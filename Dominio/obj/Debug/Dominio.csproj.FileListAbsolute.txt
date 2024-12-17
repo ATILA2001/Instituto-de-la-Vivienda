@@ -1,0 +1,6 @@
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\bin\Debug\Dominio.dll
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\bin\Debug\Dominio.pdb
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\obj\Debug\Dominio.csproj.AssemblyReference.cache
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\obj\Debug\Dominio.csproj.CoreCompileInputs.cache
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\obj\Debug\Dominio.dll
+C:\Users\Usuario\Dropbox\00 tableros IVC\2024\PAGINA WEB\IVC\Dominio\obj\Debug\Dominio.pdb

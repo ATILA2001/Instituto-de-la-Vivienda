@@ -1,0 +1,103 @@
+﻿using Dominio;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Negocio
+{
+    public class BarrioNegocio
+    {
+        public List<Barrio> listar()
+        {
+            List<Barrio> lista = new List<Barrio>();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("SELECT * FROM BARRIOS");
+                datos.ejecutarLectura();
+                while (datos.Lector.Read())
+                {
+
+                    Barrio aux = new Barrio();
+                    aux.Id = (int)datos.Lector["ID"];
+                    aux.Nombre = (string)datos.Lector["NOMBRE"];
+
+
+                    lista.Add(aux);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+
+        }
+        public void agregar(Barrio barrio)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                if (barrio != null)
+                {
+                    datos.setearConsulta("INSERT INTO BARRIOS (NOMBRE) VALUES (@Nombre)");
+                    datos.setearParametros("@Nombre", barrio.Nombre);
+                    //datos.setearParametros("@Estado_M", true);
+                    datos.ejecutarAccion();
+                    datos.cerrarConexion();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public void modificar(Barrio barrio)
+        { 
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                if (barrio != null)
+                {
+                    datos.setearConsulta("UPDATE BARRIOS SET NOMBRE = @NOMBRE WHERE ID = @ID;");
+                    datos.setearParametros("@NOMBRE", barrio.Nombre);
+                    datos.setearParametros("@ID", barrio.Id);
+                    datos.ejecutarAccion();
+                    datos.cerrarConexion();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public bool eliminar(int id)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta("DELETE FROM BARRIOS WHERE ID = @ID;");
+                datos.setearParametros("@ID", id);
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception)
+           {
+               return false;
+            }
+           finally { datos.cerrarConexion(); }
+        }
+    }
+}
