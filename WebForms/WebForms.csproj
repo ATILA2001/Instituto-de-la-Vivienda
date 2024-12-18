@@ -69,8 +69,10 @@
   <ItemGroup>
     <Content Include="AbmlBarrio.aspx" />
     <Content Include="AbmlEmpresa.aspx" />
+    <Content Include="AbmlUsuarios.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="Register.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +89,13 @@
     </Compile>
     <Compile Include="AbmlEmpresa.aspx.designer.cs">
       <DependentUpon>AbmlEmpresa.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AbmlUsuarios.aspx.cs">
+      <DependentUpon>AbmlUsuarios.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AbmlUsuarios.aspx.designer.cs">
+      <DependentUpon>AbmlUsuarios.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin.Master.cs">
       <DependentUpon>Admin.Master</DependentUpon>
@@ -110,6 +119,13 @@
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Register.aspx.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Register.aspx.designer.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin.Master" />
