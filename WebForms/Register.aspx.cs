@@ -2,6 +2,7 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -13,7 +14,10 @@ namespace WebForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!IsPostBack)
+            {
+                CargarDropDownList();
+            }
         }
 
         protected void btnRegistrar_Click(object sender, EventArgs e)
@@ -22,11 +26,23 @@ namespace WebForms
             Usuario nuevo = new Usuario();
             nuevo.Correo = txtEmail.Text;
             nuevo.Contrasenia = txtPass.Text;
-            nuevo.Nombre = txtNombre.Text;
+            nuevo.Nombre = txtNombre.Text; 
+            nuevo.Area = new Area(); // Inicializa la propiedad Area
+            nuevo.Area.Id = int.Parse(ddlAreas.SelectedValue);
+            nuevo.Area.Nombre = ddlAreas.SelectedItem.Text;
 
             try
             {
-                if (txtNombre.Text.Trim() == string.Empty)
+                int areaSeleccionadaId = int.Parse(ddlAreas.SelectedValue);
+
+                if (areaSeleccionadaId == 0)
+                {
+                    lblError.Text = "Por favor selecciona un área.";
+
+
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
+                else if (txtNombre.Text.Trim() == string.Empty)
                 {
                     lblMensaje.Text = "Tiene que escribir un nombre";
                     lblMensaje.CssClass = "alert alert-danger";
@@ -94,6 +110,32 @@ namespace WebForms
                 lblErrorPass.Text = string.Empty; lblErrorPass.CssClass = string.Empty;
             }
         }
+
+        private void CargarDropDownList()
+        {
+            AreaNegocio negocio = new AreaNegocio();
+
+            try
+            {
+                // Obtener la lista de áreas desde la base de datos
+                List<Area> listaAreas = negocio.listar();
+
+                // Asignar los datos al DropDownList
+                ddlAreas.DataSource = listaAreas;
+                ddlAreas.DataTextField = "Nombre"; // Mostrar el nombre del área
+                ddlAreas.DataValueField = "Id";   // El valor será el ID del área
+                ddlAreas.DataBind();
+
+                // Opción por defecto (opcional)
+                ddlAreas.Items.Insert(0, new ListItem("-- Seleccionar Área --", "0"));
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores (opcionalmente mostrar un mensaje de error)
+                lblError.Text = "Error al cargar las áreas: " + ex.Message;
+            }
+        }
+
 
 
 

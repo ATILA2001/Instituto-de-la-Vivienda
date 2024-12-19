@@ -20,9 +20,20 @@
                                 <div class="col-6">
                                     <div class="p-3">
                                         <asp:Label ID="lblNombre" CssClass="fs-5" Text="Nombre completo" runat="server" />
-                                        <asp:TextBox ID="txtNombre" onkeydown="return (event.keyCode >= 65 && event.keyCode <= 90 || event.keyCode >= 97 && event.keyCode <= 122 || event.keyCode == 08 || event.keyCode == 9)" CssClass="form-control" placeholder="Nombre" runat="server" />
-                                    </div>
+<asp:TextBox 
+    ID="txtNombre" 
+    onkeydown="return (event.keyCode >= 65 && event.keyCode <= 90 || event.keyCode >= 97 && event.keyCode <= 122 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 32)" 
+    CssClass="form-control" 
+    placeholder="Nombre" 
+    runat="server" /> </div>
                                 </div>
+                                <div class="col-6">
+    <div class="p-3">
+        <asp:Label ID="lblArea" CssClass="fs-5" Text="Área" runat="server" />
+        <asp:DropDownList ID="ddlAreas" CssClass="form-control" runat="server"></asp:DropDownList>
+        <asp:Label ID="lblError" CssClass="text-danger" runat="server" />
+    </div>
+</div>
                           
                                 <div class="col-6">
                                     <div class="p-3">

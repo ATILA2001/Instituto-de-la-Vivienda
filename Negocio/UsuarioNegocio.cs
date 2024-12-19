@@ -46,10 +46,11 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("INSERT INTO USUARIOS (NOMBRE, CORREO, CONTRASENIA) OUTPUT INSERTED.NOMBRE VALUES (@nombre,@correo, @pass);");
+                datos.setearConsulta("INSERT INTO USUARIOS (NOMBRE, CORREO, CONTRASENIA, AREA) OUTPUT INSERTED.NOMBRE VALUES (@nombre,@correo, @pass,@area);");
                 datos.setearParametros("@correo", usuario.Correo);
                 datos.setearParametros("@pass", usuario.Contrasenia);
                 datos.setearParametros("@nombre", usuario.Nombre);
+                datos.setearParametros("@area", usuario.Area.Id);
                 return datos.ejecutarAccionScalar();
             }
             catch (Exception)
@@ -70,17 +71,20 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM USUARIOS");
+                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE FROM USUARIOS as u inner join AREAS as a on AREA = a.ID");
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {
 
-                    Usuario aux = new Usuario();
+                    Usuario aux = new Usuario(); 
                     aux.Id = (int)datos.Lector["ID"];
                     aux.Nombre = (string)datos.Lector["NOMBRE"];
                     aux.Tipo = (bool)datos.Lector["TIPO"];
                     aux.Correo = (string)datos.Lector["CORREO"];
-
+                    aux.Estado = (bool)datos.Lector["ESTADO"];
+                    aux.Area = new Area(); // Inicializa el objeto Area
+                    aux.Area.Id = (int)datos.Lector["ID"];
+                    aux.Area.Nombre = (string)datos.Lector["NOMBRE"];
 
                     lista.Add(aux);
                 }
@@ -136,7 +140,7 @@ namespace Negocio
               throw new Exception("Error al buscar usuario: " + ex.Message);
           }
       }
-
+        */
 
       public bool ModificarUsuario(Usuario usuario)
       {
@@ -145,25 +149,12 @@ namespace Negocio
           {
               if (usuario != null)
               {
-                  datos.setearConsulta("UPDATE Usuarios SET NombreUsuario_U = @NombreUsuario_U, Nombre_U = @Nombre_U, Apellido_U = @Apellido_U, Correo_U = @Correo_U, Contrasenia_U = @Contrasenia_U, ImgURL_U = @ImgURL_U, Estado_U = @Estado_U, TipoUser_U = @TipoUser_U, Telefono_U = @Telefono_U WHERE Cod_Usuario = @Cod_Usuario");
-                  datos.setearParametros("@Cod_Usuario", usuario.Cod_Usuario);
-                  datos.setearParametros("@NombreUsuario_U", usuario.NombreUsuario);
-                  datos.setearParametros("@Nombre_U", usuario.Nombre);
-                  datos.setearParametros("@Apellido_U", usuario.Apellido);
-                  datos.setearParametros("@Correo_U", usuario.Correo);
-                  datos.setearParametros("@Contrasenia_U", usuario.Contrasenia);
-                  // datos.setearParametros("@Cod_Localidad_U", usuario.Localidad.Id);
-                  datos.setearParametros("@ImgURL_U", usuario.ImagenURL);
-                  datos.setearParametros("@Estado_U", true);
-                  datos.setearParametros("@Telefono_U", usuario.Telefono);
-                  if (usuario.TipoUsuario == TipoUsuario.ADMIN)
-                  {
-                      datos.setearParametros("@TipoUser_U", 2);
-                  }
-                  else
-                  {
-                      datos.setearParametros("@TipoUser_U", 1);
-                  }
+                    datos.setearConsulta("UPDATE USUARIOS SET NOMBRE = @NOMBRE, CORREO = @CORREO, TIPO = @TIPO, ESTADO = @ESTADO WHERE ID = @ID");
+                    datos.setearParametros("@NOMBRE", usuario.Nombre);
+                  datos.setearParametros("@CORREO", usuario.Correo);
+                  datos.setearParametros("@TIPO", usuario.Tipo);
+                  datos.setearParametros("@ESTADO", usuario.Estado);
+                  datos.setearParametros("@ID", usuario.Id);
                   datos.ejecutarAccion();
                   return true;
               }
@@ -180,6 +171,6 @@ namespace Negocio
           }
 
       }
-      */
+      
     }
 }

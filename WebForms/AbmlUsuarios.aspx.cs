@@ -21,7 +21,7 @@ namespace WebForms
         protected void dgvUsuario_SelectedIndexChanged(object sender, EventArgs e)
         {
             var codM = dgvUsuario.SelectedDataKey.Value.ToString();
-            Response.Redirect("modificarUsuario.aspx?codM=" + codM);
+            Response.Redirect("ModificarUsuario.aspx?codM=" + codM);
         }
 
         protected void dgvUsuario_RowDeleting(object sender, GridViewDeleteEventArgs e)

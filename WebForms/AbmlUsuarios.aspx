@@ -15,12 +15,22 @@
             <Columns>
                 
                 <asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-CssClass="oculto" ItemStyle-CssClass="oculto" />
-                <asp:BoundField HeaderText="Correo" DataField="CORREO" HeaderStyle-BackColor="DarkGray" />
                 <asp:BoundField HeaderText="Usuario" DataField="NOMBRE" HeaderStyle-BackColor="DarkGray" />
-                <asp:BoundField HeaderText="Tipo" DataField="TIPO" HeaderStyle-BackColor="DarkGray" />                
-                <asp:BoundField HeaderText="Estado" DataField="ESTADO" HeaderStyle-BackColor="DarkGray" />
-                <asp:CommandField ShowSelectButton="true" SelectText="Modificar" HeaderStyle-BackColor="DarkGray" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" HeaderText="Modificar" />
-                <asp:CommandField ShowDeleteButton="true" HeaderStyle-BackColor="DarkGray" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" HeaderText="Eliminar" />
+                <asp:BoundField HeaderText="Correo" DataField="CORREO" HeaderStyle-BackColor="DarkGray" />
+
+                <asp:TemplateField HeaderText="Tipo" HeaderStyle-BackColor="DarkGray">
+            <ItemTemplate>
+                <%# Convert.ToInt32(Eval("TIPO")) == 1 ? "Admin" : "User" %>
+           </ItemTemplate>
+        </asp:TemplateField>              
+               
+                <asp:TemplateField HeaderText="Estado" HeaderStyle-BackColor="DarkGray">
+            <ItemTemplate>
+                <%# Convert.ToBoolean(Eval("ESTADO")) ? "Habilitado" : "Bloqueado" %>
+            </ItemTemplate>
+            </asp:TemplateField><asp:CommandField ShowSelectButton="true" SelectText="Modificar" HeaderStyle-BackColor="DarkGray" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" HeaderText="Modificar" />
+               <asp:CommandField ShowDeleteButton="true" HeaderStyle-BackColor="DarkGray" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" HeaderText="Eliminar" />
+            
             </Columns>
         </asp:GridView>
     </div>
