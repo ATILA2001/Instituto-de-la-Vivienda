@@ -1,0 +1,110 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Obras.aspx.cs" Inherits="WebForms.Obras" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-12 bg-light rounded-3 p-3">
+                <h2 class="text-center p-2">OBRAS</h2>
+                <div class="mx-auto p-2">
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Número</th>
+                                    <th>Contrata</th>
+                                    <th>Año</th>
+                                    <th>Etapa</th>
+                                    <th>Obra</th>
+                                    <th>Barrio</th>
+                                    <th>Descripción</th>
+                                    <th> </th> 
+                                     <th> </th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                    </td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                    </td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlBarrio" CssClass="form-control" runat="server"></asp:DropDownList>
+                                    </td>
+                                    <td>
+                                        <asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" TextMode="Multiline" />
+                                    </td>
+                                    <td class="text-right">
+                                        <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
+                                            CssClass="btn btn-outline-success" runat="server" /> </td>
+                                      <td class="text-right">  <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click" 
+                                            CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+                                   
+                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table table-bordered table-hover"
+                    OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
+                    OnRowDeleting="dgvObra_RowDeleting"
+                    AutoGenerateColumns="false" runat="server" AllowPaging="true"
+                    PageSize="10" OnPageIndexChanging="dgvObra_PageIndexChanging">
+                    <Columns>
+                        <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+                        <asp:BoundField HeaderText="Área" DataField="Area" Visible="false" />
+                        <asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+                        <asp:BoundField HeaderText="Número" DataField="Numero" />
+                        <asp:BoundField HeaderText="Contrata" DataField="Contrata" />
+                        <asp:BoundField HeaderText="Año" DataField="Año" />
+                        <asp:BoundField HeaderText="Etapa" DataField="Etapa" />
+                        <asp:BoundField HeaderText="Obra" DataField="ObraNumero" />
+                        <asp:BoundField HeaderText="Barrio" DataField="Barrio" />
+                        <asp:BoundField HeaderText="Descripción" DataField="Descripcion" />
+                        <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
+                        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
+                    </Columns>
+                </asp:GridView>
+
+                <div class="text-center p-4">
+                    <asp:Label ID="lblMensaje" Text="" runat="server" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function soloNumeros(e) {
+            var tecla = (document.all) ? e.keyCode : e.which;
+            if (tecla == 8 || tecla == 46) {
+                return true;
+            }
+            var patron = /^[0-9]$/;
+            var te = String.fromCharCode(tecla);
+            return patron.test(te);
+        }
+    </script>
+</asp:Content>
+
+

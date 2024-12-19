@@ -25,13 +25,20 @@ namespace WebForms
                 if (negocio.Logear(usuario))
                 {
                     Session.Add("Usuario", usuario);
-                    if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo)
+                    if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                     {
                         Response.Redirect("HomeAdmin.aspx", false);
                     }
                     else
                     {
-                        Response.Redirect("Default.aspx", false);
+                        if(((Dominio.Usuario)Session["Usuario"]).Estado == true) { 
+                        Response.Redirect("HomeUser.aspx", false);
+                        }
+                        else
+                        {
+                            Session.Add("error", "Usuario no habilitado a ingresar");
+                            Response.Redirect("Error.aspx", false);
+                        }
                     }
                 }
                 else
@@ -50,7 +57,7 @@ namespace WebForms
         }
         protected void btnVolver_Click(object sender, EventArgs e)
         {
-            Response.Redirect("Default.aspx");
+            Response.Redirect("HomeUser.aspx");
         }
     }
 }

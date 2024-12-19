@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Negocio
 {
-    public class EmpresaNegocio
+    public class ContrataNegocio
     {
         public DataTable listarddl()
         {
@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM EMPRESAS");
+                datos.setearConsulta("SELECT * FROM CONTRATA");
                 datos.ejecutarLectura();
 
                 // Definir las columnas del DataTable.
@@ -54,7 +54,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM EMPRESAS");
+                datos.setearConsulta("SELECT * FROM CONTRATA");
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {
@@ -78,62 +78,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
 
-        }
-        public void agregar(Empresa empresa)
-        {
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                if (empresa != null)
-                {
-                    datos.setearConsulta("INSERT INTO EMPRESAS (NOMBRE) VALUES (@Nombre)");
-                    datos.setearParametros("@Nombre", empresa.Nombre);
-                    //datos.setearParametros("@Estado_M", true);
-                    datos.ejecutarAccion();
-                    datos.cerrarConexion();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-        public bool eliminar(int id)
-        {
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                datos.setearConsulta("DELETE FROM EMPRESAS WHERE ID = @ID;");
-                datos.setearParametros("@ID", id);
-                datos.ejecutarAccion();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            finally { datos.cerrarConexion(); }
-        }
-        public void modificar(Empresa empresa)
-        {
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                if (empresa != null)
-                {
-                    datos.setearConsulta("UPDATE EMPRESAS SET NOMBRE = @NOMBRE WHERE ID = @ID;");
-                    datos.setearParametros("@NOMBRE", empresa.Nombre);
-                    datos.setearParametros("@ID", empresa.Id);
-                    datos.ejecutarAccion();
-                    datos.cerrarConexion();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
         }
     }
 }

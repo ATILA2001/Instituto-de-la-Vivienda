@@ -7,16 +7,11 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class Admin : System.Web.UI.MasterPage
+    public partial class LoginRegister : System.Web.UI.MasterPage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
 
-        }
-        protected void btnCerrarSesion_Click(object sender, EventArgs e)
-        {
-            Session.Clear();
-            Response.Redirect("Login.aspx", false);
         }
     }
 }

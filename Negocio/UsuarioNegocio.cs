@@ -15,7 +15,7 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("SELECT * FROM USUARIOS WHERE CORREO = @correo AND CONTRASENIA = @pass");
+                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM USUARIOS as u inner join AREAS as a on AREA = a.ID WHERE CORREO = @correo AND CONTRASENIA = @pass ");
                 datos.setearParametros("@correo", usuario.Correo);
                 datos.setearParametros("@pass", usuario.Contrasenia);
                 datos.ejecutarLectura();
@@ -26,6 +26,9 @@ namespace Negocio
                     usuario.Nombre = datos.Lector["NOMBRE"] as string ?? string.Empty;
                     usuario.Tipo = datos.Lector["TIPO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["TIPO"]);
                     usuario.Estado = datos.Lector["ESTADO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["ESTADO"]);
+                    usuario.Area = new Area();
+                    usuario.Area.Id = (int)datos.Lector["IDAREA"];
+                    usuario.Area.Nombre = (string)datos.Lector["AREA"];
                     return true;
                 }
 

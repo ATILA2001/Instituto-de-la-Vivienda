@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="WebForms.Register" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/LoginRegister.Master" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="WebForms.Register" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -72,17 +72,18 @@
             </div>
         </div>
     </div>
-    <div class="text-end p-4">
+    <div class="text-center p-4">
         <asp:Label ID="lblMensaje" Text="" runat="server" />
 
     </div>
             <div class="text-center m-2">
+                <asp:Button Text="Volver" ID="Button1" CssClass="btn btn-outline-secondary" OnClick="btnVolver_Click" runat="server" />
                <asp:Button ID="Button2" CssClass="btn btn-outline-primary" Text="Registrar" runat="server" OnClick="btnRegistrar_Click" />
             </div>
         </div>
     </div>
 </div>
-<div class="text-end p-4">
+<div class="text-center p-4">
     <asp:Label ID="Label9" Text="" runat="server" />
 
 </div>

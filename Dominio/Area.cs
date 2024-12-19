@@ -15,7 +15,7 @@ namespace Dominio
 
         public override string ToString()
         {
-            return "Area: " + Nombre ;
+            return  Nombre ;
         }
     }
 }

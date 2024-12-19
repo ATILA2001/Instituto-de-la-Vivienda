@@ -73,7 +73,12 @@ namespace WebForms
                     nuevo.Nombre = negocio.registrarUsuario(nuevo);
                     negocio.Logear(nuevo);
                     Session["usuario"] = nuevo;
+                    if (nuevo.Tipo) { 
                     Response.Redirect("HomeAdmin.aspx", false);
+                    }else
+                    {
+                        Response.Redirect("HomeUser.aspx", false);
+                    }
                 }
 
             }
@@ -134,6 +139,10 @@ namespace WebForms
                 // Manejo de errores (opcionalmente mostrar un mensaje de error)
                 lblError.Text = "Error al cargar las áreas: " + ex.Message;
             }
+        }
+        protected void btnVolver_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("Login.aspx");
         }
 
 
