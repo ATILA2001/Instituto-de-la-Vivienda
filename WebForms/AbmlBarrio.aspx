@@ -13,7 +13,7 @@
             <!-- Sección Listado (70%) -->
             <div class="col-md-8 border-end">
                 <h2 class="text-center p-2">Listado de Barrios</h2>
-                <asp:GridView ID="dgvBarrio" DataKeyNames="ID" CssClass="table table-dark table-bordered" 
+                <asp:GridView ID="dgvBarrio" DataKeyNames="ID" CssClass="table table-bordered table-hover" 
                               OnSelectedIndexChanged="dgvBarrio_SelectedIndexChanged" 
                               OnRowDeleting="dgvBarrio_RowDeleting"
                               AutoGenerateColumns="false" runat="server"  AllowPaging="true" 

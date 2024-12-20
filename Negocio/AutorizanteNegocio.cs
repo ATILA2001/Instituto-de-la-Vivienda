@@ -57,11 +57,11 @@ namespace Negocio
                     aux.Estado = new EstadoAutorizante
                     {
                         Nombre = datos.Lector["ESTADO"] as string,
-                        Id = (int)datos.Lector["ID"]
+                        Id = (int)datos.Lector["ESTADO_ID"]
                     };
 
                     aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
-                    aux.MontoAutorizado = (decimal)datos.Lector["MONTO_AUTORIZADO"];
+                    aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
 
 
@@ -81,7 +81,7 @@ namespace Negocio
                             Nombre = datos.Lector["AREA"] as string  // Asignamos el nombre del Area
                         }
                     };
-
+                    lista.Add(aux);
                 }
 
                 return lista;
@@ -96,9 +96,9 @@ namespace Negocio
             }
         }
 
-        public List<Obra> listar()
+        public List<Autorizante> listar()
         {
-            List<Obra> lista = new List<Obra>();
+            List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
@@ -141,11 +141,11 @@ namespace Negocio
                     aux.Estado = new EstadoAutorizante
                     {
                         Nombre = datos.Lector["ESTADO"] as string,
-                        Id = (int)datos.Lector["ID"]
+                        Id = (int)datos.Lector["ESTADO_ID"]
                     };
 
                     aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
-                    aux.MontoAutorizado = (decimal)datos.Lector["MONTO_AUTORIZADO"];
+                    aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
 
 
@@ -165,7 +165,7 @@ namespace Negocio
                             Nombre = datos.Lector["AREA"] as string  // Asignamos el nombre del Area
                         }
                     };
-
+                    lista.Add(aux);
                 }
 
                 return lista;

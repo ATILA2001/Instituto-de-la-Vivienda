@@ -1,4 +1,4 @@
-﻿666666666666666666666666666666<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="User.master.cs" Inherits="WebForms.User" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="User.master.cs" Inherits="WebForms.User" %>
 
 <!DOCTYPE html>
 

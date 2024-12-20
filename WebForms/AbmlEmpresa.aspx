@@ -13,7 +13,7 @@
             <!-- Sección Listado (70%) -->
             <div class="col-md-8 border-end">
                 <h2 class="text-center p-2">Listado de Empresas</h2>
-                <asp:GridView ID="dgvEmpresa" DataKeyNames="ID" CssClass="table table-dark table-bordered" 
+                <asp:GridView ID="dgvEmpresa" DataKeyNames="ID" CssClass="table table-bordered table-hover" 
                               OnSelectedIndexChanged="dgvEmpresa_SelectedIndexChanged" 
                               OnRowDeleting="dgvEmpresa_RowDeleting"
                               AutoGenerateColumns="false" runat="server" AllowPaging="true" 
@@ -26,6 +26,7 @@
                         <asp:CommandField ShowDeleteButton="true" 
                                           ControlStyle-CssClass="btn btn-outline-danger" />
                     </Columns>
+
                 </asp:GridView>
             </div>
 

@@ -70,6 +70,8 @@
     <Content Include="AbmlBarrio.aspx" />
     <Content Include="AbmlEmpresa.aspx" />
     <Content Include="AbmlUsuarios.aspx" />
+    <Content Include="Autorizantes.aspx" />
+    <Content Include="AutorizantesAdmin.aspx" />
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />
@@ -108,6 +110,20 @@
     </Compile>
     <Compile Include="Admin.Master.designer.cs">
       <DependentUpon>Admin.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Autorizantes.aspx.cs">
+      <DependentUpon>Autorizantes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Autorizantes.aspx.designer.cs">
+      <DependentUpon>Autorizantes.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AutorizantesAdmin.aspx.cs">
+      <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AutorizantesAdmin.aspx.designer.cs">
+      <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>
@@ -184,6 +200,8 @@
   <ItemGroup>
     <Content Include="Admin.Master" />
     <Content Include="LoginRegister.Master" />
+    <None Include=".editorconfig" />
+    <Content Include="libman.json" />
     <None Include="packages.config" />
     <Content Include="User.Master" />
     <None Include="Web.Debug.config">

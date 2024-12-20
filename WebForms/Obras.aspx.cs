@@ -80,7 +80,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar las opbras: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar las obras: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }

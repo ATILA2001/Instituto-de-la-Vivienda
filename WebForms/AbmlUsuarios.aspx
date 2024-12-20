@@ -11,7 +11,7 @@
     <h2 class="text-center p-2">Listado Usuarios</h2>
 
     <div class=" container-fluid mx-auto p-2" style="width: 50%;">
-        <asp:GridView ID="dgvUsuario" DataKeyNames="ID" CssClass="table table-dark table-bordered" OnSelectedIndexChanged="dgvUsuario_SelectedIndexChanged" OnRowDeleting="dgvUsuario_RowDeleting" AutoGenerateColumns="false" runat="server">
+        <asp:GridView ID="dgvUsuario" DataKeyNames="ID" CssClass="table table-bordered table-hover" OnSelectedIndexChanged="dgvUsuario_SelectedIndexChanged" OnRowDeleting="dgvUsuario_RowDeleting" AutoGenerateColumns="false" runat="server">
             <Columns>
                 
                 <asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-CssClass="oculto" ItemStyle-CssClass="oculto" />
@@ -32,6 +32,7 @@
                <asp:CommandField ShowDeleteButton="true" HeaderStyle-BackColor="DarkGray" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" HeaderText="Eliminar" />
             
             </Columns>
+
         </asp:GridView>
     </div>
 
