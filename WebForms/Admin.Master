@@ -38,6 +38,10 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="AbmlUsuarios.aspx">Usuarios</a>
                                 </li>
+                                <li class="nav-item">
+    <a class="nav-link" href="ObrasAdmin.aspx">Obras</a>
+</li>
+
                             </ul>
 
                         </div>

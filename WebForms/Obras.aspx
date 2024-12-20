@@ -13,15 +13,15 @@
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Empresa</th>
-                                    <th>Número</th>
                                     <th>Contrata</th>
+                                    <th>Número</th>
                                     <th>Año</th>
                                     <th>Etapa</th>
                                     <th>Obra</th>
                                     <th>Barrio</th>
                                     <th>Descripción</th>
-                                    <th> </th> 
-                                     <th> </th> 
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -30,11 +30,12 @@
                                         <asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
                                     </td>
                                     <td>
-                                        <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-                                    </td>
-                                    <td>
                                         <asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
                                     </td>
+                                    <td>
+                                        <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                    </td>
+
                                     <td>
                                         <asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
                                     </td>
@@ -52,11 +53,13 @@
                                     </td>
                                     <td class="text-right">
                                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
-                                            CssClass="btn btn-outline-success" runat="server" /> </td>
-                                      <td class="text-right">  <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click" 
+                                            CssClass="btn btn-outline-success" runat="server" />
+                                    </td>
+                                    <td class="text-right">
+                                        <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
                                             CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-                                   
-                                    
+
+
                                 </tr>
                             </tbody>
                         </table>
@@ -75,9 +78,9 @@
                     <Columns>
                         <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                         <asp:BoundField HeaderText="Área" DataField="Area" Visible="false" />
-                        <asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-                        <asp:BoundField HeaderText="Número" DataField="Numero" />
+                        <asp:BoundField HeaderText="Empresa" DataField="Empresa" />                       
                         <asp:BoundField HeaderText="Contrata" DataField="Contrata" />
+                        <asp:BoundField HeaderText="Número" DataField="Numero" />
                         <asp:BoundField HeaderText="Año" DataField="Año" />
                         <asp:BoundField HeaderText="Etapa" DataField="Etapa" />
                         <asp:BoundField HeaderText="Obra" DataField="ObraNumero" />

@@ -76,6 +76,7 @@
     <Content Include="Login.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="Obras.aspx" />
+    <Content Include="ObrasAdmin.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -156,6 +157,13 @@
     </Compile>
     <Compile Include="Obras.aspx.designer.cs">
       <DependentUpon>Obras.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ObrasAdmin.aspx.cs">
+      <DependentUpon>ObrasAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ObrasAdmin.aspx.designer.cs">
+      <DependentUpon>ObrasAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.aspx.cs">
