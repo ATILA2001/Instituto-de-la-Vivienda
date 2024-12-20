@@ -164,5 +164,32 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+
+        public bool eliminar(int idObra)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Consulta para eliminar la obra por su ID
+                datos.setearConsulta("DELETE FROM OBRAS WHERE ID = @ID");
+
+                // Asignar el parámetro ID
+                datos.agregarParametro("@ID", idObra);
+
+                 datos.ejecutarAccion();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                
+                throw ex;
+                return false;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

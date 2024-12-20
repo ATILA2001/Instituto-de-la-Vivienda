@@ -46,21 +46,21 @@ namespace WebForms
         protected void dgvObra_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
 
-            //try
-            //{
-            //    var id = Convert.ToInt32(dgvBarrio.DataKeys[e.RowIndex].Value);
-            //    if (negocio.eliminar(id))
-            //    {
-            //        lblMensaje.Text = "Barrio eliminado correctamente.";
-            //        lblMensaje.CssClass = "alert alert-success";
-            //        CargarListaBarrios(); // Actualizar el GridView
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
-            //    lblMensaje.CssClass = "alert alert-danger";
-            //}
+            try
+            {
+                var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
+                if (negocio.eliminar(id))
+               {
+                    lblMensaje.Text = "Obra eliminada correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+                    CargarListaObras(); // Actualizar el GridView
+               }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al eliminar la obra: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
         protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
