@@ -3,7 +3,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <h1 class="text-center p-2">Registrate</h1>
+    <h1 class="text-center p-2">Modificar Usuario</h1>
 
     <asp:ScriptManager ID="ScriptManager1" runat="server" />
 

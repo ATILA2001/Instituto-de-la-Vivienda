@@ -76,6 +76,7 @@
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="ModificarObra.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="Obras.aspx" />
     <Content Include="ObrasAdmin.aspx" />
@@ -159,6 +160,13 @@
     </Compile>
     <Compile Include="LoginRegister.Master.designer.cs">
       <DependentUpon>LoginRegister.Master</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarObra.aspx.cs">
+      <DependentUpon>ModificarObra.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarObra.aspx.designer.cs">
+      <DependentUpon>ModificarObra.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarUsuario.aspx.cs">
       <DependentUpon>ModificarUsuario.aspx</DependentUpon>
