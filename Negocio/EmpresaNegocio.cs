@@ -88,7 +88,6 @@ namespace Negocio
                 {
                     datos.setearConsulta("INSERT INTO EMPRESAS (NOMBRE) VALUES (@Nombre)");
                     datos.setearParametros("@Nombre", empresa.Nombre);
-                    //datos.setearParametros("@Estado_M", true);
                     datos.ejecutarAccion();
                     datos.cerrarConexion();
                 }

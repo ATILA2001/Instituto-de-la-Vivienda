@@ -2,6 +2,7 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -15,8 +16,20 @@ namespace WebForms
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
-            {
-                                CargarListaAutorizantes();
+            {// Llenar el DropDownList para Empresas
+                ddlEstado.DataSource = ObtenerEstado();  // Método para obtener los datos de las Empresas
+                ddlEstado.DataTextField = "Nombre";         // Columna que se muestra
+                ddlEstado.DataValueField = "Id";            // Columna que se almacena
+                ddlEstado.DataBind();
+
+
+
+                // Llenar el DropDownList para Barrios
+                ddlObra.DataSource = ObtenerObras();    // Método para obtener los datos de los Barrios
+                ddlObra.DataTextField = "Nombre";
+                ddlObra.DataValueField = "Id";
+                ddlObra.DataBind();
+                CargarListaAutorizantes();
             }
         }
 
@@ -76,6 +89,47 @@ namespace WebForms
                 lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
+        }
+        protected void btnAgregar_Click(object sender, EventArgs e)
+        {
+            // Instancia de negocio y autorización.
+            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+            Autorizante nuevoAutorizante = new Autorizante();
+
+            // Asignación de valores desde los controles del formulario.
+            nuevoAutorizante.Obra = new Obra();
+            nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
+            nuevoAutorizante.Concepto = txtConcepto.Text;
+            nuevoAutorizante.Detalle = txtDetalle.Text;
+            nuevoAutorizante.Expediente = txtExpediente.Text;
+            nuevoAutorizante.Estado = new EstadoAutorizante();
+            nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
+            nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+
+            // Llamar al método que agrega el registro.
+            autorizanteNegocio.agregar(nuevoAutorizante);
+
+            // Mostrar mensaje de éxito.
+            lblMensaje.Text = "Autorizante agregado con éxito.";
+            CargarListaAutorizantes();  // Re-cargar la lista para mostrar los cambios.
+        }
+        private DataTable ObtenerEstado()
+        {
+            EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
+            return empresaNegocio.listarddl();
+        }
+
+        private DataTable ObtenerContratas()
+        {
+            ContrataNegocio contrataNegocio = new ContrataNegocio();
+            return contrataNegocio.listarddl();
+        }
+
+        private DataTable ObtenerObras()
+        {
+            ObraNegocio barrioNegocio = new ObraNegocio();
+            Usuario usuarioLogueado = (Usuario)Session["usuario"];
+            return barrioNegocio.listarddl(usuarioLogueado);
         }
     }
 }

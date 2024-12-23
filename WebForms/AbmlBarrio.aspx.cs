@@ -69,7 +69,7 @@ namespace WebForms
         protected void dgvBarrio_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvBarrio.SelectedDataKey.Value.ToString();
-            Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
+            Response.Redirect("ModificarBarrio.aspx?codM=" + idSeleccionado);
         }
 
         protected void dgvBarrio_RowDeleting(object sender, GridViewDeleteEventArgs e)

@@ -39,7 +39,7 @@ namespace Negocio
                 ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID
             INNER JOIN 
                 CONTRATA AS C ON O.CONTRATA = C.ID
-            INNER JOIN 
+            LEFT JOIN 
                 BD_PROYECTOS AS B ON O.ID = B.ID_BASE
             INNER JOIN 
                 AREAS AS AR ON O.AREA = AR.ID
@@ -179,26 +179,26 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        /*
-        public bool agregar(Obra nuevaObra)
+
+        public bool agregar(Autorizante nuevoAutorizante)
         {
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                // Consulta para insertar la nueva obra
-                datos.setearConsulta("INSERT INTO OBRAS (EMPRESA, AREA, CONTRATA, NUMERO, AÑO, ETAPA, OBRA, BARRIO, DESCRIPCION) " +
-                                     "VALUES (@EMPRESA, @AREA, @CONTRATA, @NUMERO, @AÑO, @ETAPA, @OBRA, @BARRIO, @DESCRIPCION)");
+                // Consulta para insertar el nuevo autorizante
+                datos.setearConsulta(@"
+            INSERT INTO AUTORIZANTES 
+            (OBRA, ESTADO, CONCEPTO, DETALLE, EXPEDIENTE, MONTO_AUTORIZADO)
+            VALUES 
+            (@OBRA, @ESTADO, @CONCEPTO, @DETALLE, @EXPEDIENTE, @MONTO_AUTORIZADO)");
 
                 // Asignar los parámetros
-                datos.agregarParametro("@EMPRESA", nuevaObra.Empresa.Id);
-                datos.agregarParametro("@AREA", nuevaObra.Area.Id);
-                datos.agregarParametro("@CONTRATA", nuevaObra.Contrata.Id);
-                datos.agregarParametro("@NUMERO", nuevaObra.Numero);
-                datos.agregarParametro("@AÑO", nuevaObra.Año);
-                datos.agregarParametro("@ETAPA", nuevaObra.Etapa);
-                datos.agregarParametro("@OBRA", nuevaObra.ObraNumero);
-                datos.agregarParametro("@BARRIO", nuevaObra.Barrio.Id);
-                datos.agregarParametro("@DESCRIPCION", nuevaObra.Descripcion);
+                datos.agregarParametro("@OBRA", nuevoAutorizante.Obra.Id);
+                datos.agregarParametro("@ESTADO", nuevoAutorizante.Estado.Id);
+                datos.agregarParametro("@CONCEPTO", nuevoAutorizante.Concepto);
+                datos.agregarParametro("@DETALLE", nuevoAutorizante.Detalle);
+                datos.agregarParametro("@EXPEDIENTE", nuevoAutorizante.Expediente);
+                datos.agregarParametro("@MONTO_AUTORIZADO", nuevoAutorizante.MontoAutorizado);
 
                 // Ejecutar la inserción
                 datos.ejecutarAccion();
@@ -215,6 +215,6 @@ namespace Negocio
             {
                 datos.cerrarConexion();
             }
-        }*/
+        }
     }
 }

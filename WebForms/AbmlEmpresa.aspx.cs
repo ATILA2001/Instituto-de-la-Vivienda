@@ -79,14 +79,14 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvEmpresa.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
-                    lblMensaje.Text = "Barrio eliminado correctamente.";
+                    lblMensaje.Text = "Empresa eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
                     CargarListaEmpresas(); // Actualizar el GridView
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
+                lblMensaje.Text = $"Error al eliminar la empresa: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }

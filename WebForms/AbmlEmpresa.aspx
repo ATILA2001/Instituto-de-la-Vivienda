@@ -19,7 +19,7 @@
                               AutoGenerateColumns="false" runat="server" AllowPaging="true" 
               PageSize="10" OnPageIndexChanging="dgvEmpresa_PageIndexChanging">
                     <Columns>
-                        <asp:BoundField HeaderText="ID" DataField="Id" />
+                        <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                         <asp:BoundField HeaderText="Empresa" DataField="Nombre" />
                         <asp:CommandField ShowSelectButton="true" SelectText="Modificar" 
                                           ControlStyle-CssClass="btn btn-outline-warning" />

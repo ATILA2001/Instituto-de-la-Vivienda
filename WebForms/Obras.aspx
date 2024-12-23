@@ -3,13 +3,27 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <style>
+    .table-3d {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px; /* Borde redondeado */
+        overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+    }
+
+    .table-3d:hover {
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3), 0 8px 10px rgba(0, 0, 0, 0.2);
+        transform: translateY(-10px);
+    }
+</style>
     <div class="container-fluid mt-4">
         <div class="row">
-            <div class="col-md-12 bg-light rounded-3 p-3">
+            <div class="col-md-12  rounded-3 p-3">
                 <h2 class="text-center p-2">OBRAS</h2>
                 <div class="mx-auto p-2">
                     <div class="card-body">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover table-3d">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Empresa</th>
@@ -35,7 +49,6 @@
                                     <td>
                                         <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
                                     </td>
-
                                     <td>
                                         <asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
                                     </td>
@@ -58,8 +71,6 @@
                                     <td class="text-right">
                                         <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
                                             CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-
-
                                 </tr>
                             </tbody>
                         </table>
@@ -98,16 +109,17 @@
         </div>
     </div>
     <script type="text/javascript">
-        function soloNumeros(e) {
-            var tecla = (document.all) ? e.keyCode : e.which;
-            if (tecla == 8 || tecla == 46) {
-                return true;
-            }
-            var patron = /^[0-9]$/;
-            var te = String.fromCharCode(tecla);
-            return patron.test(te);
-        }
-    </script>
+		function soloNumeros(e) {
+			var tecla = (document.all) ? e.keyCode : e.which;
+			if (tecla == 8 || tecla == 46) {
+				return true;
+			}
+			var patron = /^[0-9]$/;
+			var te = String.fromCharCode(tecla);
+			return patron.test(te);
+		}
+	</script>
 </asp:Content>
+
 
 

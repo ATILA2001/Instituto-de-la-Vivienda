@@ -93,7 +93,8 @@ namespace WebForms
             try
             {
                 // Validar que los campos no estén vacíos o nulos
-                if (txtNumero.Text.Trim() != string.Empty &&
+                if (txtDescripcion.Text.Trim() != string.Empty &&
+                    txtNumero.Text.Trim() != string.Empty &&
                     txtAño.Text.Trim() != string.Empty &&
                     txtEtapa.Text.Trim() != string.Empty &&
                     txtObra.Text.Trim() != string.Empty &&

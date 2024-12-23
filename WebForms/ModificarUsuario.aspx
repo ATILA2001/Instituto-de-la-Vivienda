@@ -64,8 +64,5 @@
 
     </div>
 
-    <div class="text-end p-4">
-        <asp:Label ID="Label9" Text="" runat="server" />
 
-    </div>
 </asp:Content>
