@@ -20,7 +20,6 @@
     <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-md-12  rounded-3 p-3">
-                <h2 class="text-center p-2">OBRAS</h2>
                 <div class="mx-auto p-2">
                     <div class="card-body">
                         <table class="table table-bordered table-hover table-3d">

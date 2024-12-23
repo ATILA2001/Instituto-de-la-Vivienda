@@ -79,6 +79,7 @@
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarObra.aspx" />
+    <Content Include="ModificarObraUser.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="Obras.aspx" />
     <Content Include="ObrasAdmin.aspx" />
@@ -183,6 +184,13 @@
     </Compile>
     <Compile Include="ModificarObra.aspx.designer.cs">
       <DependentUpon>ModificarObra.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarObraUser.aspx.cs">
+      <DependentUpon>ModificarObraUser.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarObraUser.aspx.designer.cs">
+      <DependentUpon>ModificarObraUser.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarUsuario.aspx.cs">
       <DependentUpon>ModificarUsuario.aspx</DependentUpon>

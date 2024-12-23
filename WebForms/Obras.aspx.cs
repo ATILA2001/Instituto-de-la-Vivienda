@@ -160,7 +160,7 @@ namespace WebForms
         protected void dgvObra_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvObra.SelectedDataKey.Value.ToString();
-            Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
+            Response.Redirect("ModificarObraUser.aspx?codM=" + idSeleccionado);
         }
         protected void dgvObra_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
