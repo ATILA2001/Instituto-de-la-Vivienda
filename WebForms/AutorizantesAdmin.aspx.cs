@@ -37,8 +37,8 @@ namespace WebForms
 
         protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
-            Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
+            //var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
+            //Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
         }
         protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {

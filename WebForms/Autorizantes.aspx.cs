@@ -51,8 +51,8 @@ namespace WebForms
 
         protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
-            Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
+            //var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
+            //Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
         }
         protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
@@ -105,6 +105,7 @@ namespace WebForms
             nuevoAutorizante.Estado = new EstadoAutorizante();
             nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
             nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+            nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
 
             // Llamar al método que agrega el registro.
             autorizanteNegocio.agregar(nuevoAutorizante);

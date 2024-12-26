@@ -26,7 +26,8 @@ namespace Negocio
                 E.NOMBRE AS ESTADO, 
                 E.ID AS ESTADO_ID, 
                 A.EXPEDIENTE, 
-                A.MONTO_AUTORIZADO, 
+                A.MONTO_AUTORIZADO,
+                A.MES,
                 A.AUTORIZACION_GG, 
                 AR.NOMBRE AS AREA, 
                 AR.ID AS AREA_ID, 
@@ -63,6 +64,7 @@ namespace Negocio
                     aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
                     aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
+                    aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
 
 
                     aux.Obra = new Obra
@@ -113,7 +115,8 @@ namespace Negocio
                 E.NOMBRE AS ESTADO, 
                 E.ID AS ESTADO_ID, 
                 A.EXPEDIENTE, 
-                A.MONTO_AUTORIZADO, 
+                A.MONTO_AUTORIZADO,
+A.MES,
                 A.AUTORIZACION_GG, 
                 AR.NOMBRE AS AREA, 
                 AR.ID AS AREA_ID, 
@@ -147,7 +150,7 @@ namespace Negocio
                     aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
                     aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
-
+                    aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
 
                     aux.Obra = new Obra
                     {
@@ -188,9 +191,9 @@ namespace Negocio
                 // Consulta para insertar el nuevo autorizante
                 datos.setearConsulta(@"
             INSERT INTO AUTORIZANTES 
-            (OBRA, ESTADO, CONCEPTO, DETALLE, EXPEDIENTE, MONTO_AUTORIZADO)
+            (OBRA, ESTADO, CONCEPTO, DETALLE, EXPEDIENTE, MONTO_AUTORIZADO,MES)
             VALUES 
-            (@OBRA, @ESTADO, @CONCEPTO, @DETALLE, @EXPEDIENTE, @MONTO_AUTORIZADO)");
+            (@OBRA, @ESTADO, @CONCEPTO, @DETALLE, @EXPEDIENTE, @MONTO_AUTORIZADO, @MES)");
 
                 // Asignar los parámetros
                 datos.agregarParametro("@OBRA", nuevoAutorizante.Obra.Id);
@@ -199,6 +202,7 @@ namespace Negocio
                 datos.agregarParametro("@DETALLE", nuevoAutorizante.Detalle);
                 datos.agregarParametro("@EXPEDIENTE", nuevoAutorizante.Expediente);
                 datos.agregarParametro("@MONTO_AUTORIZADO", nuevoAutorizante.MontoAutorizado);
+                datos.agregarParametro("@MES", nuevoAutorizante.Fecha);
 
                 // Ejecutar la inserción
                 datos.ejecutarAccion();

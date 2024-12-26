@@ -249,7 +249,7 @@ namespace Negocio
                 }
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE " +
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION) AS NOMBRE " +
                                      "FROM OBRAS AS O " +
                                      "INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID " +
                                      "WHERE O.AREA = @area"); // Se filtra por el área del usuario activo

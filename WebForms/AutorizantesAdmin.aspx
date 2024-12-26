@@ -25,6 +25,8 @@
                 <asp:BoundField HeaderText="Estado" DataField="Estado.Nombre" />
 
                 <asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
+                
+					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}"/>
 
                 <asp:BoundField HeaderText="Autorización GG" DataField="AutorizacionGG" />
 

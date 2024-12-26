@@ -17,6 +17,7 @@ namespace Dominio
         public string Expediente { get; set; } // Expediente de tipo VARCHAR(50)
         public decimal MontoAutorizado { get; set; } // Monto autorizado de tipo DECIMAL(15, 2)
         public bool AutorizacionGG { get; set; } // Autorización GG (BIT) de tipo bool
+        public DateTime? Fecha { get; set; }
 
         public Autorizante() { }
 

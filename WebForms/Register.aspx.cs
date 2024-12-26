@@ -73,11 +73,23 @@ namespace WebForms
                     nuevo.Nombre = negocio.registrarUsuario(nuevo);
                     negocio.Logear(nuevo);
                     Session["usuario"] = nuevo;
+
+
+                    
+
                     if (nuevo.Tipo) { 
                     Response.Redirect("HomeAdmin.aspx", false);
                     }else
                     {
-                        Response.Redirect("HomeUser.aspx", false);
+                        if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
+                        {
+                            Response.Redirect("HomeUser.aspx", false);
+                        }
+                        else
+                        {
+                            Session.Add("error", "Usuario no habilitado a ingresar");
+                            Response.Redirect("Error.aspx", false);
+                        }
                     }
                 }
 
