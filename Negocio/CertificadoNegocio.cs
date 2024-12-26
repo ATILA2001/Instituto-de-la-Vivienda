@@ -16,7 +16,24 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta(@"SELECT C.ID, CONCAT(CO.NOMBRE,' ',O.NUMERO,'/',O.AÑO) AS CONTRATA, O.DESCRIPCION, C.CODIGO_AUTORIZANTE, EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, MONTO_TOTAL, MES_APROBACION, A.MONTO_AUTORIZADO, FORMAT((MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, A.ID AS AUTORIZANTE_ID, A.OBRA AS AUTORIZANTE_OBRA, A.DETALLE AS AUTORIZANTE_DETALLE, A.CONCEPTO AS AUTORIZANTE_CONCEPTO, A.ESTADO AS AUTORIZANTE_ESTADO, A.EXPEDIENTE AS AUTORIZANTE_EXPEDIENTE, A.MONTO_AUTORIZADO AS AUTORIZANTE_MONTO_AUTORIZADO, A.AUTORIZACION_GG AS AUTORIZANTE_AUTORIZACION_GG FROM CERTIFICADOS AS C INNER JOIN TIPO_PAGO AS T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES AS A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS AS O ON A.OBRA = O.ID INNER JOIN CONTRATA AS CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS AS B ON O.ID = B.ID_BASE WHERE O.AREA = @area");
+                datos.setearConsulta(@"SELECT C.ID, CONCAT(CO.NOMBRE,' ',O.NUMERO,'/',O.AÑO) AS CONTRATA, 
+                                      O.DESCRIPCION, 
+                                      C.CODIGO_AUTORIZANTE, 
+                                      EXPEDIENTE_PAGO, 
+                                      T.ID AS TIPO_PAGO, 
+                                      T.NOMBRE AS TIPO_PAGO_NOMBRE, 
+                                      MONTO_TOTAL, 
+                                      MES_APROBACION, 
+                                      A.MONTO_AUTORIZADO, 
+                                      FORMAT((MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, 
+                                      B.AUTORIZADO_NUEVO 
+                               FROM CERTIFICADOS AS C
+                               INNER JOIN TIPO_PAGO AS T ON C.TIPO_PAGO = T.ID
+                               INNER JOIN AUTORIZANTES AS A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE
+                               INNER JOIN OBRAS AS O ON A.OBRA = O.ID
+                               INNER JOIN CONTRATA AS CO ON O.CONTRATA = CO.ID
+                               LEFT JOIN BD_PROYECTOS AS B ON O.ID = B.ID_BASE 
+                               WHERE O.AREA = @area");
                 datos.agregarParametro("@area", usuario.Area.Id);
                 datos.ejecutarLectura();
 
@@ -27,15 +44,7 @@ namespace Negocio
                         Id = datos.Lector["ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID"]) : 0,
                         Autorizante = new Autorizante
                         {
-                            Id = datos.Lector["AUTORIZANTE_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AUTORIZANTE_ID"]) : 0,
-                            Obra = datos.Lector["AUTORIZANTE_OBRA"] != DBNull.Value ? new Obra { Id = Convert.ToInt32(datos.Lector["AUTORIZANTE_OBRA"]) } : null,
-                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string,
-                            Detalle = datos.Lector["AUTORIZANTE_DETALLE"] as string,
-                            Concepto = datos.Lector["AUTORIZANTE_CONCEPTO"] as string,
-                            Estado = datos.Lector["AUTORIZANTE_ESTADO"] != DBNull.Value ? new EstadoAutorizante { Id = Convert.ToInt32(datos.Lector["AUTORIZANTE_ESTADO"]) } : null,
-                            Expediente = datos.Lector["AUTORIZANTE_EXPEDIENTE"] as string,
-                            MontoAutorizado = datos.Lector["AUTORIZANTE_MONTO_AUTORIZADO"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["AUTORIZANTE_MONTO_AUTORIZADO"]) : 0M,
-                            AutorizacionGG = datos.Lector["AUTORIZANTE_AUTORIZACION_GG"] != DBNull.Value ? Convert.ToBoolean(datos.Lector["AUTORIZANTE_AUTORIZACION_GG"]) : false
+                            Id = datos.Lector["AUTORIZANTE_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AUTORIZANTE_ID"]) : 0, Obra = datos.Lector["AUTORIZANTE_OBRA"] != DBNull.Value ? new Obra { Id = Convert.ToInt32(datos.Lector["AUTORIZANTE_OBRA"]) } : null, CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string, Detalle = datos.Lector["AUTORIZANTE_DETALLE"] as string, Concepto = datos.Lector["AUTORIZANTE_CONCEPTO"] as string, Estado = datos.Lector["AUTORIZANTE_ESTADO"] != DBNull.Value ? new EstadoAutorizante { Id = Convert.ToInt32(datos.Lector["AUTORIZANTE_ESTADO"]) } : null, Expediente = datos.Lector["AUTORIZANTE_EXPEDIENTE"] as string, MontoAutorizado = datos.Lector["AUTORIZANTE_MONTO_AUTORIZADO"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["AUTORIZANTE_MONTO_AUTORIZADO"]) : 0M, AutorizacionGG = datos.Lector["AUTORIZANTE_AUTORIZACION_GG"] != DBNull.Value ? Convert.ToBoolean(datos.Lector["AUTORIZANTE_AUTORIZACION_GG"]) : false, Fecha = datos.Lector["AUTORIZANTE_FECHA"] != DBNull.Value ? (DateTime?)datos.Lector["AUTORIZANTE_FECHA"] : null
                         },
                         ExpedientePago = datos.Lector["EXPEDIENTE_PAGO"] != DBNull.Value ? datos.Lector["EXPEDIENTE_PAGO"].ToString() : null,
                         Tipo = new TipoPago
