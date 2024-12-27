@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT O.ID,A.NOMBRE AS AREA,E.NOMBRE AS EMPRESA,C.NOMBRE AS CONTRATA,NUMERO,AÑO,ETAPA,OBRA,B.NOMBRE AS BARRIO,DESCRIPCION FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID where O.AREA = @area");
+                datos.setearConsulta("SELECT  O.ID,   A.NOMBRE AS AREA,   E.NOMBRE AS EMPRESA,    NUMERO,  C.NOMBRE AS CONTRATA,  AÑO,    ETAPA,   OBRA, B.NOMBRE AS BARRIO,    DESCRIPCION,   BD.AUTORIZADO_INICIAL,   BD.AUTORIZADO_NUEVO,    (SELECT SUM(C.MONTO_TOTAL)     FROM CERTIFICADOS AS C   INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante    WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO FROM     OBRAS AS O INNER JOIN    EMPRESAS AS E ON O.EMPRESA = E.ID  INNER JOIN     AREAS AS A ON O.AREA = A.ID  INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN   BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN     BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE where O.AREA = @area");
                 datos.agregarParametro("@area", usuario.Area.Id);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
@@ -30,6 +30,9 @@ namespace Negocio
                     aux.Año = datos.Lector["AÑO"] as int?;
                     aux.Etapa = datos.Lector["ETAPA"] as int?;
                     aux.ObraNumero = datos.Lector["OBRA"] as int?;
+                    aux.AutorizadoInicial = datos.Lector["AUTORIZADO_INICIAL"] as decimal?;
+                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] as decimal?;
+                    aux.MontoCertificado = datos.Lector["MONTO_CERTIFICADO"] as decimal?;
 
                     aux.Barrio = new Barrio
                     {
@@ -45,13 +48,13 @@ namespace Negocio
 
                     aux.Empresa = new Empresa
                     {
-                        Id = (int)datos.Lector["ID"], 
+                        Id = (int)datos.Lector["ID"],
                         Nombre = datos.Lector["EMPRESA"] as string
                     };
 
                     aux.Contrata = new Contrata
                     {
-                        Id = (int)datos.Lector["ID"], 
+                        Id = (int)datos.Lector["ID"],
                         Nombre = datos.Lector["CONTRATA"] as string
                     };
 
@@ -77,8 +80,8 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT O.ID,A.NOMBRE AS AREA,E.NOMBRE AS EMPRESA,C.NOMBRE AS CONTRATA , NUMERO,AÑO,ETAPA,OBRA,B.NOMBRE AS BARRIO,DESCRIPCION FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID");
-                
+                datos.setearConsulta("SELECT  O.ID,   A.NOMBRE AS AREA,   E.NOMBRE AS EMPRESA,    NUMERO,  C.NOMBRE AS CONTRATA,  AÑO,    ETAPA,   OBRA, B.NOMBRE AS BARRIO,    DESCRIPCION,   BD.AUTORIZADO_INICIAL,   BD.AUTORIZADO_NUEVO,    (SELECT SUM(C.MONTO_TOTAL)     FROM CERTIFICADOS AS C   INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante    WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO FROM     OBRAS AS O INNER JOIN    EMPRESAS AS E ON O.EMPRESA = E.ID  INNER JOIN     AREAS AS A ON O.AREA = A.ID  INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN   BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN     BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE");
+
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {
@@ -90,6 +93,9 @@ namespace Negocio
                     aux.Año = datos.Lector["AÑO"] as int?;
                     aux.Etapa = datos.Lector["ETAPA"] as int?;
                     aux.ObraNumero = datos.Lector["OBRA"] as int?;
+                    aux.AutorizadoInicial = datos.Lector["AUTORIZADO_INICIAL"] as decimal?;
+                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] as decimal?;
+                    aux.MontoCertificado = datos.Lector["MONTO_CERTIFICADO"] as decimal?;
 
                     aux.Barrio = new Barrio
                     {
@@ -177,13 +183,13 @@ namespace Negocio
                 // Asignar el parámetro ID
                 datos.agregarParametro("@ID", idObra);
 
-                 datos.ejecutarAccion();
+                datos.ejecutarAccion();
                 return true;
 
             }
             catch (Exception ex)
             {
-                
+
                 throw ex;
             }
             finally

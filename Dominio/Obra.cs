@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dominio
 {
+    [Serializable]
     public class Obra
     {
         public int Id { get; set; }
@@ -18,6 +19,10 @@ namespace Dominio
         public int? ObraNumero { get; set; } // Puede ser null
         public Barrio Barrio { get; set; } // Puede ser null
         public string Descripcion { get; set; } // Puede ser null
+
+        public  decimal? AutorizadoInicial { get; set; }
+        public decimal? AutorizadoNuevo { get; set; }
+        public decimal? MontoCertificado { get; set; }
         public Obra() { }
 
     }

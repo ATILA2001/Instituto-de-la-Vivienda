@@ -1,8 +1,8 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Certificados.aspx.cs" Inherits="WebForms.Certificados" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="CertificadosAdmin.aspx.cs" Inherits="WebForms.CertificadosAdmin" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-	<style>
+		<style>
 	.table-3d {
 		box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
 		transform: translateY(-5px);
@@ -26,6 +26,7 @@
 				AutoGenerateColumns="false" runat="server" AllowPaging="true"
 				PageSize="10" OnPageIndexChanging="dgvCertificado_PageIndexChanging">
 				<Columns>
+					<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" />
 					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
 					<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />

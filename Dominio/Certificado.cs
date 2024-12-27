@@ -9,6 +9,7 @@ namespace Dominio
     public class Certificado
     {
         public int Id { get; set; } // IDENTITY (1, 1) PRIMARY KEY
+        public decimal Porcentaje { get; set; }
 
         public Autorizante Autorizante { get; set; } 
 

@@ -20,6 +20,10 @@
                     <asp:BoundField HeaderText="Obra" DataField="ObraNumero" />
                     <asp:BoundField HeaderText="Barrio" DataField="Barrio" />
                     <asp:BoundField HeaderText="Descripción" DataField="Descripcion" />
+                        <asp:BoundField HeaderText="Autorizado Inicial" DataField="AutorizadoInicial" />
+                        
+                        <asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" />
+                          <asp:BoundField HeaderText="Monto Certificado" DataField="MontoCertificado" />
                     <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
                     <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
                 </Columns>

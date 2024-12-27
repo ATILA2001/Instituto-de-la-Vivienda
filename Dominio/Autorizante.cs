@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dominio
 {
+    [Serializable]
     public class Autorizante
     {
         public int Id { get; set; } // ID (clave primaria) de tipo INT

@@ -11,7 +11,7 @@ namespace WebForms
 {
 
 
-    public partial class Certificados
+    public partial class CertificadosAdmin
     {
 
         /// <summary>

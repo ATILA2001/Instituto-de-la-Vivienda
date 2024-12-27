@@ -73,6 +73,7 @@
     <Content Include="Autorizantes.aspx" />
     <Content Include="AutorizantesAdmin.aspx" />
     <Content Include="Certificados.aspx" />
+    <Content Include="CertificadosAdmin.aspx" />
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />
@@ -136,6 +137,13 @@
     </Compile>
     <Compile Include="Certificados.aspx.designer.cs">
       <DependentUpon>Certificados.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CertificadosAdmin.aspx.cs">
+      <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CertificadosAdmin.aspx.designer.cs">
+      <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>

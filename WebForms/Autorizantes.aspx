@@ -95,7 +95,11 @@
 						<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
 						<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}"/>
 
-						<asp:BoundField HeaderText="Autorización GG" DataField="AutorizacionGG" />
+						<asp:TemplateField HeaderText="Autorización GG">
+						<ItemTemplate>
+							<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
+						</ItemTemplate>
+					</asp:TemplateField>
 						<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
 						<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
 					</Columns>

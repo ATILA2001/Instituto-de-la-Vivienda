@@ -10,14 +10,17 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class Certificados : System.Web.UI.Page
+    public partial class CertificadosAdmin : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
         protected void Page_Load(object sender, EventArgs e)
         {
 
+
+
             if (!IsPostBack)
-            {    CargarListaCertificados();
+            {
+                CargarListaCertificados();
             }
         }
 
@@ -26,7 +29,7 @@ namespace WebForms
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaCertificado"] = negocio.listar(usuarioLogueado);
+                Session["listaCertificado"] = negocio.listar();
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
             }

@@ -36,6 +36,9 @@
 									<a class="nav-link" href="AutorizantesAdmin.aspx">Autorizantes</a>
 								</li>
 								<li class="nav-item">
+									<a class="nav-link" href="CertificadosAdmin.aspx">Certificados</a>
+								</li>
+								<li class="nav-item">
 									<a class="nav-link" href="AbmlBarrio.aspx">Barrios</a>
 								</li>
 								<li class="nav-item">
