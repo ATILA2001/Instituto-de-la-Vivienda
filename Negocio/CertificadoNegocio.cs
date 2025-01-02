@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -193,6 +194,39 @@ namespace Negocio
             {
                 datos.cerrarConexion();
             }
+    
+        
         }
+        public void agregar(Certificado certificado)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+            INSERT INTO CERTIFICADOS (CODIGO_AUTORIZANTE, EXPEDIENTE_PAGO, TIPO_PAGO, MONTO_TOTAL, MES_APROBACION) 
+            VALUES (@codigoAutorizante, @expedientePago, @tipoPago, @montoTotal, @mesAprobacion)");
+
+                datos.agregarParametro("@codigoAutorizante", certificado.Autorizante.CodigoAutorizante);
+                datos.agregarParametro("@expedientePago", (object)certificado.ExpedientePago ?? DBNull.Value);
+                datos.agregarParametro("@tipoPago", certificado.Tipo.Id);
+                datos.agregarParametro("@montoTotal", certificado.MontoTotal);
+                datos.agregarParametro("@mesAprobacion", (object)certificado.MesAprobacion ?? DBNull.Value);
+
+                datos.ejecutarAccion();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al agregar el certificado.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+
+        
     }
+
 }

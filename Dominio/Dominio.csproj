@@ -48,6 +48,7 @@
     <Compile Include="Contrata.cs" />
     <Compile Include="Empresa.cs" />
     <Compile Include="EstadoAutorizante.cs" />
+    <Compile Include="Legitimo.cs" />
     <Compile Include="Obra.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TipoPago.cs" />

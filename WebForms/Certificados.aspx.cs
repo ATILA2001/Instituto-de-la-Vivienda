@@ -17,7 +17,20 @@ namespace WebForms
         {
 
             if (!IsPostBack)
-            {    CargarListaCertificados();
+            {
+   
+
+                ddlTipo.DataSource = ObtenerTipos(); 
+                ddlTipo.DataTextField = "Nombre";
+                ddlTipo.DataValueField = "Id";
+                ddlTipo.DataBind();
+
+                ddlAutorizante.DataSource = ObtenerAutorizantes();
+                ddlAutorizante.DataTextField = "Nombre";
+                ddlAutorizante.DataValueField = "Id";
+                ddlAutorizante.DataBind();
+
+                CargarListaCertificados();
             }
         }
 
@@ -80,12 +93,43 @@ namespace WebForms
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            CargarListaCertificados();  // Re-cargar la lista para mostrar los cambios.
-        }
-        private DataTable ObtenerEstado()
-        {
-            EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
-            return empresaNegocio.listarddl();
+            try
+            {
+                // Instancia de negocio y certificado.
+                CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
+                Certificado nuevoCertificado = new Certificado
+                {
+                    Autorizante = new Autorizante
+                    {
+                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                    },
+                    ExpedientePago = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
+                    Tipo = new TipoPago
+                    {
+                        Id = int.Parse(ddlTipo.SelectedValue)
+                    },
+                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
+                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
+                        ? null
+                        : (DateTime?)DateTime.Parse(txtFecha.Text)
+                };
+
+                // Llamar al método que agrega el registro.
+                certificadoNegocio.agregar(nuevoCertificado);
+
+                // Mostrar mensaje de éxito.
+                lblMensaje.Text = "Certificado agregado con éxito.";
+                lblMensaje.ForeColor = System.Drawing.Color.Green;
+
+                // Re-cargar la lista para mostrar los cambios.
+                CargarListaCertificados();
+            }
+            catch (Exception ex)
+            {
+                // Mostrar mensaje de error.
+                lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
+                lblMensaje.ForeColor = System.Drawing.Color.Red;
+            }
         }
 
         private DataTable ObtenerContratas()
@@ -94,11 +138,18 @@ namespace WebForms
             return contrataNegocio.listarddl();
         }
 
-        private DataTable ObtenerObras()
+    
+        private DataTable ObtenerTipos()
         {
-            ObraNegocio barrioNegocio = new ObraNegocio();
+            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
+            return tipoPagNegocio.listarddl();
+        }
+        private DataTable ObtenerAutorizantes()
+        {
+            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
-            return barrioNegocio.listarddl(usuarioLogueado);
+            return autorizanteNegocio.listarddl(usuarioLogueado);
         }
     }
 }

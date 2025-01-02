@@ -77,6 +77,8 @@
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />
+    <Content Include="Legitimos.aspx" />
+    <Content Include="LegitimosAdmin.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
@@ -165,6 +167,20 @@
     </Compile>
     <Compile Include="HomeUser.aspx.designer.cs">
       <DependentUpon>HomeUser.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Legitimos.aspx.cs">
+      <DependentUpon>Legitimos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Legitimos.aspx.designer.cs">
+      <DependentUpon>Legitimos.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LegitimosAdmin.aspx.cs">
+      <DependentUpon>LegitimosAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LegitimosAdmin.aspx.designer.cs">
+      <DependentUpon>LegitimosAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>

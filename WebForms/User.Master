@@ -41,7 +41,7 @@
                                 <a class="nav-link active" aria-current="page" href="Certificados.aspx">Certificados</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="LegitimosAbonos.aspx">Legitimos abonos</a>
+                                <a class="nav-link active" aria-current="page" href="Legitimos.aspx">Legitimos abonos</a>
                             </li>
 
                         </ul>

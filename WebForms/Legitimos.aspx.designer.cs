@@ -11,17 +11,26 @@ namespace WebForms
 {
 
 
-    public partial class Certificados
+    public partial class Legitimos
     {
 
         /// <summary>
-        /// Control ddlAutorizante.
+        /// Control ddlObra.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAutorizante;
+        protected global::System.Web.UI.WebControls.DropDownList ddlObra;
+
+        /// <summary>
+        /// Control txtAutorizante.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAutorizante;
 
         /// <summary>
         /// Control txtExpediente.
@@ -33,31 +42,40 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtExpediente;
 
         /// <summary>
-        /// Control ddlTipo.
+        /// Control txtInicioEjecucion.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlTipo;
+        protected global::System.Web.UI.WebControls.TextBox txtInicioEjecucion;
 
         /// <summary>
-        /// Control txtMontoAutorizado.
+        /// Control txtFinEjecucion.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMontoAutorizado;
+        protected global::System.Web.UI.WebControls.TextBox txtFinEjecucion;
 
         /// <summary>
-        /// Control txtFecha.
+        /// Control txtCertificado.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFecha;
+        protected global::System.Web.UI.WebControls.TextBox txtCertificado;
+
+        /// <summary>
+        /// Control txtMesAprobacion.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtMesAprobacion;
 
         /// <summary>
         /// Control btnAgregar.
@@ -69,13 +87,13 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
-        /// Control dgvCertificado.
+        /// Control dgvLegitimos.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView dgvCertificado;
+        protected global::System.Web.UI.WebControls.GridView dgvLegitimos;
 
         /// <summary>
         /// Control lblMensaje.
