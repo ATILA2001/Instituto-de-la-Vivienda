@@ -301,5 +301,48 @@ A.MES,
                 datos.cerrarConexion();
             }
         }
+
+        public bool modificar(Autorizante autorizante)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE AUTORIZANTES 
+        SET 
+            OBRA = @obra, 
+            ESTADO = @estado, 
+            CONCEPTO = @concepto, 
+            DETALLE = @detalle, 
+            EXPEDIENTE = @expediente, 
+            MONTO_AUTORIZADO = @montoAutorizado, 
+            MES = @mes
+        WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+
+                // Asignar parámetros
+                datos.agregarParametro("@obra", autorizante.Obra.Id);
+                datos.agregarParametro("@estado", autorizante.Estado.Id);
+                datos.agregarParametro("@concepto", autorizante.Concepto);
+                datos.agregarParametro("@detalle", autorizante.Detalle);
+                datos.agregarParametro("@expediente", (object)autorizante.Expediente ?? DBNull.Value);
+                datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
+                datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
+                datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
+
+                // Ejecutar la actualización
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el autorizante.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
     }
 }

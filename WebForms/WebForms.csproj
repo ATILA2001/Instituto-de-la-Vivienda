@@ -80,6 +80,7 @@
     <Content Include="Legitimos.aspx" />
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="ModificarAutorizante.aspx" />
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarCertificado.aspx" />
     <Content Include="ModificarCertificadoAdmin.aspx" />
@@ -197,6 +198,13 @@
     </Compile>
     <Compile Include="LoginRegister.Master.designer.cs">
       <DependentUpon>LoginRegister.Master</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarAutorizante.aspx.cs">
+      <DependentUpon>ModificarAutorizante.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarAutorizante.aspx.designer.cs">
+      <DependentUpon>ModificarAutorizante.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarBarrio.aspx.cs">
       <DependentUpon>ModificarBarrio.aspx</DependentUpon>
