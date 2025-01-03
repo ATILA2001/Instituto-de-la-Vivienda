@@ -16,7 +16,10 @@
         <div>
             <nav class="navbar navbar-expand-lg" style="background-color: #99bbc2;">
                 <div class="container-fluid">
-                    <a class="navbar-brand mb-0 h1" href="HomeUser.aspx">INSTITUTO DE LA VIVIENDA</a>
+                                       <a class="navbar-brand" href="HomeUser.aspx">
+    <img src="https://media-exp1.licdn.com/dms/image/C510BAQHLl_VSWE7p4Q/company-logo_200_200/0/1519882941913?e=2159024400&v=beta&t=4wDwMu7kpFCRNEuXQQbNAmqo1nxs7rIAlgAis5mjc0E" alt="Home" width="32" height="32" />
+</a>
+                    
                 </div>
             </nav>
 

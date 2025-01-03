@@ -56,7 +56,10 @@ namespace Negocio
                         ExpedientePago = datos.Lector["EXPEDIENTE_PAGO"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) / 100 : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
+    && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
+    ? porcentaje / 100
+    : 0M,
                         Tipo = new TipoPago
                         {
                             Id = datos.Lector["TIPO_PAGO"] != DBNull.Value ? Convert.ToInt32(datos.Lector["TIPO_PAGO"]) : 0,
@@ -150,7 +153,10 @@ namespace Negocio
                         ExpedientePago = datos.Lector["EXPEDIENTE_PAGO"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) / 100 : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
+    && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
+    ? porcentaje / 100
+    : 0M,
                         Tipo = new TipoPago
                         {
                             Id = datos.Lector["TIPO_PAGO"] != DBNull.Value ? Convert.ToInt32(datos.Lector["TIPO_PAGO"]) : 0,

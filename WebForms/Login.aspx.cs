@@ -36,7 +36,7 @@ namespace WebForms
                         }
                         else
                         {
-                            Session.Add("error", "Usuario no habilitado a ingresar");
+                            Session.Add("error", "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
                             Response.Redirect("Error.aspx", false);
                         }
                     }

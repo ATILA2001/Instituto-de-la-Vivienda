@@ -19,8 +19,9 @@
 					<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
 					</button>
-					<a class="navbar-brand" href="PerfilAdmin.aspx">Admin</a>
-					<a class="navbar-brand" href="HomeAdmin.aspx">Inicio</a>
+					                   <a class="navbar-brand" href="HomeAdmin.aspx">
+    <img src="https://media-exp1.licdn.com/dms/image/C510BAQHLl_VSWE7p4Q/company-logo_200_200/0/1519882941913?e=2159024400&v=beta&t=4wDwMu7kpFCRNEuXQQbNAmqo1nxs7rIAlgAis5mjc0E" alt="Home" width="32" height="32" />
+</a>
 					<asp:Button ID="btnCerrarSesion" CssClass="btn btn-outline-danger" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" />
 					<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
 						<div class="offcanvas-header">

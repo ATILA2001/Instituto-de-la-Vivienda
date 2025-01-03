@@ -28,14 +28,13 @@ namespace WebForms
         {
             try
             {
-                Usuario usuarioLogueado = (Usuario)Session["usuario"];
                 Session["listaCertificado"] = negocio.listar();
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar los Certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }

@@ -301,7 +301,50 @@ A.MES,
                 datos.cerrarConexion();
             }
         }
+        public DataTable listarddl()
+        {
+            DataTable dt = new DataTable(); // DataTable donde guardaremos las obras.
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+          
+
+                // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
+                datos.setearConsulta("SELECT A.ID, codigo_autorizante FROM AUTORIZANTES AS A INNER JOIN OBRAS AS O ON A.OBRA = O.ID");
+
+          
+                // Ejecutar la consulta.
+                datos.ejecutarLectura();
+
+                // Definir las columnas del DataTable.
+                dt.Columns.Add("ID", typeof(int));    // Columna ID (para el valor de la obra)
+                dt.Columns.Add("NOMBRE", typeof(string));  // Columna Descripción (para la opción a mostrar)
+
+                while (datos.Lector.Read())
+                {
+                    // Crear una nueva fila y asignar los valores obtenidos de la base de datos.
+                    DataRow row = dt.NewRow();
+                    row["ID"] = (int)datos.Lector["ID"];  // Asignar el ID de la obra
+                    row["NOMBRE"] = datos.Lector["codigo_autorizante"] as string;  // Asignar la descripción de la obra
+
+                    // Agregar la fila al DataTable.
+                    dt.Rows.Add(row);
+                }
+
+                return dt;  // Devolvemos el DataTable con los datos
+            }
+            catch (Exception ex)
+            {
+                // Proveer información más detallada en el caso de un error
+                throw new ApplicationException("Hubo un problema al obtener las obras para el usuario", ex);
+            }
+            finally
+            {
+                // Asegurarnos de cerrar la conexión después de usarla.
+                datos.cerrarConexion();
+            }
+        }
         public bool modificar(Autorizante autorizante)
         {
             var datos = new AccesoDatos();

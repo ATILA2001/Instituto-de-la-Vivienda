@@ -81,6 +81,7 @@
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="ModificarAutorizante.aspx" />
+    <Content Include="ModificarAutorizanteAdmin.aspx" />
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarCertificado.aspx" />
     <Content Include="ModificarCertificadoAdmin.aspx" />
@@ -205,6 +206,13 @@
     </Compile>
     <Compile Include="ModificarAutorizante.aspx.designer.cs">
       <DependentUpon>ModificarAutorizante.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarAutorizanteAdmin.aspx.cs">
+      <DependentUpon>ModificarAutorizanteAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarAutorizanteAdmin.aspx.designer.cs">
+      <DependentUpon>ModificarAutorizanteAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarBarrio.aspx.cs">
       <DependentUpon>ModificarBarrio.aspx</DependentUpon>

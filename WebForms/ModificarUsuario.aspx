@@ -58,11 +58,11 @@
                 </asp:UpdatePanel>
             </div>
         </div>
-    </div>
-    <div class="text-end p-4">
+   
+    <div class="text-center p-4">
         <asp:Label ID="lblMensaje" Text="" runat="server" />
 
     </div>
-
+ </div>
 
 </asp:Content>

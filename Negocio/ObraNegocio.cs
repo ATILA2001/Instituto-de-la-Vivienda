@@ -295,6 +295,51 @@ namespace Negocio
             }
         }
 
+        public DataTable listarddl()
+        {
+            DataTable dt = new DataTable(); // DataTable donde guardaremos las obras.
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+       
+
+                // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION) AS NOMBRE " +
+                                     "FROM OBRAS AS O " +
+                                     "INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID"); 
+
+
+                // Ejecutar la consulta.
+                datos.ejecutarLectura();
+
+                // Definir las columnas del DataTable.
+                dt.Columns.Add("ID", typeof(int));    // Columna ID (para el valor de la obra)
+                dt.Columns.Add("NOMBRE", typeof(string));  // Columna Descripción (para la opción a mostrar)
+
+                while (datos.Lector.Read())
+                {
+                    // Crear una nueva fila y asignar los valores obtenidos de la base de datos.
+                    DataRow row = dt.NewRow();
+                    row["ID"] = (int)datos.Lector["ID"];  // Asignar el ID de la obra
+                    row["NOMBRE"] = datos.Lector["NOMBRE"] as string;  // Asignar la descripción de la obra
+
+                    // Agregar la fila al DataTable.
+                    dt.Rows.Add(row);
+                }
+
+                return dt;  // Devolvemos el DataTable con los datos
+            }
+            catch (Exception ex)
+            {
+                // Proveer información más detallada en el caso de un error
+                throw new ApplicationException("Hubo un problema al obtener las obras para el usuario", ex);
+            }
+            finally
+            {
+                // Asegurarnos de cerrar la conexión después de usarla.
+                datos.cerrarConexion();
+            }
+        }
     }
 }
