@@ -61,8 +61,8 @@ namespace WebForms
 
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
-            //Response.Redirect("modificarBarrio.aspx?codM=" + idSeleccionado);
+            var idSeleccionado = dgvCertificado.SelectedDataKey.Value.ToString();
+            Response.Redirect("ModificarCertificado.aspx?codM=" + idSeleccionado);
         }
         protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {

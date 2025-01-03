@@ -81,6 +81,7 @@
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="ModificarBarrio.aspx" />
+    <Content Include="ModificarCertificado.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarObra.aspx" />
     <Content Include="ModificarObraUser.aspx" />
@@ -202,6 +203,13 @@
     </Compile>
     <Compile Include="ModificarBarrio.aspx.designer.cs">
       <DependentUpon>ModificarBarrio.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarCertificado.aspx.cs">
+      <DependentUpon>ModificarCertificado.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarCertificado.aspx.designer.cs">
+      <DependentUpon>ModificarCertificado.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarEmpresa.aspx.cs">
       <DependentUpon>ModificarEmpresa.aspx</DependentUpon>

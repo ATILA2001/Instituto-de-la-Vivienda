@@ -245,6 +245,41 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+        public bool modificar(Certificado certificado)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE CERTIFICADOS 
+        SET 
+            CODIGO_AUTORIZANTE = @codigoAutorizante, 
+            EXPEDIENTE_PAGO = @expedientePago, 
+            TIPO_PAGO = @tipoPago, 
+            MONTO_TOTAL = @montoTotal, 
+            MES_APROBACION = @mesAprobacion
+        WHERE ID = @id");
+
+                datos.agregarParametro("@codigoAutorizante", certificado.Autorizante.CodigoAutorizante);
+                datos.agregarParametro("@expedientePago", (object)certificado.ExpedientePago ?? DBNull.Value);
+                datos.agregarParametro("@tipoPago", certificado.Tipo.Id);
+                datos.agregarParametro("@montoTotal", certificado.MontoTotal);
+                datos.agregarParametro("@mesAprobacion", (object)certificado.MesAprobacion ?? DBNull.Value);
+                datos.agregarParametro("@id", certificado.Id);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el certificado.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
 
     }
 
