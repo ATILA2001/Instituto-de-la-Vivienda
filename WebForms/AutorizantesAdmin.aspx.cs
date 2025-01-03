@@ -43,21 +43,21 @@ namespace WebForms
         protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
 
-            //try
-            //{
-            //    var id = Convert.ToInt32(dgvBarrio.DataKeys[e.RowIndex].Value);
-            //    if (negocio.eliminar(id))
-            //    {
-            //        lblMensaje.Text = "Barrio eliminado correctamente.";
-            //        lblMensaje.CssClass = "alert alert-success";
-            //        CargarListaBarrios(); // Actualizar el GridView
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
-            //    lblMensaje.CssClass = "alert alert-danger";
-            //}
+            try
+            {
+                var id = dgvAutorizante.DataKeys[e.RowIndex].Value.ToString();
+                if (negocio.eliminar(id))
+                {
+                    lblMensaje.Text = "Barrio eliminado correctamente.";
+                   lblMensaje.CssClass = "alert alert-success";
+                    CargarListaAutorizantes(); // Actualizar el GridView
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
 
         protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)

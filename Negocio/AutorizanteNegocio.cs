@@ -10,6 +10,36 @@ namespace Negocio
 {
     public class AutorizanteNegocio
     {
+
+        public bool eliminar(string codigo)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Configurar la consulta para eliminar un registro por ID
+                datos.setearConsulta("DELETE FROM AUTORIZANTES WHERE CODIGO_AUTORIZANTE = @ID");
+
+                // Agregar el parámetro para el ID
+                datos.agregarParametro("@ID", codigo);
+
+                // Ejecutar la consulta
+                datos.ejecutarAccion();
+
+                // Si no hubo excepciones, asumimos que la operación fue exitosa
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Propagar la excepción para que se maneje en el nivel superior
+                throw new ApplicationException("Hubo un problema al intentar eliminar el autorizante.", ex);
+            }
+            finally
+            {
+                // Cerrar la conexión en el bloque finally
+                datos.cerrarConexion();
+            }
+        }
+
         public List<Autorizante> listar(Usuario usuario)
         {
             List<Autorizante> lista = new List<Autorizante>();

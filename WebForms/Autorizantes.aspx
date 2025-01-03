@@ -34,7 +34,7 @@
 									<th>Estado</th>
 									<th>Monto Autorizado</th>
 									<th>Mes Aprobacion</th>
-									<th></th>
+									<th></th><th></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -66,6 +66,9 @@
 									<td class="text-right">
 										<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
 									</td>
+									<td class="text-right">
+    <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+        CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
 								</tr>
 							</tbody>
 						</table>

@@ -33,6 +33,15 @@ namespace WebForms
                 CargarListaCertificados();
             }
         }
+        protected void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            // Limpiar todos los TextBox
+            txtMontoAutorizado.Text = string.Empty;
+            txtExpediente.Text = string.Empty;
+            txtFecha.Text = string.Empty;
+            ddlAutorizante.SelectedIndex = -1;
+            ddlTipo.SelectedIndex = -1;
+        }
 
         private void CargarListaCertificados()
         {
@@ -58,21 +67,21 @@ namespace WebForms
         protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
 
-            //try
-            //{
-            //    var id = Convert.ToInt32(dgvBarrio.DataKeys[e.RowIndex].Value);
-            //    if (negocio.eliminar(id))
-            //    {
-            //        lblMensaje.Text = "Barrio eliminado correctamente.";
-            //        lblMensaje.CssClass = "alert alert-success";
-            //        CargarListaBarrios(); // Actualizar el GridView
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
-            //    lblMensaje.CssClass = "alert alert-danger";
-            //}
+            try
+            {
+                var id = Convert.ToInt32(dgvCertificado.DataKeys[e.RowIndex].Value);
+                if (negocio.eliminar(id))
+                {
+                    lblMensaje.Text = "Certificado eliminado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+                    CargarListaCertificados(); // Actualizar el GridView
+                }
+            }
+           catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al eliminar el certificado: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
 
         protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)

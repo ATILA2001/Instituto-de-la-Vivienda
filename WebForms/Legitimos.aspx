@@ -33,7 +33,7 @@
                                     <th>Fin Ejecución</th>
                                     <th>Monto Certificado</th>
                                     <th>Mes Aprobación</th>
-                                    <th>Acción</th>
+                                    <th></th><th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -63,6 +63,9 @@
                                     <td class="text-right">
                                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
                                     </td>
+                                    <td class="text-right">
+    <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+        CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -75,7 +78,7 @@
     <div class="container-fluid mt-4">
         <div class="row mt-4">
             <div class="col-md-12">
-                <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table table-bordered table-hover table-3d"
+                <asp:GridView ID="dgvLegitimos" DataKeyNames="CodigoAutorizante" CssClass="table table-bordered table-hover table-3d"
                     OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server"
                     AllowPaging="true" PageSize="10" OnPageIndexChanging="dgvLegitimos_PageIndexChanging">
                     <Columns>

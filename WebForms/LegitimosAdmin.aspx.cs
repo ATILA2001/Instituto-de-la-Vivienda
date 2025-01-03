@@ -50,7 +50,7 @@ namespace WebForms
         {
             try
             {
-                var id = Convert.ToInt32(dgvLegitimos.DataKeys[e.RowIndex].Value);
+                var id = dgvLegitimos.DataKeys[e.RowIndex].Value.ToString();
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";

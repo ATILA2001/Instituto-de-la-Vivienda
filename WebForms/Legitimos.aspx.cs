@@ -25,6 +25,17 @@ namespace WebForms
                 CargarListaLegitimos();
             }
         }
+        protected void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            // Limpiar todos los TextBox
+            txtAutorizante.Text = string.Empty;
+            txtExpediente.Text = string.Empty;
+            txtInicioEjecucion.Text = string.Empty;
+            txtFinEjecucion.Text = string.Empty;
+            txtCertificado.Text = string.Empty;
+            txtMesAprobacion.Text = string.Empty;
+            ddlObra.SelectedIndex = -1;
+        }
 
         private void CargarListaLegitimos()
         {
@@ -55,7 +66,7 @@ namespace WebForms
         {
             try
             {
-                var id = Convert.ToInt32(dgvLegitimos.DataKeys[e.RowIndex].Value);
+                var id = dgvLegitimos.DataKeys[e.RowIndex].Value.ToString();
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";

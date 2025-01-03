@@ -47,10 +47,34 @@ namespace Negocio
             }
         }
 
-        public bool eliminar(int id)
+        public bool eliminar(string codigo)
         {
-            throw new NotImplementedException();
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Consulta para eliminar el legítimo por ID
+                datos.setearConsulta("DELETE FROM LEGITIMOS_ABONOS WHERE CODIGO_AUTORIZANTE = @ID");
+
+                // Asignar el parámetro
+                datos.agregarParametro("@ID", codigo);
+
+                // Ejecutar la acción
+                datos.ejecutarAccion();
+
+                // Retorna true si se ejecutó exitosamente
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Lanza una excepción personalizada si hay errores
+                throw new Exception("Error al eliminar el legítimo.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
         }
+
 
         public List<Legitimo> listar(Usuario usuario)
         {

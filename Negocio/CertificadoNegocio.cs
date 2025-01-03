@@ -194,8 +194,8 @@ namespace Negocio
             {
                 datos.cerrarConexion();
             }
-    
-        
+
+
         }
         public void agregar(Certificado certificado)
         {
@@ -225,8 +225,27 @@ namespace Negocio
             }
         }
 
+        public bool eliminar(int id)
+        {
+            var datos = new AccesoDatos();
 
-        
+            try
+            {
+                datos.setearConsulta("DELETE FROM CERTIFICADOS WHERE ID = @id");
+                datos.agregarParametro("@id", id);
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al eliminar el certificado.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
     }
 
 }

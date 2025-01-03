@@ -20,7 +20,7 @@
 <div class="container-fluid mt-4">
 	<div class="row mt-4">
 		<div class="col-md-12">
-			<asp:GridView ID="dgvCertificado" DataKeyNames="Autorizante" CssClass="table table-bordered table-hover table-3d"
+			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table table-bordered table-hover table-3d"
 				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
 				OnRowDeleting="dgvCertificado_RowDeleting"
 				AutoGenerateColumns="false" runat="server" AllowPaging="true"
