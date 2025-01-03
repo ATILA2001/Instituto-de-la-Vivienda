@@ -1,9 +1,10 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="ModificarAutorizanteAdmin.aspx.cs" Inherits="WebForms.ModificarAutorizanteAdmin" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-        <style>
+    <style>
         .table-3d {
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
             transform: translateY(-5px);
@@ -34,6 +35,7 @@
                                     <th>Estado</th>
                                     <th>Monto Autorizado</th>
                                     <th>Mes Aprobacion</th>
+                                    <th>Aprobacion</th>
                                     <th></th>
                                     <th></th>
                                 </tr>
@@ -42,7 +44,7 @@
                                 <tr>
                                     <!-- Dropdowns y TextBoxes para agregar -->
                                     <td>
-                                        <asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server" Enabled="false"> </asp:DropDownList>
+                                        <asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server" Enabled="false"></asp:DropDownList>
                                     </td>
                                     <td>
                                         <asp:TextBox ID="txtConcepto" CssClass="form-control" runat="server" />
@@ -62,6 +64,12 @@
                                     <td>
                                         <asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
                                     </td>
+<td>
+        <asp:DropDownList ID="ddlAutorizacionGG" runat="server">
+            <asp:ListItem Text="A AUTORIZAR" Value="0"></asp:ListItem>
+            <asp:ListItem Text="AUTORIZADO" Value="1"></asp:ListItem>
+        </asp:DropDownList>
+ </td>
                                     <td class="text-right">
                                         <asp:Button Text="Modificar" ID="btnModificar" OnClick="btnModificar_Click" CssClass="btn btn-outline-success" runat="server" />
                                     </td>
@@ -73,7 +81,7 @@
                 </div>
             </div>
             <div class="text-center p-4">
-	<asp:Label ID="lblMensaje" Text="" runat="server" />
-</div>
+                <asp:Label ID="lblMensaje" Text="" runat="server" />
+            </div>
         </div>
 </asp:Content>

@@ -79,11 +79,12 @@ namespace WebForms
                         Fecha = string.IsNullOrEmpty(txtFecha.Text.Trim())
                             ? (DateTime?)null
                             : DateTime.Parse(txtFecha.Text.Trim()),
+                        AutorizacionGG = int.Parse(ddlAutorizacionGG.SelectedValue) == 1,
                         Estado = new EstadoAutorizante { Id = int.Parse(ddlEstado.SelectedValue) }
                     };
 
                     // Llamar al método de modificación
-                    if (negocio.modificar(autorizadoModificado))
+                    if (negocio.modificarAdmin(autorizadoModificado))
                     {
                         lblMensaje.Text = "Autorizante modificado exitosamente.";
                         lblMensaje.CssClass = "alert alert-success";
@@ -126,7 +127,6 @@ namespace WebForms
             return ddlObra.SelectedIndex != -1 &&
                    !string.IsNullOrWhiteSpace(txtConcepto.Text) &&
                    !string.IsNullOrWhiteSpace(txtDetalle.Text) &&
-                   !string.IsNullOrWhiteSpace(txtExpediente.Text) &&
                    !string.IsNullOrWhiteSpace(txtMontoAutorizado.Text) &&
                    ddlEstado.SelectedIndex != -1;
         }

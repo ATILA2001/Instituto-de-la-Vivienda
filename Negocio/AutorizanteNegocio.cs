@@ -265,7 +265,7 @@ A.MES,
                 }
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT A.ID, codigo_autorizante FROM AUTORIZANTES AS A INNER JOIN OBRAS AS O ON A.OBRA = O.ID WHERE O.AREA = @area");
+                datos.setearConsulta("SELECT A.ID, codigo_autorizante FROM AUTORIZANTES AS A INNER JOIN OBRAS AS O ON A.OBRA = O.ID WHERE O.AREA = @area and AUTORIZACION_GG = 1");
 
                 // Asignar el parámetro del área del usuario.
                 datos.agregarParametro("@area", usuario.Area.Id);
@@ -386,6 +386,48 @@ A.MES,
                 datos.cerrarConexion();
             }
         }
+        public bool modificarAdmin(Autorizante autorizante)
+        {
+            var datos = new AccesoDatos();
 
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE AUTORIZANTES 
+        SET 
+            OBRA = @obra, 
+            ESTADO = @estado, 
+            CONCEPTO = @concepto, 
+            DETALLE = @detalle, 
+            EXPEDIENTE = @expediente, 
+            MONTO_AUTORIZADO = @montoAutorizado, 
+            MES = @mes,
+AUTORIZACION_GG = @aut
+        WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+
+                // Asignar parámetros
+                datos.agregarParametro("@obra", autorizante.Obra.Id);
+                datos.agregarParametro("@estado", autorizante.Estado.Id);
+                datos.agregarParametro("@concepto", autorizante.Concepto);
+                datos.agregarParametro("@detalle", autorizante.Detalle);
+                datos.agregarParametro("@expediente", (object)autorizante.Expediente ?? DBNull.Value);
+                datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
+                datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
+                datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
+                datos.agregarParametro("@aut", autorizante.AutorizacionGG);
+
+                // Ejecutar la actualización
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el autorizante.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }
