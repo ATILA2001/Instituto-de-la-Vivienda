@@ -72,6 +72,7 @@
     <Content Include="AbmlUsuarios.aspx" />
     <Content Include="Autorizantes.aspx" />
     <Content Include="AutorizantesAdmin.aspx" />
+    <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
     <Content Include="Error.aspx" />
@@ -79,6 +80,7 @@
     <Content Include="HomeUser.aspx" />
     <Content Include="Legitimos.aspx" />
     <Content Include="LegitimosAdmin.aspx" />
+    <Content Include="LineasGestion.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="ModificarAutorizante.aspx" />
     <Content Include="ModificarAutorizanteAdmin.aspx" />
@@ -89,6 +91,7 @@
     <Content Include="ModificarObra.aspx" />
     <Content Include="ModificarObraUser.aspx" />
     <Content Include="ModificarUsuario.aspx" />
+    <Content Include="MovimientosGestion.aspx" />
     <Content Include="Obras.aspx" />
     <Content Include="ObrasAdmin.aspx" />
     <Content Include="Register.aspx" />
@@ -136,6 +139,13 @@
     </Compile>
     <Compile Include="AutorizantesAdmin.aspx.designer.cs">
       <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="BdProyectos.aspx.cs">
+      <DependentUpon>BdProyectos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BdProyectos.aspx.designer.cs">
+      <DependentUpon>BdProyectos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Certificados.aspx.cs">
       <DependentUpon>Certificados.aspx</DependentUpon>
@@ -185,6 +195,13 @@
     </Compile>
     <Compile Include="LegitimosAdmin.aspx.designer.cs">
       <DependentUpon>LegitimosAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LineasGestion.aspx.cs">
+      <DependentUpon>LineasGestion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LineasGestion.aspx.designer.cs">
+      <DependentUpon>LineasGestion.aspx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
@@ -262,6 +279,13 @@
     </Compile>
     <Compile Include="ModificarUsuario.aspx.designer.cs">
       <DependentUpon>ModificarUsuario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="MovimientosGestion.aspx.cs">
+      <DependentUpon>MovimientosGestion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MovimientosGestion.aspx.designer.cs">
+      <DependentUpon>MovimientosGestion.aspx</DependentUpon>
     </Compile>
     <Compile Include="Obras.aspx.cs">
       <DependentUpon>Obras.aspx</DependentUpon>
