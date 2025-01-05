@@ -18,17 +18,9 @@ namespace WebForms
 
             if (!IsPostBack)
             {
-   
 
-                ddlTipo.DataSource = ObtenerTipos(); 
-                ddlTipo.DataTextField = "Nombre";
-                ddlTipo.DataValueField = "Id";
-                ddlTipo.DataBind();
 
-                ddlAutorizante.DataSource = ObtenerAutorizantes();
-                ddlAutorizante.DataTextField = "Nombre";
-                ddlAutorizante.DataValueField = "Id";
-                ddlAutorizante.DataBind();
+                BindDropDownList();
 
                 CargarListaCertificados();
             }
@@ -47,8 +39,10 @@ namespace WebForms
         {
             try
             {
-                Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaCertificado"] = negocio.listar(usuarioLogueado);
+                Usuario usuarioLogueado = (Usuario)Session["usuario"]; 
+                string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
+
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
             }
@@ -153,6 +147,13 @@ namespace WebForms
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
             return tipoPagNegocio.listarddl();
         }
+        private DataTable ObtenerAutorizantesFiltro()
+        {
+            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+
+            Usuario usuarioLogueado = (Usuario)Session["usuario"];
+            return autorizanteNegocio.listarddl(usuarioLogueado);
+        }
         private DataTable ObtenerAutorizantes()
         {
             AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
@@ -160,5 +161,44 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return autorizanteNegocio.listarddl(usuarioLogueado);
         }
+        protected void ddlAutorizanteFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+        }
+
+        private void BindDropDownList()
+        {
+            // Obtener los tipos.
+            var tipos = ObtenerTipos();
+            ddlTipo.DataSource = tipos;
+            ddlTipo.DataTextField = "Nombre";
+            ddlTipo.DataValueField = "Id";
+            ddlTipo.DataBind();
+
+            // Obtener los autorizantes.
+            var autorizantes = ObtenerAutorizantes();
+            ddlAutorizante.DataSource = autorizantes;
+            ddlAutorizante.DataTextField = "Nombre";
+            ddlAutorizante.DataValueField = "Id";
+            ddlAutorizante.DataBind();
+
+            // Obtener los autorizantes para filtro.
+            var autorizantesFiltro = ObtenerAutorizantesFiltro();
+            autorizantesFiltro.Rows.InsertAt(CrearFilaTodos(autorizantesFiltro), 0);
+            ddlAutorizanteFiltro.DataSource = autorizantesFiltro;
+            ddlAutorizanteFiltro.DataTextField = "Nombre";
+            ddlAutorizanteFiltro.DataValueField = "Id";
+            ddlAutorizanteFiltro.DataBind();
+        }
+
+        // Crear una fila con valor "Todos".
+        private DataRow CrearFilaTodos(DataTable table)
+        {
+            DataRow row = table.NewRow();
+            row["Id"] = 0;             // Valor del ítem.
+            row["Nombre"] = "Todos";   // Texto mostrado.
+            return row;
+        }
     }
+
 }

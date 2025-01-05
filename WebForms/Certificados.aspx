@@ -77,6 +77,17 @@
     <div class="container-fluid mt-4">
         <div class="row mt-4">
             <div class="col-md-12">
+
+                    <div class="text-end"> <!-- Alineación a la derecha -->
+    <asp:DropDownList ID="ddlAutorizanteFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAutorizanteFiltro_SelectedIndexChanged" CssClass="btn btn-secondary btn-sm dropdown-toggle" BackColor="Black">
+    </asp:DropDownList>
+
+
+<br />
+    <br />   </div>
+
+
+
                 <asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table "
                     OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
                     OnRowDeleting="dgvCertificado_RowDeleting"
