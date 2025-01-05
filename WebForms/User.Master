@@ -21,7 +21,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" />
         <header>
             <nav class="navbar navbar-expand-lg navbar-light" style="background-color: var(--color-principal);">
-                <div class="container">
+                <div class="container-fluid">
                     <a class="navbar-brand d-flex align-items-center" href="HomeUser.aspx">
                         <img src="https://media-exp1.licdn.com/dms/image/C510BAQHLl_VSWE7p4Q/company-logo_200_200/0/1519882941913?e=2159024400&v=beta&t=4wDwMu7kpFCRNEuXQQbNAmqo1nxs7rIAlgAis5mjc0E" alt="IVC" class="me-2" width="40" height="40" />
                         <span class="fw-bold">Instituto de la Vivienda</span>
@@ -44,10 +44,7 @@
                                 <a class="nav-link" href="Legitimos.aspx">Legítimos Abonos</a>
                             </li>
                         </ul>
-                        <div class="d-flex">
-                            <asp:TextBox CssClass="form-control me-2" placeholder="Buscar..." ID="txtBuscar" runat="server" />
-                            <asp:Button CssClass="btn btn-outline-dark" ID="btnBuscar" runat="server" Text="Buscar" />
-                        </div>
+
                         <% if (Session["usuario"] != null)
                             { %>
                         <asp:LinkButton ID="btnCerrarSession" CssClass="btn btn-outline-dark ms-3" OnClick="btnCerrarSession_Click" runat="server">
@@ -58,7 +55,7 @@
                 </div>
             </nav>
         </header>
-        <main class="container py-4">
+        <main class="container-fluid">
             <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
         </main>
         <footer class="bg-dark text-light py-4">

@@ -23,23 +23,24 @@
             <div class="col-md-12  rounded-3 p-3">
                 <div class="mx-auto p-2">
                     <div class="card-body">
-                        <table class="table table-bordered table-hover table-3d">
+                        <table class="table  table-3d">
                             <thead class="thead-dark">
                                 <tr>
-                                    
+
                                     <th>Código Autorizante</th>
                                     <th>Expediente</th>
                                     <th>Tipo</th>
                                     <th>Monto Autorizado</th>
                                     <th>Mes Aprobacion</th>
-                                    <th></th><th></th>
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <!-- Dropdowns y TextBoxes para agregar -->
-                                 
-                                   
+
+
                                     <td>
                                         <asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
                                     </td>
@@ -62,8 +63,8 @@
                                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
                                     </td>
                                     <td class="text-right">
-    <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-        CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+                                        <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+                                            CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -71,47 +72,47 @@
                 </div>
             </div>
         </div>
-        </div>
-        <hr />
-        <div class="container-fluid mt-4">
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table table-bordered table-hover table-3d"
-                        OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
-                        OnRowDeleting="dgvCertificado_RowDeleting"
-                        AutoGenerateColumns="false" runat="server" AllowPaging="true"
-                        PageSize="10" OnPageIndexChanging="dgvCertificado_PageIndexChanging">
-                        <Columns>
-                            <asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
-                            <asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
-                            <asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
-                            <asp:BoundField HeaderText="Expediente" DataField="ExpedientePago" />
-                            <asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />
-                            <asp:BoundField HeaderText="Monto Autorizado" DataField="MontoTotal" DataFormatString="{0:C}" />
-                            <asp:BoundField HeaderText="Mes Aprobacion" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
-                            <asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+    </div>
+    <hr />
+    <div class="container-fluid mt-4">
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table "
+                    OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
+                    OnRowDeleting="dgvCertificado_RowDeleting"
+                    AutoGenerateColumns="false" runat="server" AllowPaging="true"
+                    PageSize="10" OnPageIndexChanging="dgvCertificado_PageIndexChanging">
+                    <Columns>
+                        <asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Expediente" DataField="ExpedientePago" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Monto Autorizado" DataField="MontoTotal" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Mes Aprobacion" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 
-                            <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
-                            <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
-                        </Columns>
-                    </asp:GridView>
+                        <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                    </Columns>
+                </asp:GridView>
 
-                    <div class="text-center p-4">
-                        <asp:Label ID="lblMensaje" Text="" runat="server" />
-                    </div>
+                <div class="text-center p-4">
+                    <asp:Label ID="lblMensaje" Text="" runat="server" />
                 </div>
             </div>
         </div>
+    </div>
 
-        <script type="text/javascript">
-            function soloNumeros(e) {
-                var tecla = (document.all) ? e.keyCode : e.which;
-                if (tecla == 8 || tecla == 46) {
-                    return true;
-                }
-                var patron = /^[0-9]$/;
-                var te = String.fromCharCode(tecla);
-                return patron.test(te);
+    <script type="text/javascript">
+        function soloNumeros(e) {
+            var tecla = (document.all) ? e.keyCode : e.which;
+            if (tecla == 8 || tecla == 46) {
+                return true;
             }
-        </script>
+            var patron = /^[0-9]$/;
+            var te = String.fromCharCode(tecla);
+            return patron.test(te);
+        }
+    </script>
 </asp:Content>

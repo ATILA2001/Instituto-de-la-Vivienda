@@ -4,20 +4,20 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     	<div class="row mt-4">
 		<div class="col-md-12">
-			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table table-bordered table-hover table-3d"
+			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table"
     OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server"
     AllowPaging="true" PageSize="10" OnPageIndexChanging="dgvLegitimos_PageIndexChanging">
     <Columns>
-        <asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre" />
+        <asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
         
-        <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
-        <asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />
-        <asp:BoundField HeaderText="Expediente" DataField="Expediente" />
-        <asp:BoundField HeaderText="Inicio Ejecución" DataField="InicioEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
-        <asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
-        <asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
-        <asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
-        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" DeleteText="Eliminar" />
+        <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Expediente" DataField="Expediente"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Inicio Ejecución" DataField="InicioEjecucion" DataFormatString="{0:dd-MM-yyyy}"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" DeleteText="Eliminar"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
     </Columns>
 </asp:GridView>
 

@@ -22,7 +22,7 @@
             <div class="col-md-12  rounded-3 p-3">
                 <div class="mx-auto p-2">
                     <div class="card-body">
-                        <table class="table table-bordered table-hover table-3d">
+                        <table class="table  table-3d">
                             <thead class="thead-dark" style="color: #fad404">
                                 <tr>
                                     <th>Empresa</th>
@@ -80,7 +80,7 @@
         <hr />
         <div class="row mt-4">
             <div class="col-md-12">
-                <asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table table-bordered table-hover"
+                <asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table"
                     OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
                     OnRowDeleting="dgvObra_RowDeleting"
                     AutoGenerateColumns="false" runat="server" AllowPaging="true"
@@ -88,21 +88,21 @@
                     <Columns>
                         <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                         <asp:BoundField HeaderText="Área" DataField="Area" Visible="false" />
-                        <asp:BoundField HeaderText="Empresa" DataField="Empresa" />                       
-                        <asp:BoundField HeaderText="Contrata" DataField="Contrata" />
-                        <asp:BoundField HeaderText="Número" DataField="Numero" />
-                        <asp:BoundField HeaderText="Año" DataField="Año" />
-                        <asp:BoundField HeaderText="Etapa" DataField="Etapa" />
-                        <asp:BoundField HeaderText="Obra" DataField="ObraNumero" />
-                        <asp:BoundField HeaderText="Barrio" DataField="Barrio" />
-                        <asp:BoundField HeaderText="Descripción" DataField="Descripcion" />
+                        <asp:BoundField HeaderText="Empresa" DataField="Empresa"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />                       
+                        <asp:BoundField HeaderText="Contrata" DataField="Contrata"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Número" DataField="Numero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
+                        <asp:BoundField HeaderText="Año" DataField="Año"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Etapa" DataField="Etapa"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Obra" DataField="ObraNumero"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Barrio" DataField="Barrio"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:BoundField HeaderText="Descripción" DataField="Descripcion"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
                         
-                        <asp:BoundField HeaderText="Autorizado Inicial" DataField="AutorizadoInicial" />
+                        <asp:BoundField HeaderText="Autorizado Inicial" DataField="AutorizadoInicial"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
                         
-                        <asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" />
-                          <asp:BoundField HeaderText="Monto Certificado" DataField="MontoCertificado" />
-                        <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
-                        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
+                        <asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
+                          <asp:BoundField HeaderText="Monto Certificado" DataField="MontoCertificado"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+                        <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
                     </Columns>
                 </asp:GridView>
 

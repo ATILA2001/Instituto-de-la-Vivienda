@@ -13,18 +13,18 @@
             <!-- Sección Listado (70%) -->
             <div class="col-md-8 border-end">
                 <h2 class="text-center p-2">Listado de Empresas</h2>
-                <asp:GridView ID="dgvEmpresa" DataKeyNames="ID" CssClass="table table-bordered table-hover" 
+                <asp:GridView ID="dgvEmpresa" DataKeyNames="ID" CssClass="table " 
                               OnSelectedIndexChanged="dgvEmpresa_SelectedIndexChanged" 
                               OnRowDeleting="dgvEmpresa_RowDeleting"
                               AutoGenerateColumns="false" runat="server" AllowPaging="true" 
               PageSize="10" OnPageIndexChanging="dgvEmpresa_PageIndexChanging">
                     <Columns>
                         <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-                        <asp:BoundField HeaderText="Empresa" DataField="Nombre" />
+                        <asp:BoundField HeaderText="Empresa" DataField="Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
                         <asp:CommandField ShowSelectButton="true" SelectText="Modificar" 
-                                          ControlStyle-CssClass="btn btn-outline-warning" />
+                                          ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
                         <asp:CommandField ShowDeleteButton="true" 
-                                          ControlStyle-CssClass="btn btn-outline-danger" />
+                                          ControlStyle-CssClass="btn btn-outline-danger"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
                     </Columns>
 
                 </asp:GridView>

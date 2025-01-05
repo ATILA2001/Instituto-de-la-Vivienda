@@ -24,6 +24,8 @@ body, h1, h2, h3, h4, h5, h6 {
     background-color: var(--color-principal);
     box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 1rem; /* Agregar más consistencia con padding */
+    margin: 0;
+    border-radius: 0;
 }
 
 /* Estilo de la marca y logo en la navbar */
@@ -109,9 +111,10 @@ button, .btn {
 
 /* Contenedores y espacio de contenido principal */
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* Pie de página */
