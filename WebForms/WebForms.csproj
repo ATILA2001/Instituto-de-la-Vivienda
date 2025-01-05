@@ -75,6 +75,7 @@
     <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
+    <Content Include="custom.css" />
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />

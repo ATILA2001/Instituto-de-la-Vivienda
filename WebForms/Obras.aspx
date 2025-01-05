@@ -23,7 +23,7 @@
                 <div class="mx-auto p-2">
                     <div class="card-body">
                         <table class="table table-bordered table-hover table-3d">
-                            <thead class="thead-dark">
+                            <thead class="thead-dark" style="color: #fad404">
                                 <tr>
                                     <th>Empresa</th>
                                     <th>Contrata</th>

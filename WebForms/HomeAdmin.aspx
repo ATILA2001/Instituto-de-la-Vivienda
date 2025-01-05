@@ -4,40 +4,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
  <br /><h2 style="text-align:center">Inicio</h2>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .card {
-        height: 155px;
-        width: 520px;
-        border-radius: 15px; 
-        border: 2px solid #343a40; 
-    }
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-    }
-    .card-title {
-        margin-bottom: 10px;
-    }
-    .card-text {
-        flex-grow: 1;
-    }
-    .card-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-    .fixed-width-btn {
-        width: 150px;
-        text-align: center;
-    }
-    .button-container {
-      display: flex;
-      justify-content: flex-end;
-    }
-  </style>
    <div class="container mt-5">
     <div class="row justify-content-center mb-5">
       <div class="col-sm-6">

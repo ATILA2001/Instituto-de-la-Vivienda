@@ -1,42 +1,62 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/LoginRegister.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="WebForms.Login" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
- <h1 class="text-center p-2">Inicia Sesión</h1>
 
-    <div class="container-fluid" style="max-width: 28rem;">
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="mb-3">
-                    <asp:Label ID="lblEmail" CssClass="fs-5" Text="Email" runat="server" />
-                    <asp:TextBox type="email" CssClass="form-control" ID="txtEmail" placeholder="Email@Ejemplo.com" runat="server" />
-                </div>
-                <div class="mb-3">
-                    <asp:Label ID="lblContrasenia" CssClass="fs-5" Text="Contraseña" runat="server" />
-                    <asp:TextBox type="password" CssClass="form-control" ID="txtPass" placeholder="Contraseña" runat="server" />
-                </div>
-                <div class="text-end">
-                    <asp:Button Text="Volver" ID="btnVolver" CssClass="btn btn-outline-secondary" OnClick="btnVolver_Click" runat="server" />
-                    <asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-outline-dark" Style="background-color: #99bbc2;" Text="Iniciar" runat="server" />
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <!-- Título principal de la página -->
+   
+
+    <!-- Contenedor principal del formulario centrado verticalmente -->
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+
+        <div class="container-fluid" style="max-width: 28rem;">
+             <h1 class="text-center p-4 fs-1">Inicia Sesión</h1>
+            <div class="card shadow-lg border-0">
+                <div class="card-body">
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <asp:Label ID="lblEmail" CssClass="fs-5" Text="Email" runat="server" />
+                        <asp:TextBox type="email" CssClass="form-control" ID="txtEmail" placeholder="Email@Ejemplo.com" runat="server" />
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="mb-4">
+                        <asp:Label ID="lblContrasenia" CssClass="fs-5" Text="Contraseña" runat="server" />
+                        <asp:TextBox type="password" CssClass="form-control" ID="txtPass" placeholder="Contraseña" runat="server" />
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-between">
+                                            <!-- Espacio a la izquierda -->
+                    <div class="ms-auto">
+                        <!-- Botón Iniciar alineado a la derecha -->
+                        <asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-outline-dark" style="background-color: #f1c40f; border-color: #f1c40f;" Text="Iniciar" runat="server" />
+                    </div>
                 </div>
             </div>
         </div>
-        ¿Eres nuevo? <a href="Register.aspx">Crear cuenta</a>
 
+
+            <!-- Enlace para registro -->
+            <div class="text-center mt-3">
+
+                ¿Eres nuevo? <a href="Register.aspx" style="color: #34495e; font-weight: 500;">Crear cuenta</a>
+            </div>
+        </div>
     </div>
+
+    <!-- Script para detección de la tecla Enter -->
     <asp:ScriptManager runat="server" />
     <script type="text/javascript">
-        // Función para detectar la tecla Enter
         function detectEnterKeyPress(event) {
             if (event.keyCode === 13) {
-                event.preventDefault(); // Prevenir el comportamiento predeterminado del Enter
-                document.getElementById('<%= btnIniciar.ClientID %>').click(); // Simular clic en el botón Iniciar sesión
+                event.preventDefault();
+                document.getElementById('<%= btnIniciar.ClientID %>').click();
             }
         }
         document.getElementById('<%= txtEmail.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
         document.getElementById('<%= txtPass.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
     </script>
-
-
 
 </asp:Content>
