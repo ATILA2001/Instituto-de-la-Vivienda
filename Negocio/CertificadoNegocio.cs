@@ -14,7 +14,7 @@ namespace Negocio
     {
 
 
-        public List<Certificado> listarFiltro(Usuario usuario,string autorizante )
+        public List<Certificado> listarFiltro(Usuario usuario, string autorizante, string tipo,DateTime? mesAprobacion)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -22,10 +22,21 @@ namespace Negocio
             try
             {
                 string query = " SELECT C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, C.CODIGO_AUTORIZANTE,  C.EXPEDIENTE_PAGO,  T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION,  A.MONTO_AUTORIZADO,  O.AREA AS AREAS_ID,  AR.NOMBRE AS AREAS_NOMBRE,  A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE,  FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE WHERE O.AREA = @area";
-                     if (!string.IsNullOrEmpty(autorizante))
+                if (!string.IsNullOrEmpty(autorizante))
                 {
                     query += " AND C.CODIGO_AUTORIZANTE = @Autorizante";
                     datos.setearParametros("@Autorizante", autorizante);
+                }
+                if (!string.IsNullOrEmpty(tipo))
+                {
+                    query += " AND T.NOMBRE = @Tipo";
+                    datos.setearParametros("@Tipo", tipo);
+                }
+                if (mesAprobacion.HasValue)
+                {
+                    query += " AND MONTH(C.MES_APROBACION) = @Mes AND YEAR(C.MES_APROBACION) = @Año";
+                    datos.setearParametros("@Mes", mesAprobacion.Value.Month);
+                    datos.setearParametros("@Año", mesAprobacion.Value.Year);
                 }
                 datos.setearConsulta(query);
 

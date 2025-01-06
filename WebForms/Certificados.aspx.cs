@@ -25,6 +25,23 @@ namespace WebForms
                 CargarListaCertificados();
             }
         }
+
+        private void CalcularSubtotal()
+        {
+            decimal subtotal = 0;
+
+            foreach (GridViewRow row in dgvCertificado.Rows)
+            {
+                // Encuentra la columna que contiene los montos
+                var cellValue = row.Cells[5].Text; // Suponiendo que la columna de 'Monto Autorizado' está en la posición 5
+                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
+                {
+                    subtotal += monto;
+                }
+            }
+
+            txtSubtotal.Text = subtotal.ToString("C");
+        }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             // Limpiar todos los TextBox
@@ -41,10 +58,16 @@ namespace WebForms
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"]; 
                 string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
-
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado);
+                string tipoFiltrado = ddlTipoFiltro.SelectedValue == "0" ? null : ddlTipoFiltro.SelectedItem.Text;
+                DateTime? mesAprobacion = null;
+                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
+                {
+                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
+                }
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado, tipoFiltrado, mesAprobacion);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
+                CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -87,6 +110,7 @@ namespace WebForms
 
                 // Refrescar el listado de empresas
                 CargarListaCertificados();
+                CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -126,6 +150,7 @@ namespace WebForms
 
                 // Re-cargar la lista para mostrar los cambios.
                 CargarListaCertificados();
+                CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -147,6 +172,11 @@ namespace WebForms
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
             return tipoPagNegocio.listarddl();
         }
+        private DataTable ObtenerTiposFiltro()
+        {
+            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
+            return tipoPagNegocio.listarddl();
+        }
         private DataTable ObtenerAutorizantesFiltro()
         {
             AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
@@ -164,6 +194,12 @@ namespace WebForms
         protected void ddlAutorizanteFiltro_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaCertificados();
+            CalcularSubtotal();
+        }
+        protected void ddlTipoFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
         }
 
         private void BindDropDownList()
@@ -174,6 +210,13 @@ namespace WebForms
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
+
+            var tiposFiltro = ObtenerTiposFiltro();
+            tiposFiltro.Rows.InsertAt(CrearFilaTodos(tiposFiltro), 0);
+            ddlTipoFiltro.DataSource = tiposFiltro;
+            ddlTipoFiltro.DataTextField = "Nombre";
+            ddlTipoFiltro.DataValueField = "Id";
+            ddlTipoFiltro.DataBind();
 
             // Obtener los autorizantes.
             var autorizantes = ObtenerAutorizantes();
@@ -198,6 +241,12 @@ namespace WebForms
             row["Id"] = 0;             // Valor del ítem.
             row["Nombre"] = "Todos";   // Texto mostrado.
             return row;
+        }
+
+        protected void btnFiltrarMes_Click(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
         }
     }
 

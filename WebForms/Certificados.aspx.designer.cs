@@ -78,6 +78,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.Button btnLimpiar;
 
         /// <summary>
+        /// Control txtSubtotal.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSubtotal;
+
+        /// <summary>
         /// Control ddlAutorizanteFiltro.
         /// </summary>
         /// <remarks>
@@ -85,6 +94,33 @@ namespace WebForms
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlAutorizanteFiltro;
+
+        /// <summary>
+        /// Control ddlTipoFiltro.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlTipoFiltro;
+
+        /// <summary>
+        /// Control txtMesAprobacionFiltro.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtMesAprobacionFiltro;
+
+        /// <summary>
+        /// Control btnFiltrarMes.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnFiltrarMes;
 
         /// <summary>
         /// Control dgvCertificado.

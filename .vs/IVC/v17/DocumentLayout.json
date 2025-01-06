@@ -1,30 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\",
+  "WorkspaceRootPath": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\webforms\\admin.master||{B30AFBFF-D992-43B7-B62D-2642580A2883}",
-      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\admin.master||{B30AFBFF-D992-43B7-B62D-2642580A2883}"
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\obrasadmin.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\obrasadmin.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\webforms\\user.master||{B30AFBFF-D992-43B7-B62D-2642580A2883}",
-      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\user.master||{B30AFBFF-D992-43B7-B62D-2642580A2883}"
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\obras.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\obras.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{38D13745-5B63-4C52-8FC7-A14ED1D549A9}|Negocio\\Negocio.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\negocio\\certificadonegocio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{38D13745-5B63-4C52-8FC7-A14ED1D549A9}|Negocio\\Negocio.csproj|solutionrelative:negocio\\certificadonegocio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\legitimos.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\legitimos.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\webforms\\certificados.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\certificados.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
       "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\certificados.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\webforms\\certificados.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\certificados.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\bdproyectos.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\bdproyectos.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\usuario\\desktop\\instituto-de-la-vivienda\\webforms\\certificados.aspx.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\certificados.aspx.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|c:\\users\\20428194781\\onedrive\\escritorio\\instituto-de-la-vivienda\\webforms\\autorizantes.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{77D88A29-3EDD-436F-80AE-9166EC60F647}|WebForms\\WebForms.csproj|solutionrelative:webforms\\autorizantes.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     }
   ],
   "DocumentGroupContainers": [
@@ -39,79 +39,79 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "User.Master",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\User.Master",
-              "RelativeDocumentMoniker": "WebForms\\User.Master",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\User.Master",
-              "RelativeToolTip": "WebForms\\User.Master",
+              "Title": "Obras.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Obras.aspx",
+              "RelativeDocumentMoniker": "WebForms\\Obras.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Obras.aspx*",
+              "RelativeToolTip": "WebForms\\Obras.aspx*",
               "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
-              "WhenOpened": "2025-01-05T20:16:09.083Z",
+              "WhenOpened": "2025-01-06T18:56:03.854Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Admin.Master",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Admin.Master",
-              "RelativeDocumentMoniker": "WebForms\\Admin.Master",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Admin.Master",
-              "RelativeToolTip": "WebForms\\Admin.Master",
+              "Title": "ObrasAdmin.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\ObrasAdmin.aspx",
+              "RelativeDocumentMoniker": "WebForms\\ObrasAdmin.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\ObrasAdmin.aspx",
+              "RelativeToolTip": "WebForms\\ObrasAdmin.aspx",
               "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
-              "WhenOpened": "2025-01-05T20:15:54.187Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Certificados.aspx.designer.cs",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx.designer.cs",
-              "RelativeDocumentMoniker": "WebForms\\Certificados.aspx.designer.cs",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx.designer.cs",
-              "RelativeToolTip": "WebForms\\Certificados.aspx.designer.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAMwGsAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-05T20:11:18.876Z",
+              "WhenOpened": "2025-01-06T18:56:02.991Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "CertificadoNegocio.cs",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\Negocio\\CertificadoNegocio.cs",
-              "RelativeDocumentMoniker": "Negocio\\CertificadoNegocio.cs",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\Negocio\\CertificadoNegocio.cs",
-              "RelativeToolTip": "Negocio\\CertificadoNegocio.cs",
-              "ViewState": "AQIAAAoAAAAAAAAAAAAqwBAAAABRAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-05T20:08:59.132Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Certificados.aspx.cs",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx.cs",
-              "RelativeDocumentMoniker": "WebForms\\Certificados.aspx.cs",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx.cs",
-              "RelativeToolTip": "WebForms\\Certificados.aspx.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAmwMkAAAAFAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-05T20:07:47.29Z",
+              "Title": "Legitimos.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Legitimos.aspx",
+              "RelativeDocumentMoniker": "WebForms\\Legitimos.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Legitimos.aspx*",
+              "RelativeToolTip": "WebForms\\Legitimos.aspx*",
+              "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-01-06T18:55:38.339Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "Certificados.aspx",
-              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx",
               "RelativeDocumentMoniker": "WebForms\\Certificados.aspx",
-              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx",
-              "RelativeToolTip": "WebForms\\Certificados.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Certificados.aspx*",
+              "RelativeToolTip": "WebForms\\Certificados.aspx*",
               "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
-              "WhenOpened": "2025-01-05T20:07:33.388Z",
+              "WhenOpened": "2025-01-06T18:55:20.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "BdProyectos.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\BdProyectos.aspx",
+              "RelativeDocumentMoniker": "WebForms\\BdProyectos.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\BdProyectos.aspx*",
+              "RelativeToolTip": "WebForms\\BdProyectos.aspx*",
+              "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-01-06T18:55:06.17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Autorizantes.aspx",
+              "DocumentMoniker": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Autorizantes.aspx",
+              "RelativeDocumentMoniker": "WebForms\\Autorizantes.aspx",
+              "ToolTip": "C:\\Users\\20428194781\\OneDrive\\Escritorio\\Instituto-de-la-Vivienda\\WebForms\\Autorizantes.aspx*",
+              "RelativeToolTip": "WebForms\\Autorizantes.aspx*",
+              "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-01-06T18:54:45.86Z",
               "EditorCaption": ""
             }
           ]
