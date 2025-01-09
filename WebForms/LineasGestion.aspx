@@ -10,8 +10,7 @@
                 <asp:GridView ID="dgvLineaGestion" DataKeyNames="ID" CssClass="table " 
                               OnSelectedIndexChanged="dgvLineaGestion_SelectedIndexChanged" 
                               OnRowDeleting="dgvLineaGestion_RowDeleting"
-                              AutoGenerateColumns="false" runat="server" AllowPaging="true" 
-                              PageSize="10" OnPageIndexChanging="dgvLineaGestion_PageIndexChanging">
+                              AutoGenerateColumns="false" runat="server" style="display: block; overflow-x: auto;  white-space: nowrap; width: 100%;">
                     <Columns>
                         <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                         <asp:BoundField HeaderText="Nombre" DataField="Nombre"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

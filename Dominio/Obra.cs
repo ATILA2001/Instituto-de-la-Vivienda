@@ -22,7 +22,10 @@ namespace Dominio
 
         public  decimal? AutorizadoInicial { get; set; }
         public decimal? AutorizadoNuevo { get; set; }
+        public decimal? MontoAutorizante { get; set; }
         public decimal? MontoCertificado { get; set; }
+        public decimal? Porcentaje { get; set; }
+
         public Obra() { }
 
     }

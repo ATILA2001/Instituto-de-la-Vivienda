@@ -80,7 +80,7 @@
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<asp:GridView ID="dgvLegitimos" DataKeyNames="CodigoAutorizante" CssClass="table  "
-					OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server">
+					OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server" style="display: block; overflow-x: auto;  white-space: nowrap; width: 100%;">
 					<Columns>
 						<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

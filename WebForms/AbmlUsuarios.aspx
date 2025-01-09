@@ -15,6 +15,7 @@
             <Columns>
                 
                 <asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-CssClass="oculto" ItemStyle-CssClass="oculto" />
+                <asp:BoundField HeaderText="Area" DataField="AREA"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
                 <asp:BoundField HeaderText="Usuario" DataField="NOMBRE"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
                 <asp:BoundField HeaderText="Correo" DataField="CORREO"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center"  />
 

@@ -72,7 +72,7 @@
 				<asp:GridView ID="dgvBdProyecto" DataKeyNames="ID" CssClass="table"
 					OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
 					OnRowDeleting="dgvBdProyecto_RowDeleting"
-					AutoGenerateColumns="false" runat="server" >
+					AutoGenerateColumns="false" runat="server" style="display: block;  overflow-x: auto; white-space: nowrap; width: 100%;">
 					<Columns>
 						<asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" SortExpression="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" SortExpression="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

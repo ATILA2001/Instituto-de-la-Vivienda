@@ -14,14 +14,14 @@ namespace Negocio
     {
 
 
-        public List<Certificado> listarFiltro(Usuario usuario, string autorizante, string tipo,DateTime? mesAprobacion)
+        public List<Certificado> listarFiltro(Usuario usuario, string autorizante, string tipo, DateTime? mesAprobacion)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = " SELECT C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, C.CODIGO_AUTORIZANTE,  C.EXPEDIENTE_PAGO,  T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION,  A.MONTO_AUTORIZADO,  O.AREA AS AREAS_ID,  AR.NOMBRE AS AREAS_NOMBRE,  A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE,  FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE WHERE O.AREA = @area";
+                string query = "SELECT C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE WHERE O.AREA = @area ";
                 if (!string.IsNullOrEmpty(autorizante))
                 {
                     query += " AND C.CODIGO_AUTORIZANTE = @Autorizante";
@@ -52,9 +52,10 @@ namespace Negocio
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
                         Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
-    && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
-    ? porcentaje / 100
-    : 0M,
+                        && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
+                        ? porcentaje / 100
+                        : 0M,
+                        Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         Tipo = new TipoPago
                         {
                             Id = datos.Lector["TIPO_PAGO"] != DBNull.Value ? Convert.ToInt32(datos.Lector["TIPO_PAGO"]) : 0,

@@ -74,20 +74,27 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE FROM USUARIOS as u inner join AREAS as a on AREA = a.ID");
+                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, 
+                                      a.NOMBRE AS AreaNombre, a.ID AS AreaId 
+                               FROM USUARIOS u 
+                               INNER JOIN AREAS a ON u.AREA = a.ID");
                 datos.ejecutarLectura();
+
                 while (datos.Lector.Read())
                 {
-
-                    Usuario aux = new Usuario(); 
-                    aux.Id = (int)datos.Lector["ID"];
-                    aux.Nombre = (string)datos.Lector["NOMBRE"];
-                    aux.Tipo = (bool)datos.Lector["TIPO"];
-                    aux.Correo = (string)datos.Lector["CORREO"];
-                    aux.Estado = (bool)datos.Lector["ESTADO"];
-                    aux.Area = new Area(); // Inicializa el objeto Area
-                    aux.Area.Id = (int)datos.Lector["ID"];
-                    aux.Area.Nombre = (string)datos.Lector["NOMBRE"];
+                    Usuario aux = new Usuario
+                    {
+                        Id = Convert.ToInt32(datos.Lector["ID"]),
+                        Nombre = datos.Lector["NOMBRE"].ToString(),
+                        Tipo = Convert.ToBoolean(datos.Lector["TIPO"]),
+                        Correo = datos.Lector["CORREO"].ToString(),
+                        Estado = Convert.ToBoolean(datos.Lector["ESTADO"]),
+                        Area = new Area
+                        {
+                            Id = Convert.ToInt32(datos.Lector["AreaId"]),
+                            Nombre = datos.Lector["AreaNombre"].ToString()
+                        }
+                    };
 
                     lista.Add(aux);
                 }
@@ -96,7 +103,8 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                // Puedes implementar un registro de errores aquí en lugar de relanzar la excepción directamente
+                throw new Exception("Error al listar usuarios", ex);
             }
             finally
             {

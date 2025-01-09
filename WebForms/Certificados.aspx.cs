@@ -71,7 +71,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar los Certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }

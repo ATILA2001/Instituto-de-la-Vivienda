@@ -11,8 +11,7 @@
     HeaderStyle-BackColor="#f1c40f"
     OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
     OnRowDeleting="dgvCertificado_RowDeleting"
-    AutoGenerateColumns="false" runat="server" AllowPaging="true"
-    PageSize="10" OnPageIndexChanging="dgvCertificado_PageIndexChanging">
+    AutoGenerateColumns="false" runat="server" style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
 				<Columns>
 					<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

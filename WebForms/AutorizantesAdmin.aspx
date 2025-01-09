@@ -9,8 +9,7 @@
 			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table "
 				OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
 				OnRowDeleting="dgvAutorizante_RowDeleting"
-				AutoGenerateColumns="false" runat="server" AllowPaging="true"
-				PageSize="10" OnPageIndexChanging="dgvAutorizante_PageIndexChanging">
+				AutoGenerateColumns="false" runat="server" style="display: block;  overflow-x: auto; white-space: nowrap; width: 100%;">
 				<Columns>
 					<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

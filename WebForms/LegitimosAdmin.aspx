@@ -6,7 +6,7 @@
 		<div class="col-md-12">
 			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table"
     OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server"
-    AllowPaging="true" PageSize="10" OnPageIndexChanging="dgvLegitimos_PageIndexChanging">
+    style="display: block;overflow-x: auto;  white-space: nowrap; width: 100%;">
     <Columns>
         <asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre"  HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
         
