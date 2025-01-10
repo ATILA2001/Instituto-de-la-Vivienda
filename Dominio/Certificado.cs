@@ -20,6 +20,8 @@ namespace Dominio
         public decimal MontoTotal { get; set; } // MONTO_TOTAL DECIMAL(15, 2)
         public decimal? Sigaf { get; set; }
         public DateTime? MesAprobacion { get; set; }
+        public DateTime? FechaSade { get; set; }
+        public string BuzonSade {  get; set; } 
         public Certificado() { }
     }
 }

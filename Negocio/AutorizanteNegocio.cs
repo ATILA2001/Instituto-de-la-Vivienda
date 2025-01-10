@@ -160,7 +160,7 @@ A.MES,
                 ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID
             INNER JOIN 
                 CONTRATA AS C ON O.CONTRATA = C.ID
-            INNER JOIN 
+            LEFT JOIN 
                 BD_PROYECTOS AS B ON O.ID = B.ID_BASE
             INNER JOIN 
                 AREAS AS AR ON O.AREA = AR.ID");
