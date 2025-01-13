@@ -17,46 +17,70 @@ namespace WebForms
         {
             // Asegúrate de que el GridView se llena solo al cargar la página por primera vez
             if (!IsPostBack)
-            ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
-            ddlObra.DataTextField = "Nombre";
-            ddlObra.DataValueField = "Id";
-            ddlObra.DataBind();
-
-            ddlLineaGestion.DataSource = ObtenerLineaGestion();  // Método para obtener los datos de Autorizantes
-            ddlLineaGestion.DataTextField = "Nombre";
-            ddlLineaGestion.DataValueField = "Id";
-            ddlLineaGestion.DataBind();
-
             {
+
+                ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
+                ddlObra.DataTextField = "Nombre";
+                ddlObra.DataValueField = "Id";
+                ddlObra.DataBind();
+
+                ddlLineaGestion.DataSource = ObtenerLineaGestion();  // Método para obtener los datos de Autorizantes
+                ddlLineaGestion.DataTextField = "Nombre";
+                ddlLineaGestion.DataValueField = "Id";
+                ddlLineaGestion.DataBind();
+
+
                 // Llamamos a la función para obtener los proyectos
-                List<BdProyecto> proyectos = bdProyectoNegocio.Listar();
+                Session["listaProyectos"] = bdProyectoNegocio.Listar();
 
                 // Asignamos la lista de proyectos al GridView
-                dgvBdProyecto.DataSource = proyectos;
+                dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
             }
         }
         protected void dgvBdProyecto_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Lógica para manejar la selección de filas (si es necesario)
-            string codigoAutorizante = dgvBdProyecto.SelectedDataKey["CodigoAutorizante"].ToString();
-            lblMensaje.Text = "Proyecto seleccionado: " + codigoAutorizante;
+            var idSeleccionado = dgvBdProyecto.SelectedDataKey.Value.ToString();
+            Response.Redirect("ModificarProyecto.aspx?codM=" + idSeleccionado);
         }
 
         // Método para el evento de eliminación de fila
         protected void dgvBdProyecto_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            // Lógica para manejar la eliminación de filas (si es necesario)
-            int idProyecto = Convert.ToInt32(dgvBdProyecto.DataKeys[e.RowIndex].Value);
-            // Lógica para eliminar proyecto...
+            try
+            {
+                var id = Convert.ToInt32(dgvBdProyecto.DataKeys[e.RowIndex].Value);
+                if (bdProyectoNegocio.eliminar(id))
+                {
+                    lblMensaje.Text = "Obra eliminada correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+                    Session["listaProyectos"] = bdProyectoNegocio.Listar();
+
+                    // Asignamos la lista de proyectos al GridView
+                    dgvBdProyecto.DataSource = Session["listaProyectos"];
+                    dgvBdProyecto.DataBind();
+                    ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
+                    ddlObra.DataTextField = "Nombre";
+                    ddlObra.DataValueField = "Id";
+                    ddlObra.DataBind();
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al eliminar la obra: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+
         }
 
         // Método para el cambio de página del GridView
         protected void dgvBdProyecto_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             dgvBdProyecto.PageIndex = e.NewPageIndex;
-            List<BdProyecto> proyectos = bdProyectoNegocio.Listar();
-            dgvBdProyecto.DataSource = proyectos;
+            Session["listaProyectos"] = bdProyectoNegocio.Listar();
+
+            // Asignamos la lista de proyectos al GridView
+            dgvBdProyecto.DataSource = Session["listaProyectos"];
             dgvBdProyecto.DataBind();
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -72,7 +96,8 @@ namespace WebForms
                 nuevoProyecto.SubProyecto = txtSubProyecto.Text; // Subproyecto del TextBox
                 nuevoProyecto.Proyecto = txtProyecto.Text; // Proyecto del TextBox
                 nuevoProyecto.LineaGestion = new LineaGestion(); // Creamos una nueva instancia de LineaGestion
-                nuevoProyecto.LineaGestion.Id = Convert.ToInt32(ddlLineaGestion.SelectedValue); // Valor seleccionado del DropDownList
+                nuevoProyecto.LineaGestion.Id = int.Parse(ddlLineaGestion.SelectedValue);
+                nuevoProyecto.LineaGestion.Nombre = ddlLineaGestion.SelectedItem.Text;
                 nuevoProyecto.AutorizadoInicial = Convert.ToDecimal(txtMontoAutorizadoInicial.Text); // Autorizado inicial del TextBox
 
                 // Llamar al método `agregar` de la clase BdProyectoNegocio para insertar el proyecto en la base de datos
@@ -82,11 +107,20 @@ namespace WebForms
                 // Mostrar mensaje de éxito
                 lblMensaje.Text = "Proyecto agregado con éxito.";
                 lblMensaje.CssClass = "alert alert-success"; // Establecer el estilo de mensaje de éxito
+                Session["listaProyectos"] = bdProyectoNegocio.Listar();
 
-                // Actualizar la lista de proyectos y recargar el GridView
-                List<BdProyecto> proyectos = bdProyectoNegocio.Listar(); // Obtener los proyectos actualizados
-                dgvBdProyecto.DataSource = proyectos; // Asignar la lista actualizada de proyectos al GridView
-                dgvBdProyecto.DataBind(); // Recargar el GridView con la nueva lista de proyectos
+                // Asignamos la lista de proyectos al GridView
+                dgvBdProyecto.DataSource = Session["listaProyectos"];
+                dgvBdProyecto.DataBind();
+                ddlLineaGestion.SelectedIndex = -1;
+                ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
+                ddlObra.DataTextField = "Nombre";
+                ddlObra.DataValueField = "Id";
+                ddlObra.DataBind();
+                ddlObra.SelectedIndex = -1;
+                txtProyecto.Text = string.Empty;
+                txtSubProyecto.Text = string.Empty;
+                txtMontoAutorizadoInicial.Text = string.Empty;
             }
             catch (Exception ex)
             {

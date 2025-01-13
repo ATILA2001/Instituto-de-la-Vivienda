@@ -69,7 +69,7 @@
 		<!-- GridView de BdProyecto -->
 		<div class="row mt-4">
 			<div class="col-md-12">
-				<asp:GridView ID="dgvBdProyecto" DataKeyNames="ID" CssClass="table"
+				<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table"
 					OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
 					OnRowDeleting="dgvBdProyecto_RowDeleting"
 					AutoGenerateColumns="false" runat="server" style="display: block;  overflow-x: auto; white-space: nowrap; width: 100%;">

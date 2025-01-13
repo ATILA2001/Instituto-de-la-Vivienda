@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -310,9 +312,7 @@ namespace Negocio
        
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION) AS NOMBRE " +
-                                     "FROM OBRAS AS O " +
-                                     "INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID"); 
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION) AS NOMBRE FROM OBRAS AS O INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)"); 
 
 
                 // Ejecutar la consulta.

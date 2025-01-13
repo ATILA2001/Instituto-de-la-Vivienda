@@ -9,6 +9,46 @@ namespace Negocio
 {
     public class BdProyectoNegocio
     {
+
+        public bool modificar(BdProyecto proyecto)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                // Consulta SQL para actualizar un proyecto en la base de datos
+                datos.setearConsulta(@"
+        UPDATE BD_PROYECTOS
+        SET 
+            ID_BASE = @idBase, 
+            SUBPROYECTO = @subProyecto, 
+            PROYECTO = @proyecto, 
+            LINEA_DE_GESTION = @lineaGestion, 
+            AUTORIZADO_INICIAL = @autorizadoInicial
+        WHERE ID = @id");
+
+                // Asignar valores a los parámetros de la consulta
+                datos.agregarParametro("@idBase", proyecto.Obra.Id);
+                datos.agregarParametro("@subProyecto", proyecto.SubProyecto);
+                datos.agregarParametro("@proyecto", proyecto.Proyecto);
+                datos.agregarParametro("@lineaGestion", proyecto.LineaGestion.Id);
+                datos.agregarParametro("@autorizadoInicial", proyecto.AutorizadoInicial);
+                datos.agregarParametro("@id", proyecto.Id);
+
+                // Ejecutar la consulta SQL
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el proyecto.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
         public List<BdProyecto> Listar()
         {
             List<BdProyecto> lista = new List<BdProyecto>();
@@ -19,6 +59,7 @@ namespace Negocio
                 // La consulta SQL que une las tablas de la base de datos.
                 string query = @"
                 SELECT 
+                    BD.ID,
                     CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
                     O.DESCRIPCION, 
                     PROYECTO,
@@ -47,6 +88,7 @@ namespace Negocio
                            Nombre = datos.Lector["CONTRATA"].ToString()
                         }
                         },
+                        Id = datos.Lector["ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID"]) : 0,
                         Proyecto = datos.Lector["PROYECTO"].ToString(),
                         SubProyecto = datos.Lector["SUBPROYECTO"].ToString(),
                         LineaGestion = new LineaGestion
@@ -106,6 +148,34 @@ namespace Negocio
             finally
             {
                 datos.cerrarConexion(); // Cierra la conexión con la base de datos
+            }
+        }
+        public bool eliminar(int id)
+        {
+            var datos = new AccesoDatos(); // Clase para gestionar la conexión con la base de datos
+
+            try
+            {
+                // Consulta SQL para eliminar el proyecto por su ID
+                string query = "DELETE FROM BD_PROYECTOS WHERE ID = @id";
+
+                // Configurar la consulta con el parámetro correspondiente
+                datos.setearConsulta(query);
+                datos.agregarParametro("@id", id);
+
+                // Ejecutar la acción SQL para eliminar
+                datos.ejecutarAccion();
+
+                return true; // Devuelve true si la operación fue exitosa
+            }
+            catch (Exception ex)
+            {
+                // Lanzar una excepción específica con información adicional
+                throw new Exception("Error al eliminar el proyecto.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion(); // Asegurar que la conexión se cierra
             }
         }
     }

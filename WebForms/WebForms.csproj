@@ -91,6 +91,7 @@
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarObra.aspx" />
     <Content Include="ModificarObraUser.aspx" />
+    <Content Include="ModificarProyecto.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
     <Content Include="Obras.aspx" />
@@ -273,6 +274,13 @@
     </Compile>
     <Compile Include="ModificarObraUser.aspx.designer.cs">
       <DependentUpon>ModificarObraUser.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarProyecto.aspx.cs">
+      <DependentUpon>ModificarProyecto.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarProyecto.aspx.designer.cs">
+      <DependentUpon>ModificarProyecto.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarUsuario.aspx.cs">
       <DependentUpon>ModificarUsuario.aspx</DependentUpon>
