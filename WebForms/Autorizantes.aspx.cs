@@ -16,16 +16,13 @@ namespace WebForms
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
-            {// Llenar el DropDownList para Empresas
-                ddlEstado.DataSource = ObtenerEstado();  // Método para obtener los datos de las Empresas
-                ddlEstado.DataTextField = "Nombre";         // Columna que se muestra
-                ddlEstado.DataValueField = "Id";            // Columna que se almacena
+            {   ddlEstado.DataSource = ObtenerEstado();  
+                ddlEstado.DataTextField = "Nombre";      
+                ddlEstado.DataValueField = "Id";         
                 ddlEstado.DataBind();
 
 
-
-                // Llenar el DropDownList para Barrios
-                ddlObra.DataSource = ObtenerObras();    // Método para obtener los datos de los Barrios
+ddlObra.DataSource = ObtenerObras();
                 ddlObra.DataTextField = "Nombre";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
@@ -74,7 +71,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Autorizante eliminado correctamente.";
                    lblMensaje.CssClass = "alert alert-success";
-                    CargarListaAutorizantes(); // Actualizar el GridView
+                    CargarListaAutorizantes();
                 }
             }
             catch (Exception ex)
@@ -88,10 +85,8 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
                 dgvAutorizante.PageIndex = e.NewPageIndex;
 
-                // Refrescar el listado de empresas
                 CargarListaAutorizantes();
             }
             catch (Exception ex)
@@ -102,11 +97,9 @@ namespace WebForms
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            // Instancia de negocio y autorización.
             AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
             Autorizante nuevoAutorizante = new Autorizante();
 
-            // Asignación de valores desde los controles del formulario.
             nuevoAutorizante.Obra = new Obra();
             nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
             nuevoAutorizante.Concepto = txtConcepto.Text;
@@ -117,12 +110,10 @@ namespace WebForms
             nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
             nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
 
-            // Llamar al método que agrega el registro.
             autorizanteNegocio.agregar(nuevoAutorizante);
 
-            // Mostrar mensaje de éxito.
             lblMensaje.Text = "Autorizante agregado con éxito.";
-            CargarListaAutorizantes();  // Re-cargar la lista para mostrar los cambios.
+            CargarListaAutorizantes(); 
         }
         private DataTable ObtenerEstado()
         {

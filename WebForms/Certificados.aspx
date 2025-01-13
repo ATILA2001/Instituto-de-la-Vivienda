@@ -19,7 +19,6 @@
 	</style>
 	<div class="container-fluid mt-4">
 		<div class="row">
-			<!-- Sección de Agregar Autorizante -->
 			<div class="col-md-12  rounded-3 p-3">
 				<div class="mx-auto p-2">
 					<div class="card-body">
@@ -38,7 +37,6 @@
 							</thead>
 							<tbody>
 								<tr>
-									<!-- Dropdowns y TextBoxes para agregar -->
 
 
 									<td>
@@ -79,8 +77,10 @@
 			<div class="col-md-12">
 
 				<div class="text-end">
-					<!-- Alineación a la derecha -->
-					<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" />
+					<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+
+					<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+					</asp:DropDownList>
 					<asp:DropDownList ID="ddlAutorizanteFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAutorizanteFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 					</asp:DropDownList>
 					<asp:DropDownList ID="ddlTipoFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlTipoFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
@@ -102,6 +102,7 @@
 					<Columns>
 						<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+						<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Expediente" DataField="ExpedientePago" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 						<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />

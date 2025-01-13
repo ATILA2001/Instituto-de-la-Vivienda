@@ -32,8 +32,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                // Encuentra la columna que contiene los montos
-                var cellValue = row.Cells[5].Text; // Suponiendo que la columna de 'Monto Autorizado' está en la posición 5
+                var cellValue = row.Cells[6].Text; 
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
@@ -44,7 +43,6 @@ namespace WebForms
         }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            // Limpiar todos los TextBox
             txtMontoAutorizado.Text = string.Empty;
             txtExpediente.Text = string.Empty;
             txtFecha.Text = string.Empty;
@@ -60,11 +58,12 @@ namespace WebForms
                 string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
                 string tipoFiltrado = ddlTipoFiltro.SelectedValue == "0" ? null : ddlTipoFiltro.SelectedItem.Text;
                 DateTime? mesAprobacion = null;
+                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
                 if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
                 {
                     mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
                 }
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado, tipoFiltrado, mesAprobacion);
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado, tipoFiltrado, mesAprobacion,empresa);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -91,7 +90,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados(); // Actualizar el GridView
+                    CargarListaCertificados();
                 }
             }
            catch (Exception ex)
@@ -105,10 +104,8 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
                 dgvCertificado.PageIndex = e.NewPageIndex;
 
-                // Refrescar el listado de empresas
                 CargarListaCertificados();
                 CalcularSubtotal();
             }
@@ -122,7 +119,6 @@ namespace WebForms
         {
             try
             {
-                // Instancia de negocio y certificado.
                 CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
                 Certificado nuevoCertificado = new Certificado
                 {
@@ -141,20 +137,16 @@ namespace WebForms
                         : (DateTime?)DateTime.Parse(txtFecha.Text)
                 };
 
-                // Llamar al método que agrega el registro.
                 certificadoNegocio.agregar(nuevoCertificado);
 
-                // Mostrar mensaje de éxito.
                 lblMensaje.Text = "Certificado agregado con éxito.";
                 lblMensaje.ForeColor = System.Drawing.Color.Green;
 
-                // Re-cargar la lista para mostrar los cambios.
                 CargarListaCertificados();
                 CalcularSubtotal();
             }
             catch (Exception ex)
             {
-                // Mostrar mensaje de error.
                 lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
             }
@@ -177,6 +169,7 @@ namespace WebForms
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
             return tipoPagNegocio.listarddl();
         }
+
         private DataTable ObtenerAutorizantesFiltro()
         {
             AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
@@ -201,10 +194,13 @@ namespace WebForms
             CargarListaCertificados();
             CalcularSubtotal();
         }
-
+        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
+        }
         private void BindDropDownList()
         {
-            // Obtener los tipos.
             var tipos = ObtenerTipos();
             ddlTipo.DataSource = tipos;
             ddlTipo.DataTextField = "Nombre";
@@ -218,14 +214,20 @@ namespace WebForms
             ddlTipoFiltro.DataValueField = "Id";
             ddlTipoFiltro.DataBind();
 
-            // Obtener los autorizantes.
+            var empresa = ObtenerEmpresas();
+            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
+            ddlEmpresa.DataSource = empresa;  
+            ddlEmpresa.DataTextField = "Nombre";
+            ddlEmpresa.DataValueField = "Id"; 
+            ddlEmpresa.DataBind();
+
             var autorizantes = ObtenerAutorizantes();
             ddlAutorizante.DataSource = autorizantes;
             ddlAutorizante.DataTextField = "Nombre";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
 
-            // Obtener los autorizantes para filtro.
+
             var autorizantesFiltro = ObtenerAutorizantesFiltro();
             autorizantesFiltro.Rows.InsertAt(CrearFilaTodos(autorizantesFiltro), 0);
             ddlAutorizanteFiltro.DataSource = autorizantesFiltro;
@@ -233,13 +235,16 @@ namespace WebForms
             ddlAutorizanteFiltro.DataValueField = "Id";
             ddlAutorizanteFiltro.DataBind();
         }
-
-        // Crear una fila con valor "Todos".
+        private DataTable ObtenerEmpresas()
+        {
+            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+            return empresaNegocio.listarddl();
+        }
         private DataRow CrearFilaTodos(DataTable table)
         {
             DataRow row = table.NewRow();
-            row["Id"] = 0;             // Valor del ítem.
-            row["Nombre"] = "Todos";   // Texto mostrado.
+            row["Id"] = 0;            
+            row["Nombre"] = "Todos";  
             return row;
         }
 

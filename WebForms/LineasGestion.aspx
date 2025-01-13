@@ -4,7 +4,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
       <div class="container-fluid mt-4">
         <div class="row">
-            <!-- Sección Listado (70%) -->
             <div class="col-md-8 border-end">
                 <h2 class="text-center p-2">Listado de Líneas de Gestión</h2>
                 <asp:GridView ID="dgvLineaGestion" DataKeyNames="ID" CssClass="table " 
@@ -24,8 +23,6 @@
                     </Columns>
                 </asp:GridView>
             </div>
-
-            <!-- Sección Agregar Línea de Gestión (30%) con color de fondo -->
             <div class="col-md-4 bg-light rounded-3 p-3">
                 <h2 class="text-center p-2">Agregar Línea de Gestión</h2>
                 <div class="mx-auto p-2">
@@ -54,7 +51,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Mensaje de éxito o error -->
                 <div class="text-center p-4">
                     <asp:Label ID="lblMensaje" Text="" runat="server" />
                 </div>

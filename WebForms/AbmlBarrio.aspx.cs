@@ -49,8 +49,6 @@ namespace WebForms
                     lblMensaje.Text = "Barrio agregado exitosamente!";
                     lblMensaje.CssClass = "alert alert-success";
                     txtNombre.Text = string.Empty;
-
-                    // Refrescar listado
                     CargarListaBarrios();
                 }
                 else
@@ -82,7 +80,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Barrio eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaBarrios(); // Actualizar el GridView
+                    CargarListaBarrios();
                 }
             }
             catch (Exception ex)
@@ -95,10 +93,9 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
+
                 dgvBarrio.PageIndex = e.NewPageIndex;
 
-                // Refrescar el listado de empresas
                 CargarListaBarrios();
             }
             catch (Exception ex)

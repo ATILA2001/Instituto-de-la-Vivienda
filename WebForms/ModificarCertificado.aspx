@@ -8,8 +8,8 @@
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
             transform: translateY(-5px);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 10px; /* Borde redondeado */
-            overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+            border-radius: 10px; 
+            overflow: hidden; 
         }
 
             .table-3d:hover {
@@ -19,7 +19,6 @@
     </style>
     <div class="container-fluid mt-4">
         <div class="row">
-            <!-- Sección de Agregar Autorizante -->
             <div class="col-md-12  rounded-3 p-3">
                 <div class="mx-auto p-2">
                     <div class="card-body">
@@ -38,7 +37,6 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <!-- Dropdowns y TextBoxes para agregar -->
 
 
                                     <td>

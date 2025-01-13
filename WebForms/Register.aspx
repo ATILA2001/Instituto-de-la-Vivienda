@@ -5,12 +5,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-    <!-- Título principal de la página -->
-  
-
     <asp:ScriptManager ID="ScriptManager1" runat="server" />
-
-    <!-- Contenedor principal del formulario centrado verticalmente -->
     <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
 
         <div class="container-fluid" style="max-width: 70rem;">
@@ -21,7 +16,6 @@
                         <ContentTemplate>
                             <div class="container overflow-hidden text-center">
                                 <div class="row">
-                                    <!-- Nombre -->
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblNombre" CssClass="fs-5" Text="Nombre completo" runat="server" />
@@ -34,7 +28,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Área -->
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblArea" CssClass="fs-5" Text="Área" runat="server" />
@@ -43,7 +36,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Email -->
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblEmail" CssClass="fs-5" Text="Email" runat="server" />
@@ -51,7 +43,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Repetir Email -->
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblEmailRep" CssClass="fs-5" Text="Repetir Email" runat="server" />
@@ -60,15 +51,13 @@
                                         <asp:Label ID="lblErrorMail" runat="server" />
                                     </div>
 
-                                    <!-- Contraseña -->
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblContrasenia" CssClass="fs-5" Text="Contraseña" runat="server" />
                                             <asp:TextBox type="password" CssClass="form-control" ID="txtPass" placeholder="Contraseña" runat="server" />
                                         </div>
                                     </div>
-
-                                    <!-- Repetir Contraseña -->
+                                    
                                     <div class="col-6">
                                         <div class="p-3">
                                             <asp:Label ID="lblPassRep" CssClass="fs-5" Text="Repetir Contraseña" runat="server" />
@@ -78,12 +67,10 @@
                                     </div>
                                 </div>
                             </div>
-                                    <!-- Mensajes -->
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />
         </div>
 
-        <!-- Botones de acción -->
         <div class="text-center m-2">
             <asp:Button Text="Volver" ID="Button1" CssClass="btn btn-outline-dark ms-3" OnClick="btnVolver_Click" runat="server" />
             <asp:Button ID="Button2"  Text="Registrar" runat="server" OnClick="btnRegistrar_Click" class="btn btn-outline-dark" style="background-color: #f1c40f; border-color: #f1c40f;"/>

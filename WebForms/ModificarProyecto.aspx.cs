@@ -17,24 +17,21 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Asegúrate de que el GridView se llena solo al cargar la página por primera vez
             if (!IsPostBack)
             {
                 if (Request.QueryString["codM"] != null)
                 {
-                    ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
+                    ddlObra.DataSource = ObtenerObras();
                     ddlObra.DataTextField = "Nombre";
                     ddlObra.DataValueField = "Id";
                     ddlObra.DataBind();
 
-                    ddlLineaGestion.DataSource = ObtenerLineaGestion();  // Método para obtener los datos de Autorizantes
+                    ddlLineaGestion.DataSource = ObtenerLineaGestion();
                     ddlLineaGestion.DataTextField = "Nombre";
                     ddlLineaGestion.DataValueField = "Id";
                     ddlLineaGestion.DataBind();
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
-
-                    // Obtener y mostrar los datos del certificado seleccionado
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
                     List<BdProyecto> temp = (List<BdProyecto>)Session["listaProyectos"];
                     BdProyecto selected = temp.Find(x => x.Id == codM);
@@ -70,7 +67,6 @@ namespace WebForms
                     ddlLineaGestion.SelectedIndex != -1 &&
                     txtMontoAutorizadoInicial.Text.Trim() != string.Empty)
                 {
-                    // Crear el objeto modificado
                     BdProyecto Modificado = new BdProyecto
                     {
                         Id = int.Parse(Request.QueryString["codM"]),
@@ -85,7 +81,6 @@ namespace WebForms
                         }
                     };
 
-                    // Llamar al método modificar
                     if (negocio.modificar(Modificado))
                     {
                         lblMensaje.Text = "Certificado modificado exitosamente!";

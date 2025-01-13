@@ -20,7 +20,6 @@
 
 	<div class="container-fluid mt-4">
 		<div class="row">
-			<!-- Sección de Agregar BdProyecto -->
 			<div class="col-md-12 rounded-3 p-3">
 				<div class="mx-auto p-2">
 					<div class="card-body">
@@ -66,7 +65,6 @@
 
 		<hr />
 
-		<!-- GridView de BdProyecto -->
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table"

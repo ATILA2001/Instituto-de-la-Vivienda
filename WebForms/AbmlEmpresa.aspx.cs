@@ -50,7 +50,6 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-success";
                     txtNombre.Text = string.Empty;
 
-                    // Refrescar listado
                     CargarListaEmpresas();
                 }
                 else
@@ -81,7 +80,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Empresa eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaEmpresas(); // Actualizar el GridView
+                    CargarListaEmpresas(); 
                 }
             }
             catch (Exception ex)
@@ -94,10 +93,7 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
                 dgvEmpresa.PageIndex = e.NewPageIndex;
-
-                // Refrescar el listado de empresas
                 CargarListaEmpresas();
             }
             catch (Exception ex)

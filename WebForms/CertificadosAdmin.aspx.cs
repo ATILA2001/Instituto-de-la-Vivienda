@@ -15,11 +15,9 @@ namespace WebForms
         CertificadoNegocio negocio = new CertificadoNegocio();
         protected void Page_Load(object sender, EventArgs e)
         {
-
-
-
             if (!IsPostBack)
             {
+                BindDropDownList();
                 CargarListaCertificados();
             }
         }
@@ -28,9 +26,18 @@ namespace WebForms
         {
             try
             {
-                Session["listaCertificado"] = negocio.listar();
+                string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
+                string tipoFiltrado = ddlTipoFiltro.SelectedValue == "0" ? null : ddlTipoFiltro.SelectedItem.Text;
+                DateTime? mesAprobacion = null;
+                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
+                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
+                {
+                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
+                }
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(autorizanteFiltrado, tipoFiltrado, mesAprobacion, empresa);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
+                CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -54,7 +61,8 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados(); // Actualizar el GridView
+                    CargarListaCertificados(); 
+                    CalcularSubtotal();
                 }
             }
             catch (Exception ex)
@@ -68,11 +76,10 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
                 dgvCertificado.PageIndex = e.NewPageIndex;
 
-                // Refrescar el listado de empresas
                 CargarListaCertificados();
+                CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -80,27 +87,90 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void btnAgregar_Click(object sender, EventArgs e)
+        private DataTable ObtenerTiposFiltro()
         {
-            CargarListaCertificados();  // Re-cargar la lista para mostrar los cambios.
+            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
+            return tipoPagNegocio.listarddl();
         }
-        private DataTable ObtenerEstado()
+
+        private DataTable ObtenerAutorizantesFiltro()
         {
-            EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
+            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+            return autorizanteNegocio.listarddl();
+        }
+ 
+        protected void ddlAutorizanteFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
+        }
+        protected void ddlTipoFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
+        }
+        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+            CalcularSubtotal();
+        }
+        private void BindDropDownList()
+        {
+
+            var tiposFiltro = ObtenerTiposFiltro();
+            tiposFiltro.Rows.InsertAt(CrearFilaTodos(tiposFiltro), 0);
+            ddlTipoFiltro.DataSource = tiposFiltro;
+            ddlTipoFiltro.DataTextField = "Nombre";
+            ddlTipoFiltro.DataValueField = "Id";
+            ddlTipoFiltro.DataBind();
+
+            var empresa = ObtenerEmpresas();
+            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
+            ddlEmpresa.DataSource = empresa; 
+            ddlEmpresa.DataTextField = "Nombre";        
+            ddlEmpresa.DataValueField = "Id";        
+            ddlEmpresa.DataBind();
+
+            var autorizantesFiltro = ObtenerAutorizantesFiltro();
+            autorizantesFiltro.Rows.InsertAt(CrearFilaTodos(autorizantesFiltro), 0);
+            ddlAutorizanteFiltro.DataSource = autorizantesFiltro;
+            ddlAutorizanteFiltro.DataTextField = "Nombre";
+            ddlAutorizanteFiltro.DataValueField = "Id";
+            ddlAutorizanteFiltro.DataBind();
+        }
+        private DataTable ObtenerEmpresas()
+        {
+            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-
-        private DataTable ObtenerContratas()
+        private DataRow CrearFilaTodos(DataTable table)
         {
-            ContrataNegocio contrataNegocio = new ContrataNegocio();
-            return contrataNegocio.listarddl();
+            DataRow row = table.NewRow();
+            row["Id"] = 0;            
+            row["Nombre"] = "Todos";   
+            return row;
         }
 
-        private DataTable ObtenerObras()
+        protected void btnFiltrarMes_Click(object sender, EventArgs e)
         {
-            ObraNegocio barrioNegocio = new ObraNegocio();
-            Usuario usuarioLogueado = (Usuario)Session["usuario"];
-            return barrioNegocio.listarddl(usuarioLogueado);
+            CargarListaCertificados();
+            CalcularSubtotal();
         }
+        private void CalcularSubtotal()
+        {
+            decimal subtotal = 0;
+
+            foreach (GridViewRow row in dgvCertificado.Rows)
+            {
+                var cellValue = row.Cells[6].Text;
+                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
+                {
+                    subtotal += monto;
+                }
+            }
+
+            txtSubtotal.Text = subtotal.ToString("C");
+        }
+
     }
 }

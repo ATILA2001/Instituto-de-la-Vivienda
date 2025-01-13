@@ -13,7 +13,7 @@ namespace Negocio
     {
         public DataTable listarddl()
         {
-            DataTable dt = new DataTable(); // DataTable donde guardaremos las empresas.
+            DataTable dt = new DataTable();
             AccesoDatos datos = new AccesoDatos();
 
             try
@@ -21,18 +21,15 @@ namespace Negocio
                 datos.setearConsulta("SELECT * FROM AREAS");
                 datos.ejecutarLectura();
 
-                // Definir las columnas del DataTable.
                 dt.Columns.Add("ID");
                 dt.Columns.Add("NOMBRE");
 
                 while (datos.Lector.Read())
                 {
-                    // Crear una nueva fila y asignar los valores obtenidos.
                     DataRow row = dt.NewRow();
                     row["ID"] = (int)datos.Lector["ID"];
                     row["NOMBRE"] = (string)datos.Lector["NOMBRE"];
 
-                    // Agregar la fila al DataTable.
                     dt.Rows.Add(row);
                 }
 
@@ -88,7 +85,6 @@ namespace Negocio
                 {
                     datos.setearConsulta("INSERT INTO AREAS (NOMBRE) VALUES (@Nombre)");
                     datos.setearParametros("@Nombre", area.Nombre);
-                    //datos.setearParametros("@Estado_M", true);
                     datos.ejecutarAccion();
                     datos.cerrarConexion();
                 }
@@ -99,45 +95,5 @@ namespace Negocio
                 throw;
             }
         }
-        //public void modificar(Area marca)
-        //{
-        //    AccesoDatos datos = new AccesoDatos();
-        //    try
-        //    {
-        //        if (marca != null)
-        //        {
-        //            datos.setearProcedimiento("spActualizarMarca");
-        //            datos.setearParametros("@Cod_Marca", marca.Cod_Marca);
-        //            datos.setearParametros("@Nombre_M", marca.Nombre);
-        //            datos.setearParametros("@ImgURL_M", marca.ImagenURL);
-        //            datos.setearParametros("@Estado_M", true);
-        //            datos.ejecutarAccion();
-        //            datos.cerrarConexion();
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
-
-        //public bool eliminar(string cod)
-        //{
-        //    AccesoDatos datos = new AccesoDatos();
-        //    try
-        //    {
-        //        datos.setearProcedimiento("spEliminarMarca");
-        //        datos.setearParametros("@Cod_Marca", cod);
-        //        datos.ejecutarAccion();
-        //        return true;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return false;
-        //    }
-        //    finally { datos.cerrarConexion(); }
-        //}
-
     }
 }
