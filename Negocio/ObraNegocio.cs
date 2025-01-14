@@ -77,7 +77,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public List<Obra> listar()
         {
             List<Obra> lista = new List<Obra>();
@@ -178,7 +177,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public bool eliminar(int idObra)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -262,9 +260,9 @@ namespace Negocio
                 }
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION) AS NOMBRE " +
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION,' - ', B.NOMBRE) AS NOMBRE " +
                                      "FROM OBRAS AS O " +
-                                     "INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID " +
+                                     "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID " +
                                      "WHERE O.AREA = @area"); // Se filtra por el área del usuario activo
 
                 // Asignar el parámetro del área del usuario.
@@ -301,7 +299,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public DataTable listarddl()
         {
             DataTable dt = new DataTable(); // DataTable donde guardaremos las obras.
@@ -312,7 +309,7 @@ namespace Negocio
        
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION) AS NOMBRE FROM OBRAS AS O INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)"); 
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION, ' - ', B.NOMBRE) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)"); 
 
 
                 // Ejecutar la consulta.

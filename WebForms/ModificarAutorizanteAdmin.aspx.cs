@@ -20,11 +20,10 @@ namespace WebForms
                 {
                     var codM = Request.QueryString["codM"];
                     AutorizanteNegocio negocio = new AutorizanteNegocio();
-                    ddlObra.DataSource = ObtenerObras();  // Método para obtener los datos de Autorizantes
+                    ddlObra.DataSource = ObtenerObras();  
                     ddlObra.DataTextField = "Nombre";
                     ddlObra.DataValueField = "Id";
                     ddlObra.DataBind();
-                    // Llenar el DropDownList con los estados disponibles
                     ddlEstado.DataSource = ObtenerEstado();
                     ddlEstado.DataTextField = "Nombre";
                     ddlEstado.DataValueField = "Id";
@@ -32,7 +31,6 @@ namespace WebForms
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
 
-                    // Cargar los datos del autorizante
                     List<Autorizante> temp = (List<Autorizante>)Session["listaAutorizante"];
                     Autorizante selected = temp?.Find(x => x.CodigoAutorizante == codM);
 
@@ -67,7 +65,6 @@ namespace WebForms
                 {
                     var codM = Request.QueryString["codM"];
 
-                    // Crear un objeto con los valores modificados
                     Autorizante autorizadoModificado = new Autorizante
                     {
                         CodigoAutorizante = codM,
@@ -83,7 +80,6 @@ namespace WebForms
                         Estado = new EstadoAutorizante { Id = int.Parse(ddlEstado.SelectedValue) }
                     };
 
-                    // Llamar al método de modificación
                     if (negocio.modificarAdmin(autorizadoModificado))
                     {
                         lblMensaje.Text = "Autorizante modificado exitosamente.";

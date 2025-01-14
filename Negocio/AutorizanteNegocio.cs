@@ -1,9 +1,12 @@
 ﻿using Dominio;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Negocio
@@ -34,44 +37,34 @@ namespace Negocio
             }
         }
 
-        public List<Autorizante> listar(Usuario usuario)
+        public List<Autorizante> listar(Usuario usuario, string estado, string empresa, string obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta(@"
-            SELECT 
-                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, 
-                O.DESCRIPCION AS OBRA, 
-                A.CODIGO_AUTORIZANTE, 
-                A.DETALLE, 
-                A.CONCEPTO, 
-                E.NOMBRE AS ESTADO, 
-                E.ID AS ESTADO_ID, 
-                A.EXPEDIENTE, 
-                A.MONTO_AUTORIZADO,
-                A.MES,
-                A.AUTORIZACION_GG, 
-                AR.NOMBRE AS AREA, 
-                AR.ID AS AREA_ID, 
-                C.ID AS CONTRATA_ID
-            FROM 
-                AUTORIZANTES AS A
-            INNER JOIN 
-                OBRAS AS O ON A.OBRA = O.ID
-            INNER JOIN 
-                ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID
-            INNER JOIN 
-                CONTRATA AS C ON O.CONTRATA = C.ID
-            LEFT JOIN 
-                BD_PROYECTOS AS B ON O.ID = B.ID_BASE
-            INNER JOIN 
-                AREAS AS AR ON O.AREA = AR.ID
-            WHERE 
-                O.AREA = @area");
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.ID = BA.ID WHERE O.AREA = @area";
+
+                if (!string.IsNullOrEmpty(estado))
+                {
+                    query += " AND E.NOMBRE = @estado";
+                    datos.setearParametros("@estado", estado);
+                }
+                if (!string.IsNullOrEmpty(empresa))
+                {
+                    query += " AND EM.NOMBRE = @empresa";
+                    datos.setearParametros("@empresa", empresa);
+                }
+                //if (!string.IsNullOrEmpty(obra))
+                //{
+                //    query += " AND OBRA = @obra";
+                //    datos.setearParametros("@obra", obra);
+                //}
+
+                datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
+
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {
@@ -79,7 +72,8 @@ namespace Negocio
                     Autorizante aux = new Autorizante();
                     aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
                     aux.Detalle = datos.Lector["DETALLE"] as string;
-                    aux.Concepto = datos.Lector["CONCEPTO"] as string;
+                    aux.Concepto = datos.Lector["CONCEPTO"] as string;  
+                    aux.Empresa = datos.Lector["EMPRESA"] as string;
                     aux.Estado = new EstadoAutorizante
                     {
                         Nombre = datos.Lector["ESTADO"] as string,
@@ -283,23 +277,23 @@ A.MES,
             try
             {
 
- datos.setearConsulta("SELECT A.ID, codigo_autorizante FROM AUTORIZANTES AS A INNER JOIN OBRAS AS O ON A.OBRA = O.ID");
+                datos.setearConsulta("SELECT A.ID, codigo_autorizante FROM AUTORIZANTES AS A INNER JOIN OBRAS AS O ON A.OBRA = O.ID");
 
 
-datos.ejecutarLectura();
-                dt.Columns.Add("ID", typeof(int));   
-                dt.Columns.Add("NOMBRE", typeof(string)); 
+                datos.ejecutarLectura();
+                dt.Columns.Add("ID", typeof(int));
+                dt.Columns.Add("NOMBRE", typeof(string));
 
                 while (datos.Lector.Read())
                 {
                     DataRow row = dt.NewRow();
-                    row["ID"] = (int)datos.Lector["ID"];  
-                    row["NOMBRE"] = datos.Lector["codigo_autorizante"] as string;  
+                    row["ID"] = (int)datos.Lector["ID"];
+                    row["NOMBRE"] = datos.Lector["codigo_autorizante"] as string;
 
                     dt.Rows.Add(row);
                 }
 
-                return dt; 
+                return dt;
             }
             catch (Exception ex)
             {
@@ -320,21 +314,46 @@ datos.ejecutarLectura();
         UPDATE AUTORIZANTES 
         SET 
             OBRA = @obra, 
-            ESTADO = @estado, 
             CONCEPTO = @concepto, 
             DETALLE = @detalle, 
-            EXPEDIENTE = @expediente, 
             MONTO_AUTORIZADO = @montoAutorizado, 
-            MES = @mes
+            MES = @mes,
+AUTORIZACION_GG = @aut
         WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
 
-                 datos.agregarParametro("@obra", autorizante.Obra.Id);
-                datos.agregarParametro("@estado", autorizante.Estado.Id);
+                datos.agregarParametro("@obra", autorizante.Obra.Id);
                 datos.agregarParametro("@concepto", autorizante.Concepto);
                 datos.agregarParametro("@detalle", autorizante.Detalle);
-                datos.agregarParametro("@expediente", (object)autorizante.Expediente ?? DBNull.Value);
                 datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
                 datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
+                datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
+                datos.agregarParametro("@aut", 0);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el autorizante.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+        public bool ActualizarEstado(Autorizante autorizante)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE AUTORIZANTES 
+        SET 
+            ESTADO = @estado 
+           WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+
+                datos.agregarParametro("@estado", autorizante.Estado.Id);
                 datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
 
                 datos.ejecutarAccion();
@@ -343,6 +362,33 @@ datos.ejecutarLectura();
             catch (Exception ex)
             {
                 throw new Exception("Error al modificar el autorizante.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+        public bool ActualizarExpediente(string autorizante, string ex)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE AUTORIZANTES 
+        SET 
+            EXPEDIENTE = @expediente
+           WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+
+                datos.agregarParametro("@expediente", ex);
+                datos.agregarParametro("@codigoAutorizante", autorizante);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al modificar el autorizante.");
             }
             finally
             {

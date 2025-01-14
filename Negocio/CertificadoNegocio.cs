@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -13,7 +14,6 @@ namespace Negocio
     public class CertificadoNegocio
     {
 
-
         public List<Certificado> listarFiltro(Usuario usuario, string autorizante, string tipo, DateTime? mesAprobacion,string empresa )
         {
             var lista = new List<Certificado>();
@@ -21,7 +21,7 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID  WHERE O.AREA = @area ";
+                string query = "SELECT C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') + '%' AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID  WHERE O.AREA = @area ";
                 if (!string.IsNullOrEmpty(autorizante))
                 {
                     query += " AND C.CODIGO_AUTORIZANTE = @Autorizante";
@@ -58,10 +58,7 @@ namespace Negocio
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
-                        && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
-                        ? porcentaje / 100
-                        : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
@@ -111,9 +108,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
-
         public List<Certificado> listarFiltroAdmin(string autorizante, string tipo, DateTime? mesAprobacion, string empresa)
         {
             var lista = new List<Certificado>();
@@ -156,10 +150,7 @@ namespace Negocio
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
-                        && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
-                        ? porcentaje / 100
-                        : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
@@ -209,10 +200,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
-
-
         public List<Certificado> listar(Usuario usuario)
         {
             var lista = new List<Certificado>();
@@ -259,10 +246,7 @@ namespace Negocio
                         ExpedientePago = datos.Lector["EXPEDIENTE_PAGO"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
-    && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
-    ? porcentaje / 100
-    : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
                         Tipo = new TipoPago
                         {
                             Id = datos.Lector["TIPO_PAGO"] != DBNull.Value ? Convert.ToInt32(datos.Lector["TIPO_PAGO"]) : 0,
@@ -307,11 +291,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
-
-
-
         public List<Certificado> listar()
         {
             var lista = new List<Certificado>();
@@ -356,10 +335,7 @@ namespace Negocio
                         ExpedientePago = datos.Lector["EXPEDIENTE_PAGO"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value
-    && decimal.TryParse(datos.Lector["PORCENTAJE"].ToString(), out var porcentaje)
-    ? porcentaje / 100
-    : 0M,
+                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
                         Tipo = new TipoPago
                         {
                             Id = datos.Lector["TIPO_PAGO"] != DBNull.Value ? Convert.ToInt32(datos.Lector["TIPO_PAGO"]) : 0,
@@ -424,6 +400,11 @@ namespace Negocio
 
                 datos.ejecutarAccion();
             }
+            catch (SqlException sqlEx)
+            {
+                // Agregar detalles específicos de SQL al mensaje
+                throw new Exception($"Error al agregar el certificado. {sqlEx.Message}");
+            }
             catch (Exception ex)
             {
                 throw new Exception("Error al agregar el certificado.", ex);
@@ -433,7 +414,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public bool eliminar(int id)
         {
             var datos = new AccesoDatos();
@@ -489,7 +469,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
     }
 
 }

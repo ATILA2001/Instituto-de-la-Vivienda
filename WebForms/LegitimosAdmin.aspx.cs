@@ -41,7 +41,6 @@ namespace WebForms
 
         protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Ejemplo de acción para seleccionar un registro (editar)
             var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
             Response.Redirect($"ModificarLegitimo.aspx?id={idSeleccionado}");
         }
@@ -55,7 +54,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos(); // Actualizar el GridView
+                    CargarListaLegitimos(); 
                 }
             }
             catch (Exception ex)

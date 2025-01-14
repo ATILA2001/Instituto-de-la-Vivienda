@@ -50,7 +50,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Barrio eliminado correctamente.";
                    lblMensaje.CssClass = "alert alert-success";
-                    CargarListaAutorizantes(); // Actualizar el GridView
+                    CargarListaAutorizantes();
                 }
             }
             catch (Exception ex)
@@ -64,10 +64,8 @@ namespace WebForms
         {
             try
             {
-                // Cambiar el índice de la página
                 dgvAutorizante.PageIndex = e.NewPageIndex;
 
-                // Refrescar el listado de empresas
                 CargarListaAutorizantes();
             }
             catch (Exception ex)

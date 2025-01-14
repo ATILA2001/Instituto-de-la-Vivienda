@@ -13,7 +13,7 @@ namespace Negocio
     {
         public DataTable listarddl()
         {
-            DataTable dt = new DataTable(); // DataTable donde guardaremos las empresas.
+            DataTable dt = new DataTable(); 
             AccesoDatos datos = new AccesoDatos();
 
             try
@@ -21,18 +21,15 @@ namespace Negocio
                 datos.setearConsulta("SELECT * FROM BARRIOS");
                 datos.ejecutarLectura();
 
-                // Definir las columnas del DataTable.
                 dt.Columns.Add("ID");
                 dt.Columns.Add("NOMBRE");
 
                 while (datos.Lector.Read())
                 {
-                    // Crear una nueva fila y asignar los valores obtenidos.
                     DataRow row = dt.NewRow();
                     row["ID"] = (int)datos.Lector["ID"];
                     row["NOMBRE"] = (string)datos.Lector["NOMBRE"];
 
-                    // Agregar la fila al DataTable.
                     dt.Rows.Add(row);
                 }
 
@@ -88,7 +85,6 @@ namespace Negocio
                 {
                     datos.setearConsulta("INSERT INTO BARRIOS (NOMBRE) VALUES (@Nombre)");
                     datos.setearParametros("@Nombre", barrio.Nombre);
-                    //datos.setearParametros("@Estado_M", true);
                     datos.ejecutarAccion();
                     datos.cerrarConexion();
                 }

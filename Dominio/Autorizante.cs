@@ -19,7 +19,7 @@ namespace Dominio
         public decimal MontoAutorizado { get; set; }
         public bool AutorizacionGG { get; set; } 
         public DateTime? Fecha { get; set; }
-
+        public string Empresa { get; set; }
         public Autorizante() { }
 
     }

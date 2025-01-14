@@ -14,14 +14,12 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                // Consulta para insertar el nuevo legítimo
                 datos.setearConsulta(@"
             INSERT INTO LEGITIMOS_ABONOS 
             (CODIGO_AUTORIZANTE, OBRA, EXPEDIENTE, INICIO_EJECUCION, FIN_EJECUCION, CERTIFICADO, MES_APROBACION)
             VALUES 
             (@CODIGO_AUTORIZANTE, @OBRA, @EXPEDIENTE, @INICIO_EJECUCION, @FIN_EJECUCION, @CERTIFICADO, @MES_APROBACION)");
 
-                // Asignar los parámetros
                 datos.agregarParametro("@CODIGO_AUTORIZANTE", nuevoLegitimo.CodigoAutorizante);
                 datos.agregarParametro("@OBRA", nuevoLegitimo.Obra.Id);
                 datos.agregarParametro("@EXPEDIENTE", nuevoLegitimo.Expediente);
@@ -30,15 +28,12 @@ namespace Negocio
                 datos.agregarParametro("@CERTIFICADO", nuevoLegitimo.Certificado);
                 datos.agregarParametro("@MES_APROBACION", nuevoLegitimo.MesAprobacion);
 
-                // Ejecutar la consulta
                 datos.ejecutarAccion();
 
-                // Retorna true si todo salió bien
                 return true;
             }
             catch (Exception ex)
             {
-                // Lanza la excepción al nivel superior para manejo personalizado
                 throw new Exception("Error al agregar un legítimo.", ex);
             }
             finally
@@ -52,21 +47,16 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                // Consulta para eliminar el legítimo por ID
                 datos.setearConsulta("DELETE FROM LEGITIMOS_ABONOS WHERE CODIGO_AUTORIZANTE = @ID");
 
-                // Asignar el parámetro
                 datos.agregarParametro("@ID", codigo);
 
-                // Ejecutar la acción
                 datos.ejecutarAccion();
 
-                // Retorna true si se ejecutó exitosamente
                 return true;
             }
             catch (Exception ex)
             {
-                // Lanza una excepción personalizada si hay errores
                 throw new Exception("Error al eliminar el legítimo.", ex);
             }
             finally

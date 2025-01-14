@@ -21,15 +21,13 @@ namespace WebForms
             {
                 if (Request.QueryString["codM"] != null)
                 {
-                    // Llenar los DropDownList con datos correspondientes
-                    ddlTipo.DataSource = ObtenerTiposPago();  // Método para obtener los datos de Tipos de Pago
-                    ddlTipo.DataTextField = "Nombre";         // Columna que se muestra
-                    ddlTipo.DataValueField = "Id";            // Columna que se almacena
+                    ddlTipo.DataSource = ObtenerTiposPago();
+                    ddlTipo.DataTextField = "Nombre";       
+                    ddlTipo.DataValueField = "Id";          
                     ddlTipo.DataBind();
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
 
-                    // Obtener y mostrar los datos del certificado seleccionado
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
                     List<Certificado> temp = (List<Certificado>)Session["listaCertificado"];
                     Certificado selected = temp.Find(x => x.Id == codM);
@@ -55,7 +53,6 @@ namespace WebForms
                     ddlTipo.SelectedIndex != -1 &&
                     txtAutorizante.Text.Trim() != string.Empty )
                 {
-                    // Crear el objeto modificado
                     Certificado certificadoModificado = new Certificado
                     {
                         Id = int.Parse(Request.QueryString["codM"]),

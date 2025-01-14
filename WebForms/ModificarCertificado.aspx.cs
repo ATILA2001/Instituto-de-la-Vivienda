@@ -10,7 +10,7 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-public partial class ModificarCertificado : System.Web.UI.Page
+    public partial class ModificarCertificado : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -21,20 +21,18 @@ public partial class ModificarCertificado : System.Web.UI.Page
             {
                 if (Request.QueryString["codM"] != null)
                 {
-                    // Llenar los DropDownList con datos correspondientes
-                    ddlTipo.DataSource = ObtenerTiposPago();  // Método para obtener los datos de Tipos de Pago
-                    ddlTipo.DataTextField = "Nombre";         // Columna que se muestra
-                    ddlTipo.DataValueField = "Id";            // Columna que se almacena
+                    ddlTipo.DataSource = ObtenerTiposPago();
+
+                    ddlTipo.DataTextField = "Nombre";
+                    ddlTipo.DataValueField = "Id";
                     ddlTipo.DataBind();
 
-                    ddlAutorizante.DataSource = ObtenerAutorizantes();  // Método para obtener los datos de Autorizantes
+                    ddlAutorizante.DataSource = ObtenerAutorizantes();
                     ddlAutorizante.DataTextField = "Nombre";
                     ddlAutorizante.DataValueField = "Id";
                     ddlAutorizante.DataBind();
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
-
-                    // Obtener y mostrar los datos del certificado seleccionado
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
                     List<Certificado> temp = (List<Certificado>)Session["listaCertificado"];
                     Certificado selected = temp.Find(x => x.Id == codM);
@@ -60,7 +58,6 @@ public partial class ModificarCertificado : System.Web.UI.Page
                     ddlTipo.SelectedIndex != -1 &&
                     ddlAutorizante.SelectedIndex != -1)
                 {
-                    // Crear el objeto modificado
                     Certificado certificadoModificado = new Certificado
                     {
                         Id = int.Parse(Request.QueryString["codM"]),
@@ -70,11 +67,13 @@ public partial class ModificarCertificado : System.Web.UI.Page
                             ? (DateTime?)null
                             : DateTime.Parse(txtFecha.Text.Trim()),
                         Tipo = new TipoPago { Id = int.Parse(ddlTipo.SelectedValue) },
-                        Autorizante = new Autorizante { Id = int.Parse(ddlAutorizante.SelectedValue),
-                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text}
+                        Autorizante = new Autorizante
+                        {
+                            Id = int.Parse(ddlAutorizante.SelectedValue),
+                            CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                        }
                     };
 
-                    // Llamar al método modificar
                     if (negocio.modificar(certificadoModificado))
                     {
                         lblMensaje.Text = "Certificado modificado exitosamente!";

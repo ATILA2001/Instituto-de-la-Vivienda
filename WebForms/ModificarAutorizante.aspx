@@ -30,8 +30,6 @@
                                     <th>Obra</th>
                                     <th>Concepto</th>
                                     <th>Detalle</th>
-                                    <th>Expediente</th>
-                                    <th>Estado</th>
                                     <th>Monto Autorizado</th>
                                     <th>Mes Aprobacion</th>
                                     <th></th>
@@ -48,12 +46,6 @@
                                     </td>
                                     <td>
                                         <asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />
-                                    </td>
-                                    <td>
-                                        <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-                                    </td>
-                                    <td>
-                                        <asp:DropDownList ID="ddlEstado" CssClass="form-control" runat="server"></asp:DropDownList>
                                     </td>
                                     <td>
                                         <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />

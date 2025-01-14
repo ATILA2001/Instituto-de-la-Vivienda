@@ -18,7 +18,7 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                ddlObra.DataSource = ObtenerObras();    // Método para obtener los datos de los Barrios
+                ddlObra.DataSource = ObtenerObras();    
                 ddlObra.DataTextField = "Nombre";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
@@ -27,7 +27,6 @@ namespace WebForms
         }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            // Limpiar todos los TextBox
             txtAutorizante.Text = string.Empty;
             txtExpediente.Text = string.Empty;
             txtInicioEjecucion.Text = string.Empty;
@@ -57,7 +56,6 @@ namespace WebForms
 
         protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Ejemplo de acción para seleccionar un registro (editar)
             var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
             Response.Redirect($"ModificarLegitimo.aspx?id={idSeleccionado}");
         }
@@ -71,8 +69,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos(); // Actualizar el GridView
-                }
+                    CargarListaLegitimos();                }
             }
             catch (Exception ex)
             {
