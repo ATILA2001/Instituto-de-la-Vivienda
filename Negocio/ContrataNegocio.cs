@@ -44,37 +44,5 @@ namespace Negocio
             }
         }
 
-        public List<Empresa> listar()
-        {
-            List<Empresa> lista = new List<Empresa>();
-            AccesoDatos datos = new AccesoDatos();
-
-            try
-            {
-                datos.setearConsulta("SELECT * FROM CONTRATA");
-                datos.ejecutarLectura();
-                while (datos.Lector.Read())
-                {
-
-                    Empresa aux = new Empresa();
-                    aux.Id = (int)datos.Lector["ID"];
-                    aux.Nombre = (string)datos.Lector["NOMBRE"];
-
-
-                    lista.Add(aux);
-                }
-
-                return lista;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-
-        }
     }
 }

@@ -46,38 +46,5 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-        public List<TipoPago> listar()
-        {
-            List<TipoPago> lista = new List<TipoPago>();
-            AccesoDatos datos = new AccesoDatos();
-
-            try
-            {
-                datos.setearConsulta("SELECT * FROM TIPO_PAGO");
-                datos.ejecutarLectura();
-                while (datos.Lector.Read())
-                {
-
-                    TipoPago aux = new TipoPago();
-                    aux.Id = (int)datos.Lector["ID"];
-                    aux.Nombre = (string)datos.Lector["NOMBRE"];
-
-
-                    lista.Add(aux);
-                }
-
-                return lista;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-
-        }
     }
 }

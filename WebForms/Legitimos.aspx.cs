@@ -130,7 +130,34 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return barrioNegocio.listarddl(usuarioLogueado);
         }
+        protected void txtExpediente_TextChanged(object sender, EventArgs e)
+        {
+            // Identifica el TextBox modificado
+            TextBox txtExpediente = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
+            // Obtiene la clave del registro desde DataKeyNames
+            string codigoAutorizante = dgvLegitimos.DataKeys[row.RowIndex].Value.ToString();
+
+            // Nuevo valor del expediente
+            string nuevoExpediente = txtExpediente.Text;
+
+            // Actualiza en la base de datos
+            try
+            {
+                // Llama al método del negocio para actualizar el expediente
+                LegitimoNegocio negocio = new LegitimoNegocio();
+                negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
+
+                // Mensaje de éxito o retroalimentación opcional
+                lblMensaje.Text = "Expediente actualizado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+            }
+        }
     }
 
 }

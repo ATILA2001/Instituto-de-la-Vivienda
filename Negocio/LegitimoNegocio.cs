@@ -41,7 +41,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public bool eliminar(string codigo)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -64,8 +63,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
         public List<Legitimo> listar(Usuario usuario)
         {
             var lista = new List<Legitimo>();
@@ -194,6 +191,32 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+        public bool ActualizarExpediente(string autorizante, string ex)
+        {
+            var datos = new AccesoDatos();
 
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE LEGITIMOS_ABONOS 
+        SET 
+            EXPEDIENTE = @expediente
+           WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+
+                datos.agregarParametro("@expediente", ex);
+                datos.agregarParametro("@codigoAutorizante", autorizante);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al modificar el autorizante.");
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

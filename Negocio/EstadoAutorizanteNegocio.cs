@@ -47,37 +47,5 @@ namespace Negocio
             }
         }
 
-        public List<EstadoAutorizante> listar()
-        {
-            List<EstadoAutorizante> lista = new List<EstadoAutorizante>();
-            AccesoDatos datos = new AccesoDatos();
-
-            try
-            {
-                datos.setearConsulta("SELECT * FROM ESTADOS_AUTORIZANTES");
-                datos.ejecutarLectura();
-                while (datos.Lector.Read())
-                {
-
-                    EstadoAutorizante aux = new EstadoAutorizante();
-                    aux.Id = (int)datos.Lector["ID"];
-                    aux.Nombre = (string)datos.Lector["NOMBRE"];
-
-
-                    lista.Add(aux);
-                }
-
-                return lista;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-
-        }
     }
 }

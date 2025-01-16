@@ -46,7 +46,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public List<LineaGestion> listar()
         {
             List<LineaGestion> lista = new List<LineaGestion>();

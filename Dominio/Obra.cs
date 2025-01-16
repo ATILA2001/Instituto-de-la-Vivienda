@@ -12,13 +12,13 @@ namespace Dominio
         public int Id { get; set; }
         public Area Area { get; set; }
         public Empresa Empresa { get; set; }
-        public int? Numero { get; set; } // Puede ser null
-        public Contrata Contrata { get; set; } // Puede ser null
-        public int? Año { get; set; } // Puede ser null
-        public int? Etapa { get; set; } // Puede ser null
-        public int? ObraNumero { get; set; } // Puede ser null
-        public Barrio Barrio { get; set; } // Puede ser null
-        public string Descripcion { get; set; } // Puede ser null
+        public int? Numero { get; set; } 
+        public Contrata Contrata { get; set; } 
+        public int? Año { get; set; } 
+        public int? Etapa { get; set; } 
+        public int? ObraNumero { get; set; } 
+        public Barrio Barrio { get; set; } 
+        public string Descripcion { get; set; } 
 
         public  decimal? AutorizadoInicial { get; set; }
         public decimal? AutorizadoNuevo { get; set; }
