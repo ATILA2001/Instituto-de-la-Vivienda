@@ -68,7 +68,7 @@ L.ID as ID_LINEA
                 INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
 INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
                 INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
-                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID";
+                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID ORDER BY OBRA";
 
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
