@@ -69,6 +69,24 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
+        /// Control txtSubtotal.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSubtotal;
+
+        /// <summary>
+        /// Control txtSubtotal1.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSubtotal1;
+
+        /// <summary>
         /// Control dgvBdProyecto.
         /// </summary>
         /// <remarks>

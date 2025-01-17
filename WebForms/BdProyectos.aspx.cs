@@ -32,8 +32,43 @@ namespace WebForms
 
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
+                CalcularSubtotal();
+                CalcularSubtotal1();
             }
         }
+
+        private void CalcularSubtotal()
+        {
+            decimal subtotal = 0;
+
+            foreach (GridViewRow row in dgvBdProyecto.Rows)
+            {
+                var cellValue = row.Cells[5].Text;
+                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
+                {
+                    subtotal += monto;
+                }
+            }
+
+            txtSubtotal.Text = subtotal.ToString("C");
+        }
+        private void CalcularSubtotal1()
+        {
+            decimal subtotal = 0;
+
+            foreach (GridViewRow row in dgvBdProyecto.Rows)
+            {
+                var cellValue = row.Cells[6].Text;
+                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
+                {
+                    subtotal += monto;
+                }
+            }
+
+            txtSubtotal1.Text = subtotal.ToString("C");
+        }
+
+
         protected void dgvBdProyecto_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvBdProyecto.SelectedDataKey.Value.ToString();
@@ -56,6 +91,8 @@ namespace WebForms
                     ddlObra.DataTextField = "Nombre";
                     ddlObra.DataValueField = "Id";
                     ddlObra.DataBind();
+                    CalcularSubtotal();
+                    CalcularSubtotal1();
                 }
             }
             catch (Exception ex)
@@ -72,6 +109,8 @@ namespace WebForms
 
             dgvBdProyecto.DataSource = Session["listaProyectos"];
             dgvBdProyecto.DataBind();
+            CalcularSubtotal();
+            CalcularSubtotal1();
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
@@ -105,6 +144,8 @@ namespace WebForms
                 txtProyecto.Text = string.Empty;
                 txtSubProyecto.Text = string.Empty;
                 txtMontoAutorizadoInicial.Text = string.Empty;
+                CalcularSubtotal();
+                CalcularSubtotal1();
             }
             catch (Exception ex)
             {

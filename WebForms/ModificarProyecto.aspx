@@ -36,7 +36,7 @@
 							<tbody>
 								<tr>
 									<td>
-										<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
+										<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" ReadOnly="true" />
 									</td>
 									<td>
 										<asp:TextBox ID="txtProyecto" CssClass="form-control" runat="server" />

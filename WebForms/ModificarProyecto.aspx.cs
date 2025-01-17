@@ -21,11 +21,7 @@ namespace WebForms
             {
                 if (Request.QueryString["codM"] != null)
                 {
-                    ddlObra.DataSource = ObtenerObras();
-                    ddlObra.DataTextField = "Nombre";
-                    ddlObra.DataValueField = "Id";
-                    ddlObra.DataBind();
-
+                    
                     ddlLineaGestion.DataSource = ObtenerLineaGestion();
                     ddlLineaGestion.DataTextField = "Nombre";
                     ddlLineaGestion.DataValueField = "Id";
@@ -40,7 +36,7 @@ namespace WebForms
                     txtProyecto.Text = selected.Proyecto;
                     txtMontoAutorizadoInicial.Text = selected.AutorizadoInicial.ToString();
 
-                    ddlObra.SelectedValue = selected.Obra.Id.ToString();
+                    txtObra.Text = selected.Obra.Descripcion.ToString();
                     ddlLineaGestion.SelectedValue = selected.LineaGestion.Id.ToString();
                 }
             }
@@ -73,7 +69,6 @@ namespace WebForms
                         Proyecto = txtProyecto.Text.Trim(),
                         AutorizadoInicial = decimal.Parse(txtMontoAutorizadoInicial.Text.Trim()),
                         SubProyecto = txtSubProyecto.Text.Trim(),
-                        Obra = new Obra { Id = int.Parse(ddlObra.SelectedValue) },
                         LineaGestion = new LineaGestion
                         {
 

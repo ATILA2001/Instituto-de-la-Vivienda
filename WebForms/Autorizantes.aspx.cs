@@ -76,7 +76,7 @@ namespace WebForms
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                string obraFiltrado = ddlObraFiltro.SelectedValue == "0" ? null : ddlObraFiltro.SelectedItem.Text;
+                int obraFiltrado = int.Parse(ddlObraFiltro.SelectedValue);
                 string estadoFiltrado = ddlEstadoFiltro.SelectedValue == "0" ? null : ddlEstadoFiltro.SelectedItem.Text;
                 string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
 
@@ -265,6 +265,9 @@ namespace WebForms
 
                 // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
+                CargarListaAutorizantes();
+                CalcularSubtotal();
+
             }
             catch (Exception ex)
             {

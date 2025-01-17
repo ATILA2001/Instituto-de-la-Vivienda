@@ -18,11 +18,9 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                ddlObra.DataSource = ObtenerObras();    
-                ddlObra.DataTextField = "Nombre";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
+                BindDropDownList();
                 CargarListaLegitimos();
+
             }
         }
         protected void btnLimpiar_Click(object sender, EventArgs e)
@@ -41,9 +39,18 @@ namespace WebForms
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaLegitimos"] = negocio.listar(usuarioLogueado);
+                DateTime? mesAprobacion = null;
+                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
+                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
+                {
+                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
+                }
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, empresa);
+
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
+                CalcularSubtotal();
+
             }
             catch (Exception ex)
             {
@@ -69,7 +76,10 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos();                }
+                    CargarListaLegitimos();
+                    CalcularSubtotal();
+
+                }
             }
             catch (Exception ex)
             {
@@ -84,6 +94,8 @@ namespace WebForms
             {
                 dgvLegitimos.PageIndex = e.NewPageIndex;
                 CargarListaLegitimos();
+                CalcularSubtotal();
+
             }
             catch (Exception ex)
             {
@@ -115,6 +127,8 @@ namespace WebForms
                     lblMensaje.Text = "Legítimo agregado con éxito.";
                     lblMensaje.CssClass = "alert alert-success";
                     CargarListaLegitimos();
+                    CalcularSubtotal();
+
                 }
             }
             catch (Exception ex)
@@ -132,32 +146,85 @@ namespace WebForms
         }
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            // Identifica el TextBox modificado
             TextBox txtExpediente = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-            // Obtiene la clave del registro desde DataKeyNames
             string codigoAutorizante = dgvLegitimos.DataKeys[row.RowIndex].Value.ToString();
 
-            // Nuevo valor del expediente
             string nuevoExpediente = txtExpediente.Text;
 
-            // Actualiza en la base de datos
             try
             {
-                // Llama al método del negocio para actualizar el expediente
                 LegitimoNegocio negocio = new LegitimoNegocio();
                 negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
 
-                // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
+                CargarListaLegitimos();
+                CalcularSubtotal();
+
+
             }
             catch (Exception ex)
             {
-                // Manejo de errores
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
             }
         }
+
+        private void CalcularSubtotal()
+        {
+            decimal subtotal = 0;
+
+            foreach (GridViewRow row in dgvLegitimos.Rows)
+            {
+                var cellValue = row.Cells[6].Text;
+                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
+                {
+                    subtotal += monto;
+                }
+            }
+
+            txtSubtotal.Text = subtotal.ToString("C");
+        }
+        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaLegitimos();
+            CalcularSubtotal();
+        }
+        private void BindDropDownList()
+        {
+
+            ddlObra.DataSource = ObtenerObras();
+            ddlObra.DataTextField = "Nombre";
+            ddlObra.DataValueField = "Id";
+            ddlObra.DataBind();
+
+            var empresa = ObtenerEmpresas();
+            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
+            ddlEmpresa.DataSource = empresa;
+            ddlEmpresa.DataTextField = "Nombre";
+            ddlEmpresa.DataValueField = "Id";
+            ddlEmpresa.DataBind();
+        }
+        private DataTable ObtenerEmpresas()
+        {
+            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+            return empresaNegocio.listarddl();
+        }
+        private DataRow CrearFilaTodos(DataTable table)
+        {
+            DataRow row = table.NewRow();
+            row["Id"] = 0;
+            row["Nombre"] = "Todos";
+            return row;
+        }
+
+        protected void btnFiltrarMes_Click(object sender, EventArgs e)
+        {
+            CargarListaLegitimos();
+            CalcularSubtotal();
+        }
+
+
     }
 
 }

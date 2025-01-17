@@ -62,34 +62,52 @@
 				</div>
 			</div>
 		</div>
-
-		<hr />
-
+	</div>
+	<hr />
+	<div class="container-fluid mt-4">
 		<div class="row mt-4">
 			<div class="col-md-12">
-				<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table"
-					OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
-					OnRowDeleting="dgvBdProyecto_RowDeleting"
-					AutoGenerateColumns="false" runat="server" style="display: block;  overflow-x: auto; white-space: nowrap; width: 100%;">
-					<Columns>
-						<asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" SortExpression="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" SortExpression="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" SortExpression="Proyecto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" SortExpression="SubProyecto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Linea de Gestión" DataField="LineaGestion.Nombre" SortExpression="LineaGestion.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Monto Inicial" DataField="AutorizadoInicial" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Monto Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					</Columns>
-				</asp:GridView>
+				<div class="text-end">
+					<div class="d-flex flex-wrap p-3 gap-3">
+						<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+							<label class="form-label lbl-left" for="txtSubtotal">Subtotal Inicial:</label>
+							<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+						</div>
+						<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 
-				<div class="text-center p-4">
-					<asp:Label ID="lblMensaje" Text="" runat="server" />
+							<label class="form-label lbl-left" for="txtSubtotal1">Subtotal Nuevo:</label>
+							<asp:TextBox ID="txtSubtotal1" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+						</div>
+
+
+					</div>
 				</div>
+			</div>
+
+
+			<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table"
+				OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
+				OnRowDeleting="dgvBdProyecto_RowDeleting"
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
+				<Columns>
+					<asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" SortExpression="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" SortExpression="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" SortExpression="Proyecto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" SortExpression="SubProyecto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Linea de Gestión" DataField="LineaGestion.Nombre" SortExpression="LineaGestion.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Monto Inicial" DataField="AutorizadoInicial" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Monto Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+				</Columns>
+			</asp:GridView>
+
+			<div class="text-center p-4">
+				<asp:Label ID="lblMensaje" Text="" runat="server" />
 			</div>
 		</div>
 	</div>
+
 
 	<script type="text/javascript">
 		function soloNumeros(e) {
@@ -102,6 +120,27 @@
 			return patron.test(te);
 		}
 	</script>
+	<style>
+		.form-control-uniform {
+			display: inline-block;
+			font-size: 14px; /* Tamaño de texto uniforme */
+			padding: 6px 12px;
+			margin-top: -6px;
+			border: 1px solid;
+		}
 
+		.btn {
+			margin-top: -4px;
+			border: 1px solid;
+		}
+
+
+
+		.lbl-left {
+			text-align: left;
+			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+			font-weight: bold; /* Si necesitas enfatizar el texto */
+		}
+	</style>
 
 </asp:Content>

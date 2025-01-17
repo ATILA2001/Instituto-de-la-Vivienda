@@ -152,12 +152,6 @@ namespace WebForms
             }
         }
 
-        private DataTable ObtenerContratas()
-        {
-            ContrataNegocio contrataNegocio = new ContrataNegocio();
-            return contrataNegocio.listarddl();
-        }
-
     
         private DataTable ObtenerTipos()
         {
@@ -253,6 +247,40 @@ namespace WebForms
             CargarListaCertificados();
             CalcularSubtotal();
         }
+
+
+        protected void txtExpediente_TextChanged(object sender, EventArgs e)
+        {
+            // Identifica el TextBox modificado
+            TextBox txtExpediente = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
+
+            // Obtiene la clave del registro desde DataKeyNames
+            int id = int.Parse(dgvCertificado.DataKeys[row.RowIndex].Value.ToString());
+
+            // Nuevo valor del expediente
+            string nuevoExpediente = txtExpediente.Text;
+
+            // Actualiza en la base de datos
+            try
+            {
+                // Llama al método del negocio para actualizar el expediente
+                CertificadoNegocio negocio = new CertificadoNegocio();
+                negocio.ActualizarExpediente(id, nuevoExpediente);
+
+                // Mensaje de éxito o retroalimentación opcional
+                lblMensaje.Text = "Expediente actualizado correctamente.";
+                CargarListaCertificados();
+                CalcularSubtotal();
+
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+            }
+        }
+
     }
 
 }

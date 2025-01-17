@@ -37,14 +37,14 @@ namespace Negocio
             }
         }
 
-        public List<Autorizante> listar(Usuario usuario, string estado, string empresa, string obra)
+        public List<Autorizante> listar(Usuario usuario, string estado, string empresa, int obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.ID = BA.ID WHERE O.AREA = @area";
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID WHERE O.AREA = @area";
 
                 if (!string.IsNullOrEmpty(estado))
                 {
@@ -56,11 +56,11 @@ namespace Negocio
                     query += " AND EM.NOMBRE = @empresa";
                     datos.setearParametros("@empresa", empresa);
                 }
-                //if (!string.IsNullOrEmpty(obra))
-                //{
-                //    query += " AND OBRA = @obra";
-                //    datos.setearParametros("@obra", obra);
-                //}
+                if (obra!=0)
+                {
+                    query += " AND O.ID = @obra";
+                    datos.setearParametros("@obra", obra);
+                }
 
                 datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
@@ -403,8 +403,7 @@ AUTORIZACION_GG = @aut
             {
                 datos.setearConsulta(@"
         UPDATE AUTORIZANTES 
-        SET 
-            OBRA = @obra, 
+        SET  
             ESTADO = @estado, 
             CONCEPTO = @concepto, 
             DETALLE = @detalle, 
@@ -414,7 +413,6 @@ AUTORIZACION_GG = @aut
 AUTORIZACION_GG = @aut
         WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
 
-                datos.agregarParametro("@obra", autorizante.Obra.Id);
                 datos.agregarParametro("@estado", autorizante.Estado.Id);
                 datos.agregarParametro("@concepto", autorizante.Concepto);
                 datos.agregarParametro("@detalle", autorizante.Detalle);

@@ -68,7 +68,6 @@ namespace WebForms
                     Autorizante autorizadoModificado = new Autorizante
                     {
                         CodigoAutorizante = codM,
-                        Obra = new Obra { Id = int.Parse(ddlObra.SelectedValue), Descripcion = ddlObra.SelectedItem.Text },
                         Concepto = txtConcepto.Text.Trim(),
                         Detalle = txtDetalle.Text.Trim(),
                         Expediente = txtExpediente.Text.Trim(),
