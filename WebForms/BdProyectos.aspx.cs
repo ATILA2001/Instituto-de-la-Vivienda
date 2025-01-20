@@ -17,26 +17,49 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-
-                ddlObra.DataSource = ObtenerObras();
-                ddlObra.DataTextField = "Nombre";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
-
-                ddlLineaGestion.DataSource = ObtenerLineaGestion();  
-                ddlLineaGestion.DataTextField = "Nombre";
-                ddlLineaGestion.DataValueField = "Id";
-                ddlLineaGestion.DataBind();
-
-                Session["listaProyectos"] = bdProyectoNegocio.Listar();
-
+                BindDropDownList();
+                CargarListaProyectos();
+                CalcularSubtotal();
+                CalcularSubtotal1();
+            }
+        }
+        private void CargarListaProyectos(string filtro = null)
+        {
+            try
+            {
+                
+                string linea = ddlLinea.SelectedValue == "0" ? null : ddlLinea.SelectedItem.Text;
+                string proyecto = ddlProyecto.SelectedValue == "0" ? null : ddlProyecto.SelectedItem.Text;
+                Session["listaProyectos"] = bdProyectoNegocio.Listar(linea,proyecto, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
                 CalcularSubtotal();
                 CalcularSubtotal1();
             }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+        protected void btnBuscar_Click(object sender, EventArgs e)
+        {
+            string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
+            CargarListaProyectos(filtro);
         }
 
+        protected void ddlLinea_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaProyectos();
+            CalcularSubtotal();
+            CalcularSubtotal1();
+        }
+        protected void ddlProyecto_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaProyectos();
+            CalcularSubtotal();
+            CalcularSubtotal1();
+        }
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
@@ -83,14 +106,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    Session["listaProyectos"] = bdProyectoNegocio.Listar();
-
-                    dgvBdProyecto.DataSource = Session["listaProyectos"];
-                    dgvBdProyecto.DataBind();
-                    ddlObra.DataSource = ObtenerObras(); 
-                    ddlObra.DataTextField = "Nombre";
-                    ddlObra.DataValueField = "Id";
-                    ddlObra.DataBind();
+                    CargarListaProyectos();
                     CalcularSubtotal();
                     CalcularSubtotal1();
                 }
@@ -104,11 +120,7 @@ namespace WebForms
         }
         protected void dgvBdProyecto_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            dgvBdProyecto.PageIndex = e.NewPageIndex;
-            Session["listaProyectos"] = bdProyectoNegocio.Listar();
-
-            dgvBdProyecto.DataSource = Session["listaProyectos"];
-            dgvBdProyecto.DataBind();
+            CargarListaProyectos();
             CalcularSubtotal();
             CalcularSubtotal1();
         }
@@ -131,10 +143,7 @@ namespace WebForms
 
                 lblMensaje.Text = "Proyecto agregado con éxito.";
                 lblMensaje.CssClass = "alert alert-success";
-                Session["listaProyectos"] = bdProyectoNegocio.Listar();
-
-                dgvBdProyecto.DataSource = Session["listaProyectos"];
-                dgvBdProyecto.DataBind();
+                CargarListaProyectos();
                 ddlLineaGestion.SelectedIndex = -1;
                 ddlObra.DataSource = ObtenerObras();  
                 ddlObra.DataTextField = "Nombre";
@@ -153,9 +162,48 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+        private void BindDropDownList()
+        {
+            var proyectoFiltro = ObtenerProyecto();
+            proyectoFiltro.Rows.InsertAt(CrearFilaTodos(proyectoFiltro), 0);
+            ddlProyecto.DataSource = proyectoFiltro;
+            ddlProyecto.DataTextField = "Nombre";
+            ddlProyecto.DataValueField = "Id";
+            ddlProyecto.DataBind();
+
+            ddlObra.DataSource = ObtenerObras();
+            ddlObra.DataTextField = "Nombre";
+            ddlObra.DataValueField = "Id";
+            ddlObra.DataBind();
+
+
+            ddlLineaGestion.DataSource = ObtenerLineaGestion();
+            ddlLineaGestion.DataTextField = "Nombre";
+            ddlLineaGestion.DataValueField = "Id";
+            ddlLineaGestion.DataBind();
+
+            var lineasFiltro = ObtenerLineaGestion();
+            lineasFiltro.Rows.InsertAt(CrearFilaTodos(lineasFiltro), 0);
+            ddlLinea.DataSource = lineasFiltro;
+            ddlLinea.DataTextField = "Nombre";
+            ddlLinea.DataValueField = "Id";
+            ddlLinea.DataBind();
+        }
+        private DataRow CrearFilaTodos(DataTable table)
+        {
+            DataRow row = table.NewRow();
+            row["Id"] = 0;
+            row["Nombre"] = "Todos";
+            return row;
+        }
         private DataTable ObtenerObras()
         {
             ObraNegocio barrioNegocio = new ObraNegocio();
+            return barrioNegocio.listarddl();
+        }
+        private DataTable ObtenerProyecto()
+        {
+            BdProyectoNegocio barrioNegocio = new BdProyectoNegocio();
             return barrioNegocio.listarddl();
         }
         private DataTable ObtenerLineaGestion()

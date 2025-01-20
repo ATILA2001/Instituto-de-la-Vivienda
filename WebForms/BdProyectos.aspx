@@ -78,7 +78,22 @@
 							<label class="form-label lbl-left" for="txtSubtotal1">Subtotal Nuevo:</label>
 							<asp:TextBox ID="txtSubtotal1" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
 						</div>
-
+						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlLinea">Linea de gestion:</label>
+								<asp:DropDownList ID="ddlLinea" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlLinea_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlProyecto">Proyecto:</label>
+								<asp:DropDownList ID="ddlProyecto" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlProyecto_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
+							<div class="form-group  d-flex align-items-end">
+								<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform" Placeholder="Buscar..."></asp:TextBox>
+								<asp:Button ID="btnBuscar" runat="server" Text="Buscar" CssClass="btn btn-sm btn-outline-dark ms-2" OnClick="btnBuscar_Click" />
+							</div>
+						</div>
 
 					</div>
 				</div>
@@ -107,19 +122,14 @@
 			</div>
 		</div>
 	</div>
-
-
 	<script type="text/javascript">
-		function soloNumeros(e) {
-			var tecla = (document.all) ? e.keyCode : e.which;
-			if (tecla == 8 || tecla == 46) {
-				return true;
-			}
-			var patron = /^[0-9]$/;
-			var te = String.fromCharCode(tecla);
-			return patron.test(te);
+		document.getElementById('<%= txtBuscar.ClientID %>').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Evita el envío del formulario
+            document.getElementById('<%= btnBuscar.ClientID %>').click(); // Simula el clic en el botón Buscar
 		}
-	</script>
+	});
+</script>
 	<style>
 		.form-control-uniform {
 			display: inline-block;

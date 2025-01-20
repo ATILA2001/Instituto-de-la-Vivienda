@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,42 @@ namespace Negocio
 {
     public class BdProyectoNegocio
     {
+        public DataTable listarddl()
+        {
+            DataTable dt = new DataTable();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("SELECT DISTINCT proyecto FROM BD_PROYECTOS");
+
+                datos.ejecutarLectura();
+                dt.Columns.Add("ID", typeof(int)); // Generar ID incremental
+                dt.Columns.Add("NOMBRE", typeof(string));
+
+                int id = 1; // Inicializamos el contador de ID
+
+                while (datos.Lector.Read())
+                {
+                    DataRow row = dt.NewRow();
+                    row["ID"] = id; // Generar ID único incremental
+                    row["NOMBRE"] = datos.Lector["proyecto"] as string;
+
+                    dt.Rows.Add(row);
+                    id++; // Incrementar el ID para la siguiente fila
+                }
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Hubo un problema al obtener los proyectos para el usuario", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
 
         public bool modificar(BdProyecto proyecto)
         {
@@ -46,7 +83,7 @@ namespace Negocio
             }
         }
 
-        public List<BdProyecto> Listar()
+        public List<BdProyecto> Listar(string linea, string proye, string filtro = null)
         {
             List<BdProyecto> lista = new List<BdProyecto>();
             AccesoDatos datos = new AccesoDatos();
@@ -54,22 +91,39 @@ namespace Negocio
             {
                 string query = @"
                 SELECT 
-                    BD.ID,
-                    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
-                    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
-                    PROYECTO,
-                    SUBPROYECTO,
-                    L.NOMBRE AS NombreLineaGestion,
-                    AUTORIZADO_INICIAL,
-                    AUTORIZADO_NUEVO,
-O.ID as ID_OBRA,
-L.ID as ID_LINEA
+                BD.ID,
+                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
+                PROYECTO,
+                SUBPROYECTO,
+                L.NOMBRE AS NombreLineaGestion,
+                AUTORIZADO_INICIAL,
+                AUTORIZADO_NUEVO,
+                O.ID as ID_OBRA,
+                L.ID as ID_LINEA
                 FROM BD_PROYECTOS AS BD
                 INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
-INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+                INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
                 INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
-                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID ORDER BY OBRA";
+                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID where 1=1";
+                if (!string.IsNullOrEmpty(linea))
+                {
+                    query += " AND L.NOMBRE = @linea ";
+                    datos.setearParametros("@linea", linea);
+                }
+                if (!string.IsNullOrEmpty(proye))
+                {
+                    query += " AND PROYECTO = @proye ";
+                    datos.setearParametros("@proye", proye);
+                }
+                if (!string.IsNullOrEmpty(filtro))
+                {
 
+                    query += " AND (PROYECTO LIKE @filtro OR  L.NOMBRE LIKE @filtro OR SUBPROYECTO LIKE @filtro OR O.DESCRIPCION LIKE @filtro ) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+
+                }
+                query += " ORDER BY OBRA ";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 
