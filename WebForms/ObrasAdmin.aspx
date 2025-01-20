@@ -86,11 +86,36 @@
 
 		<div class="row mt-4">
 			<div class="col-md-12">
+
+
+				<div class="text-end">
+					<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
+						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlFiltroEmpresa">Empresa:</label>
+								<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlBarrioFiltro">Barrio:</label>
+								<asp:DropDownList ID="ddlBarrioFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlBarrioFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+
+
+
 				<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table"
 					OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
 					OnRowDeleting="dgvObra_RowDeleting"
 					AutoGenerateColumns="false" runat="server"
-					style="display: block; overflow-x: auto;  white-space: nowrap; width: 100%;">
+					Style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
 
 					<Columns>
 						<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
@@ -118,6 +143,28 @@
 				</div>
 			</div>
 		</div>
-		</div>
-		
+	</div>
+<style>
+	.form-control-uniform {
+		display: inline-block;
+		font-size: 14px; /* Tamaño de texto uniforme */
+		padding: 6px 12px;
+		margin-top: -6px;
+		border: 1px solid;
+	}
+
+	.btn {
+		margin-top: -4px;
+		border: 1px solid;
+	}
+
+
+
+	.lbl-left {
+		text-align: left;
+		display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+		font-weight: bold; /* Si necesitas enfatizar el texto */
+	}
+
+</style>
 </asp:Content>

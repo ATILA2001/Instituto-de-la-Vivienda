@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
@@ -12,14 +13,26 @@ namespace Negocio
 {
     public class ObraNegocio
     {
-        public List<Obra> listar(Usuario usuario)
+        public List<Obra> listar(Usuario usuario,string barrio, string empresa)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE WHERE O.AREA = @area;");
+                
+                string query = "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE WHERE O.AREA = @area ";
+                if (!string.IsNullOrEmpty(empresa))
+                {
+                    query += " AND E.NOMBRE = @empresa";
+                    datos.setearParametros("@empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(barrio))
+                {
+                    query += " AND B.NOMBRE = @barrio";
+                    datos.setearParametros("@barrio", barrio);
+                }
+                datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
@@ -77,15 +90,26 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Obra> listar()
+        public List<Obra> listar(string barrio, string empresa)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE ORDER BY DESCRIPCION");
-
+                string query= "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE where 1=1 ";
+                if (!string.IsNullOrEmpty(empresa))
+                {
+                    query += " AND E.NOMBRE = @empresa";
+                    datos.setearParametros("@empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(barrio))
+                {
+                    query += " AND B.NOMBRE = @barrio";
+                    datos.setearParametros("@barrio", barrio);
+                }
+                query += " ORDER BY DESCRIPCION";
+                datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {

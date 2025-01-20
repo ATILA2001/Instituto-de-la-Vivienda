@@ -6,6 +6,40 @@
 
 	<div class="row mt-4">
 		<div class="col-md-12">
+			<div class="text-end">
+				<!-- Contenedor para subtotal alineado a la izquierda -->
+				<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
+					<!-- Subtotal alineado a la izquierda -->
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
+						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+					</div>
+
+					<!-- Filtros alineados a la derecha -->
+					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+						<div class="form-group">
+							<label class="form-label lbl-left" for="ddlEmpresa">Empresa:</label>
+							<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+							</asp:DropDownList>
+						</div>
+						<div class="form-group">
+							<label class="form-label lbl-left" for="ddlObraFiltro">Obra:</label>
+							<asp:DropDownList ID="ddlObraFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlObraFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+							</asp:DropDownList>
+						</div>
+						<div class="form-group">
+							<label class="form-label lbl-left" for="ddlEstadoFiltro">Estado:</label>
+							<asp:DropDownList ID="ddlEstadoFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEstadoFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+							</asp:DropDownList>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+
+
 			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table "
 				OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
 				OnRowDeleting="dgvAutorizante_RowDeleting"
@@ -15,6 +49,8 @@
 					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 
 					<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+								<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+
 					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 
 					<asp:BoundField HeaderText="Concepto" DataField="Concepto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
@@ -47,4 +83,24 @@
 			</div>
 		</div>
 	</div>
+	<style>
+		.form-control-uniform {
+			display: inline-block;
+			font-size: 14px; /* Tamaño de texto uniforme */
+			padding: 6px 12px;
+			margin-top: -6px;
+			border: 1px solid;
+		}
+
+		.btn {
+			margin-top: -4px;
+			border: 1px solid;
+		}
+
+		.lbl-left {
+			text-align: left;
+			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+			font-weight: bold; /* Si necesitas enfatizar el texto */
+		}
+	</style>
 </asp:Content>

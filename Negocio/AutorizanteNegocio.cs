@@ -36,7 +36,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public List<Autorizante> listar(Usuario usuario, string estado, string empresa, int obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
@@ -56,7 +55,7 @@ namespace Negocio
                     query += " AND EM.NOMBRE = @empresa";
                     datos.setearParametros("@empresa", empresa);
                 }
-                if (obra!=0)
+                if (obra != 0)
                 {
                     query += " AND O.ID = @obra";
                     datos.setearParametros("@obra", obra);
@@ -72,7 +71,7 @@ namespace Negocio
                     Autorizante aux = new Autorizante();
                     aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
                     aux.Detalle = datos.Lector["DETALLE"] as string;
-                    aux.Concepto = datos.Lector["CONCEPTO"] as string;  
+                    aux.Concepto = datos.Lector["CONCEPTO"] as string;
                     aux.Empresa = datos.Lector["EMPRESA"] as string;
                     aux.Estado = new EstadoAutorizante
                     {
@@ -114,42 +113,30 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-        public List<Autorizante> listar()
+        public List<Autorizante> listar(string estado, string empresa, int obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta(@"
-            SELECT 
-                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, 
-                O.DESCRIPCION AS OBRA, 
-                A.CODIGO_AUTORIZANTE, 
-                A.DETALLE, 
-                A.CONCEPTO, 
-                E.NOMBRE AS ESTADO, 
-                E.ID AS ESTADO_ID, 
-                A.EXPEDIENTE, 
-                A.MONTO_AUTORIZADO,
-A.MES,
-                A.AUTORIZACION_GG, 
-                AR.NOMBRE AS AREA, 
-                AR.ID AS AREA_ID, 
-                C.ID AS CONTRATA_ID
-            FROM 
-                AUTORIZANTES AS A
-            INNER JOIN 
-                OBRAS AS O ON A.OBRA = O.ID
-            INNER JOIN 
-                ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID
-            INNER JOIN 
-                CONTRATA AS C ON O.CONTRATA = C.ID
-            LEFT JOIN 
-                BD_PROYECTOS AS B ON O.ID = B.ID_BASE
-            INNER JOIN 
-                AREAS AS AR ON O.AREA = AR.ID");
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID";
+                if (!string.IsNullOrEmpty(estado))
+                {
+                    query += " AND E.NOMBRE = @estado";
+                    datos.setearParametros("@estado", estado);
+                }
+                if (!string.IsNullOrEmpty(empresa))
+                {
+                    query += " AND EM.NOMBRE = @empresa";
+                    datos.setearParametros("@empresa", empresa);
+                }
+                if (obra != 0)
+                {
+                    query += " AND O.ID = @obra";
+                    datos.setearParametros("@obra", obra);
+                }
+                datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {
@@ -158,6 +145,7 @@ A.MES,
                     aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
                     aux.Detalle = datos.Lector["DETALLE"] as string;
                     aux.Concepto = datos.Lector["CONCEPTO"] as string;
+                    aux.Empresa = datos.Lector["EMPRESA"] as string;
                     aux.Estado = new EstadoAutorizante
                     {
                         Nombre = datos.Lector["ESTADO"] as string,
@@ -198,7 +186,6 @@ A.MES,
                 datos.cerrarConexion();
             }
         }
-
         public bool agregar(Autorizante nuevoAutorizante)
         {
             AccesoDatos datos = new AccesoDatos();
