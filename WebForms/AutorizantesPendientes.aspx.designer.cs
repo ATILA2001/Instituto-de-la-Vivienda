@@ -11,7 +11,7 @@ namespace WebForms
 {
 
 
-    public partial class AutorizantesAdmin
+    public partial class AutorizantesPendientes
     {
 
         /// <summary>

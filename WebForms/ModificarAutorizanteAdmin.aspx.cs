@@ -31,7 +31,7 @@ namespace WebForms
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
 
-                    List<Autorizante> temp = (List<Autorizante>)Session["listaAutorizante"];
+                    List<Autorizante> temp = (List<Autorizante>)Session["listaAutorizanteAdmin"];
                     Autorizante selected = temp?.Find(x => x.CodigoAutorizante == codM);
 
                     if (selected != null)
@@ -45,7 +45,7 @@ namespace WebForms
                             ? selected.Fecha.Value.ToString("yyyy-MM-dd")
                             : string.Empty;
                         ddlEstado.SelectedValue = selected.Estado?.Id.ToString();
-                        ddlObra.SelectedValue = selected.Estado?.Id.ToString();
+                        ddlObra.SelectedValue = selected.Obra?.Id.ToString();
                     }
                     else
                     {

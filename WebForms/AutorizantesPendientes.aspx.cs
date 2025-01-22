@@ -1,5 +1,4 @@
-﻿using Dominio;
-using Negocio;
+﻿using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,7 +9,7 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class AutorizantesAdmin : System.Web.UI.Page
+    public partial class AutorizantesPendientes : System.Web.UI.Page
     {
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
         protected void Page_Load(object sender, EventArgs e)
@@ -57,7 +56,7 @@ namespace WebForms
                 string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
                 string area = ddlAreaFiltro.SelectedValue == "0" ? null : ddlAreaFiltro.SelectedItem.Text;
 
-                Session["listaAutorizanteAdmin"] = negocio.listar(estadoFiltrado, empresa, obraFiltrado,area);
+                Session["listaAutorizanteAdmin"] = negocio.listarPendientes(estadoFiltrado, empresa, obraFiltrado, area);
                 dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();

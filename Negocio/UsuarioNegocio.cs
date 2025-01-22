@@ -111,12 +111,75 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+        public List<Usuario> listarUsuarioPendiente()
+        {
+            List<Usuario> lista = new List<Usuario>();
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, 
+                                      a.NOMBRE AS AreaNombre, a.ID AS AreaId 
+                               FROM USUARIOS u 
+                               INNER JOIN AREAS a ON u.AREA = a.ID where u.ESTADO = 0");
+                datos.ejecutarLectura();
+
+                while (datos.Lector.Read())
+                {
+                    Usuario aux = new Usuario
+                    {
+                        Id = Convert.ToInt32(datos.Lector["ID"]),
+                        Nombre = datos.Lector["NOMBRE"].ToString(),
+                        Tipo = Convert.ToBoolean(datos.Lector["TIPO"]),
+                        Correo = datos.Lector["CORREO"].ToString(),
+                        Estado = Convert.ToBoolean(datos.Lector["ESTADO"]),
+                        Area = new Area
+                        {
+                            Id = Convert.ToInt32(datos.Lector["AreaId"]),
+                            Nombre = datos.Lector["AreaNombre"].ToString()
+                        }
+                    };
+
+                    lista.Add(aux);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                // Puedes implementar un registro de errores aquí en lugar de relanzar la excepción directamente
+                throw new Exception("Error al listar usuarios", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
         public bool eliminar(object codP)
         {
-            throw new NotImplementedException();
-        }
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+                if (codP != null)
+                {
+                    datos.setearConsulta("DELETE FROM USUARIOS WHERE ID = @ID");
+                    datos.setearParametros("@ID", codP);
+                    datos.ejecutarAccion();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al intentar eliminar el usuario", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
         public bool ModificarUsuario(Usuario usuario)
         {
             AccesoDatos datos = new AccesoDatos();

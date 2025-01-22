@@ -199,7 +199,7 @@ namespace WebForms
         private DataTable ObtenerObras()
         {
             ObraNegocio barrioNegocio = new ObraNegocio();
-            return barrioNegocio.listarddl();
+            return barrioNegocio.listarddlProyecto();
         }
         private DataTable ObtenerProyecto()
         {

@@ -39,7 +39,7 @@ namespace WebForms
                         txtFecha.Text = selected.Fecha.HasValue
                             ? selected.Fecha.Value.ToString("yyyy-MM-dd")
                             : string.Empty;
-                        ddlObra.SelectedValue = selected.Estado?.Id.ToString();
+                        ddlObra.SelectedValue = selected.Obra?.Id.ToString();
                     }
                     else
                     {

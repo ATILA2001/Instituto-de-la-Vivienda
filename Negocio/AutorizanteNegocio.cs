@@ -43,7 +43,7 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID WHERE O.AREA = @area";
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.ID AS OBRA_ID,   CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID WHERE O.AREA = @area";
 
                 if (!string.IsNullOrEmpty(estado))
                 {
@@ -87,6 +87,8 @@ namespace Negocio
 
                     aux.Obra = new Obra
                     {
+                        Id = (int)datos.Lector["OBRA_ID"],
+
                         Descripcion = datos.Lector["OBRA"] as string,
                         Contrata = new Contrata
                         {
@@ -113,14 +115,14 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(string estado, string empresa, int obra)
+        public List<Autorizante> listar(string estado, string empresa, int obra, string area)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID";
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID";
                 if (!string.IsNullOrEmpty(estado))
                 {
                     query += " AND E.NOMBRE = @estado";
@@ -130,6 +132,11 @@ namespace Negocio
                 {
                     query += " AND EM.NOMBRE = @empresa";
                     datos.setearParametros("@empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(area))
+                {
+                    query += " AND AR.NOMBRE = @area";
+                    datos.setearParametros("@area", area);
                 }
                 if (obra != 0)
                 {
@@ -159,6 +166,87 @@ namespace Negocio
 
                     aux.Obra = new Obra
                     {
+                        Id = (int)datos.Lector["OBRA_ID"],
+                        Descripcion = datos.Lector["OBRA"] as string,
+                        Contrata = new Contrata
+                        {
+                            Id = (int)datos.Lector["CONTRATA_ID"],
+                            Nombre = datos.Lector["CONTRATA"] as string
+                        },
+
+                        Area = new Area
+                        {
+                            Id = (int)datos.Lector["AREA_ID"],
+                            Nombre = datos.Lector["AREA"] as string
+                        }
+                    };
+                    lista.Add(aux);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+        public List<Autorizante> listarPendientes(string estado, string empresa, int obra, string area)
+        {
+            List<Autorizante> lista = new List<Autorizante>();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     A.CONCEPTO,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID where A.AUTORIZACION_GG = 0 ";
+                if (!string.IsNullOrEmpty(estado))
+                {
+                    query += " AND E.NOMBRE = @estado";
+                    datos.setearParametros("@estado", estado);
+                }
+                if (!string.IsNullOrEmpty(empresa))
+                {
+                    query += " AND EM.NOMBRE = @empresa";
+                    datos.setearParametros("@empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(area))
+                {
+                    query += " AND AR.NOMBRE = @area";
+                    datos.setearParametros("@area", area);
+                }
+                if (obra != 0)
+                {
+                    query += " AND O.ID = @obra";
+                    datos.setearParametros("@obra", obra);
+                }
+                datos.setearConsulta(query);
+                datos.ejecutarLectura();
+                while (datos.Lector.Read())
+                {
+
+                    Autorizante aux = new Autorizante();
+                    aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
+                    aux.Detalle = datos.Lector["DETALLE"] as string;
+                    aux.Concepto = datos.Lector["CONCEPTO"] as string;
+                    aux.Empresa = datos.Lector["EMPRESA"] as string;
+                    aux.Estado = new EstadoAutorizante
+                    {
+                        Nombre = datos.Lector["ESTADO"] as string,
+                        Id = (int)datos.Lector["ESTADO_ID"]
+                    };
+
+                    aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
+                    aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
+                    aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
+                    aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
+
+                    aux.Obra = new Obra
+                    {
+                        Id = (int)datos.Lector["OBRA_ID"],
+
                         Descripcion = datos.Lector["OBRA"] as string,
                         Contrata = new Contrata
                         {

@@ -30,7 +30,10 @@ namespace WebForms
         {
             CargarListaObras();
         }
-
+        protected void ddlAreaFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaObras();
+        }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             // Limpiar todos los TextBox
@@ -76,7 +79,8 @@ namespace WebForms
             {
                 string barrio = ddlBarrioFiltro.SelectedValue == "0" ? null : ddlBarrioFiltro.SelectedItem.Text;
                 string empresa = ddlFiltroEmpresa.SelectedValue == "0" ? null : ddlFiltroEmpresa.SelectedItem.Text;
-                Session["listaObra"] = negocio.listar(barrio, empresa);
+                string area = ddlAreaFiltro.SelectedValue == "0" ? null : ddlAreaFiltro.SelectedItem.Text;
+                Session["listaObra"] = negocio.listar(barrio, empresa, area);
                 dgvObra.DataSource = Session["listaObra"];
                 dgvObra.DataBind();
             }
@@ -212,6 +216,13 @@ namespace WebForms
             ddlArea.DataTextField = "Nombre";
             ddlArea.DataValueField = "Id";
             ddlArea.DataBind();
+
+            var area = ObtenerAreas();
+            area.Rows.InsertAt(CrearFilaTodos(area), 0);
+            ddlAreaFiltro.DataSource = area;
+            ddlAreaFiltro.DataTextField = "Nombre";
+            ddlAreaFiltro.DataValueField = "Id";
+            ddlAreaFiltro.DataBind();
 
             ddlContrata.DataSource = ObtenerContratas();
             ddlContrata.DataTextField = "Nombre";

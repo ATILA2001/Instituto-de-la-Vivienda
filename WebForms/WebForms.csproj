@@ -72,6 +72,7 @@
     <Content Include="AbmlUsuarios.aspx" />
     <Content Include="Autorizantes.aspx" />
     <Content Include="AutorizantesAdmin.aspx" />
+    <Content Include="AutorizantesPendientes.aspx" />
     <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
@@ -97,6 +98,7 @@
     <Content Include="Obras.aspx" />
     <Content Include="ObrasAdmin.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="UsuariosPendientes.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +143,13 @@
     </Compile>
     <Compile Include="AutorizantesAdmin.aspx.designer.cs">
       <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AutorizantesPendientes.aspx.cs">
+      <DependentUpon>AutorizantesPendientes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AutorizantesPendientes.aspx.designer.cs">
+      <DependentUpon>AutorizantesPendientes.aspx</DependentUpon>
     </Compile>
     <Compile Include="BdProyectos.aspx.cs">
       <DependentUpon>BdProyectos.aspx</DependentUpon>
@@ -324,6 +333,13 @@
     </Compile>
     <Compile Include="User.Master.designer.cs">
       <DependentUpon>User.Master</DependentUpon>
+    </Compile>
+    <Compile Include="UsuariosPendientes.aspx.cs">
+      <DependentUpon>UsuariosPendientes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UsuariosPendientes.aspx.designer.cs">
+      <DependentUpon>UsuariosPendientes.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

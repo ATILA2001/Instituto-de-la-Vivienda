@@ -8,13 +8,13 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class AbmlUsuarios : System.Web.UI.Page
+    public partial class UsuariosPendientes : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
             UsuarioNegocio negocio = new UsuarioNegocio();
-            Session.Add("listaUsuario", negocio.listarUsuario());
-            dgvUsuario.DataSource = Session["listaUsuario"];
+            Session.Add("listaUsuarioPendiente", negocio.listarUsuarioPendiente());
+            dgvUsuario.DataSource = Session["listaUsuarioPendiente"];
             dgvUsuario.DataBind();
         }
 
@@ -35,7 +35,7 @@ namespace WebForms
                     lblMensaje.Text = "¡Se Eliminó correctamente!";
                     lblMensaje.CssClass = "alert alert-success";
                     ScriptManager.RegisterClientScriptBlock(this, typeof(Page), "redirectJS",
-                    "setTimeout(function() { window.location.replace('AbmlUsuarios.aspx') }, 3000);", true);
+                    "setTimeout(function() { window.location.replace('UsuariosPendientes.aspx') }, 3000);", true);
                 }
             }
             catch (Exception)

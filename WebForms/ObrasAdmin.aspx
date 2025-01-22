@@ -101,6 +101,11 @@
 								<asp:DropDownList ID="ddlBarrioFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlBarrioFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlAreaFiltro">Area:</label>
+								<asp:DropDownList ID="ddlAreaFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAreaFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
 						</div>
 					</div>
 				</div>

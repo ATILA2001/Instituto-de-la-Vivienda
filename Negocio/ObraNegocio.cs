@@ -13,14 +13,14 @@ namespace Negocio
 {
     public class ObraNegocio
     {
-        public List<Obra> listar(Usuario usuario,string barrio, string empresa)
+        public List<Obra> listar(Usuario usuario, string barrio, string empresa)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                
+
                 string query = "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE WHERE O.AREA = @area ";
                 if (!string.IsNullOrEmpty(empresa))
                 {
@@ -90,14 +90,14 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Obra> listar(string barrio, string empresa)
+        public List<Obra> listar(string barrio, string empresa, string area)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string query= "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE where 1=1 ";
+                string query = "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE where 1=1 ";
                 if (!string.IsNullOrEmpty(empresa))
                 {
                     query += " AND E.NOMBRE = @empresa";
@@ -107,6 +107,11 @@ namespace Negocio
                 {
                     query += " AND B.NOMBRE = @barrio";
                     datos.setearParametros("@barrio", barrio);
+                }
+                if (!string.IsNullOrEmpty(area))
+                {
+                    query += " AND A.NOMBRE = @area";
+                    datos.setearParametros("@area", area);
                 }
                 query += " ORDER BY DESCRIPCION";
                 datos.setearConsulta(query);
@@ -330,10 +335,54 @@ namespace Negocio
 
             try
             {
-       
+
+
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION,' - ', B.NOMBRE) AS NOMBRE " +
+                                     "FROM OBRAS AS O " +
+                                     "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID "); // Se filtra por el área del usuario activo
+
+
+                datos.ejecutarLectura();
+
+                // Definir las columnas del DataTable.
+                dt.Columns.Add("ID", typeof(int));    // Columna ID (para el valor de la obra)
+                dt.Columns.Add("NOMBRE", typeof(string));  // Columna Descripción (para la opción a mostrar)
+
+                while (datos.Lector.Read())
+                {
+                    // Crear una nueva fila y asignar los valores obtenidos de la base de datos.
+                    DataRow row = dt.NewRow();
+                    row["ID"] = (int)datos.Lector["ID"];  // Asignar el ID de la obra
+                    row["NOMBRE"] = datos.Lector["NOMBRE"] as string;  // Asignar la descripción de la obra
+
+                    // Agregar la fila al DataTable.
+                    dt.Rows.Add(row);
+                }
+
+                return dt;  // Devolvemos el DataTable con los datos
+            }
+            catch (Exception ex)
+            {
+                // Proveer información más detallada en el caso de un error
+                throw new ApplicationException("Hubo un problema al obtener las obras para el usuario", ex);
+            }
+            finally
+            {
+                // Asegurarnos de cerrar la conexión después de usarla.
+                datos.cerrarConexion();
+            }
+        }
+        public DataTable listarddlProyecto()
+        {
+            DataTable dt = new DataTable(); // DataTable donde guardaremos las obras.
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION, ' - ', B.NOMBRE) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)"); 
+                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION, ' - ', B.NOMBRE) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)");
 
 
                 // Ejecutar la consulta.
