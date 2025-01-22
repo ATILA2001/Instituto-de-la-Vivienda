@@ -46,6 +46,7 @@
     <Compile Include="Barrio.cs" />
     <Compile Include="Certificado.cs" />
     <Compile Include="Contrata.cs" />
+    <Compile Include="Devengado.cs" />
     <Compile Include="Empresa.cs" />
     <Compile Include="EstadoAutorizante.cs" />
     <Compile Include="Legitimo.cs" />

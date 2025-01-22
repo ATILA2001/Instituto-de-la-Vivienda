@@ -48,6 +48,7 @@
     <Compile Include="BdProyectoNegocio.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="ContrataNegocio.cs" />
+    <Compile Include="DevengadoNegocio.cs" />
     <Compile Include="EmpresaNegocio.cs" />
     <Compile Include="EstadoAutorizanteNegocio.cs" />
     <Compile Include="LegitimoNegocio.cs" />
