@@ -82,7 +82,7 @@
 	        font-family: var(--fuente_bold);
 	        font-size: 1rem;
 	        color: #fff;
-	        background: linear-gradient(45deg, #f39c12, #e67e22);
+	        background: linear-gradient(45deg, #f1c40f, #f39c11);
 	        padding: 10px 30px;
 	        border-radius: 50px;
 	        border: none;
@@ -90,7 +90,7 @@
 	    }
 
 	        .btn-primary:hover {
-	            background: linear-gradient(45deg, #e67e22, #d35400);
+	            background: linear-gradient(45deg, #f39c11, #f1c40f);
 	            transform: scale(1.1);
 	        }
 

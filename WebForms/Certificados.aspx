@@ -94,7 +94,7 @@
 						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlEmpresa">Empresa:</label>
-								<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White" Width="300px">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group">

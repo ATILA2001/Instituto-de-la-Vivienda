@@ -68,12 +68,13 @@
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<div class="text-end">
-					<div class="d-flex flex-wrap p-3 gap-3">
-						<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+					<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
+						<div class="form-group text-left" style="flex: 1; max-width: 200px;">
 							<label class="form-label lbl-left" for="txtSubtotal">Subtotal Inicial:</label>
 							<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
 						</div>
-						<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+
+						<div class="form-group text-left" style="flex: 1; max-width: 200px;">
 
 							<label class="form-label lbl-left" for="txtSubtotal1">Subtotal Nuevo:</label>
 							<asp:TextBox ID="txtSubtotal1" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
@@ -81,12 +82,12 @@
 						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlLinea">Linea de gestion:</label>
-								<asp:DropDownList ID="ddlLinea" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlLinea_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								<asp:DropDownList ID="ddlLinea" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlLinea_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlProyecto">Proyecto:</label>
-								<asp:DropDownList ID="ddlProyecto" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlProyecto_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								<asp:DropDownList ID="ddlProyecto" runat="server" AutoPostBack="True"  Width="300px" OnSelectedIndexChanged="ddlProyecto_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group  d-flex align-items-end">
@@ -123,14 +124,18 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		document.getElementById('<%= txtBuscar.ClientID %>').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Evita el envío del formulario
-            document.getElementById('<%= btnBuscar.ClientID %>').click(); // Simula el clic en el botón Buscar
-		}
-	});
-</script>
+		document.getElementById('<%= txtBuscar.ClientID %>').addEventListener('keydown', function (event) {
+			if (event.key === 'Enter') {
+				event.preventDefault(); // Evita el envío del formulario
+				document.getElementById('<%= btnBuscar.ClientID %>').click(); // Simula el clic en el botón Buscar
+			}
+		});
+	</script>
 	<style>
+		.d-flex.align-items-end > .form-control {
+			margin-right: 8px; /* Margen entre el campo y el botón */
+		}
+
 		.form-control-uniform {
 			display: inline-block;
 			font-size: 14px; /* Tamaño de texto uniforme */
