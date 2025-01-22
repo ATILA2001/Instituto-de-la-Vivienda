@@ -38,7 +38,7 @@
 							<tbody>
 								<tr>
 									<td>
-										<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
+										<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" Enabled="false" />
 									</td>
 
 									<td>
