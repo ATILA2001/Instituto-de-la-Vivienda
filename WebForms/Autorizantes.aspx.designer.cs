@@ -132,6 +132,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.DropDownList ddlEstadoFiltro;
 
         /// <summary>
+        /// Control ddlConceptoFiltro.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlConceptoFiltro;
+
+        /// <summary>
         /// Control dgvAutorizante.
         /// </summary>
         /// <remarks>

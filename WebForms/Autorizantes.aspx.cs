@@ -50,6 +50,11 @@ namespace WebForms
             CargarListaAutorizantes();
             CalcularSubtotal();
         }
+        protected void ddlConceptoFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaAutorizantes();
+            CalcularSubtotal();
+        }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             ddlConcepto.SelectedIndex = -1;
@@ -83,8 +88,9 @@ namespace WebForms
                 int obraFiltrado = int.Parse(ddlObraFiltro.SelectedValue);
                 string estadoFiltrado = ddlEstadoFiltro.SelectedValue == "0" ? null : ddlEstadoFiltro.SelectedItem.Text;
                 string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
+                string concepto = ddlConceptoFiltro.SelectedValue == "0" ? null : ddlConceptoFiltro.SelectedItem.Text;
 
-                Session["listaAutorizante"] = negocio.listar(usuarioLogueado,estadoFiltrado,empresa,obraFiltrado);
+                Session["listaAutorizante"] = negocio.listar(usuarioLogueado,estadoFiltrado,empresa,concepto,obraFiltrado);
                 dgvAutorizante.DataSource = Session["listaAutorizante"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
@@ -167,6 +173,13 @@ namespace WebForms
             ddlEstadoFiltro.DataTextField = "Nombre";
             ddlEstadoFiltro.DataValueField = "Id";
             ddlEstadoFiltro.DataBind();
+
+            var conceptoFiltro = ObtenerConcepto();
+            conceptoFiltro.Rows.InsertAt(CrearFilaTodos(conceptoFiltro), 0);
+            ddlConceptoFiltro.DataSource = conceptoFiltro;
+            ddlConceptoFiltro.DataTextField = "Nombre";
+            ddlConceptoFiltro.DataValueField = "Id";
+            ddlConceptoFiltro.DataBind();
 
             var empresa = ObtenerEmpresas();
             empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);

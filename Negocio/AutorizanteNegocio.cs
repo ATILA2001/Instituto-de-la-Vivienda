@@ -36,7 +36,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(Usuario usuario, string estado, string empresa, int obra)
+        public List<Autorizante> listar(Usuario usuario, string estado, string empresa,string concepto, int obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
@@ -54,6 +54,11 @@ namespace Negocio
                 {
                     query += " AND EM.NOMBRE = @empresa";
                     datos.setearParametros("@empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(concepto))
+                {
+                    query += " AND CO.NOMBRE = @concepto";
+                    datos.setearParametros("@concepto", concepto);
                 }
                 if (obra != 0)
                 {

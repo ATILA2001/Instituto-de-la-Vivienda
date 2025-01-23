@@ -46,7 +46,7 @@
 
 
 									<td>
-										<asp:DropDownList ID="ddlConcepto" CssClass="form-control" runat="server"> </asp:DropDownList>
+										<asp:DropDownList ID="ddlConcepto" CssClass="form-control" runat="server"></asp:DropDownList>
 									</td>
 									<td>
 										<asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />
@@ -110,6 +110,11 @@
 								<asp:DropDownList ID="ddlEstadoFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlEstadoFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlConceptoFiltro">Concepto:</label>
+								<asp:DropDownList ID="ddlConceptoFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlConceptoFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -117,9 +122,9 @@
 			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover "
 				OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
 				OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
-				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;" >
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
-										<asp:BoundField HeaderText="Obra" DataField="Obra.Id" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" Visible="false"/>
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Id" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" Visible="false" />
 
 					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
