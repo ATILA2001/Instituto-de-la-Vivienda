@@ -89,25 +89,26 @@
 
 			<div class="text-end">
 				<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
-				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-					<div class="form-group">
-						<label class="form-label lbl-left" for="ddlFiltroEmpresa">Empresa:</label>
-						<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True"   Width="300px" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-						</asp:DropDownList>
+					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+						<div class="form-group">
+							<label class="form-label lbl-left" for="ddlFiltroEmpresa">Empresa:</label>
+							<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+							</asp:DropDownList>
+						</div>
+						<div class="form-group">
+							<label class="form-label lbl-left" for="ddlBarrioFiltro">Barrio:</label>
+							<asp:DropDownList ID="ddlBarrioFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlBarrioFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+							</asp:DropDownList>
+						</div>
 					</div>
-					<div class="form-group">
-						<label class="form-label lbl-left" for="ddlBarrioFiltro">Barrio:</label>
-						<asp:DropDownList ID="ddlBarrioFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlBarrioFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-						</asp:DropDownList>
-					</div></div>
 				</div>
 			</div>
 
 
-			<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table"
+			<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover"
 				OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
 				OnRowDeleting="dgvObra_RowDeleting"
-				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 					<asp:BoundField HeaderText="Área" DataField="Area" Visible="false" />
@@ -126,8 +127,9 @@
 					<asp:BoundField HeaderText="Suma Certificados" DataField="MontoCertificado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Ejecucion actual" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:N2}%" />
 
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<%--		<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					--%>
 				</Columns>
 			</asp:GridView>
 
@@ -179,6 +181,36 @@
 		});
 	</script>
 	<style>
+		.table-bordered th, .table-bordered td {
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+
+		.table-hover tbody tr:hover {
+			background-color: #f2f2f2;
+		}
+
+		.table1 th, .table1 td {
+			padding: 12px;
+			font-size: 14px;
+		}
+
+		/* Bordes redondeados y sombras en el GridView */
+		.table1 {
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+		}
+
+			/* Mejorar el estilo de las celdas del encabezado */
+			.table1 th {
+				text-align: center;
+				font-weight: bold;
+				background: #f1c40f;
+				color: white;
+				border: 1px solid #f39c11;
+			}
+
+
 		.form-control-uniform {
 			display: inline-block;
 			font-size: 14px; /* Tamaño de texto uniforme */
