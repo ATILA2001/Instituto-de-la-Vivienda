@@ -22,6 +22,10 @@ namespace WebForms
                 ddlEstado.DataValueField = "Id";
                 ddlEstado.DataBind();
 
+                ddlConcepto.DataSource = ObtenerConcepto();
+                ddlConcepto.DataTextField = "Nombre";
+                ddlConcepto.DataValueField = "Id";
+                ddlConcepto.DataBind();
 
                 ddlObra.DataSource = ObtenerObras();
                 ddlObra.DataTextField = "Nombre";
@@ -48,7 +52,7 @@ namespace WebForms
         }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            txtConcepto.Text = string.Empty;
+            ddlConcepto.SelectedIndex = -1;
             txtDetalle.Text = string.Empty;
             txtMontoAutorizado.Text = string.Empty;
             txtExpediente.Text = string.Empty;
@@ -140,7 +144,8 @@ namespace WebForms
 
             nuevoAutorizante.Obra = new Obra();
             nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
-            nuevoAutorizante.Concepto = txtConcepto.Text;
+            nuevoAutorizante.Concepto = new Concepto();
+            nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
             nuevoAutorizante.Detalle = txtDetalle.Text;
             nuevoAutorizante.Expediente = txtExpediente.Text;
             nuevoAutorizante.Estado = new EstadoAutorizante();
@@ -194,6 +199,11 @@ namespace WebForms
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
+            return empresaNegocio.listarddl();
+        }
+        private DataTable ObtenerConcepto()
+        {
+            ConceptoNegocio empresaNegocio = new ConceptoNegocio();
             return empresaNegocio.listarddl();
         }
 

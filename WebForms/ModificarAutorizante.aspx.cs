@@ -24,7 +24,11 @@ namespace WebForms
                     ddlObra.DataTextField = "Nombre";
                     ddlObra.DataValueField = "Id";
                     ddlObra.DataBind();
-             
+                    ddlConcepto.DataSource = ObtenerConcepto();
+                    ddlConcepto.DataTextField = "Nombre";
+                    ddlConcepto.DataValueField = "Id";
+                    ddlConcepto.DataBind();
+
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
 
                     List<Autorizante> temp = (List<Autorizante>)Session["listaAutorizante"];
@@ -32,8 +36,8 @@ namespace WebForms
 
                     if (selected != null)
                     {
-                       
-                        txtConcepto.Text = selected.Concepto ?? string.Empty;
+
+                        ddlConcepto.SelectedValue = selected.Concepto?.Id.ToString();
                         txtDetalle.Text = selected.Detalle ?? string.Empty;
                         txtMontoAutorizado.Text = selected.MontoAutorizado.ToString("0.00");
                         txtFecha.Text = selected.Fecha.HasValue
@@ -63,7 +67,7 @@ namespace WebForms
                     {
                         CodigoAutorizante = codM,
                         Obra = new Obra { Id = int.Parse(ddlObra.SelectedValue), Descripcion = ddlObra.SelectedItem.Text },
-                        Concepto = txtConcepto.Text.Trim(),
+                        Concepto = new Concepto { Id = int.Parse(ddlConcepto.SelectedValue), Nombre = ddlConcepto.SelectedItem.Text },
                         Detalle = txtDetalle.Text.Trim(),
                         MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text.Trim()),
                         Fecha = string.IsNullOrEmpty(txtFecha.Text.Trim())
@@ -97,7 +101,11 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-
+        private DataTable ObtenerConcepto()
+        {
+            ConceptoNegocio empresaNegocio = new ConceptoNegocio();
+            return empresaNegocio.listarddl();
+        }
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio estadoNegocio = new EstadoAutorizanteNegocio();
@@ -113,7 +121,7 @@ namespace WebForms
         private bool ValidarCampos()
         {
             return ddlObra.SelectedIndex != -1 &&
-                   !string.IsNullOrWhiteSpace(txtConcepto.Text) &&
+                   !string.IsNullOrWhiteSpace(ddlConcepto.Text) &&
                    !string.IsNullOrWhiteSpace(txtDetalle.Text) &&
                    !string.IsNullOrWhiteSpace(txtMontoAutorizado.Text);
               }

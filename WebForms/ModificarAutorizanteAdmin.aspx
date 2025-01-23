@@ -45,7 +45,7 @@
 										<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server" Enabled="false"></asp:DropDownList>
 									</td>
 									<td>
-										<asp:TextBox ID="txtConcepto" CssClass="form-control" runat="server" />
+										<asp:DropDownList ID="ddlConcepto" CssClass="form-control" runat="server"></asp:DropDownList>
 									</td>
 									<td>
 										<asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />

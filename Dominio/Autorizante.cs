@@ -11,9 +11,9 @@ namespace Dominio
     {
         public int Id { get; set; } 
         public Obra Obra { get; set; }
+        public Concepto Concepto { get; set; }
         public string CodigoAutorizante { get; set; }
         public string Detalle { get; set; }
-        public string Concepto { get; set; }
         public EstadoAutorizante Estado { get; set; } 
         public string Expediente { get; set; }
         public decimal MontoAutorizado { get; set; }
