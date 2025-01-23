@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM LINEA_DE_GESTION");
+                datos.setearConsulta("SELECT * FROM LINEA_DE_GESTION  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
 
                 // Definir las columnas del DataTable.
@@ -53,7 +53,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM LINEA_DE_GESTION");
+                datos.setearConsulta("SELECT * FROM LINEA_DE_GESTION  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {

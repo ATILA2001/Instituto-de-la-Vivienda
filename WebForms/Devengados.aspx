@@ -4,8 +4,8 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<asp:GridView ID="dgvDevengados" DataKeyNames="Id" CssClass="table"
-		AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
+	<asp:GridView ID="dgvDevengados" DataKeyNames="Id" CssClass="table1  table-bordered table-hover"
+		AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 		<Columns>
 			<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 			<asp:BoundField HeaderText="Ejercicio" DataField="Ejercicio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
@@ -18,7 +18,7 @@
 			<asp:BoundField HeaderText="Descripción" DataField="Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 			<%--<asp:BoundField HeaderText="Obra" DataField="Obra" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />--%>
 			<asp:BoundField HeaderText="Importe Devengado" DataField="ImporteDevengado" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-<%--			<asp:BoundField HeaderText="Jurisdiccion" DataField="Jurisdiccion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+			<%--			<asp:BoundField HeaderText="Jurisdiccion" DataField="Jurisdiccion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 			<asp:BoundField HeaderText="Subjurisdiccion" DataField="SubJurisdiccion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 			<asp:BoundField HeaderText="Entidad" DataField="Entidad" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 			<asp:BoundField HeaderText="Programa" DataField="Programa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
@@ -49,6 +49,36 @@
 		</Columns>
 	</asp:GridView>
 	<div class="text-center p-4">
-	<asp:Label ID="lblMensaje" Text="" runat="server" />
-</div>
+		<asp:Label ID="lblMensaje" Text="" runat="server" />
+	</div>
+	<style>
+		.table-bordered th, .table-bordered td {
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+
+		.table-hover tbody tr:hover {
+			background-color: #f2f2f2;
+		}
+
+		.table1 th, .table1 td {
+			padding: 12px;
+			font-size: 14px;
+		}
+
+		/* Bordes redondeados y sombras en el GridView */
+		.table1 {
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+		}
+
+			/* Mejorar el estilo de las celdas del encabezado */
+			.table1 th {
+				text-align: center;
+				font-weight: bold;
+				background: #f1c40f;
+				color: white;
+				border: 1px solid #f39c11;
+			}
+	</style>
 </asp:Content>

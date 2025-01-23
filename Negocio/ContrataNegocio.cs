@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM CONTRATA");
+                datos.setearConsulta("SELECT * FROM CONTRATA  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
 
                 dt.Columns.Add("ID");

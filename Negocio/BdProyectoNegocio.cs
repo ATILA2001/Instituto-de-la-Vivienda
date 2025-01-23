@@ -83,7 +83,7 @@ namespace Negocio
             }
         }
 
-        public List<BdProyecto> Listar(string linea, string proye, string filtro = null)
+        public List<BdProyecto> Listar(string linea, string proye, string area, string filtro = null)
         {
             List<BdProyecto> lista = new List<BdProyecto>();
             AccesoDatos datos = new AccesoDatos();
@@ -100,9 +100,12 @@ namespace Negocio
                 AUTORIZADO_INICIAL,
                 AUTORIZADO_NUEVO,
                 O.ID as ID_OBRA,
-                L.ID as ID_LINEA
+                L.ID as ID_LINEA,
+                A.ID AS ID_AREA,
+                A.NOMBRE AS AREA
                 FROM BD_PROYECTOS AS BD
                 INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
+                INNER JOIN AREAS AS A ON O.AREA = A.ID
                 INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
                 INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
                 INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID where 1=1";
@@ -110,6 +113,11 @@ namespace Negocio
                 {
                     query += " AND L.NOMBRE = @linea ";
                     datos.setearParametros("@linea", linea);
+                }
+                if (!string.IsNullOrEmpty(area))
+                {
+                    query += " AND A.NOMBRE = @area ";
+                    datos.setearParametros("@area", area);
                 }
                 if (!string.IsNullOrEmpty(proye))
                 {
@@ -134,12 +142,17 @@ namespace Negocio
                         Obra = new Obra
                         {
                             Id = datos.Lector["ID_OBRA"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID_OBRA"]) : 0,
-                            Descripcion = datos.Lector["OBRA"].ToString()
-                           ,
+                            Descripcion = datos.Lector["OBRA"].ToString(),
                             Contrata = new Contrata
                             {
                                 Nombre = datos.Lector["CONTRATA"].ToString()
+                            },
+                            Area = new Area
+                            {
+                                Id = datos.Lector["ID_AREA"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID_AREA"]) : 0,
+                                Nombre = datos.Lector["AREA"].ToString()
                             }
+
                         },
                         Id = datos.Lector["ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID"]) : 0,
                         Proyecto = datos.Lector["PROYECTO"].ToString(),
@@ -150,7 +163,8 @@ namespace Negocio
                             Nombre = datos.Lector["NombreLineaGestion"].ToString()
                         },
                         AutorizadoInicial = Convert.ToDecimal(datos.Lector["AUTORIZADO_INICIAL"]),
-                        AutorizadoNuevo = Convert.ToDecimal(datos.Lector["AUTORIZADO_NUEVO"])
+                        AutorizadoNuevo = Convert.ToDecimal(datos.Lector["AUTORIZADO_NUEVO"]),
+                        
                     };
 
                     lista.Add(proyecto);

@@ -18,7 +18,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM AREAS");
+                datos.setearConsulta("SELECT * FROM AREAS ORDER BY NOMBRE");
                 datos.ejecutarLectura();
 
                 dt.Columns.Add("ID");
@@ -51,7 +51,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM AREAS");
+                datos.setearConsulta("SELECT * FROM AREAS  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {

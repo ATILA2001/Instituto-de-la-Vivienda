@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM ESTADOS_AUTORIZANTES");
+                datos.setearConsulta("SELECT * FROM ESTADOS_AUTORIZANTES  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
 
                 // Definir las columnas del DataTable.

@@ -27,10 +27,11 @@ namespace WebForms
         {
             try
             {
-                
+                string area = ddlAreaFiltro.SelectedValue == "0" ? null : ddlAreaFiltro.SelectedItem.Text;
+
                 string linea = ddlLinea.SelectedValue == "0" ? null : ddlLinea.SelectedItem.Text;
                 string proyecto = ddlProyecto.SelectedValue == "0" ? null : ddlProyecto.SelectedItem.Text;
-                Session["listaProyectos"] = bdProyectoNegocio.Listar(linea,proyecto, filtro);
+                Session["listaProyectos"] = bdProyectoNegocio.Listar(linea,proyecto, area, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
                 CalcularSubtotal();
@@ -47,7 +48,17 @@ namespace WebForms
             string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
             CargarListaProyectos(filtro);
         }
-
+        protected void ddlAreaFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaProyectos();
+            CalcularSubtotal();
+            CalcularSubtotal1();
+        }
+        private DataTable ObtenerAreas()
+        {
+            AreaNegocio areaNegocio = new AreaNegocio();
+            return areaNegocio.listarddl();
+        }
         protected void ddlLinea_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaProyectos();
@@ -66,7 +77,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvBdProyecto.Rows)
             {
-                var cellValue = row.Cells[5].Text;
+                var cellValue = row.Cells[6].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
@@ -81,7 +92,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvBdProyecto.Rows)
             {
-                var cellValue = row.Cells[6].Text;
+                var cellValue = row.Cells[7].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
@@ -90,7 +101,6 @@ namespace WebForms
 
             txtSubtotal1.Text = subtotal.ToString("C");
         }
-
 
         protected void dgvBdProyecto_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -176,6 +186,12 @@ namespace WebForms
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
 
+            var area = ObtenerAreas();
+            area.Rows.InsertAt(CrearFilaTodos(area), 0);
+            ddlAreaFiltro.DataSource = area;
+            ddlAreaFiltro.DataTextField = "Nombre";
+            ddlAreaFiltro.DataValueField = "Id";
+            ddlAreaFiltro.DataBind();
 
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";

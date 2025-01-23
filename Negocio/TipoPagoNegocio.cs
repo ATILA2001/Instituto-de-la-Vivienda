@@ -17,7 +17,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT * FROM TIPO_PAGO");
+                datos.setearConsulta("SELECT * FROM TIPO_PAGO  ORDER BY NOMBRE");
                 datos.ejecutarLectura();
 
                 // Definir las columnas del DataTable.

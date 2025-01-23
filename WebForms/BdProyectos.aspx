@@ -81,19 +81,25 @@
 						</div>
 						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlAreaFiltro">Area:</label>
+								<asp:DropDownList ID="ddlAreaFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAreaFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
+							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlLinea">Linea de gestion:</label>
 								<asp:DropDownList ID="ddlLinea" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlLinea_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlProyecto">Proyecto:</label>
-								<asp:DropDownList ID="ddlProyecto" runat="server" AutoPostBack="True"  Width="300px" OnSelectedIndexChanged="ddlProyecto_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								<asp:DropDownList ID="ddlProyecto" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlProyecto_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group  d-flex align-items-end">
 								<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform" Placeholder="Buscar..."></asp:TextBox>
 								<asp:Button ID="btnBuscar" runat="server" Text="Buscar" CssClass="btn btn-sm btn-outline-dark ms-2" OnClick="btnBuscar_Click" />
 							</div>
+
 						</div>
 
 					</div>
@@ -101,11 +107,13 @@
 			</div>
 
 
-			<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table"
+			<asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table1  table-bordered table-hover"
 				OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
 				OnRowDeleting="dgvBdProyecto_RowDeleting"
-				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; white-space: nowrap; width: 100%;">
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
+					<asp:BoundField HeaderText="Area " DataField="Obra.Area.Nombre" SortExpression="Obra.Area.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+
 					<asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" SortExpression="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" SortExpression="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" SortExpression="Proyecto" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
@@ -132,6 +140,35 @@
 		});
 	</script>
 	<style>
+		.table-bordered th, .table-bordered td {
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+
+		.table-hover tbody tr:hover {
+			background-color: #f2f2f2;
+		}
+
+		.table1 th, .table1 td {
+			padding: 12px;
+			font-size: 14px;
+		}
+
+		/* Bordes redondeados y sombras en el GridView */
+		.table1 {
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+		}
+
+			/* Mejorar el estilo de las celdas del encabezado */
+			.table1 th {
+				text-align: center;
+				font-weight: bold;
+				background: #f1c40f;
+				color: white;
+				border: 1px solid #f39c11;
+			}
+
 		.d-flex.align-items-end > .form-control {
 			margin-right: 8px; /* Margen entre el campo y el botón */
 		}
