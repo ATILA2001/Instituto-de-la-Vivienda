@@ -41,11 +41,13 @@ namespace WebForms
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
                 DateTime? mesAprobacion = null;
                 string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
+                string autorizante = ddlAutorizante.SelectedValue == "0" ? null : ddlAutorizante.SelectedItem.Text;
+
                 if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
                 {
                     mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
                 }
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, empresa);
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, empresa, autorizante);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -144,19 +146,25 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return barrioNegocio.listarddl(usuarioLogueado);
         }
+        private DataTable ObtenerLegitimos()
+        {
+            LegitimoNegocio barrioNegocio = new LegitimoNegocio();
+            Usuario usuarioLogueado = (Usuario)Session["usuario"];
+            return barrioNegocio.listarddl(usuarioLogueado);
+        }
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             TextBox txtExpediente = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-            string codigoAutorizante = dgvLegitimos.DataKeys[row.RowIndex].Value.ToString();
+            int id = (int)dgvLegitimos.DataKeys[row.RowIndex].Value;
 
             string nuevoExpediente = txtExpediente.Text;
 
             try
             {
                 LegitimoNegocio negocio = new LegitimoNegocio();
-                negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
+                negocio.ActualizarExpediente(id, nuevoExpediente);
 
                 lblMensaje.Text = "Expediente actualizado correctamente.";
                 CargarListaLegitimos();
@@ -190,6 +198,11 @@ namespace WebForms
             CargarListaLegitimos();
             CalcularSubtotal();
         }
+        protected void ddlAutorizante_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaLegitimos();
+            CalcularSubtotal();
+        }
         private void BindDropDownList()
         {
 
@@ -204,6 +217,13 @@ namespace WebForms
             ddlEmpresa.DataTextField = "Nombre";
             ddlEmpresa.DataValueField = "Id";
             ddlEmpresa.DataBind();
+            var autorizante = ObtenerLegitimos();
+            autorizante.Rows.InsertAt(CrearFilaTodos(autorizante), 0);
+            ddlAutorizante.DataSource = autorizante;
+            ddlAutorizante.DataTextField = "Nombre";
+            ddlAutorizante.DataValueField = "Id";
+            ddlAutorizante.DataBind();
+
         }
         private DataTable ObtenerEmpresas()
         {

@@ -289,10 +289,10 @@ namespace Negocio
                 }
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION,' - ', B.NOMBRE) AS NOMBRE " +
+                datos.setearConsulta("SELECT O.ID, CONCAT( B.NOMBRE, ' - ' , O.DESCRIPCION,' - ', C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE " +
                                      "FROM OBRAS AS O " +
                                      "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID " +
-                                     "WHERE O.AREA = @area"); // Se filtra por el área del usuario activo
+                                     "WHERE O.AREA = @area order by NOMBRE"); // Se filtra por el área del usuario activo
 
                 // Asignar el parámetro del área del usuario.
                 datos.agregarParametro("@area", usuario.Area.Id);
@@ -337,9 +337,9 @@ namespace Negocio
             {
 
 
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ' , O.DESCRIPCION,' - ', B.NOMBRE) AS NOMBRE " +
+                datos.setearConsulta("SELECT O.ID, CONCAT( B.NOMBRE, ' - ' , O.DESCRIPCION,' - ', C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE " +
                                      "FROM OBRAS AS O " +
-                                     "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID "); // Se filtra por el área del usuario activo
+                                     "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID order  by NOMBRE "); // Se filtra por el área del usuario activo
 
 
                 datos.ejecutarLectura();
@@ -382,7 +382,7 @@ namespace Negocio
 
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT(C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO, ' - ', O.DESCRIPCION, ' - ', B.NOMBRE) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS)");
+                datos.setearConsulta("SELECT O.ID, CONCAT( B.NOMBRE, ' - ' , O.DESCRIPCION,' - ', C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS) order by NOMBRE");
 
 
                 // Ejecutar la consulta.

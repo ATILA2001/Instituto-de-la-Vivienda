@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,18 +64,70 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(Usuario usuario, DateTime? mesAprobacion, string empresa)
+        public DataTable listarddl(Usuario usuario)
+        {
+            DataTable dt = new DataTable();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                // Validación: usuario y su área no pueden ser nulos
+                if (usuario == null || usuario.Area == null)
+                {
+                    throw new ArgumentNullException("El usuario o su área no pueden ser nulos.");
+                }
+
+                // Configurar la consulta
+                datos.setearConsulta(@"
+            SELECT  ROW_NUMBER() OVER (ORDER BY L.CODIGO_AUTORIZANTE) AS ID, L.CODIGO_AUTORIZANTE FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID WHERE O.AREA = @area AND L.CODIGO_AUTORIZANTE IS NOT NULL GROUP BY L.CODIGO_AUTORIZANTE ");
+                datos.agregarParametro("@area", usuario.Area.Id);
+
+                // Ejecutar la lectura
+                datos.ejecutarLectura();
+
+                // Crear columnas para el DataTable
+                dt.Columns.Add("ID", typeof(int));
+                dt.Columns.Add("NOMBRE", typeof(string));
+
+                // Poblar el DataTable con los datos leídos
+                while (datos.Lector.Read())
+                {
+                    DataRow row = dt.NewRow();
+                    row["ID"] = Convert.ToInt32(datos.Lector["ID"]);
+                    row["NOMBRE"] = datos.Lector["CODIGO_AUTORIZANTE"] as string;
+                    dt.Rows.Add(row);
+                }
+
+                return dt; // Devolver el DataTable
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                throw new ApplicationException("Hubo un problema al obtener los códigos autorizantes.", ex);
+            }
+            finally
+            {
+                // Asegurarse de cerrar la conexión
+                datos.cerrarConexion();
+            }
+        }
+        public List<Legitimo> listarFiltro(Usuario usuario, DateTime? mesAprobacion, string empresa, string autorizante)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = " SELECT CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, L.CODIGO_AUTORIZANTE, L.EXPEDIENTE, L.INICIO_EJECUCION, L.FIN_EJECUCION, L.CERTIFICADO, L.MES_APROBACION, EM.NOMBRE AS EMPRESA, CASE WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE O.AREA = @area ";
+                string query = " SELECT L.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, L.CODIGO_AUTORIZANTE, L.EXPEDIENTE, L.INICIO_EJECUCION, L.FIN_EJECUCION, L.CERTIFICADO, L.MES_APROBACION, EM.NOMBRE AS EMPRESA, CASE WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE O.AREA = @area ";
                 if (!string.IsNullOrEmpty(empresa))
                 {
                     query += " AND EM.NOMBRE = @Empresa";
                     datos.setearParametros("@Empresa", empresa);
+                }
+                if (!string.IsNullOrEmpty(autorizante))
+                {
+                    query += " AND L.CODIGO_AUTORIZANTE = @autorizante";
+                    datos.setearParametros("@autorizante", autorizante);
                 }
                 if (mesAprobacion.HasValue)
                 {
@@ -93,6 +146,7 @@ namespace Negocio
                 {
                     var legitimoAbono = new Legitimo
                     {
+                        Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
@@ -198,7 +252,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public bool ActualizarExpediente(string autorizante, string ex)
+        public bool ActualizarExpediente(int id, string ex)
         {
             var datos = new AccesoDatos();
 
@@ -208,10 +262,10 @@ namespace Negocio
         UPDATE LEGITIMOS_ABONOS 
         SET 
             EXPEDIENTE = @expediente
-           WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
+           WHERE ID = @id");
 
                 datos.agregarParametro("@expediente", ex);
-                datos.agregarParametro("@codigoAutorizante", autorizante);
+                datos.agregarParametro("@id", id);
 
                 datos.ejecutarAccion();
                 return true;

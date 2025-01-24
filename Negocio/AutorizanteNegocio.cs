@@ -36,14 +36,14 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(Usuario usuario, string estado, string empresa,string concepto, int obra)
+        public List<Autorizante> listar(Usuario usuario, string estado, string empresa, string concepto, int obra)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.ID AS OBRA_ID,   CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,     CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID WHERE O.AREA = @area";
+                string query = "select CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,    A.DETALLE,    CO.NOMBRE AS CONCEPTO,    CO.ID AS CONCEPTO_ID,    E.NOMBRE AS ESTADO,    E.ID AS ESTADO_ID,    A.EXPEDIENTE,    A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,    AR.NOMBRE AS AREA,    AR.ID AS AREA_ID,    C.ID AS CONTRATA_ID,    PS.[BUZON DESTINO],    PS.[FECHA ULTIMO PASE] FROM    AUTORIZANTES AS A INNER JOIN    OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN  CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN    BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN    AREAS AS AR ON O.AREA = AR.ID INNER JOIN    EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN    BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN    CONCEPTOS AS CO ON A.CONCEPTO = CO.ID LEFT JOIN     PASES_SADE AS PS ON A.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE    O.AREA = @area";
 
                 if (!string.IsNullOrEmpty(estado))
                 {
@@ -92,6 +92,9 @@ namespace Negocio
                     aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
                     aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
+                    aux.FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null;
+                    aux.BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString();
+
 
 
                     aux.Obra = new Obra

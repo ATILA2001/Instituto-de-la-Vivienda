@@ -98,6 +98,11 @@
 								<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
+							<div class="form-group">
+								<label class="form-label lbl-left" for="ddlAutorizante">Autorizante:</label>
+								<asp:DropDownList ID="ddlAutorizante" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAutorizante_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								</asp:DropDownList>
+							</div>
 							<div class="form-group d-flex align-items-end">
 								<div>
 									<label class="form-label lbl-left" for="txtMesAprobacionFiltro">Mes Aprobación:</label>
@@ -113,7 +118,7 @@
 			</div>
 
 
-			<asp:GridView ID="dgvLegitimos" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover  "
+			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  "
 				OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
 					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
