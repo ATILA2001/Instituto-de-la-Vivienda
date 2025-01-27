@@ -42,6 +42,9 @@ namespace WebForms
             ddlEmpresa.SelectedIndex = -1;
             ddlContrata.SelectedIndex = -1;
             ddlBarrio.SelectedIndex = -1;
+            cblBarrio.SelectedIndex = -1;
+            cblEmpresa.SelectedIndex = -1;
+
         }
         private DataTable ObtenerEmpresas()
         {
@@ -65,11 +68,12 @@ namespace WebForms
             try
             {
 
-                string barrio = ddlBarrioFiltro.SelectedValue == "0" ? null : ddlBarrioFiltro.SelectedItem.Text;
-                string empresa = ddlFiltroEmpresa.SelectedValue == "0" ? null : ddlFiltroEmpresa.SelectedItem.Text;
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
+                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaObra"] = negocio.listar(usuarioLogueado,barrio, empresa);
+                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas);
                 dgvObra.DataSource = Session["listaObra"];
                 dgvObra.DataBind();
             }
@@ -178,36 +182,33 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            
-            ddlEmpresa.DataSource = ObtenerEmpresas();  
-            ddlEmpresa.DataTextField = "Nombre";         
-            ddlEmpresa.DataValueField = "Id";            
+
+            ddlEmpresa.DataSource = ObtenerEmpresas();
+            ddlEmpresa.DataTextField = "Nombre";
+            ddlEmpresa.DataValueField = "Id";
             ddlEmpresa.DataBind();
 
-            
-            ddlContrata.DataSource = ObtenerContratas();  
+
+            ddlContrata.DataSource = ObtenerContratas();
             ddlContrata.DataTextField = "Nombre";
             ddlContrata.DataValueField = "Id";
             ddlContrata.DataBind();
 
-            ddlBarrio.DataSource = ObtenerBarrios();    
+            ddlBarrio.DataSource = ObtenerBarrios();
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
 
-            var barrio = ObtenerBarrios();
-            barrio.Rows.InsertAt(CrearFilaTodos(barrio), 0);
-            ddlBarrioFiltro.DataSource = barrio;
-            ddlBarrioFiltro.DataTextField = "Nombre";
-            ddlBarrioFiltro.DataValueField = "Id";
-            ddlBarrioFiltro.DataBind();
+            cblBarrio.DataSource = ObtenerBarrios();
+            cblBarrio.DataTextField = "Nombre";
+            cblBarrio.DataValueField = "Id";
+            cblBarrio.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlFiltroEmpresa.DataSource = empresa;
-            ddlFiltroEmpresa.DataTextField = "Nombre";
-            ddlFiltroEmpresa.DataValueField = "Id";
-            ddlFiltroEmpresa.DataBind();
+
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
 
         }
 
@@ -233,6 +234,10 @@ namespace WebForms
                 lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
+        }
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            CargarListaObras();
         }
     }
 }

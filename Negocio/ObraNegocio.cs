@@ -13,7 +13,7 @@ namespace Negocio
 {
     public class ObraNegocio
     {
-        public List<Obra> listar(Usuario usuario, string barrio, string empresa)
+        public List<Obra> listar(Usuario usuario, List<string> barrios, List<string> empresas)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
@@ -22,16 +22,26 @@ namespace Negocio
             {
 
                 string query = "SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, NUMERO, C.NOMBRE AS CONTRATA, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, DESCRIPCION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) AS MONTO_CERTIFICADO, (SELECT SUM(A.MONTO_AUTORIZADO) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) AS SUMA_AUTORIZANTE, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT SUM(C.MONTO_TOTAL) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) / BD.AUTORIZADO_NUEVO) * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE WHERE O.AREA = @area ";
-                if (!string.IsNullOrEmpty(empresa))
+                if (empresas != null && empresas.Count > 0)
                 {
-                    query += " AND E.NOMBRE = @empresa";
-                    datos.setearParametros("@empresa", empresa);
+                    string empresasParam = string.Join(",", empresas.Select((e, i) => $"@empresa{i}"));
+                    query += $" AND E.NOMBRE IN ({empresasParam})";
+                    for (int i = 0; i < empresas.Count; i++)
+                    {
+                        datos.setearParametros($"@empresa{i}", empresas[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(barrio))
+
+                if (barrios != null && barrios.Count > 0)
                 {
-                    query += " AND B.NOMBRE = @barrio";
-                    datos.setearParametros("@barrio", barrio);
+                    string barriosParam = string.Join(",", barrios.Select((e, i) => $"@barrio{i}"));
+                    query += $" AND B.NOMBRE IN ({barriosParam})";
+                    for (int i = 0; i < barrios.Count; i++)
+                    {
+                        datos.setearParametros($"@barrio{i}", barrios[i]);
+                    }
                 }
+
                 datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
                 datos.ejecutarLectura();
