@@ -93,7 +93,7 @@
 						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 							<div class="form-group">
 								<label class="form-label lbl-left" for="ddlFiltroEmpresa">Empresa:</label>
-								<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True"  Width="300px" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
+								<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
 								</asp:DropDownList>
 							</div>
 							<div class="form-group">
@@ -109,10 +109,6 @@
 						</div>
 					</div>
 				</div>
-
-
-
-
 
 
 
@@ -149,8 +145,7 @@
 			</div>
 		</div>
 	</div>
-<style>
-		<style>
+	<style>
 		.table-bordered th, .table-bordered td {
 			border: 1px solid #dddddd;
 			text-align: center;
@@ -179,27 +174,26 @@
 				color: white;
 				border: 1px solid #f39c11;
 			}
+
+		.form-control-uniform {
+			display: inline-block;
+			font-size: 14px; /* Tamaño de texto uniforme */
+			padding: 6px 12px;
+			margin-top: -6px;
+			border: 1px solid;
+		}
+
+		.btn {
+			margin-top: -4px;
+			border: 1px solid;
+		}
+
+
+
+		.lbl-left {
+			text-align: left;
+			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+			font-weight: bold; /* Si necesitas enfatizar el texto */
+		}
 	</style>
-	.form-control-uniform {
-		display: inline-block;
-		font-size: 14px; /* Tamaño de texto uniforme */
-		padding: 6px 12px;
-		margin-top: -6px;
-		border: 1px solid;
-	}
-
-	.btn {
-		margin-top: -4px;
-		border: 1px solid;
-	}
-
-
-
-	.lbl-left {
-		text-align: left;
-		display: block; /* Asegura que el label ocupe toda la línea si es necesario */
-		font-weight: bold; /* Si necesitas enfatizar el texto */
-	}
-
-</style>
 </asp:Content>

@@ -40,14 +40,16 @@ namespace WebForms
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
                 DateTime? mesAprobacion = null;
-                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
-                string autorizante = ddlAutorizante.SelectedValue == "0" ? null : ddlAutorizante.SelectedItem.Text;
+
+
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
                 {
                     mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
                 }
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, empresa, autorizante);
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, selectedEmpresas, selectedAutorizantes);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -193,16 +195,6 @@ namespace WebForms
 
             txtSubtotal.Text = subtotal.ToString("C");
         }
-        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaLegitimos();
-            CalcularSubtotal();
-        }
-        protected void ddlAutorizante_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaLegitimos();
-            CalcularSubtotal();
-        }
         private void BindDropDownList()
         {
 
@@ -211,18 +203,15 @@ namespace WebForms
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlEmpresa.DataSource = empresa;
-            ddlEmpresa.DataTextField = "Nombre";
-            ddlEmpresa.DataValueField = "Id";
-            ddlEmpresa.DataBind();
-            var autorizante = ObtenerLegitimos();
-            autorizante.Rows.InsertAt(CrearFilaTodos(autorizante), 0);
-            ddlAutorizante.DataSource = autorizante;
-            ddlAutorizante.DataTextField = "Nombre";
-            ddlAutorizante.DataValueField = "Id";
-            ddlAutorizante.DataBind();
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
+
+            cblAutorizante.DataSource = ObtenerLegitimos();
+            cblAutorizante.DataTextField = "Nombre";
+            cblAutorizante.DataValueField = "Id";
+            cblAutorizante.DataBind();
 
         }
         private DataTable ObtenerEmpresas()
@@ -237,11 +226,9 @@ namespace WebForms
             row["Nombre"] = "Todos";
             return row;
         }
-
-        protected void btnFiltrarMes_Click(object sender, EventArgs e)
+        protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             CargarListaLegitimos();
-            CalcularSubtotal();
         }
 
 

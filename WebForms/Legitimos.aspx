@@ -79,40 +79,61 @@
 	<div class="alert" id="visibilityMessage" role="alert">
 		<strong id="visibilityText">Agregar Legitimo</strong>
 	</div>
-	<div class="container-fluid mt-4">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<div class="text-end">
-					<!-- Contenedor para subtotal alineado a la izquierda -->
-					<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
-						<!-- Subtotal alineado a la izquierda -->
-						<div class="form-group text-left" style="flex: 1; max-width: 300px;">
-							<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
-							<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+
+	<div class="row mt-4">
+		<div class="col-md-12">
+			<div class="text-end">
+				<!-- Contenedor para subtotal alineado a la izquierda -->
+				<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
+					<!-- Subtotal alineado a la izquierda -->
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
+						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+					</div>
+
+					<!-- Filtros alineados a la derecha -->
+					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+
+
+
+						<div class="form-group">
+							<label class="form-label lbl-left" for="cblEmpresa">Empresa:</label>
+							<div class="dropdown">
+								<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
+									Todas
+								</button>
+								<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
+									<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
+								</ul>
+							</div>
 						</div>
 
-						<!-- Filtros alineados a la derecha -->
-						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-							<div class="form-group">
-								<label class="form-label lbl-left" for="ddlEmpresa">Empresa:</label>
-								<asp:DropDownList ID="ddlEmpresa" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-								</asp:DropDownList>
+						<div class="form-group">
+							<label class="form-label lbl-left" for="cblAutorizante">Autorizante:</label>
+							<div class="dropdown">
+								<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownAutorizante" data-bs-toggle="dropdown" aria-expanded="false">
+									Todas
+								</button>
+								<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
+									<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
+								</ul>
 							</div>
-							<div class="form-group">
-								<label class="form-label lbl-left" for="ddlAutorizante">Autorizante:</label>
-								<asp:DropDownList ID="ddlAutorizante" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAutorizante_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-								</asp:DropDownList>
-							</div>
-							<div class="form-group d-flex align-items-end">
-								<div>
-									<label class="form-label lbl-left" for="txtMesAprobacionFiltro">Mes Aprobación:</label>
-									<asp:TextBox ID="txtMesAprobacionFiltro" runat="server" CssClass="form-control form-control-uniform" TextMode="Date" />
-								</div>
-								<asp:Button ID="btnFiltrarMes" runat="server" CssClass="btn btn-sm btn-outline-dark ms-2" Text="Filtrar por Mes" OnClick="btnFiltrarMes_Click" />
-							</div>
-
-
 						</div>
+
+						<div class="form-group d-flex align-items-end">
+							<div>
+								<label class="form-label lbl-left" for="txtMesAprobacionFiltro">Mes Aprobación:</label>
+								<asp:TextBox ID="txtMesAprobacionFiltro" runat="server" CssClass="form-control form-control-uniform" TextMode="Date" />
+							</div>
+						</div>
+						<div class="form-group  d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
+						</div>
+						<div class="form-group d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+						</div>
+
+
 					</div>
 				</div>
 			</div>
@@ -187,8 +208,138 @@
 				}
 			});
 		});
+
+		$(document).ready(function () {
+			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
+				var seleccionados = [];
+				var $checkBoxList = $('#' + checkBoxListId);
+				var $dropdown = $('#' + dropdownId);
+
+				// Procesar checkboxes seleccionados
+				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
+					seleccionados.push($(this).next('label').text());
+				});
+
+				// Guardar en localStorage
+				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
+
+				// Actualizar el texto del botón
+				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Todos';
+				$dropdown.text(textoBoton);
+			}
+
+			// Inicializar para empresas
+			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
+			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+
+
+			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+			});
+
+			// Inicializar para  Autorizante 
+			var AutorizanteSeleccionados = JSON.parse(localStorage.getItem('selectedAutorizantes')) || [];
+			actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
+
+			$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
+			});
+
+			// Limpiar filtros
+			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
+				// Limpiar localStorage
+				localStorage.removeItem('selectedEmpresas');
+				localStorage.removeItem('selectedAutorizantes');
+
+				// Restablecer checkboxes
+				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').prop('checked', false);
+				// Restablecer texto de los botones
+
+				$('#dropdownEmpresa').text('Todas');
+				$('#dropdownAutorizante').text('Todos');
+			});
+		});
+
+
+
+
+
+
 	</script>
 	<style>
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+			.form-group label {
+				font-size: 14px;
+				color: #495057; /* Gris oscuro para un aspecto formal */
+				font-weight: 600; /* Peso semibold */
+				margin-bottom: 5px;
+			}
+
+			/* Estilo del botón dropdown */
+			.form-group .dropdown-toggle {
+				background-color: #f8f9fa; /* Fondo claro */
+				color: #212529; /* Texto negro */
+				border: 1px solid #ced4da; /* Borde gris claro */
+				border-radius: 0.375rem; /* Bordes redondeados suaves */
+				width: 100%; /* Ocupa todo el ancho */
+				text-align: left; /* Alineación del texto a la izquierda */
+				padding: 8px 12px; /* Espaciado interno */
+				font-size: 14px; /* Tamaño de texto claro y sobrio */
+			}
+
+				.form-group .dropdown-toggle:hover {
+					background-color: #e2e6ea; /* Color de fondo en hover */
+					border-color: #adb5bd; /* Color del borde en hover */
+					color: #212529;
+				}
+
+			/* Estilo del menú desplegable */
+			.form-group .dropdown-menu {
+				border: 1px solid #ced4da; /* Mismo borde que el botón */
+				border-radius: 0.375rem; /* Bordes redondeados */
+				padding: 0.5rem; /* Espaciado interno */
+				background-color: #ffffff; /* Fondo blanco */
+				max-height: 200px;
+				overflow-y: auto; /* Scroll para contenido largo */
+			}
+
+				.form-group .dropdown-menu .form-check:hover {
+					background-color: transparent;
+				}
+
+				/* Opcional: elimina el contorno (outline) en estados de foco */
+				.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+					outline: none;
+					box-shadow: none;
+				}
+				/* Estilo de los items en el dropdown */
+				.form-group .dropdown-menu .form-check {
+					margin-bottom: 0.5rem;
+				}
+
+					.form-group .dropdown-menu .form-check label {
+						font-size: 14px;
+						color: #495057;
+						background-color: transparent;
+					}
+
+					.form-group .dropdown-menu .form-check input[type="checkbox"] {
+						margin-right: 8px;
+					}
+
+						.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+						.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+							color: #495057; /* Mantener el color gris */
+							background-color: transparent; /* Sin fondo azul */
+							font-weight: normal; /* Opcional, mantiene el estilo regular */
+						}
+
+
+
 		.table-bordered th, .table-bordered td {
 			border: 1px solid #dddddd;
 			text-align: center;

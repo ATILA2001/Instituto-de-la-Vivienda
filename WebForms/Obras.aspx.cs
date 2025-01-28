@@ -21,14 +21,7 @@ namespace WebForms
                 CargarListaObras();
             }
         }
-        protected void ddlFiltroEmpresa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaObras();
-        }
-        protected void ddlBarrioFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaObras();
-        }
+
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             // Limpiar todos los TextBox

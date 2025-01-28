@@ -19,7 +19,6 @@ namespace WebForms
             if (!IsPostBack)
             {
 
-
                 BindDropDownList();
 
                 CargarListaCertificados();
@@ -54,16 +53,19 @@ namespace WebForms
         {
             try
             {
-                Usuario usuarioLogueado = (Usuario)Session["usuario"]; 
-                string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
-                string tipoFiltrado = ddlTipoFiltro.SelectedValue == "0" ? null : ddlTipoFiltro.SelectedItem.Text;
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
                 DateTime? mesAprobacion = null;
-                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
                 if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
                 {
                     mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
                 }
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, autorizanteFiltrado, tipoFiltrado, mesAprobacion,empresa);
+
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, mesAprobacion, selectedEmpresas);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -158,19 +160,7 @@ namespace WebForms
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
             return tipoPagNegocio.listarddl();
         }
-        private DataTable ObtenerTiposFiltro()
-        {
-            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
-            return tipoPagNegocio.listarddl();
-        }
 
-        private DataTable ObtenerAutorizantesFiltro()
-        {
-            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
-
-            Usuario usuarioLogueado = (Usuario)Session["usuario"];
-            return autorizanteNegocio.listarddl(usuarioLogueado);
-        }
         private DataTable ObtenerAutorizantes()
         {
             AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
@@ -178,56 +168,32 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return autorizanteNegocio.listarddl(usuarioLogueado);
         }
-        protected void ddlAutorizanteFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
-        protected void ddlTipoFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
-        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
         private void BindDropDownList()
         {
-            var tipos = ObtenerTipos();
-            ddlTipo.DataSource = tipos;
+            ddlTipo.DataSource = ObtenerTipos(); 
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
 
-            var tiposFiltro = ObtenerTiposFiltro();
-            tiposFiltro.Rows.InsertAt(CrearFilaTodos(tiposFiltro), 0);
-            ddlTipoFiltro.DataSource = tiposFiltro;
-            ddlTipoFiltro.DataTextField = "Nombre";
-            ddlTipoFiltro.DataValueField = "Id";
-            ddlTipoFiltro.DataBind();
+            cblTipo.DataSource = ObtenerTipos();
+            cblTipo.DataTextField = "Nombre";
+            cblTipo.DataValueField = "Id";
+            cblTipo.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlEmpresa.DataSource = empresa;  
-            ddlEmpresa.DataTextField = "Nombre";
-            ddlEmpresa.DataValueField = "Id"; 
-            ddlEmpresa.DataBind();
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
 
-            var autorizantes = ObtenerAutorizantes();
-            ddlAutorizante.DataSource = autorizantes;
+            ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
 
-
-            var autorizantesFiltro = ObtenerAutorizantesFiltro();
-            autorizantesFiltro.Rows.InsertAt(CrearFilaTodos(autorizantesFiltro), 0);
-            ddlAutorizanteFiltro.DataSource = autorizantesFiltro;
-            ddlAutorizanteFiltro.DataTextField = "Nombre";
-            ddlAutorizanteFiltro.DataValueField = "Id";
-            ddlAutorizanteFiltro.DataBind();
+            cblAutorizante.DataSource = ObtenerAutorizantes();
+            cblAutorizante.DataTextField = "Nombre";
+            cblAutorizante.DataValueField = "Id";
+            cblAutorizante.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
@@ -242,13 +208,7 @@ namespace WebForms
             return row;
         }
 
-        protected void btnFiltrarMes_Click(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
-
-
+   
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             // Identifica el TextBox modificado
@@ -279,6 +239,10 @@ namespace WebForms
                 // Manejo de errores
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
             }
+        }
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
         }
 
     }

@@ -17,44 +17,11 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                ddlEstado.DataSource = ObtenerEstado();
-                ddlEstado.DataTextField = "Nombre";
-                ddlEstado.DataValueField = "Id";
-                ddlEstado.DataBind();
-
-                ddlConcepto.DataSource = ObtenerConcepto();
-                ddlConcepto.DataTextField = "Nombre";
-                ddlConcepto.DataValueField = "Id";
-                ddlConcepto.DataBind();
-
-                ddlObra.DataSource = ObtenerObras();
-                ddlObra.DataTextField = "Nombre";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
                 BindDropDownList();
                 CargarListaAutorizantes();
             }
         }
-        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaAutorizantes();
-            CalcularSubtotal();
-        }
-        protected void ddlObraFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaAutorizantes();
-            CalcularSubtotal();
-        }
-        protected void ddlEstadoFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaAutorizantes();
-            CalcularSubtotal();
-        }
-        protected void ddlConceptoFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaAutorizantes();
-            CalcularSubtotal();
-        }
+
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             ddlConcepto.SelectedIndex = -1;
@@ -85,12 +52,15 @@ namespace WebForms
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                int obraFiltrado = int.Parse(ddlObraFiltro.SelectedValue);
-                string estadoFiltrado = ddlEstadoFiltro.SelectedValue == "0" ? null : ddlEstadoFiltro.SelectedItem.Text;
-                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
-                string concepto = ddlConceptoFiltro.SelectedValue == "0" ? null : ddlConceptoFiltro.SelectedItem.Text;
 
-                Session["listaAutorizante"] = negocio.listar(usuarioLogueado,estadoFiltrado,empresa,concepto,obraFiltrado);
+
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+
+
+                Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras);
                 dgvAutorizante.DataSource = Session["listaAutorizante"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
@@ -101,6 +71,11 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            CargarListaAutorizantes();
+        }
+
 
         protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -167,34 +142,41 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            var tiposFiltro = ObtenerEstado();
-            tiposFiltro.Rows.InsertAt(CrearFilaTodos(tiposFiltro), 0);
-            ddlEstadoFiltro.DataSource = tiposFiltro;
-            ddlEstadoFiltro.DataTextField = "Nombre";
-            ddlEstadoFiltro.DataValueField = "Id";
-            ddlEstadoFiltro.DataBind();
 
-            var conceptoFiltro = ObtenerConcepto();
-            conceptoFiltro.Rows.InsertAt(CrearFilaTodos(conceptoFiltro), 0);
-            ddlConceptoFiltro.DataSource = conceptoFiltro;
-            ddlConceptoFiltro.DataTextField = "Nombre";
-            ddlConceptoFiltro.DataValueField = "Id";
-            ddlConceptoFiltro.DataBind();
+            ddlEstado.DataSource = ObtenerEstado();
+            ddlEstado.DataTextField = "Nombre";
+            ddlEstado.DataValueField = "Id";
+            ddlEstado.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlEmpresa.DataSource = empresa;
-            ddlEmpresa.DataTextField = "Nombre";
-            ddlEmpresa.DataValueField = "Id";
-            ddlEmpresa.DataBind();
+            ddlConcepto.DataSource = ObtenerConcepto();
+            ddlConcepto.DataTextField = "Nombre";
+            ddlConcepto.DataValueField = "Id";
+            ddlConcepto.DataBind();
 
+            ddlObra.DataSource = ObtenerObras();
+            ddlObra.DataTextField = "Nombre";
+            ddlObra.DataValueField = "Id";
+            ddlObra.DataBind();
 
-            var obrasFiltro = ObtenerObras();
-            obrasFiltro.Rows.InsertAt(CrearFilaTodos(obrasFiltro), 0);
-            ddlObraFiltro.DataSource = obrasFiltro;
-            ddlObraFiltro.DataTextField = "Nombre";
-            ddlObraFiltro.DataValueField = "Id";
-            ddlObraFiltro.DataBind();
+            cblEstado.DataSource = ObtenerEstado();
+            cblEstado.DataTextField = "Nombre";
+            cblEstado.DataValueField = "Id";
+            cblEstado.DataBind();
+
+            cblConcepto.DataSource = ObtenerConcepto();
+            cblConcepto.DataTextField = "Nombre";
+            cblConcepto.DataValueField = "Id";
+            cblConcepto.DataBind();
+
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
+
+            cblObra.DataSource = ObtenerObras();
+            cblObra.DataTextField = "Nombre";
+            cblObra.DataValueField = "Id";
+            cblObra.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {

@@ -23,8 +23,8 @@ namespace Negocio
         }
         public AccesoDatos()
         {
-           conexion = new SqlConnection("server=.\\SQLEXPRESS; database=IVC; integrated security=true");
-            //  conexion = new SqlConnection("Server=10.10.12.10; Database=IVC; User ID=pre_financiera; Password=pre_financiera2025;");
+           //conexion = new SqlConnection("server=.\\SQLEXPRESS; database=IVC; integrated security=true");
+              conexion = new SqlConnection("Server=10.10.12.10; Database=IVC; User ID=pre_financiera; Password=pre_financiera2025;");
             comando = new SqlCommand();
         }
 
