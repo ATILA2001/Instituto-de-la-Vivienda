@@ -120,12 +120,28 @@
 							</div>
 						</div>
 
-						<div class="form-group d-flex align-items-end">
+
+						<div class="form-group">
+							<label class="form-label lbl-left" for="cblFecha">Fecha:</label>
+							<div class="dropdown">
+								<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
+									Todas
+								</button>
+								<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
+									<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
+								</ul>
+							</div>
+						</div>
+
+
+
+<%--						<div class="form-group d-flex align-items-end">
 							<div>
 								<label class="form-label lbl-left" for="txtMesAprobacionFiltro">Mes Aprobación:</label>
 								<asp:TextBox ID="txtMesAprobacionFiltro" runat="server" CssClass="form-control form-control-uniform" TextMode="Date" />
 							</div>
-						</div>
+						</div>--%>
+
 						<div class="form-group  d-flex align-items-end">
 							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
 						</div>

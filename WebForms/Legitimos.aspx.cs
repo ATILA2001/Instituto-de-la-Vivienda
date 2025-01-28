@@ -39,17 +39,13 @@ namespace WebForms
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                DateTime? mesAprobacion = null;
 
 
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
-                {
-                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
-                }
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, mesAprobacion, selectedEmpresas, selectedAutorizantes);
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -212,6 +208,20 @@ namespace WebForms
             cblAutorizante.DataTextField = "Nombre";
             cblAutorizante.DataValueField = "Id";
             cblAutorizante.DataBind();
+
+            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
+            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
+            .Select(fecha => new
+            {
+                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
+                Valor = fecha.ToString("yyyy-MM-dd") 
+            });
+
+            cblFecha.DataSource = meses;
+            cblFecha.DataTextField = "Texto";
+            cblFecha.DataValueField = "Valor";
+            cblFecha.DataBind();
+
 
         }
         private DataTable ObtenerEmpresas()

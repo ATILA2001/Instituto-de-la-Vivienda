@@ -111,7 +111,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(Usuario usuario, DateTime? mesAprobacion, List<string> empresa, List<string> autorizante)
+        public List<Legitimo> listarFiltro(Usuario usuario, List<string> mesAprobacion, List<string> empresa, List<string> autorizante)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
@@ -139,15 +139,37 @@ namespace Negocio
                     }
                 }
 
-
-
-                if (mesAprobacion.HasValue)
+                if (mesAprobacion != null && mesAprobacion.Count > 0)
                 {
-                    query += " AND MONTH(L.MES_APROBACION) = @Mes AND YEAR(L.MES_APROBACION) = @Año";
-                    datos.setearParametros("@Mes", mesAprobacion.Value.Month);
-                    datos.setearParametros("@Año", mesAprobacion.Value.Year);
-                }
+                    try
+                    {
+                        // Dividir y validar el formato de las fechas
+                        var mesesAnios = mesAprobacion
+                            .Where(ma => ma.Contains("-"))
+                            .Select(ma => ma.Split('-')) // Separar "2024-01" en ["2024", "01"]
+                            .Select(parts => new { Año = parts[0], Mes = parts[1] });
 
+                        // Construir los filtros dinámicos
+                        string filtrosMesAño = string.Join(" OR ", mesesAnios.Select((ma, i) => $"(MONTH(L.MES_APROBACION) = @Mes{i} AND YEAR(L.MES_APROBACION) = @Año{i})"));
+                        query += $" AND ({filtrosMesAño})";
+
+                        // Asignar los parámetros
+                        int index = 0;
+                        foreach (var ma in mesesAnios)
+                        {
+                            if (int.TryParse(ma.Mes, out int mes) && int.TryParse(ma.Año, out int año))
+                            {
+                                datos.setearParametros($"@Mes{index}", mes);
+                                datos.setearParametros($"@Año{index}", año);
+                                index++;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Error al procesar el filtro de fechas.", ex);
+                    }
+                }
                 datos.setearConsulta(query);
 
                 datos.agregarParametro("@area", usuario.Area.Id);
