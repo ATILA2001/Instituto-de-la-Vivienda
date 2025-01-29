@@ -263,7 +263,7 @@
 				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
 
 				// Actualizar el texto del botón
-				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Todos';
+				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
 				$dropdown.text(textoBoton);
 			}
 
@@ -325,27 +325,22 @@
 
 
 	</script>
-	<style>
-		.form-group {
-			margin-bottom: 20px;
-		}
+		<style>
 
 			.form-group label {
 				font-size: 14px;
-				color: #495057; /* Gris oscuro para un aspecto formal */
+				color: #212529; /* Gris oscuro para un aspecto formal */
 				font-weight: 600; /* Peso semibold */
-				margin-bottom: 5px;
 			}
 
 			/* Estilo del botón dropdown */
 			.form-group .dropdown-toggle {
 				background-color: #f8f9fa; /* Fondo claro */
 				color: #212529; /* Texto negro */
-				border: 1px solid #ced4da; /* Borde gris claro */
+				border: 1px solid; /* Borde gris claro */
 				border-radius: 0.375rem; /* Bordes redondeados suaves */
 				width: 100%; /* Ocupa todo el ancho */
 				text-align: left; /* Alineación del texto a la izquierda */
-				padding: 8px 12px; /* Espaciado interno */
 				font-size: 14px; /* Tamaño de texto claro y sobrio */
 			}
 
@@ -357,7 +352,7 @@
 
 			/* Estilo del menú desplegable */
 			.form-group .dropdown-menu {
-				border: 1px solid #ced4da; /* Mismo borde que el botón */
+				border: 1px solid; /* Mismo borde que el botón */
 				border-radius: 0.375rem; /* Bordes redondeados */
 				padding: 0.5rem; /* Espaciado interno */
 				background-color: #ffffff; /* Fondo blanco */
@@ -396,6 +391,8 @@
 							font-weight: normal; /* Opcional, mantiene el estilo regular */
 						}
 
+
+
 		.table-bordered th, .table-bordered td {
 			border: 1px solid #dddddd;
 			text-align: center;
@@ -425,17 +422,22 @@
 				border: 1px solid #f39c11;
 			}
 
+		.form-label {
+			margin-bottom: 0;
+		}
+
+		.d-flex.align-items-end > .form-control {
+			margin-right: 8px; /* Margen entre el campo y el botón */
+		}
 
 		.form-control-uniform {
 			display: inline-block;
 			font-size: 14px; /* Tamaño de texto uniforme */
-			padding: 6px 12px;
-			margin-top: -6px;
+			padding: 4px 12px;
 			border: 1px solid;
 		}
 
 		.btn {
-			margin-top: -4px;
 			border: 1px solid;
 		}
 
@@ -470,4 +472,5 @@
 			color: #0b5ed7; /* Resaltar cuando se pasa el mouse */
 		}
 	</style>
+
 </asp:Content>

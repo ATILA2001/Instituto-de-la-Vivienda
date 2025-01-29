@@ -41,7 +41,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, DateTime? mesAprobacion, List<string> empresa )
+        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -78,12 +78,38 @@ namespace Negocio
                     }
                 }
 
-                if (mesAprobacion.HasValue)
+                if (mesAprobacion != null && mesAprobacion.Count > 0)
                 {
-                    query += " AND MONTH(C.MES_APROBACION) = @Mes AND YEAR(C.MES_APROBACION) = @Año";
-                    datos.setearParametros("@Mes", mesAprobacion.Value.Month);
-                    datos.setearParametros("@Año", mesAprobacion.Value.Year);
+                    try
+                    {
+                        // Dividir y validar el formato de las fechas
+                        var mesesAnios = mesAprobacion
+                            .Where(ma => ma.Contains("-"))
+                            .Select(ma => ma.Split('-')) // Separar "2024-01" en ["2024", "01"]
+                            .Select(parts => new { Año = parts[0], Mes = parts[1] });
+
+                        // Construir los filtros dinámicos
+                        string filtrosMesAño = string.Join(" OR ", mesesAnios.Select((ma, i) => $"(MONTH(C.MES_APROBACION) = @Mes{i} AND YEAR(C.MES_APROBACION) = @Año{i})"));
+                        query += $" AND ({filtrosMesAño})";
+
+                        // Asignar los parámetros
+                        int index = 0;
+                        foreach (var ma in mesesAnios)
+                        {
+                            if (int.TryParse(ma.Mes, out int mes) && int.TryParse(ma.Año, out int año))
+                            {
+                                datos.setearParametros($"@Mes{index}", mes);
+                                datos.setearParametros($"@Año{index}", año);
+                                index++;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Error al procesar el filtro de fechas.", ex);
+                    }
                 }
+
 
                 datos.setearConsulta(query);
 
@@ -112,7 +138,7 @@ namespace Negocio
                         },
                         Autorizante = new Autorizante
                         {
-                            Id= (int)datos.Lector["ID_AUTORIZANTE"],
+                            Id = (int)datos.Lector["ID_AUTORIZANTE"],
                             CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"]?.ToString(),
                             MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_AUTORIZADO"]) : 0M,
                             Estado = new EstadoAutorizante

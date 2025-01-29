@@ -84,7 +84,7 @@
 			<div class="text-end">
 				<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
 
-					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+					<div class="form-group text-left" style="flex: 3; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
 						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
 					</div>
@@ -130,12 +130,19 @@
 							</div>
 						</div>
 
-						<div class="form-group d-flex align-items-end">
-							<div>
-								<label class="form-label lbl-left" for="txtMesAprobacionFiltro">Mes Aprobación:</label>
-								<asp:TextBox ID="txtMesAprobacionFiltro" runat="server" CssClass="form-control form-control-uniform" TextMode="Date" />
+						<div class="form-group">
+							<label class="form-label lbl-left" for="cblFecha">Fecha:</label>
+							<div class="dropdown">
+								<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
+									Todas
+								</button>
+								<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
+									<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
+								</ul>
 							</div>
 						</div>
+
+
 						<div class="form-group  d-flex align-items-end">
 							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
 						</div>
@@ -242,7 +249,7 @@
 				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
 
 				// Actualizar el texto del botón
-				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Todos';
+				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
 				$dropdown.text(textoBoton);
 			}
 
@@ -269,6 +276,15 @@
 			$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').on('change', function () {
 				actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
 			});
+			// Inicializar para fecha
+			var FechaSeleccionadas = JSON.parse(localStorage.getItem('selectedFechas')) || [];
+			actualizarSeleccion('<%= cblFecha.ClientID %>', 'dropdownFecha', 'selectedFechas');
+
+
+			$('#<%= cblFecha.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblFecha.ClientID %>', 'dropdownFecha', 'selectedFechas');
+			});
+
 
 			// Limpiar filtros
 			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
@@ -277,15 +293,18 @@
 				localStorage.removeItem('selectedTipos');
 				localStorage.removeItem('selectedAutorizantes');
 
+				localStorage.removeItem('selectedFechas');
 				// Restablecer checkboxes
 				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
 				$('#<%= cblTipo.ClientID %> input[type=checkbox]').prop('checked', false);
 				$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblFecha.ClientID %> input[type=checkbox]').prop('checked', false);
 				// Restablecer texto de los botones
 
 				$('#dropdownEmpresa').text('Todas');
 				$('#dropdownTipo').text('Todas');
 				$('#dropdownAutorizante').text('Todos');
+				$('#dropdownFecha').text('Todos');
 			});
 		});
 
@@ -293,26 +312,20 @@
 
 	</script>
 	<style>
-				.form-group {
-			margin-bottom: 20px;
-		}
-
 			.form-group label {
 				font-size: 14px;
-				color: #495057; /* Gris oscuro para un aspecto formal */
+				color: #212529; /* Gris oscuro para un aspecto formal */
 				font-weight: 600; /* Peso semibold */
-				margin-bottom: 5px;
 			}
 
 			/* Estilo del botón dropdown */
 			.form-group .dropdown-toggle {
 				background-color: #f8f9fa; /* Fondo claro */
 				color: #212529; /* Texto negro */
-				border: 1px solid #ced4da; /* Borde gris claro */
+				border: 1px solid; /* Borde gris claro */
 				border-radius: 0.375rem; /* Bordes redondeados suaves */
 				width: 100%; /* Ocupa todo el ancho */
 				text-align: left; /* Alineación del texto a la izquierda */
-				padding: 8px 12px; /* Espaciado interno */
 				font-size: 14px; /* Tamaño de texto claro y sobrio */
 			}
 
@@ -324,7 +337,7 @@
 
 			/* Estilo del menú desplegable */
 			.form-group .dropdown-menu {
-				border: 1px solid #ced4da; /* Mismo borde que el botón */
+				border: 1px solid; /* Mismo borde que el botón */
 				border-radius: 0.375rem; /* Bordes redondeados */
 				padding: 0.5rem; /* Espaciado interno */
 				background-color: #ffffff; /* Fondo blanco */
@@ -394,6 +407,9 @@
 				border: 1px solid #f39c11;
 			}
 
+		.form-label {
+			margin-bottom: 0;
+		}
 
 		.d-flex.align-items-end > .form-control {
 			margin-right: 8px; /* Margen entre el campo y el botón */
@@ -402,13 +418,11 @@
 		.form-control-uniform {
 			display: inline-block;
 			font-size: 14px; /* Tamaño de texto uniforme */
-			padding: 6px 12px;
-			margin-top: -6px;
+			padding: 4px 12px;
 			border: 1px solid;
 		}
 
 		.btn {
-			margin-top: -4px;
 			border: 1px solid;
 		}
 

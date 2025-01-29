@@ -31,7 +31,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                var cellValue = row.Cells[7].Text; 
+                var cellValue = row.Cells[7].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
@@ -59,13 +59,9 @@ namespace WebForms
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
-                DateTime? mesAprobacion = null;
-                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
-                {
-                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
-                }
+                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, mesAprobacion, selectedEmpresas);
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -95,7 +91,7 @@ namespace WebForms
                     CargarListaCertificados();
                 }
             }
-           catch (Exception ex)
+            catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al eliminar el certificado: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
@@ -154,7 +150,7 @@ namespace WebForms
             }
         }
 
-    
+
         private DataTable ObtenerTipos()
         {
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
@@ -170,7 +166,7 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            ddlTipo.DataSource = ObtenerTipos(); 
+            ddlTipo.DataSource = ObtenerTipos();
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
@@ -194,6 +190,20 @@ namespace WebForms
             cblAutorizante.DataTextField = "Nombre";
             cblAutorizante.DataValueField = "Id";
             cblAutorizante.DataBind();
+
+            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
+            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
+            .Select(fecha => new
+            {
+                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
+                Valor = fecha.ToString("yyyy-MM-dd")
+            });
+
+            cblFecha.DataSource = meses;
+            cblFecha.DataTextField = "Texto";
+            cblFecha.DataValueField = "Valor";
+            cblFecha.DataBind();
+
         }
         private DataTable ObtenerEmpresas()
         {
@@ -203,12 +213,12 @@ namespace WebForms
         private DataRow CrearFilaTodos(DataTable table)
         {
             DataRow row = table.NewRow();
-            row["Id"] = 0;            
-            row["Nombre"] = "Todos";  
+            row["Id"] = 0;
+            row["Nombre"] = "Todos";
             return row;
         }
 
-   
+
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             // Identifica el TextBox modificado
