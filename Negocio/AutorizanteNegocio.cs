@@ -43,7 +43,7 @@ namespace Negocio
 
             try
             {
-                string query = "select CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,    A.DETALLE,    CO.NOMBRE AS CONCEPTO,    CO.ID AS CONCEPTO_ID,    E.NOMBRE AS ESTADO,    E.ID AS ESTADO_ID,    A.EXPEDIENTE,    A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,    AR.NOMBRE AS AREA,    AR.ID AS AREA_ID,    C.ID AS CONTRATA_ID,    PS.[BUZON DESTINO],    PS.[FECHA ULTIMO PASE] FROM    AUTORIZANTES AS A INNER JOIN    OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN  CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN    BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN    AREAS AS AR ON O.AREA = AR.ID INNER JOIN    EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN    BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN    CONCEPTOS AS CO ON A.CONCEPTO = CO.ID LEFT JOIN     PASES_SADE AS PS ON A.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE    O.AREA = @area";
+                string query = "select CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,    A.DETALLE,A.MES_BASE,    CO.NOMBRE AS CONCEPTO,    CO.ID AS CONCEPTO_ID,    E.NOMBRE AS ESTADO,    E.ID AS ESTADO_ID,    A.EXPEDIENTE,    A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,    AR.NOMBRE AS AREA,    AR.ID AS AREA_ID,    C.ID AS CONTRATA_ID,    PS.[BUZON DESTINO],    PS.[FECHA ULTIMO PASE] FROM    AUTORIZANTES AS A INNER JOIN    OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN  CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN    BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN    AREAS AS AR ON O.AREA = AR.ID INNER JOIN    EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN    BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN    CONCEPTOS AS CO ON A.CONCEPTO = CO.ID LEFT JOIN     PASES_SADE AS PS ON A.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE    O.AREA = @area";
 
                 if (empresa != null && empresa.Count > 0)
                 {
@@ -113,6 +113,7 @@ namespace Negocio
                     aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
                     aux.FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null;
                     aux.BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString();
+                    aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ? (DateTime)datos.Lector["MES_BASE"] : (DateTime?)null;
 
 
 
@@ -153,7 +154,7 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,A.MES_BASE,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
                 if (!string.IsNullOrEmpty(estado))
                 {
                     query += " AND E.NOMBRE = @estado";
@@ -198,7 +199,7 @@ namespace Negocio
                     aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
                     aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
-
+                    aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ? (DateTime)datos.Lector["MES_BASE"] : (DateTime?)null;
                     aux.Obra = new Obra
                     {
                         Id = (int)datos.Lector["OBRA_ID"],
@@ -236,7 +237,7 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,  CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID where A.AUTORIZACION_GG = 0 ";
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,O.ID AS OBRA_ID, A.MES_BASE,   CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,    EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE,  CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID where A.AUTORIZACION_GG = 0 ";
                 if (!string.IsNullOrEmpty(estado))
                 {
                     query += " AND E.NOMBRE = @estado";
@@ -281,7 +282,7 @@ namespace Negocio
                     aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
                     aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
                     aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
-
+                    aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ? (DateTime)datos.Lector["MES_BASE"] : (DateTime?)null;
                     aux.Obra = new Obra
                     {
                         Id = (int)datos.Lector["OBRA_ID"],
@@ -320,9 +321,9 @@ namespace Negocio
             {
                 datos.setearConsulta(@"
             INSERT INTO AUTORIZANTES 
-            (OBRA, ESTADO, CONCEPTO, DETALLE, EXPEDIENTE, MONTO_AUTORIZADO,MES)
+            (OBRA, ESTADO, CONCEPTO, DETALLE, EXPEDIENTE, MONTO_AUTORIZADO,MES,MES_BASE)
             VALUES 
-            (@OBRA, @ESTADO, @CONCEPTO, @DETALLE, @EXPEDIENTE, @MONTO_AUTORIZADO, @MES)");
+            (@OBRA, @ESTADO, @CONCEPTO, @DETALLE, @EXPEDIENTE, @MONTO_AUTORIZADO, @MES,@MESBASE)");
 
                 datos.agregarParametro("@OBRA", nuevoAutorizante.Obra.Id);
                 datos.agregarParametro("@ESTADO", nuevoAutorizante.Estado.Id);
@@ -331,6 +332,7 @@ namespace Negocio
                 datos.agregarParametro("@EXPEDIENTE", nuevoAutorizante.Expediente);
                 datos.agregarParametro("@MONTO_AUTORIZADO", nuevoAutorizante.MontoAutorizado);
                 datos.agregarParametro("@MES", nuevoAutorizante.Fecha);
+                datos.agregarParametro("@MESBASE", nuevoAutorizante.MesBase ?? (object)DBNull.Value);
 
                 datos.ejecutarAccion();
 
@@ -432,6 +434,7 @@ namespace Negocio
             DETALLE = @detalle, 
             MONTO_AUTORIZADO = @montoAutorizado, 
             MES = @mes,
+MES_BASE = @mesBASE,
 AUTORIZACION_GG = @aut
         WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
 
@@ -440,8 +443,10 @@ AUTORIZACION_GG = @aut
                 datos.agregarParametro("@detalle", autorizante.Detalle);
                 datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
                 datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
+
+                datos.agregarParametro("@mesBASE", (object)autorizante.MesBase ?? DBNull.Value);
                 datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
-                datos.agregarParametro("@aut", 0);
+                datos.agregarParametro("@aut", 1);
 
                 datos.ejecutarAccion();
                 return true;
@@ -524,6 +529,7 @@ AUTORIZACION_GG = @aut
             EXPEDIENTE = @expediente, 
             MONTO_AUTORIZADO = @montoAutorizado, 
             MES = @mes,
+MES_BASE = @MESBASE
 AUTORIZACION_GG = @aut
         WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
 
@@ -533,6 +539,7 @@ AUTORIZACION_GG = @aut
                 datos.agregarParametro("@expediente", (object)autorizante.Expediente ?? DBNull.Value);
                 datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
                 datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
+                datos.agregarParametro("@MESBASE", (object)autorizante.Fecha ?? DBNull.Value);
                 datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
                 datos.agregarParametro("@aut", autorizante.AutorizacionGG);
 

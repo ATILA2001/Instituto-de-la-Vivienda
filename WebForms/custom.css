@@ -103,6 +103,10 @@ button, .btn {
 	color: white;
 	border: none;
 	transition: background-color 0.3s;
+
+
+
+
 }
 
 	button:hover, .btn:hover {

@@ -47,7 +47,7 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("DELETE FROM LEGITIMOS_ABONOS WHERE CODIGO_AUTORIZANTE = @ID");
+                datos.setearConsulta("DELETE FROM LEGITIMOS_ABONOS WHERE ID = @ID");
 
                 datos.agregarParametro("@ID", codigo);
 

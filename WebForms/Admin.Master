@@ -26,7 +26,10 @@
 					</button>
 					<div class="collapse navbar-collapse" id="navbarMenu">
 						<ul class="navbar-nav me-auto">
+
+
 							<li class="nav-item"><a class="nav-link" href="BdProyectos.aspx">Proyectos</a></li>
+
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Consolidado</a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -36,14 +39,24 @@
 									<li><a class="dropdown-item" href="LegitimosAdmin.aspx">Legítimos Abonos</a></li>
 								</ul>
 							</li>
+
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Listados</a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 									<li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
 									<li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
-									<li><a class="dropdown-item" href="LineasGestion.aspx">Líneas de Gestión</a></li>
 								</ul>
 							</li>
+
+
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Líneas de Gestión</a>
+								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+									<li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
+									<li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
+								</ul>
+							</li>
+
 							<li class="nav-item"><a class="nav-link" href="AbmlUsuarios.aspx">Usuarios</a></li>
 						</ul>
 

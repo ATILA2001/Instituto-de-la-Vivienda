@@ -43,6 +43,10 @@ namespace WebForms
                         txtFecha.Text = selected.Fecha.HasValue
                             ? selected.Fecha.Value.ToString("yyyy-MM-dd")
                             : string.Empty;
+
+                        txtMes.Text = selected.MesBase.HasValue
+                            ? selected.MesBase.Value.ToString("yyyy-MM-dd")
+                            : string.Empty;
                         ddlObra.SelectedValue = selected.Obra?.Id.ToString();
                     }
                     else
@@ -73,6 +77,10 @@ namespace WebForms
                         Fecha = string.IsNullOrEmpty(txtFecha.Text.Trim())
                             ? (DateTime?)null
                             : DateTime.Parse(txtFecha.Text.Trim()),
+                        MesBase = string.IsNullOrEmpty(txtMes.Text.Trim())
+                            ? (DateTime?)null
+                            : DateTime.Parse(txtMes.Text.Trim()),
+
                     };
 
                     if (negocio.modificar(autorizadoModificado))

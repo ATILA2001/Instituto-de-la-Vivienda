@@ -84,6 +84,7 @@
     <Content Include="Legitimos.aspx" />
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="LineasGestion.aspx" />
+    <Content Include="LineasGestionFF.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="ModificarAutorizante.aspx" />
     <Content Include="ModificarAutorizanteAdmin.aspx" />
@@ -221,6 +222,13 @@
     </Compile>
     <Compile Include="LineasGestion.aspx.designer.cs">
       <DependentUpon>LineasGestion.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LineasGestionFF.aspx.cs">
+      <DependentUpon>LineasGestionFF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LineasGestionFF.aspx.designer.cs">
+      <DependentUpon>LineasGestionFF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>

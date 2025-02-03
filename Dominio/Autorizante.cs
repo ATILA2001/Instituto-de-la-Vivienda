@@ -22,6 +22,7 @@ namespace Dominio
         public string Empresa { get; set; }
         public DateTime? FechaSade { get; set; }
         public string BuzonSade { get; set; }
+        public DateTime? MesBase { get; set; }
         public Autorizante() { }
 
     }

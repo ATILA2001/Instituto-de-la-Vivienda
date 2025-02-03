@@ -11,71 +11,53 @@ namespace WebForms
 {
 
 
-    public partial class ModificarAutorizante
+    public partial class LineasGestionFF
     {
 
         /// <summary>
-        /// Control ddlObra.
+        /// Control dgvLineaGestionFF.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlObra;
+        protected global::System.Web.UI.WebControls.GridView dgvLineaGestionFF;
 
         /// <summary>
-        /// Control ddlConcepto.
+        /// Control ddlLineaGestion.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlConcepto;
+        protected global::System.Web.UI.WebControls.DropDownList ddlLineaGestion;
 
         /// <summary>
-        /// Control txtDetalle.
+        /// Control txtNombreFF.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDetalle;
+        protected global::System.Web.UI.WebControls.TextBox txtNombreFF;
 
         /// <summary>
-        /// Control txtMontoAutorizado.
+        /// Control txtFuente.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMontoAutorizado;
+        protected global::System.Web.UI.WebControls.TextBox txtFuente;
 
         /// <summary>
-        /// Control txtFecha.
+        /// Control btnAgregarFF.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFecha;
-
-        /// <summary>
-        /// Control txtMes.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMes;
-
-        /// <summary>
-        /// Control btnModificar.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnModificar;
+        protected global::System.Web.UI.WebControls.Button btnAgregarFF;
 
         /// <summary>
         /// Control lblMensaje.

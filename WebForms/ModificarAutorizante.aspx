@@ -32,6 +32,7 @@
 									<th>Detalle</th>
 									<th>Monto Autorizado</th>
 									<th>Mes Aprobacion</th>
+									<th>Mes Base</th>
 									<th></th>
 									<th></th>
 								</tr>
@@ -53,6 +54,9 @@
 									<td>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 									</td>
+									<td>
+										<asp:TextBox ID="txtMes" CssClass="form-control" runat="server" TextMode="Date" />
+									</td>
 									<td class="text-right">
 										<asp:Button Text="Modificar" ID="btnModificar" OnClick="btnModificar_Click" CssClass="btn btn-outline-success" runat="server" />
 									</td>
@@ -63,9 +67,9 @@
 					</div>
 				</div>
 			</div>
-			</div>
-			<div class="text-center p-4">
-				<asp:Label ID="lblMensaje" Text="" runat="server" />
-			</div>
 		</div>
+		<div class="text-center p-4">
+			<asp:Label ID="lblMensaje" Text="" runat="server" />
+		</div>
+	</div>
 </asp:Content>

@@ -53,6 +53,7 @@
     <Compile Include="EmpresaNegocio.cs" />
     <Compile Include="EstadoAutorizanteNegocio.cs" />
     <Compile Include="LegitimoNegocio.cs" />
+    <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

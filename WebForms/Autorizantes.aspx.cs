@@ -133,7 +133,7 @@ namespace WebForms
             nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
             nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
             nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
-
+            nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
             autorizanteNegocio.agregar(nuevoAutorizante);
 
             lblMensaje.Text = "Autorizante agregado con éxito.";

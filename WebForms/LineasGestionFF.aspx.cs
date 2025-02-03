@@ -9,70 +9,84 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class LineasGestion : System.Web.UI.Page
+    public partial class LineasGestionFF : System.Web.UI.Page
     {
-        LineaGestionNegocio negocio = new LineaGestionNegocio();
+        LineaGestionFFNegocio negocio = new LineaGestionFFNegocio();
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                CargarListaLineaGestion();
+                cargarLineasGestion();
             }
         }
 
-        private void CargarListaLineaGestion()
+        private void cargarLineasGestion()
         {
+            AccesoDatos datos = new AccesoDatos();
             try
             {
-                Session["listaLineas"] = negocio.listar();
-                dgvLineaGestion.DataSource = Session["listaLineas"];
-                dgvLineaGestion.DataBind();
+                Session["listaLineasFF"] = negocio.listar();
+                dgvLineaGestionFF.DataSource = Session["listaLineasFF"];
+                dgvLineaGestionFF.DataBind();
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al cargar las Lineas de gestion: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
+
+            try
+            {
+                datos.setearConsulta("SELECT ID, NOMBRE FROM LINEA_DE_GESTION ORDER BY NOMBRE");
+                datos.ejecutarLectura();
+
+                ddlLineaGestion.DataSource = datos.Lector;
+                ddlLineaGestion.DataValueField = "ID";
+                ddlLineaGestion.DataTextField = "NOMBRE";
+                ddlLineaGestion.DataBind();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
         }
-        protected void btnAgregar_Click(object sender, EventArgs e)
+        protected void btnAgregarFF_Click(object sender, EventArgs e)
         {
             try
             {
-                string nombre = txtNombre.Text;
-                string tipo = txtTipo.Text;
-                string grupo = txtGrupo.Text;
-                string reparticion = txtReparticion.Text;
-                LineaGestion linea = new LineaGestion();
-                linea.Nombre = nombre;
-                linea.Tipo = tipo;
-                linea.Grupo = grupo;
-                linea.Reparticion = reparticion;
-                // Llamar a la lógica para agregar la nueva línea de gestión
-               negocio.agregar(linea);
+                LineaGestionFF nuevaFF = new LineaGestionFF
+                {
+                    LineaGestion = new LineaGestion { Id = int.Parse(ddlLineaGestion.SelectedValue) },
+                    Nombre = txtNombreFF.Text.Trim(),
+                    Fuente = txtFuente.Text.Trim()
+                };
 
+                LineaGestionFFNegocio negocio = new LineaGestionFFNegocio();
+                negocio.agregar(nuevaFF);
                 // Mostrar mensaje de éxito
                 lblMensaje.Text = "¡Línea de Gestión agregada exitosamente!";
                 lblMensaje.ForeColor = System.Drawing.Color.Green;
 
-                 
-                List<LineaGestion> listaLineaGestion = negocio.listar();
-                dgvLineaGestion.DataSource = listaLineaGestion;
-                dgvLineaGestion.DataBind();
+                Session["listaLineasFF"] = negocio.listar();
+                dgvLineaGestionFF.DataSource = Session["listaLineasFF"];
             }
             catch (Exception ex)
-            {
-                // Mostrar error si ocurre un problema
+            {  // Mostrar error si ocurre un problema
                 lblMensaje.Text = "Error al agregar la Línea de Gestión: " + ex.Message;
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
             }
         }
-        protected void dgvLineaGestion_SelectedIndexChanged(object sender, EventArgs e)
+        protected void dgvLineaGestionFF_SelectedIndexChanged(object sender, EventArgs e)
         {
         //    var idSeleccionado = dgvLineaGestion.SelectedDataKey.Value.ToString();
         //    Response.Redirect("modificarEmpresa.aspx?codM=" + idSeleccionado);
         }
 
-        protected void dgvLineaGestion_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void dgvLineaGestionFF_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             //try
             //{
@@ -90,15 +104,15 @@ namespace WebForms
             //    lblMensaje.CssClass = "alert alert-danger";
             //}
         }
-        protected void dgvLineaGestion_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void dgvLineaGestionFF_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
             {
                 // Cambiar el índice de la página
-                dgvLineaGestion.PageIndex = e.NewPageIndex;
+                dgvLineaGestionFF.PageIndex = e.NewPageIndex;
 
                 // Refrescar el listado de empresas
-                CargarListaLineaGestion();
+                cargarLineasGestion();
             }
             catch (Exception ex)
             {
@@ -106,5 +120,6 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+
     }
 }
