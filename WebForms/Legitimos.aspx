@@ -31,53 +31,53 @@
 				<table class="table  table-3d">
 					<thead class="thead-dark" style="color: #fad404">
 						<tr>
-									<th>Obra</th>
-									<th>Código Autorizante</th>
-									<th>Expediente</th>
-									<th>Inicio Ejecución</th>
-									<th>Fin Ejecución</th>
-									<th>Monto Certificado</th>
-									<th>Mes Aprobación</th>
-									<th></th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>
-										<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
-										<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-											CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
+							<th>Obra</th>
+							<th>Código Autorizante</th>
+							<th>Expediente</th>
+							<th>Inicio Ejecución</th>
+							<th>Fin Ejecución</th>
+							<th>Monto Certificado</th>
+							<th>Mes Aprobación</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+								<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
+	</div>
+	</div>
 	</div>
 
 	<div class="row mt-4">
@@ -120,6 +120,11 @@
 								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
 							</ul>
 						</div>
+					</div>
+
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
 					</div>
 
 

@@ -111,7 +111,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(Usuario usuario, List<string> mesAprobacion, List<string> empresa, List<string> autorizante)
+        public List<Legitimo> listarFiltro(Usuario usuario, List<string> mesAprobacion, List<string> empresa, List<string> autorizante , string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
@@ -170,6 +170,14 @@ namespace Negocio
                         throw new Exception("Error al procesar el filtro de fechas.", ex);
                     }
                 }
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+
+
                 datos.setearConsulta(query);
 
                 datos.agregarParametro("@area", usuario.Area.Id);

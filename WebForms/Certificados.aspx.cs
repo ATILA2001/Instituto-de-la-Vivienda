@@ -49,7 +49,7 @@ namespace WebForms
             ddlTipo.SelectedIndex = -1;
         }
 
-        private void CargarListaCertificados()
+        private void CargarListaCertificados(string filtro = null)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace WebForms
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas);
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -252,7 +252,8 @@ namespace WebForms
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            CargarListaCertificados();
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaCertificados(filtro);
         }
 
     }

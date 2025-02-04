@@ -34,7 +34,7 @@ namespace WebForms
             ddlObra.SelectedIndex = -1;
         }
 
-        private void CargarListaLegitimos()
+        private void CargarListaLegitimos(string filtro = null)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace WebForms
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes);
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes,filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -238,7 +238,9 @@ namespace WebForms
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            CargarListaLegitimos();
+
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaLegitimos(filtro);
         }
 
 

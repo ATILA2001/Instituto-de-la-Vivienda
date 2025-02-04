@@ -31,6 +31,7 @@ namespace WebForms
             txtFecha.Text = string.Empty;
             ddlObra.SelectedIndex = -1;
             ddlEstado.SelectedIndex = -1;
+
         }
         private void CalcularSubtotal()
         {
@@ -47,7 +48,7 @@ namespace WebForms
 
             txtSubtotal.Text = subtotal.ToString("C");
         }
-        private void CargarListaAutorizantes()
+        private void CargarListaAutorizantes(string filtro = null)
         {
             try
             {
@@ -60,7 +61,7 @@ namespace WebForms
                 var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
 
-                Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras);
+                Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras,filtro);
                 dgvAutorizante.DataSource = Session["listaAutorizante"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
@@ -71,9 +72,12 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+        
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            CargarListaAutorizantes();
+            string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
+
+            CargarListaAutorizantes(filtro);
         }
 
 

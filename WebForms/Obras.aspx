@@ -120,7 +120,10 @@
 						</div>
 					</div>
 
-
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
+					</div>
 
 					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 

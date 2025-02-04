@@ -36,7 +36,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(Usuario usuario, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra)
+        public List<Autorizante> listar(Usuario usuario, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra, string filtro = null)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
@@ -84,6 +84,14 @@ namespace Negocio
                         datos.setearParametros($"@obra{i}", obra[i]);
                     }
                 }
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND (C.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR EM.NOMBRE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR E.NOMBRE LIKE @filtro OR AR.NOMBRE LIKE @filtro OR A.EXPEDIENTE LIKE @filtro OR A.DETALLE LIKE @filtro OR A.CODIGO_AUTORIZANTE LIKE @filtro) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+
+
 
                 datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);

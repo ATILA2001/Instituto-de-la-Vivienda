@@ -146,6 +146,15 @@
 
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
+					</div>
+
+
+
+
+
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
 						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
 					</div>
@@ -333,6 +342,7 @@
 				$('#dropdownObra').text('Todas');
 				$('#dropdownEstado').text('Todos');
 				$('#dropdownConcepto').text('Todos');
+
 			});
 		});
 

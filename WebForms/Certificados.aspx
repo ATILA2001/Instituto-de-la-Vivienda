@@ -25,55 +25,53 @@
 				border: none;
 			}
 	</style>
-		<div id="section1" style="display: none;">
+	<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
 					<thead class="thead-dark" style="color: #fad404">
 						<tr>
 
-									<th>Código Autorizante</th>
-									<th>Expediente</th>
-									<th>Tipo</th>
-									<th>Monto Autorizado</th>
-									<th>Mes Aprobacion</th>
-									<th></th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
+							<th>Código Autorizante</th>
+							<th>Expediente</th>
+							<th>Tipo</th>
+							<th>Monto Autorizado</th>
+							<th>Mes Aprobacion</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
 
 
-									<td>
-										<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
+							<td>
+								<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
 
-									<td>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-									</td>
+							<td>
+								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+							</td>
 
-									<td>
-										<asp:DropDownList ID="ddlTipo" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
+							<td>
+								<asp:DropDownList ID="ddlTipo" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
 
-									<td>
-										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-											CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
+							<td>
+								<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
@@ -131,13 +129,19 @@
 						</div>
 					</div>
 
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
+					</div>
+
 
 					<div class="form-group text-left" style="flex: 3; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
 						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
 					</div>
 
-					<!-- Filtros alineados a la derecha -->
+
+
 
 					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
@@ -170,7 +174,7 @@
 					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					
+
 					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:TemplateField HeaderText="Expediente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">

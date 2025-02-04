@@ -56,7 +56,7 @@ namespace WebForms
             BarrioNegocio barrioNegocio = new BarrioNegocio();
             return barrioNegocio.listarddl();
         }
-        private void CargarListaObras()
+        private void CargarListaObras(string filtro = null)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace WebForms
                 var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas);
+                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas,filtro);
                 dgvObra.DataSource = Session["listaObra"];
                 dgvObra.DataBind();
             }
@@ -205,13 +205,7 @@ namespace WebForms
 
         }
 
-        private DataRow CrearFilaTodos(DataTable table)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = 0;
-            row["Nombre"] = "Todos";
-            return row;
-        }
+      
         protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
@@ -230,7 +224,8 @@ namespace WebForms
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            CargarListaObras();
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaObras(filtro);
         }
     }
 }

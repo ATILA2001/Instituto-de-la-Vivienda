@@ -13,7 +13,7 @@ namespace Negocio
 {
     public class ObraNegocio
     {
-        public List<Obra> listar(Usuario usuario, List<string> barrios, List<string> empresas)
+        public List<Obra> listar(Usuario usuario, List<string> barrios, List<string> empresas, string filtro = null)
         {
             List<Obra> lista = new List<Obra>();
             AccesoDatos datos = new AccesoDatos();
@@ -41,6 +41,12 @@ namespace Negocio
                         datos.setearParametros($"@barrio{i}", barrios[i]);
                     }
                 }
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND (E.NOMBRE LIKE @filtro OR NUMERO LIKE @filtro OR C.NOMBRE LIKE @filtro OR AÑO LIKE @filtro OR ETAPA LIKE @filtro OR OBRA LIKE @filtro OR B.NOMBRE LIKE @filtro OR DESCRIPCION LIKE @filtro) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+
 
                 datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
