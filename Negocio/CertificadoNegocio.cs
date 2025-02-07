@@ -183,34 +183,79 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltroAdmin(string autorizante, string tipo, DateTime? mesAprobacion, string empresa)
+        public List<Certificado> listarFiltroAdmin(List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT A.ID as ID_AUTORIZANTE,C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID";
-                if (!string.IsNullOrEmpty(autorizante))
+                string query = "SELECT A.ID as ID_AUTORIZANTE,C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID ";
+
+
+                if (empresa != null && empresa.Count > 0)
                 {
-                    query += " AND C.CODIGO_AUTORIZANTE = @Autorizante";
-                    datos.setearParametros("@Autorizante", autorizante);
+                    string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
+                    query += $" AND EM.NOMBRE IN ({empresasParam})";
+                    for (int i = 0; i < empresa.Count; i++)
+                    {
+                        datos.setearParametros($"@empresa{i}", empresa[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(empresa))
+                if (autorizante != null && autorizante.Count > 0)
                 {
-                    query += " AND EM.NOMBRE = @Empresa";
-                    datos.setearParametros("@Empresa", empresa);
+                    string AutorizanteParam = string.Join(",", autorizante.Select((e, i) => $"@autorizante{i}"));
+                    query += $" AND C.CODIGO_AUTORIZANTE IN ({AutorizanteParam})";
+                    for (int i = 0; i < autorizante.Count; i++)
+                    {
+                        datos.setearParametros($"@autorizante{i}", autorizante[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(tipo))
+                if (tipo != null && tipo.Count > 0)
                 {
-                    query += " AND T.NOMBRE = @Tipo";
-                    datos.setearParametros("@Tipo", tipo);
+                    string TipoParam = string.Join(",", tipo.Select((e, i) => $"@tipo{i}"));
+                    query += $" AND T.NOMBRE IN ({TipoParam})";
+                    for (int i = 0; i < tipo.Count; i++)
+                    {
+                        datos.setearParametros($"@tipo{i}", tipo[i]);
+                    }
                 }
-                if (mesAprobacion.HasValue)
+
+                if (mesAprobacion != null && mesAprobacion.Count > 0)
                 {
-                    query += " AND MONTH(C.MES_APROBACION) = @Mes AND YEAR(C.MES_APROBACION) = @Año";
-                    datos.setearParametros("@Mes", mesAprobacion.Value.Month);
-                    datos.setearParametros("@Año", mesAprobacion.Value.Year);
+                    try
+                    {
+                        // Dividir y validar el formato de las fechas
+                        var mesesAnios = mesAprobacion
+                            .Where(ma => ma.Contains("-"))
+                            .Select(ma => ma.Split('-')) // Separar "2024-01" en ["2024", "01"]
+                            .Select(parts => new { Año = parts[0], Mes = parts[1] });
+
+                        // Construir los filtros dinámicos
+                        string filtrosMesAño = string.Join(" OR ", mesesAnios.Select((ma, i) => $"(MONTH(C.MES_APROBACION) = @Mes{i} AND YEAR(C.MES_APROBACION) = @Año{i})"));
+                        query += $" AND ({filtrosMesAño})";
+
+                        // Asignar los parámetros
+                        int index = 0;
+                        foreach (var ma in mesesAnios)
+                        {
+                            if (int.TryParse(ma.Mes, out int mes) && int.TryParse(ma.Año, out int año))
+                            {
+                                datos.setearParametros($"@Mes{index}", mes);
+                                datos.setearParametros($"@Año{index}", año);
+                                index++;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Error al procesar el filtro de fechas.", ex);
+                    }
+                }
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND (A.DETALLE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro  OR EM.NOMBRE LIKE @filtro OR C.CODIGO_AUTORIZANTE LIKE @filtro OR C.EXPEDIENTE_PAGO LIKE @filtro OR T.NOMBRE LIKE @filtro OR C.MONTO_TOTAL LIKE @filtro OR C.MES_APROBACION LIKE @filtro OR A.MONTO_AUTORIZADO LIKE @filtro OR E.NOMBRE LIKE @filtro) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
                 }
 
                 datos.setearConsulta(query);

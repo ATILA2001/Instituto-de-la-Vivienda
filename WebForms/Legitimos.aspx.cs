@@ -175,7 +175,6 @@ namespace WebForms
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
             }
         }
-
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
@@ -242,7 +241,6 @@ namespace WebForms
             string filtro = txtBuscar.Text.Trim();
             CargarListaLegitimos(filtro);
         }
-
 
     }
 

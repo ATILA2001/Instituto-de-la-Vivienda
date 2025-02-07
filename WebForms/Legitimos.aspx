@@ -77,9 +77,7 @@
 			</div>
 		</div>
 	</div>
-	</div>
-	</div>
-
+	
 	<div class="row mt-4">
 		<div class="col-md-12">
 			<div class="text-end">

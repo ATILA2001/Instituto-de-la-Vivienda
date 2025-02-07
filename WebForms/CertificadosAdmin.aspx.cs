@@ -22,19 +22,18 @@ namespace WebForms
             }
         }
 
-        private void CargarListaCertificados()
+        private void CargarListaCertificados(string filtro = null)
         {
             try
             {
-                string autorizanteFiltrado = ddlAutorizanteFiltro.SelectedValue == "0" ? null : ddlAutorizanteFiltro.SelectedItem.Text;
-                string tipoFiltrado = ddlTipoFiltro.SelectedValue == "0" ? null : ddlTipoFiltro.SelectedItem.Text;
-                DateTime? mesAprobacion = null;
-                string empresa = ddlEmpresa.SelectedValue == "0" ? null : ddlEmpresa.SelectedItem.Text;
-                if (!string.IsNullOrWhiteSpace(txtMesAprobacionFiltro.Text))
-                {
-                    mesAprobacion = DateTime.Parse(txtMesAprobacionFiltro.Text);
-                }
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(autorizanteFiltrado, tipoFiltrado, mesAprobacion, empresa);
+               
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
+                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+
+                Session["listaCertificado"] = negocio.listarFiltroAdmin( selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -45,7 +44,6 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvCertificado.SelectedDataKey.Value.ToString();
@@ -114,29 +112,47 @@ namespace WebForms
             CargarListaCertificados();
             CalcularSubtotal();
         }
+        private DataTable ObtenerTipos()
+        {
+            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
+            return tipoPagNegocio.listarddl();
+        }
+
+        private DataTable ObtenerAutorizantes()
+        {
+            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+
+            return autorizanteNegocio.listarddl();
+        }
         private void BindDropDownList()
         {
+            cblTipo.DataSource = ObtenerTipos();
+            cblTipo.DataTextField = "Nombre";
+            cblTipo.DataValueField = "Id";
+            cblTipo.DataBind();
 
-            var tiposFiltro = ObtenerTiposFiltro();
-            tiposFiltro.Rows.InsertAt(CrearFilaTodos(tiposFiltro), 0);
-            ddlTipoFiltro.DataSource = tiposFiltro;
-            ddlTipoFiltro.DataTextField = "Nombre";
-            ddlTipoFiltro.DataValueField = "Id";
-            ddlTipoFiltro.DataBind();
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlEmpresa.DataSource = empresa; 
-            ddlEmpresa.DataTextField = "Nombre";        
-            ddlEmpresa.DataValueField = "Id";        
-            ddlEmpresa.DataBind();
+            cblAutorizante.DataSource = ObtenerAutorizantes();
+            cblAutorizante.DataTextField = "Nombre";
+            cblAutorizante.DataValueField = "Id";
+            cblAutorizante.DataBind();
 
-            var autorizantesFiltro = ObtenerAutorizantesFiltro();
-            autorizantesFiltro.Rows.InsertAt(CrearFilaTodos(autorizantesFiltro), 0);
-            ddlAutorizanteFiltro.DataSource = autorizantesFiltro;
-            ddlAutorizanteFiltro.DataTextField = "Nombre";
-            ddlAutorizanteFiltro.DataValueField = "Id";
-            ddlAutorizanteFiltro.DataBind();
+            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
+            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
+            .Select(fecha => new
+            {
+                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
+                Valor = fecha.ToString("yyyy-MM-dd")
+            });
+
+            cblFecha.DataSource = meses;
+            cblFecha.DataTextField = "Texto";
+            cblFecha.DataValueField = "Valor";
+            cblFecha.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
@@ -150,19 +166,51 @@ namespace WebForms
             row["Nombre"] = "Todos";   
             return row;
         }
-
-        protected void btnFiltrarMes_Click(object sender, EventArgs e)
+        protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            CargarListaCertificados();
-            CalcularSubtotal();
+            // Identifica el TextBox modificado
+            TextBox txtExpediente = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
+
+            // Obtiene la clave del registro desde DataKeyNames
+            int id = int.Parse(dgvCertificado.DataKeys[row.RowIndex].Value.ToString());
+
+            // Nuevo valor del expediente
+            string nuevoExpediente = txtExpediente.Text;
+
+            // Actualiza en la base de datos
+            try
+            {
+                // Llama al método del negocio para actualizar el expediente
+                CertificadoNegocio negocio = new CertificadoNegocio();
+                negocio.ActualizarExpediente(id, nuevoExpediente);
+
+                // Mensaje de éxito o retroalimentación opcional
+                lblMensaje.Text = "Expediente actualizado correctamente.";
+                CargarListaCertificados();
+                CalcularSubtotal();
+
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+            }
         }
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaCertificados(filtro);
+        }
+
+        
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                var cellValue = row.Cells[7].Text;
+                var cellValue = row.Cells[8].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;

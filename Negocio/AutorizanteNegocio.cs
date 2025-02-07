@@ -155,7 +155,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(string estado, string empresa, int obra, string area)
+        public List<Autorizante> listar( List<string> estado, List<string> empresa, List<string> concepto, List<string> obra,string filtro = null)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
@@ -163,26 +163,52 @@ namespace Negocio
             try
             {
                 string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,A.MES_BASE,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
-                if (!string.IsNullOrEmpty(estado))
+                if (empresa != null && empresa.Count > 0)
                 {
-                    query += " AND E.NOMBRE = @estado";
-                    datos.setearParametros("@estado", estado);
+                    string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
+                    query += $" AND EM.NOMBRE IN ({empresasParam})";
+                    for (int i = 0; i < empresa.Count; i++)
+                    {
+                        datos.setearParametros($"@empresa{i}", empresa[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(empresa))
+
+                if (estado != null && estado.Count > 0)
                 {
-                    query += " AND EM.NOMBRE = @empresa";
-                    datos.setearParametros("@empresa", empresa);
+                    string estadoParam = string.Join(",", estado.Select((e, i) => $"@estado{i}"));
+                    query += $" AND E.NOMBRE IN ({estadoParam})";
+                    for (int i = 0; i < estado.Count; i++)
+                    {
+                        datos.setearParametros($"@estado{i}", estado[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(area))
+
+                if (concepto != null && concepto.Count > 0)
                 {
-                    query += " AND AR.NOMBRE = @area";
-                    datos.setearParametros("@area", area);
+                    string conceptoParam = string.Join(",", concepto.Select((e, i) => $"@concepto{i}"));
+                    query += $" AND CO.NOMBRE IN ({conceptoParam})";
+                    for (int i = 0; i < concepto.Count; i++)
+                    {
+                        datos.setearParametros($"@concepto{i}", concepto[i]);
+                    }
                 }
-                if (obra != 0)
+
+                if (obra != null && obra.Count > 0)
                 {
-                    query += " AND O.ID = @obra";
-                    datos.setearParametros("@obra", obra);
+                    string obraParam = string.Join(",", obra.Select((e, i) => $"@obra{i}"));
+                    query += $" AND O.ID IN ({obraParam})";
+                    for (int i = 0; i < obra.Count; i++)
+                    {
+                        datos.setearParametros($"@obra{i}", obra[i]);
+                    }
                 }
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND (C.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR EM.NOMBRE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR E.NOMBRE LIKE @filtro OR AR.NOMBRE LIKE @filtro OR A.EXPEDIENTE LIKE @filtro OR A.DETALLE LIKE @filtro OR A.CODIGO_AUTORIZANTE LIKE @filtro) ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+        
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())

@@ -31,7 +31,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                var cellValue = row.Cells[7].Text;
+                var cellValue = row.Cells[8].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
