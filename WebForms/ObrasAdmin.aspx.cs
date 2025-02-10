@@ -47,7 +47,6 @@ namespace WebForms
             ddlEmpresa.SelectedIndex = -1;
             ddlContrata.SelectedIndex = -1;
             ddlBarrio.SelectedIndex = -1;
-            ddlArea.SelectedIndex = -1;
 
         }
         private DataTable ObtenerEmpresas()
@@ -73,14 +72,16 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras()
+        private void CargarListaObras(string filtro= null)
         {
             try
             {
-                string barrio = ddlBarrioFiltro.SelectedValue == "0" ? null : ddlBarrioFiltro.SelectedItem.Text;
-                string empresa = ddlFiltroEmpresa.SelectedValue == "0" ? null : ddlFiltroEmpresa.SelectedItem.Text;
-                string area = ddlAreaFiltro.SelectedValue == "0" ? null : ddlAreaFiltro.SelectedItem.Text;
-                Session["listaObra"] = negocio.listar(barrio, empresa, area);
+                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
+                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
+                Session["listaObra"] = negocio.listar(selectedBarrios, selectedEmpresas, selectedAreas, filtro);
                 dgvObra.DataSource = Session["listaObra"];
                 dgvObra.DataBind();
             }
@@ -217,12 +218,6 @@ namespace WebForms
             ddlArea.DataValueField = "Id";
             ddlArea.DataBind();
 
-            var area = ObtenerAreas();
-            area.Rows.InsertAt(CrearFilaTodos(area), 0);
-            ddlAreaFiltro.DataSource = area;
-            ddlAreaFiltro.DataTextField = "Nombre";
-            ddlAreaFiltro.DataValueField = "Id";
-            ddlAreaFiltro.DataBind();
 
             ddlContrata.DataSource = ObtenerContratas();
             ddlContrata.DataTextField = "Nombre";
@@ -234,19 +229,22 @@ namespace WebForms
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
 
-            var barrio = ObtenerBarrios();
-            barrio.Rows.InsertAt(CrearFilaTodos(barrio), 0);
-            ddlBarrioFiltro.DataSource = barrio;
-            ddlBarrioFiltro.DataTextField = "Nombre";
-            ddlBarrioFiltro.DataValueField = "Id";
-            ddlBarrioFiltro.DataBind();
+            cblBarrio.DataSource = ObtenerBarrios();
+            cblBarrio.DataTextField = "Nombre";
+            cblBarrio.DataValueField = "Id";
+            cblBarrio.DataBind();
 
-            var empresa = ObtenerEmpresas();
-            empresa.Rows.InsertAt(CrearFilaTodos(empresa), 0);
-            ddlFiltroEmpresa.DataSource = empresa;
-            ddlFiltroEmpresa.DataTextField = "Nombre";
-            ddlFiltroEmpresa.DataValueField = "Id";
-            ddlFiltroEmpresa.DataBind();
+
+            cblEmpresa.DataSource = ObtenerEmpresas();
+            cblEmpresa.DataTextField = "Nombre";
+            cblEmpresa.DataValueField = "Id";
+            cblEmpresa.DataBind();
+
+            cblArea.DataSource = ObtenerAreas();
+            cblArea.DataTextField = "Nombre";
+            cblArea.DataValueField = "Id";
+            cblArea.DataBind();
+
 
         }
 
@@ -256,6 +254,11 @@ namespace WebForms
             row["Id"] = 0;
             row["Nombre"] = "Todos";
             return row;
+        }
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaObras(filtro);
         }
     }
 }

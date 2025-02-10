@@ -20,22 +20,19 @@ namespace WebForms
                 BindDropDownList();
                 CargarListaProyectos();
                 CalcularSubtotal();
-                CalcularSubtotal1();
             }
         }
         private void CargarListaProyectos(string filtro = null)
         {
             try
             {
-                string area = ddlAreaFiltro.SelectedValue == "0" ? null : ddlAreaFiltro.SelectedItem.Text;
-
-                string linea = ddlLinea.SelectedValue == "0" ? null : ddlLinea.SelectedItem.Text;
-                string proyecto = ddlProyecto.SelectedValue == "0" ? null : ddlProyecto.SelectedItem.Text;
-                Session["listaProyectos"] = bdProyectoNegocio.Listar(linea,proyecto, area, filtro);
+                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                Session["listaProyectos"] = bdProyectoNegocio.Listar(selectedLineas, selectedProyectos, selectedAreas, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
                 CalcularSubtotal();
-                CalcularSubtotal1();
             }
             catch (Exception ex)
             {
@@ -43,16 +40,15 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void btnBuscar_Click(object sender, EventArgs e)
+        protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
+            string filtro = txtBuscar.Text.Trim();
             CargarListaProyectos(filtro);
         }
         protected void ddlAreaFiltro_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaProyectos();
             CalcularSubtotal();
-            CalcularSubtotal1();
         }
         private DataTable ObtenerAreas()
         {
@@ -63,13 +59,11 @@ namespace WebForms
         {
             CargarListaProyectos();
             CalcularSubtotal();
-            CalcularSubtotal1();
         }
         protected void ddlProyecto_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaProyectos();
             CalcularSubtotal();
-            CalcularSubtotal1();
         }
         private void CalcularSubtotal()
         {
@@ -83,31 +77,16 @@ namespace WebForms
                     subtotal += monto;
                 }
             }
-
             txtSubtotal.Text = subtotal.ToString("C");
         }
-        private void CalcularSubtotal1()
-        {
-            decimal subtotal = 0;
 
-            foreach (GridViewRow row in dgvBdProyecto.Rows)
-            {
-                var cellValue = row.Cells[7].Text;
-                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
-                {
-                    subtotal += monto;
-                }
-            }
-
-            txtSubtotal1.Text = subtotal.ToString("C");
-        }
 
         protected void dgvBdProyecto_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvBdProyecto.SelectedDataKey.Value.ToString();
             Response.Redirect("ModificarProyecto.aspx?codM=" + idSeleccionado);
         }
-   protected void dgvBdProyecto_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void dgvBdProyecto_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
@@ -118,7 +97,6 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-success";
                     CargarListaProyectos();
                     CalcularSubtotal();
-                    CalcularSubtotal1();
                 }
             }
             catch (Exception ex)
@@ -132,8 +110,7 @@ namespace WebForms
         {
             CargarListaProyectos();
             CalcularSubtotal();
-            CalcularSubtotal1();
-        }
+         }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             try
@@ -143,11 +120,11 @@ namespace WebForms
                 nuevoProyecto.Obra = new Obra();
                 nuevoProyecto.Obra.Id = Convert.ToInt32(ddlObra.SelectedValue);
                 nuevoProyecto.SubProyecto = txtSubProyecto.Text;
-                nuevoProyecto.Proyecto = txtProyecto.Text; 
-                nuevoProyecto.LineaGestion = new LineaGestion(); 
+                nuevoProyecto.Proyecto = txtProyecto.Text;
+                nuevoProyecto.LineaGestion = new LineaGestion();
                 nuevoProyecto.LineaGestion.Id = int.Parse(ddlLineaGestion.SelectedValue);
                 nuevoProyecto.LineaGestion.Nombre = ddlLineaGestion.SelectedItem.Text;
-                nuevoProyecto.AutorizadoInicial = Convert.ToDecimal(txtMontoAutorizadoInicial.Text); 
+                nuevoProyecto.AutorizadoInicial = Convert.ToDecimal(txtMontoAutorizadoInicial.Text);
                 BdProyectoNegocio proyectoNegocio = new BdProyectoNegocio();
                 proyectoNegocio.agregar(nuevoProyecto);
 
@@ -155,7 +132,7 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-success";
                 CargarListaProyectos();
                 ddlLineaGestion.SelectedIndex = -1;
-                ddlObra.DataSource = ObtenerObras();  
+                ddlObra.DataSource = ObtenerObras();
                 ddlObra.DataTextField = "Nombre";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
@@ -164,8 +141,7 @@ namespace WebForms
                 txtSubProyecto.Text = string.Empty;
                 txtMontoAutorizadoInicial.Text = string.Empty;
                 CalcularSubtotal();
-                CalcularSubtotal1();
-            }
+                 }
             catch (Exception ex)
             {
                 lblMensaje.Text = "Error al agregar el proyecto: " + ex.Message;
@@ -174,36 +150,31 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            var proyectoFiltro = ObtenerProyecto();
-            proyectoFiltro.Rows.InsertAt(CrearFilaTodos(proyectoFiltro), 0);
-            ddlProyecto.DataSource = proyectoFiltro;
-            ddlProyecto.DataTextField = "Nombre";
-            ddlProyecto.DataValueField = "Id";
-            ddlProyecto.DataBind();
+            cblProyecto.DataSource = ObtenerProyecto();
+            cblProyecto.DataTextField = "Nombre";
+            cblProyecto.DataValueField = "Id";
+            cblProyecto.DataBind();
 
             ddlObra.DataSource = ObtenerObras();
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
 
-            var area = ObtenerAreas();
-            area.Rows.InsertAt(CrearFilaTodos(area), 0);
-            ddlAreaFiltro.DataSource = area;
-            ddlAreaFiltro.DataTextField = "Nombre";
-            ddlAreaFiltro.DataValueField = "Id";
-            ddlAreaFiltro.DataBind();
+            cblArea.DataSource = ObtenerAreas();
+            cblArea.DataTextField = "Nombre";
+            cblArea.DataValueField = "Id";
+            cblArea.DataBind();
 
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";
             ddlLineaGestion.DataValueField = "Id";
             ddlLineaGestion.DataBind();
 
-            var lineasFiltro = ObtenerLineaGestion();
-            lineasFiltro.Rows.InsertAt(CrearFilaTodos(lineasFiltro), 0);
-            ddlLinea.DataSource = lineasFiltro;
-            ddlLinea.DataTextField = "Nombre";
-            ddlLinea.DataValueField = "Id";
-            ddlLinea.DataBind();
+           
+            cblLinea.DataSource = ObtenerLineaGestion();
+            cblLinea.DataTextField = "Nombre";
+            cblLinea.DataValueField = "Id";
+            cblLinea.DataBind();
         }
         private DataRow CrearFilaTodos(DataTable table)
         {

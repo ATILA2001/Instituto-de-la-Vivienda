@@ -83,7 +83,7 @@ namespace Negocio
             }
         }
 
-        public List<BdProyecto> Listar(string linea, string proye, string area, string filtro = null)
+        public List<BdProyecto> Listar(List <string> linea, List<string> proye, List<string> area, string filtro = null)
         {
             List<BdProyecto> lista = new List<BdProyecto>();
             AccesoDatos datos = new AccesoDatos();
@@ -109,21 +109,35 @@ namespace Negocio
                 INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
                 INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
                 INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID where 1=1";
-                if (!string.IsNullOrEmpty(linea))
+               
+                if (linea != null && linea.Count > 0)
                 {
-                    query += " AND L.NOMBRE = @linea ";
-                    datos.setearParametros("@linea", linea);
+                    string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
+                    query += $" AND L.NOMBRE IN ({lineasParam})";
+                    for (int i = 0; i < linea.Count; i++)
+                    {
+                        datos.setearParametros($"@linea{i}", linea[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(area))
+                if (area != null && area.Count > 0)
                 {
-                    query += " AND A.NOMBRE = @area ";
-                    datos.setearParametros("@area", area);
+                    string areasParam = string.Join(",", area.Select((e, i) => $"@area{i}"));
+                    query += $" AND A.NOMBRE IN ({areasParam})";
+                    for (int i = 0; i < area.Count; i++)
+                    {
+                        datos.setearParametros($"@area{i}", area[i]);
+                    }
                 }
-                if (!string.IsNullOrEmpty(proye))
+                if (proye != null && proye.Count > 0)
                 {
-                    query += " AND PROYECTO = @proye ";
-                    datos.setearParametros("@proye", proye);
+                    string proyeParam = string.Join(",", proye.Select((e, i) => $"@proye{i}"));
+                    query += $" AND PROYECTO IN ({proyeParam})";
+                    for (int i = 0; i < proye.Count; i++)
+                    {
+                        datos.setearParametros($"@proye{i}", proye[i]);
+                    }
                 }
+                
                 if (!string.IsNullOrEmpty(filtro))
                 {
 

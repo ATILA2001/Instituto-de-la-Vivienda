@@ -5,147 +5,368 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
 	<style>
-		.table-3d {
-			box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
-			transform: translateY(-5px);
-			transition: transform 0.3s ease, box-shadow 0.3s ease;
-			border-radius: 15px; /* Borde redondeado */
-			overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+			color: #ecf0f1 !important; /* Blanco suave para texto */
 		}
 
-			.table-3d:hover {
-				box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3), 0 8px 10px rgba(0, 0, 0, 0.2);
-				transform: translateY(-10px);
+		.table-3d {
+			border-radius: 10px; /* Borde redondeado */
+			overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+			border-collapse: collapse;
+		}
+
+			.table-3d thead th {
+				background-color: #34495e;
+				color: #ecf0f1;
+				font-weight: bold;
+				text-align: center;
+				text-transform: uppercase;
+				border: none;
 			}
 	</style>
-	<div class="container-fluid mt-4">
-		<div class="row">
-			<div class="col-md-12  rounded-3 p-3">
-				<div class="mx-auto p-2">
-					<div class="card-body">
-						<table class="table  table-3d">
-							<thead class="thead-dark" style="color: #fad404">
-								<tr>
-									<th>Area</th>
-									<th>Empresa</th>
-									<th>Contrata</th>
-									<th>Número</th>
-									<th>Año</th>
-									<th>Etapa</th>
-									<th>Obra N°</th>
-									<th>Barrio</th>
-									<th>Nombre de Obra</th>
-									<th></th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>
-										<asp:DropDownList ID="ddlArea" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
-										<asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
-										<asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
-										<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-									</td>
-									<td>
-										<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-									</td>
-									<td>
-										<asp:DropDownList ID="ddlBarrio" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
-										<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" TextMode="Multiline" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
-											CssClass="btn btn-outline-success" runat="server" />
-									</td>
-									<td class="text-right">
-										<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-											CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-		<hr />
-
+	<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
+				<table class="table  table-3d">
+					<thead class="thead-dark" style="color: #fad404">
+						<tr>
+							<th>Area</th>
+							<th>Empresa</th>
+							<th>Contrata</th>
+							<th>Número</th>
+							<th>Año</th>
+							<th>Etapa</th>
+							<th>Obra N°</th>
+							<th>Barrio</th>
+							<th>Nombre de Obra</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<asp:DropDownList ID="ddlArea" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
 
-
-				<div class="text-end">
-					<div class="d-flex flex-wrap justify-content-between p-3 gap-3">
-						<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-							<div class="form-group">
-								<label class="form-label lbl-left" for="ddlFiltroEmpresa">Empresa:</label>
-								<asp:DropDownList ID="ddlFiltroEmpresa" runat="server" AutoPostBack="True" Width="300px" OnSelectedIndexChanged="ddlFiltroEmpresa_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-								</asp:DropDownList>
-							</div>
-							<div class="form-group">
-								<label class="form-label lbl-left" for="ddlBarrioFiltro">Barrio:</label>
-								<asp:DropDownList ID="ddlBarrioFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlBarrioFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-								</asp:DropDownList>
-							</div>
-							<div class="form-group">
-								<label class="form-label lbl-left" for="ddlAreaFiltro">Area:</label>
-								<asp:DropDownList ID="ddlAreaFiltro" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlAreaFiltro_SelectedIndexChanged" CssClass="btn btn-sm dropdown-toggle" BackColor="White">
-								</asp:DropDownList>
-							</div>
-						</div>
-					</div>
-				</div>
-
-
-
-				<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover"
-					OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
-					OnRowDeleting="dgvObra_RowDeleting"
-					AutoGenerateColumns="false" runat="server"
-					Style="display: block; overflow-x: auto;">
-
-					<Columns>
-						<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-						<asp:BoundField HeaderText="Área" DataField="Area" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Contrata" DataField="Contrata" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Número" DataField="Numero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Año" DataField="Año" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Etapa" DataField="Etapa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Barrio" DataField="Barrio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Disponible Inicial" DataField="AutorizadoInicial" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-						<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-						<asp:BoundField HeaderText="Suma Autorizantes" DataField="MontoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-						<asp:BoundField HeaderText="Suma Certificados" DataField="MontoCertificado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-						<asp:BoundField HeaderText="Ejecucion actual" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:N2}%" />
-						<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					</Columns>
-				</asp:GridView>
-
-				<div class="text-center p-4">
-					<asp:Label ID="lblMensaje" Text="" runat="server" />
-				</div>
+							<td>
+								<asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+								<asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+								<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							</td>
+							<td>
+								<asp:DropDownList ID="ddlBarrio" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+								<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
+									CssClass="btn btn-outline-light" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-light" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
+
+	<div class="row mt-4">
+		<div class="col-md-12">
+			<div class="text-end">
+
+				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+
+
+						<div class="form-group ">
+					<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
+					<div class="dropdown">
+						<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+							Todas
+               
+						</button>
+						<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+							<!-- Rendimos la CheckBoxList aquí -->
+							<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+						</ul>
+					</div>
+				</div>
+
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+               
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblBarrio">Barrio:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownBarrio" data-bs-toggle="dropdown" aria-expanded="false">
+								Todos
+               
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownBarrio" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblBarrio" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
+					</div>
+
+					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+
+
+
+
+
+						<div class="form-group d-flex align-items-end">
+							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
+								<strong id="visibilityText">Agregar Obra</strong>
+							</button>
+						</div>
+
+
+						<div class="form-group  d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
+						</div>
+						<div class="form-group d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<hr />
+
+
+			<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover"
+				OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
+				OnRowDeleting="dgvObra_RowDeleting"
+				AutoGenerateColumns="false" runat="server"
+				Style="display: block; overflow-x: auto;">
+
+				<Columns>
+					<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+					<asp:BoundField HeaderText="Área" DataField="Area" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Contrata" DataField="Contrata" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Número" DataField="Numero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Año" DataField="Año" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Etapa" DataField="Etapa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Barrio" DataField="Barrio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Disponible Inicial" DataField="AutorizadoInicial" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Suma Autorizantes" DataField="MontoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Suma Certificados 2025" DataField="MontoCertificado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Ejecucion actual" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:N2}%" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+				</Columns>
+			</asp:GridView>
+
+			<div class="text-center p-4">
+				<asp:Label ID="lblMensaje" Text="" runat="server" />
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function soloNumeros(e) {
+			var tecla = (document) ? e.keyCode : e.which;
+			if (tecla == 8 || tecla == 46) {
+				return true;
+			}
+			var patron = /^[0-9]$/;
+			var te = String.fromCharCode(tecla);
+			return patron.test(te);
+		}
+
+		$(document).ready(function () {
+			// Inicializamos la visibilidad según el valor almacenado en localStorage
+			var sectionVisible = localStorage.getItem("sectionVisible");
+
+			if (sectionVisible === "true") {
+				$('#section1').show();
+				$('#visibilityText').text("Ocultar sección");
+			} else {
+				$('#section1').hide();
+				$('#visibilityText').text("Agregar Obra");
+			}
+
+			// Manejar clic en el botón para alternar la visibilidad
+			$('#visibilityMessage').on('click', function () {
+				var currentStatus = $('#visibilityText').text();
+
+				if (currentStatus === "Agregar Obra") {
+					localStorage.setItem("sectionVisible", "true");
+					$('#section1').show();
+					$('#visibilityText').text("Ocultar sección");
+				} else {
+					localStorage.setItem("sectionVisible", "false");
+					$('#section1').hide();
+					$('#visibilityText').text("Agregar Obra");
+				}
+			});
+		});
+		$(document).ready(function () {
+			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
+				var seleccionados = [];
+				var $checkBoxList = $('#' + checkBoxListId);
+				var $dropdown = $('#' + dropdownId);
+
+				// Procesar checkboxes seleccionados
+				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
+					seleccionados.push($(this).next('label').text());
+				});
+
+				// Guardar en localStorage
+				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
+
+				// Actualizar el texto del botón
+				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
+				$dropdown.text(textoBoton);
+			}
+
+			// Inicializar para empresas
+			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
+			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+
+				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
+					actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+			});
+
+				// Inicializar para barrios
+				var barriosSeleccionados = JSON.parse(localStorage.getItem('selectedBarrios')) || [];
+				actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
+
+				$('#<%= cblBarrio.ClientID %> input[type=checkbox]').on('change', function () {
+					actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
+				});
+			// Inicializar para areas
+			var areasSeleccionados = JSON.parse(localStorage.getItem('selectedAreas')) || [];
+			actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
+
+			$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
+		actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
+	});
+
+				// Limpiar filtros
+				$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
+					// Limpiar localStorage
+					localStorage.removeItem('selectedEmpresas');
+					localStorage.removeItem('selectedBarrios');
+					localStorage.removeItem('selectedAreas');
+
+
+					// Restablecer checkboxes
+					$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblBarrio.ClientID %> input[type=checkbox]').prop('checked', false);
+
+				// Restablecer texto de los botones
+				$('#dropdownEmpresa').text('Todas');
+				$('#dropdownBarrio').text('Todos');
+					$('#dropdownArea').text('Todas');			});
+			});
+
+	</script>
+
 	<style>
+		.form-group label {
+			font-size: 14px;
+			color: #212529; /* Gris oscuro para un aspecto formal */
+			font-weight: 600; /* Peso semibold */
+		}
+
+		/* Estilo del botón dropdown */
+		.form-group .dropdown-toggle {
+			background-color: #f8f9fa; /* Fondo claro */
+			color: #212529; /* Texto negro */
+
+			border-radius: 0.375rem; /* Bordes redondeados suaves */
+			width: 100%; /* Ocupa todo el ancho */
+			text-align: left; /* Alineación del texto a la izquierda */
+			font-size: 14px; /* Tamaño de texto claro y sobrio */
+			font-weight: normal; /* Si necesitas enfatizar el texto */
+		}
+
+			.form-group .dropdown-toggle:hover {
+				background-color: #e2e6ea; /* Color de fondo en hover */
+				border-color: #adb5bd; /* Color del borde en hover */
+				color: #212529;
+			}
+
+		/* Estilo del menú desplegable */
+		.form-group .dropdown-menu {
+			border: 1px solid; /* Mismo borde que el botón */
+			border-radius: 0.375rem; /* Bordes redondeados */
+			padding: 0.5rem; /* Espaciado interno */
+			background-color: #ffffff; /* Fondo blanco */
+			max-height: 200px;
+			overflow-y: auto; /* Scroll para contenido largo */
+		}
+
+			.form-group .dropdown-menu .form-check:hover {
+				background-color: transparent;
+			}
+
+			/* Opcional: elimina el contorno (outline) en estados de foco */
+			.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+				outline: none;
+				box-shadow: none;
+			}
+			/* Estilo de los items en el dropdown */
+			.form-group .dropdown-menu .form-check {
+				margin-bottom: 0.5rem;
+			}
+
+				.form-group .dropdown-menu .form-check label {
+					font-size: 14px;
+					color: #495057;
+					background-color: transparent;
+				}
+
+				.form-group .dropdown-menu .form-check input[type="checkbox"] {
+					margin-right: 8px;
+				}
+
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+						color: #495057; /* Mantener el color gris */
+						background-color: transparent; /* Sin fondo azul */
+						font-weight: normal; /* Opcional, mantiene el estilo regular */
+					}
+
+
+
 		.table-bordered th, .table-bordered td {
 			border: 1px solid #dddddd;
 			text-align: center;
@@ -175,18 +396,39 @@
 				border: 1px solid #f39c11;
 			}
 
+		.form-label {
+			margin-bottom: 0;
+		}
+
+		.d-flex.align-items-end > .form-control {
+			margin-right: 8px; /* Margen entre el campo y el botón */
+		}
+
 		.form-control-uniform {
 			display: inline-block;
 			font-size: 14px; /* Tamaño de texto uniforme */
-			padding: 6px 12px;
-			margin-top: -6px;
+			padding: 4px 12px;
 			border: 1px solid;
 		}
 
 		.btn {
-			margin-top: -4px;
-			border: 1px solid;
+			background-color: #34495e; /* Azul institucional */
+			text-align: center;
+			transition: all 0.3s ease-in-out;
+			color: #ecf0f1; /* Blanco suave para el texto */
+			border: none;
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			border-radius: 4px; /* Bordes redondeados */
+			display: inline-block;
+			font-weight: bold; /* Si necesitas enfatizar el texto */
 		}
+
+			.btn:hover {
+				background-color: #2c3e50; /* Gris oscuro al pasar el cursor */
+				color: white;
+			}
 
 
 
@@ -195,5 +437,30 @@
 			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
 			font-weight: bold; /* Si necesitas enfatizar el texto */
 		}
+
+		#visibilityMessage {
+			background-color: #34495e; /* Fondo más neutro (gris claro) */
+			text-align: center; /* Centrar el contenido */
+			transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
+			color: #ecf0f1; /* Blanco suave para el texto */
+		}
+
+		#visibilityText {
+			cursor: pointer;
+			display: inline-block;
+			transition: color 0.3s ease-in-out;
+		}
+
+		#visibilityMessage:hover {
+			background-color: #2c3e50; /* Gris oscuro cuando se pasa el cursor */
+		}
+
+
+			#visibilityMessage:hover #visibilityText {
+				color: white; /* Resaltar cuando se pasa el mouse */
+			}
 	</style>
+
 </asp:Content>
+
+
