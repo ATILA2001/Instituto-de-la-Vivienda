@@ -124,6 +124,8 @@ C:\Users\Usuario\Desktop\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.cs
 C:\Users\Usuario\Desktop\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.Up2Date
 C:\Users\Usuario\Desktop\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.dll
 C:\Users\Usuario\Desktop\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.pdb
+C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.AssemblyReference.cache
+C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.CoreCompileInputs.cache
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\WebForms.dll.config
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\WebForms.dll
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\WebForms.pdb
@@ -182,8 +184,6 @@ C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\N
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\Dominio.pdb
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\Negocio.pdb
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
-C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.AssemblyReference.cache
-C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.CoreCompileInputs.cache
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.csproj.Up2Date
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.dll
 C:\Users\20428194781\OneDrive\Escritorio\Instituto-de-la-Vivienda\WebForms\obj\Debug\WebForms.pdb

@@ -11,6 +11,43 @@ namespace Negocio
 {
     public class LegitimoNegocio
     {
+
+        public bool modificar(Legitimo legitimoModificado)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta(@"
+            UPDATE LEGITIMOS_ABONOS 
+            SET 
+                EXPEDIENTE = @EXPEDIENTE,
+                INICIO_EJECUCION = @INICIO_EJECUCION,
+                FIN_EJECUCION = @FIN_EJECUCION,
+                CERTIFICADO = @CERTIFICADO,
+                MES_APROBACION = @MES_APROBACION
+            WHERE 
+                ID = @ID");
+
+                datos.agregarParametro("@EXPEDIENTE", legitimoModificado.Expediente);
+                datos.agregarParametro("@INICIO_EJECUCION", legitimoModificado.InicioEjecucion);
+                datos.agregarParametro("@FIN_EJECUCION", legitimoModificado.FinEjecucion);
+                datos.agregarParametro("@CERTIFICADO", legitimoModificado.Certificado);
+                datos.agregarParametro("@MES_APROBACION", legitimoModificado.MesAprobacion);
+                datos.agregarParametro("@ID", legitimoModificado.Id);
+
+                datos.ejecutarAccion();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar el legítimo abono.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
         public bool agregar(Legitimo nuevoLegitimo)
         {
             AccesoDatos datos = new AccesoDatos();

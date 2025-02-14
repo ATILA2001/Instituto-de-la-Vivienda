@@ -23,6 +23,11 @@ namespace WebForms
 
             }
         }
+        protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
+            Response.Redirect("ModificarLegitimo.aspx?codM=" + idSeleccionado);
+        }
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
             txtAutorizante.Text = string.Empty;
@@ -61,11 +66,7 @@ namespace WebForms
 
 
 
-        protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
-            Response.Redirect($"ModificarLegitimo.aspx?id={idSeleccionado}");
-        }
+      
 
         protected void dgvLegitimos_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {

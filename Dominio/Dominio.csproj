@@ -50,12 +50,14 @@
     <Compile Include="Devengado.cs" />
     <Compile Include="Empresa.cs" />
     <Compile Include="EstadoAutorizante.cs" />
+    <Compile Include="EstadoRedet.cs" />
     <Compile Include="Legitimo.cs" />
     <Compile Include="LineaGestion.cs" />
     <Compile Include="LineaGestionFF.cs" />
     <Compile Include="Obra.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BdProyecto.cs" />
+    <Compile Include="Redeterminacion.cs" />
     <Compile Include="TipoPago.cs" />
     <Compile Include="Usuario.cs" />
   </ItemGroup>
