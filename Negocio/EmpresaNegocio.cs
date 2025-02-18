@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -44,14 +45,21 @@ namespace Negocio
             }
         }
 
-        public List<Empresa> listar()
+        public List<Empresa> listar(string filtro = null)
         {
             List<Empresa> lista = new List<Empresa>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT * FROM EMPRESAS  ORDER BY NOMBRE");
+                string query = "SELECT * FROM EMPRESAS  where 1=1 ";
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND NOMBRE LIKE @filtro ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+                query += "ORDER BY NOMBRE";
+                datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {

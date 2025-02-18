@@ -44,14 +44,21 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Barrio> listar()
+        public List<Barrio> listar(string filtro = null)
         {
             List<Barrio> lista = new List<Barrio>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT * FROM BARRIOS  ORDER BY NOMBRE");
+                string query = "SELECT * FROM BARRIOS  where 1=1 ";
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query += " AND NOMBRE LIKE @filtro ";
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+                query += "ORDER BY NOMBRE";
+                datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
                 {

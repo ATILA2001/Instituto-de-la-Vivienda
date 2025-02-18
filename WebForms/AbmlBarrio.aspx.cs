@@ -20,12 +20,16 @@ namespace WebForms
                 CargarListaBarrios();
             }
         }
-
-        private void CargarListaBarrios()
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaBarrios(filtro);
+        }
+        private void CargarListaBarrios(string filtro = null)
         {
             try
             {
-                Session["listaBarrio"] = negocio.listar();
+                Session["listaBarrio"] = negocio.listar(filtro);
                 dgvBarrio.DataSource = Session["listaBarrio"];
                 dgvBarrio.DataBind();
             }

@@ -2,6 +2,7 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -17,15 +18,23 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
+
+               
                 CargarListaEmpresas();
             }
         }
-
-        private void CargarListaEmpresas()
+        protected void btnFiltrar_Click(object sender, EventArgs e)
         {
+            string filtro = txtBuscar.Text.Trim();
+            CargarListaEmpresas(filtro);
+        }
+        private void CargarListaEmpresas(string filtro = null)
+        {
+            
+            
             try
             {
-                Session["listaEmpresa"] = negocio.listar();
+                Session["listaEmpresa"] = negocio.listar(filtro);
                 dgvEmpresa.DataSource = Session["listaEmpresa"];
                 dgvEmpresa.DataBind();
             }
@@ -89,19 +98,7 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void dgvEmpresa_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            try
-            {
-                dgvEmpresa.PageIndex = e.NewPageIndex;
-                CargarListaEmpresas();
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
+       
 
     }
 }
