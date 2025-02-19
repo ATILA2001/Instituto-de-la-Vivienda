@@ -9,7 +9,42 @@ namespace Negocio
 {
     public class RedeterminacionNegocio
     {
-        public bool eliminar(string codigo)
+
+        public bool agregar(Redeterminacion nuevaRedet)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                string query = @"
+            INSERT INTO REDETERMINACIONES 
+            (CODIGO_AUTORIZANTE, EXPEDIENTE, SALTO, NRO, TIPO, ETAPA, OBSERVACIONES,PORCENTAJE_PONDERACION) 
+            VALUES 
+            (@CODIGO_AUTORIZANTE, @EXPEDIENTE, @SALTO, @NRO, @TIPO, @ETAPA, @OBSERVACIONES,@PORCENTAJE)";
+
+                datos.setearConsulta(query);
+
+                datos.agregarParametro("@CODIGO_AUTORIZANTE", nuevaRedet.Autorizante.CodigoAutorizante);
+                datos.agregarParametro("@EXPEDIENTE", nuevaRedet.Expediente);
+                datos.agregarParametro("@SALTO", nuevaRedet.Salto.HasValue ? (object)nuevaRedet.Salto.Value : DBNull.Value);
+                datos.agregarParametro("@NRO", nuevaRedet.Nro.HasValue ? (object)nuevaRedet.Nro.Value : DBNull.Value);
+                datos.agregarParametro("@TIPO", nuevaRedet.Tipo);
+                datos.agregarParametro("@ETAPA", nuevaRedet.Etapa.Id);
+                datos.agregarParametro("@OBSERVACIONES", nuevaRedet.Observaciones ?? (object)DBNull.Value);
+                datos.agregarParametro("@PORCENTAJE", nuevaRedet.Porcentaje ?? (object)DBNull.Value);
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Hubo un problema al intentar agregar la redeterminación.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public bool eliminar(int codigo)
         {
             AccesoDatos datos = new AccesoDatos();
             try
@@ -45,14 +80,11 @@ namespace Negocio
                             R.ETAPA,
                             R.OBSERVACIONES,
                             R.CODIGO_REDET,
-                            O.ID AS OBRA_ID,
-                            O.DESCRIPCION AS OBRA_DESCRIPCION,
                             E.ID AS ETAPA_ID,
-                            E.NOMBRE AS ETAPA_NOMBRE
+                            E.NOMBRE AS ETAPA_NOMBRE,
+                            R.PORCENTAJE_PONDERACION AS PORCENTAJE
                         FROM 
                             REDETERMINACIONES AS R
-                        INNER JOIN 
-                            OBRAS AS O ON R.ID_BASE = O.ID
                         INNER JOIN 
                             ESTADOS_REDET AS E ON R.ETAPA = E.ID
                         WHERE 1=1";
@@ -74,16 +106,6 @@ namespace Negocio
                     for (int i = 0; i < codigoAutorizante.Count; i++)
                     {
                         datos.agregarParametro($"@autorizante{i}", codigoAutorizante[i]);
-                    }
-                }
-
-                if (obra != null && obra.Count > 0)
-                {
-                    string obraParam = string.Join(",", obra.Select((e, i) => $"@obra{i}"));
-                    query += $" AND O.ID IN ({obraParam})";
-                    for (int i = 0; i < obra.Count; i++)
-                    {
-                        datos.agregarParametro($"@obra{i}", obra[i]);
                     }
                 }
 
@@ -111,12 +133,10 @@ namespace Negocio
                     aux.Tipo = datos.Lector["TIPO"] as string;
                     aux.Observaciones = datos.Lector["OBSERVACIONES"] as string;
                     aux.CodigoRedet = datos.Lector["CODIGO_REDET"] as string;
+                    aux.Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null;
 
-                    aux.Obra = new Obra
-                    {
-                        Id = (int)datos.Lector["OBRA_ID"],
-                        Descripcion = datos.Lector["OBRA_DESCRIPCION"] as string
-                    };
+                    //aux.Obra =  datos.Lector["OBRA_DESCRIPCION"] as string;
+
 
                     aux.Etapa = new EstadoRedet
                     {
