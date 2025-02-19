@@ -1,0 +1,477 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Redet.Master" AutoEventWireup="true" CodeBehind="Redeterminaciones.aspx.cs" Inherits="WebForms.Redeterminaciones" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+	<style>
+		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+			color: #ecf0f1 !important; /* Blanco suave para texto */
+		}
+
+		.table-3d {
+			border-radius: 10px; /* Borde redondeado */
+			overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+			border-collapse: collapse;
+		}
+
+			.table-3d thead th {
+				background-color: #34495e;
+				color: #ecf0f1;
+				font-weight: bold;
+				text-align: center;
+				text-transform: uppercase;
+				border: none;
+			}
+	</style>
+	<div id="section1" style="display: none;">
+		<div class="row mt-4">
+			<div class="col-md-12">
+				<table class="table  table-3d">
+					<thead class="thead-dark" style="color: #fad404">
+						<tr>
+							<th>Código Autorizante</th>
+							<th>Expediente</th>
+							<th>Salto</th>
+							<th>Nro</th>
+							<th>Tipo</th>
+							<th>Etapa</th>
+							<th>Porcentaje</th>							<th>Observaciones</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+
+
+
+							<td>
+								<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtNro" CssClass="form-control" runat="server" />
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtTipo" CssClass="form-control" runat="server"></asp:TextBox>
+							</td>
+							<td>
+								<asp:DropDownList ID="ddlEtapa" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+				<asp:TextBox ID="txtPorcentaje" CssClass="form-control" runat="server" />
+</td>
+							<td>
+								<asp:TextBox ID="txtObservacion" CssClass="form-control" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div class="row mt-4">
+		<div class="col-md-12">
+			<div class="text-end">
+				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblObra">Obra:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownObra" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownObra" style="max-height: 200px; overflow-y: auto;">
+								<asp:CheckBoxList ID="cblObra" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblAutorizante">Autorizante:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownAutorizante" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
+								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEtapa">Etapa:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEtapa" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEtapa" style="max-height: 200px; overflow-y: auto;">
+								<asp:CheckBoxList ID="cblEtapa" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+
+					<%--<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
+								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>--%>
+
+					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
+						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
+					</div>
+
+
+
+
+
+
+
+					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+
+
+						<div class="form-group d-flex align-items-end">
+							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
+								<strong id="visibilityText">Agregar Redet</strong>
+							</button>
+						</div>
+
+						<div class="form-group  d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
+						</div>
+						<div class="form-group d-flex align-items-end">
+							<asp:Button CssClass="btn btn-sm btn-outline-dark" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<hr />
+			<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1  table-bordered table-hover "
+				OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
+				OnRowDeleting="dgvRedeterminacion_RowDeleting"
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
+				<Columns>
+					<asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" Visible="false" />
+
+					<asp:BoundField HeaderText="Obra" DataField="Obra" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Etapa" DataField="Etapa.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:TemplateField HeaderText="Expediente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+						<ItemTemplate>
+							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+						</ItemTemplate>
+					</asp:TemplateField>
+					<asp:BoundField HeaderText="Tipo" DataField="Tipo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<%--					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />--%>
+					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+				</Columns>
+			</asp:GridView>
+
+			<div class="text-center p-4">
+				<asp:Label ID="lblMensaje" Text="" runat="server" />
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		function soloNumeros(e) {
+			var tecla = (document) ? e.keyCode : e.which;
+			if (tecla == 8 || tecla == 46) {
+				return true;
+			}
+			var patron = /^[0-9]$/;
+			var te = String.fromCharCode(tecla);
+			return patron.test(te);
+		}
+		$(document).ready(function () {
+			// Inicializamos la visibilidad según el valor de localStorage
+			var sectionVisible = localStorage.getItem("sectionVisible");
+
+			// Si está marcado como 'true', mostramos la sección
+			if (sectionVisible === "true") {
+				$('#section1').show(); // Mostramos la sección
+				$('#visibilityText').text("Ocultar sección"); // Texto cuando la sección es visible
+			} else {
+				$('#section1').hide(); // Ocultamos la sección
+				$('#visibilityText').text("Agregar Certificado"); // Texto cuando la sección está oculta
+			}
+
+			// Manejar clic en el mensaje para alternar el estado de visibilidad
+			$(document).on('click', '#visibilityMessage', function () {
+				// Cambiamos el valor de visibilidad
+				var currentStatus = $('#visibilityText').text();
+
+				if (currentStatus === "Agregar Certificado") {
+					// Si está oculto, lo mostramos
+					localStorage.setItem("sectionVisible", "true");
+					$('#section1').show(); // Mostramos la sección
+					$('#visibilityText').text("Ocultar sección"); // Cambiar el texto
+				} else {
+					// Si está visible, lo ocultamos
+					localStorage.setItem("sectionVisible", "false");
+					$('#section1').hide(); // Ocultamos la sección
+					$('#visibilityText').text("Agregar Certificado"); // Cambiar el texto
+				}
+			});
+		});
+
+
+		$(document).ready(function () {
+			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
+				var seleccionados = [];
+				var $checkBoxList = $('#' + checkBoxListId);
+				var $dropdown = $('#' + dropdownId);
+
+				// Procesar checkboxes seleccionados
+				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
+					seleccionados.push($(this).next('label').text());
+				});
+
+				// Guardar en localStorage
+				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
+
+				// Actualizar el texto del botón
+				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
+				$dropdown.text(textoBoton);
+			}
+
+			// Inicializar para empresas
+			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedObras')) || [];
+			actualizarSeleccion('<%= cblObra.ClientID %>', 'dropdownObra', 'selectedObra');
+
+
+			$('#<%= cblObra.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblObra.ClientID %>', 'dropdownObra', 'selectedObras');
+			});
+
+			// Inicializar para Tipo 
+			var TipoSeleccionados = JSON.parse(localStorage.getItem('selectedEtapas')) || [];
+			actualizarSeleccion('<%= cblEtapa.ClientID %>', 'dropdownEtapa', 'selectedEtapas');
+
+			$('#<%= cblEtapa.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblEtapa.ClientID %>', 'dropdownEtapa', 'selectedEtapas');
+			});
+			// Inicializar para  Autorizante 
+			var AutorizanteSeleccionados = JSON.parse(localStorage.getItem('selectedAutorizantes')) || [];
+			actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
+
+			$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
+			});
+
+
+
+			// Limpiar filtros
+			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
+				// Limpiar localStorage
+				localStorage.removeItem('selectedObras');
+				localStorage.removeItem('selectedEtapas');
+				localStorage.removeItem('selectedAutorizantes');
+				// Restablecer checkboxes
+				$('#<%= cblObra.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblEtapa.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').prop('checked', false);
+				// Restablecer texto de los botones
+
+				$('#dropdownObra').text('Todas');
+				$('#dropdownEtapa').text('Todas');
+				$('#dropdownAutorizante').text('Todos');
+			});
+		});
+
+
+
+	</script>
+	<style>
+		.form-group label {
+			font-size: 14px;
+			color: #212529; /* Gris oscuro para un aspecto formal */
+			font-weight: 600; /* Peso semibold */
+		}
+
+		/* Estilo del botón dropdown */
+		.form-group .dropdown-toggle {
+			background-color: #f8f9fa; /* Fondo claro */
+			color: #212529; /* Texto negro */
+			border-radius: 0.375rem; /* Bordes redondeados suaves */
+			width: 100%; /* Ocupa todo el ancho */
+			text-align: left; /* Alineación del texto a la izquierda */
+			font-size: 14px; /* Tamaño de texto claro y sobrio */
+			font-weight: normal; /* Si necesitas enfatizar el texto */
+		}
+
+			.form-group .dropdown-toggle:hover {
+				background-color: #e2e6ea; /* Color de fondo en hover */
+				border-color: #adb5bd; /* Color del borde en hover */
+				color: #212529;
+			}
+
+		/* Estilo del menú desplegable */
+		.form-group .dropdown-menu {
+			border: 1px solid; /* Mismo borde que el botón */
+			border-radius: 0.375rem; /* Bordes redondeados */
+			padding: 0.5rem; /* Espaciado interno */
+			background-color: #ffffff; /* Fondo blanco */
+			max-height: 200px;
+			overflow-y: auto; /* Scroll para contenido largo */
+		}
+
+			.form-group .dropdown-menu .form-check:hover {
+				background-color: transparent;
+			}
+
+			/* Opcional: elimina el contorno (outline) en estados de foco */
+			.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+				outline: none;
+				box-shadow: none;
+			}
+			/* Estilo de los items en el dropdown */
+			.form-group .dropdown-menu .form-check {
+				margin-bottom: 0.5rem;
+			}
+
+				.form-group .dropdown-menu .form-check label {
+					font-size: 14px;
+					color: #495057;
+					background-color: transparent;
+				}
+
+				.form-group .dropdown-menu .form-check input[type="checkbox"] {
+					margin-right: 8px;
+				}
+
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+						color: #495057; /* Mantener el color gris */
+						background-color: transparent; /* Sin fondo azul */
+						font-weight: normal; /* Opcional, mantiene el estilo regular */
+					}
+
+
+
+		.table-bordered th, .table-bordered td {
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+
+		.table-hover tbody tr:hover {
+			background-color: #f2f2f2;
+		}
+
+		.table1 th, .table1 td {
+			padding: 12px;
+			font-size: 14px;
+		}
+
+		/* Bordes redondeados y sombras en el GridView */
+		.table1 {
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+		}
+
+			/* Mejorar el estilo de las celdas del encabezado */
+			.table1 th {
+				text-align: center;
+				font-weight: bold;
+				background: #f1c40f;
+				color: white;
+				border: 1px solid #f39c11;
+			}
+
+		.form-label {
+			margin-bottom: 0;
+		}
+
+		.d-flex.align-items-end > .form-control {
+			margin-right: 8px; /* Margen entre el campo y el botón */
+		}
+
+		.form-control-uniform {
+			display: inline-block;
+			font-size: 14px; /* Tamaño de texto uniforme */
+			padding: 4px 12px;
+			border: 1px solid;
+		}
+
+		.btn {
+			background-color: #34495e; /* Azul institucional */
+			text-align: center;
+			transition: all 0.3s ease-in-out;
+			color: #ecf0f1; /* Blanco suave para el texto */
+			border: none;
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			border-radius: 4px; /* Bordes redondeados */
+			display: inline-block;
+			font-weight: bold; /* Si necesitas enfatizar el texto */
+		}
+
+			.btn:hover {
+				background-color: #2c3e50; /* Gris oscuro al pasar el cursor */
+				color: white;
+			}
+
+
+
+		.lbl-left {
+			text-align: left;
+			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+			font-weight: bold; /* Si necesitas enfatizar el texto */
+		}
+
+		#visibilityMessage {
+			background-color: #34495e; /* Fondo más neutro (gris claro) */
+			text-align: center; /* Centrar el contenido */
+			transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
+			color: #ecf0f1; /* Blanco suave para el texto */
+		}
+
+		#visibilityText {
+			cursor: pointer;
+			display: inline-block;
+			transition: color 0.3s ease-in-out;
+		}
+
+		#visibilityMessage:hover {
+			background-color: #2c3e50; /* Gris oscuro cuando se pasa el cursor */
+		}
+
+
+			#visibilityMessage:hover #visibilityText {
+				color: white; /* Resaltar cuando se pasa el mouse */
+			}
+	</style>
+</asp:Content>
