@@ -78,6 +78,7 @@
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
     <Content Include="custom.css" />
+    <Content Include="CustomControls\CheckBoxListSearch.ascx" />
     <Content Include="Devengados.aspx" />
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
@@ -176,6 +177,10 @@
     </Compile>
     <Compile Include="CertificadosAdmin.aspx.designer.cs">
       <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\CheckBoxListSearch.ascx.cs">
+      <DependentUpon>CheckBoxListSearch.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Devengados.aspx.cs">
       <DependentUpon>Devengados.aspx</DependentUpon>

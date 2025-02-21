@@ -1,5 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Obras.aspx.cs" Inherits="WebForms.Obras" %>
 
+<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -95,7 +97,7 @@
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
 						<div class="dropdown">
-							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
 								Todas
                    
 							</button>
@@ -103,6 +105,8 @@
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
 							</ul>
+							--%>
+								<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
@@ -241,7 +245,7 @@
 
 			// Inicializar para empresas
 			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
-			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');presas');
 
 			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
 				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
@@ -271,7 +275,7 @@
 			});
 		});
 
-	</script>
+    </script>
 
 	<style>
 		.form-group label {
