@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace Negocio
 {
@@ -23,8 +24,9 @@ namespace Negocio
         }
         public AccesoDatos()
         {
-           //conexion = new SqlConnection("server=.\\SQLEXPRESS; database=IVC; integrated security=true");
-              conexion = new SqlConnection("Server=10.10.12.10; Database=IVC; User ID=pre_financiera; Password=pre_financiera2025;");
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringTest"].ConnectionString;
+            Console.WriteLine(connectionString);
+            conexion = new SqlConnection(connectionString);
             comando = new SqlCommand();
         }
 

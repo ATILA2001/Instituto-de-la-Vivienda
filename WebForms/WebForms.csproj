@@ -177,7 +177,6 @@
     <Compile Include="CertificadosAdmin.aspx.designer.cs">
       <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Controls\CheckBoxListSearch.cs" />
     <Compile Include="Devengados.aspx.cs">
       <DependentUpon>Devengados.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -388,6 +387,7 @@
     <Content Include="LoginRegister.Master" />
     <None Include=".editorconfig" />
     <Content Include="libman.json" />
+    <Content Include="connectionStrings.config" />
     <None Include="packages.config" />
     <Content Include="User.Master" />
     <Content Include="Redet.Master" />
