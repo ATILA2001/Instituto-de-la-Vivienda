@@ -20,14 +20,14 @@ namespace WebForms
                 {
                     var codM = Request.QueryString["codM"];
                     AutorizanteNegocio negocio = new AutorizanteNegocio();
-                    ddlObra.DataSource = ObtenerObras();  
+                    ddlObra.DataSource = ObtenerObras();
                     ddlObra.DataTextField = "Nombre";
                     ddlObra.DataValueField = "Id";
                     ddlObra.DataBind();
-                    ddlEstado.DataSource = ObtenerEstado();
-                    ddlEstado.DataTextField = "Nombre";
-                    ddlEstado.DataValueField = "Id";
-                    ddlEstado.DataBind();
+                    ddlConcepto.DataSource = ObtenerConcepto();
+                    ddlConcepto.DataTextField = "Nombre";
+                    ddlConcepto.DataValueField = "Id";
+                    ddlConcepto.DataBind();
 
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
 
@@ -39,12 +39,14 @@ namespace WebForms
 
                         ddlConcepto.SelectedValue = selected.Concepto?.Id.ToString();
                         txtDetalle.Text = selected.Detalle ?? string.Empty;
-                        txtExpediente.Text = selected.Expediente ?? string.Empty;
                         txtMontoAutorizado.Text = selected.MontoAutorizado.ToString("0.00");
                         txtFecha.Text = selected.Fecha.HasValue
                             ? selected.Fecha.Value.ToString("yyyy-MM-dd")
                             : string.Empty;
-                        ddlEstado.SelectedValue = selected.Estado?.Id.ToString();
+
+                        txtMes.Text = selected.MesBase.HasValue
+                            ? selected.MesBase.Value.ToString("yyyy-MM-dd")
+                            : string.Empty;
                         ddlObra.SelectedValue = selected.Obra?.Id.ToString();
                     }
                     else
@@ -68,18 +70,20 @@ namespace WebForms
                     Autorizante autorizadoModificado = new Autorizante
                     {
                         CodigoAutorizante = codM,
+                        Obra = new Obra { Id = int.Parse(ddlObra.SelectedValue), Descripcion = ddlObra.SelectedItem.Text },
                         Concepto = new Concepto { Id = int.Parse(ddlConcepto.SelectedValue), Nombre = ddlConcepto.SelectedItem.Text },
                         Detalle = txtDetalle.Text.Trim(),
-                        Expediente = txtExpediente.Text.Trim(),
                         MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text.Trim()),
                         Fecha = string.IsNullOrEmpty(txtFecha.Text.Trim())
                             ? (DateTime?)null
                             : DateTime.Parse(txtFecha.Text.Trim()),
-                        AutorizacionGG = int.Parse(ddlAutorizacionGG.SelectedValue) == 1,
-                        Estado = new EstadoAutorizante { Id = int.Parse(ddlEstado.SelectedValue) }
+                        MesBase = string.IsNullOrEmpty(txtMes.Text.Trim())
+                            ? (DateTime?)null
+                            : DateTime.Parse(txtMes.Text.Trim()),
+
                     };
 
-                    if (negocio.modificarAdmin(autorizadoModificado))
+                    if (negocio.modificar(autorizadoModificado))
                     {
                         lblMensaje.Text = "Autorizante modificado exitosamente.";
                         lblMensaje.CssClass = "alert alert-success";
@@ -105,7 +109,11 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-
+        private DataTable ObtenerConcepto()
+        {
+            ConceptoNegocio empresaNegocio = new ConceptoNegocio();
+            return empresaNegocio.listarddl();
+        }
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio estadoNegocio = new EstadoAutorizanteNegocio();
@@ -122,8 +130,7 @@ namespace WebForms
             return ddlObra.SelectedIndex != -1 &&
                    !string.IsNullOrWhiteSpace(ddlConcepto.Text) &&
                    !string.IsNullOrWhiteSpace(txtDetalle.Text) &&
-                   !string.IsNullOrWhiteSpace(txtMontoAutorizado.Text) &&
-                   ddlEstado.SelectedIndex != -1;
+                   !string.IsNullOrWhiteSpace(txtMontoAutorizado.Text);
         }
     }
 }

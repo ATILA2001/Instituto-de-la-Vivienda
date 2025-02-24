@@ -42,24 +42,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtDetalle;
 
         /// <summary>
-        /// Control txtExpediente.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtExpediente;
-
-        /// <summary>
-        /// Control ddlEstado.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlEstado;
-
-        /// <summary>
         /// Control txtMontoAutorizado.
         /// </summary>
         /// <remarks>
@@ -78,13 +60,13 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtFecha;
 
         /// <summary>
-        /// Control ddlAutorizacionGG.
+        /// Control txtMes.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlAutorizacionGG;
+        protected global::System.Web.UI.WebControls.TextBox txtMes;
 
         /// <summary>
         /// Control btnModificar.

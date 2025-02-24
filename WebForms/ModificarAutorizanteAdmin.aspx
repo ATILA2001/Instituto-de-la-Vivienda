@@ -30,11 +30,9 @@
 									<th>Obra</th>
 									<th>Concepto</th>
 									<th>Detalle</th>
-									<th>Expediente</th>
-									<th>Estado</th>
 									<th>Monto Autorizado</th>
 									<th>Mes Aprobacion</th>
-									<th>Aprobacion</th>
+									<th>Mes Base</th>
 									<th></th>
 									<th></th>
 								</tr>
@@ -51,22 +49,13 @@
 										<asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />
 									</td>
 									<td>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-									</td>
-									<td>
-										<asp:DropDownList ID="ddlEstado" CssClass="form-control" runat="server"></asp:DropDownList>
-									</td>
-									<td>
 										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
 									</td>
 									<td>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 									</td>
 									<td>
-										<asp:DropDownList ID="ddlAutorizacionGG" runat="server">
-											<asp:ListItem Text="A AUTORIZAR" Value="0"></asp:ListItem>
-											<asp:ListItem Text="AUTORIZADO" Value="1"></asp:ListItem>
-										</asp:DropDownList>
+										<asp:TextBox ID="txtMes" CssClass="form-control" runat="server" TextMode="Date" />
 									</td>
 									<td class="text-right">
 										<asp:Button Text="Modificar" ID="btnModificar" OnClick="btnModificar_Click" CssClass="btn btn-outline-success" runat="server" />
@@ -78,8 +67,9 @@
 					</div>
 				</div>
 			</div>
-			<div class="text-center p-4">
-				<asp:Label ID="lblMensaje" Text="" runat="server" />
-			</div>
 		</div>
+		<div class="text-center p-4">
+			<asp:Label ID="lblMensaje" Text="" runat="server" />
+		</div>
+	</div>
 </asp:Content>
