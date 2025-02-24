@@ -409,6 +409,7 @@ namespace Negocio
                 {
                     var legitimoAbono = new Legitimo
                     {
+                        Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),

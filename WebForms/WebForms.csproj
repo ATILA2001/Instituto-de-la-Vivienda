@@ -96,6 +96,7 @@
     <Content Include="ModificarCertificadoAdmin.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarLegitimo.aspx" />
+    <Content Include="ModificarLegitimoAdmin.aspx" />
     <Content Include="ModificarObra.aspx" />
     <Content Include="ModificarObraUser.aspx" />
     <Content Include="ModificarProyecto.aspx" />
@@ -309,6 +310,13 @@
     </Compile>
     <Compile Include="ModificarLegitimo.aspx.designer.cs">
       <DependentUpon>ModificarLegitimo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ModificarLegitimoAdmin.aspx.cs">
+      <DependentUpon>ModificarLegitimoAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ModificarLegitimoAdmin.aspx.designer.cs">
+      <DependentUpon>ModificarLegitimoAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarObra.aspx.cs">
       <DependentUpon>ModificarObra.aspx</DependentUpon>

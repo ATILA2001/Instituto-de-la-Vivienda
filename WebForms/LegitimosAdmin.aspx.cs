@@ -51,7 +51,7 @@ namespace WebForms
         protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
         {
             var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
-            Response.Redirect($"ModificarLegitimo.aspx?id={idSeleccionado}");
+            Response.Redirect("ModificarLegitimoAdmin.aspx?codM=" + idSeleccionado);
         }
 
         protected void dgvLegitimos_RowDeleting(object sender, GridViewDeleteEventArgs e)
