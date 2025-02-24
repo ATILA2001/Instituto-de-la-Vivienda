@@ -12,6 +12,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 	<asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
+	
+	<link rel="icon" href="Images/IVC-Azul.png" type="image/x-icon" />
 </head>
 <body class="bg-light">
 	<form id="form1" runat="server">
