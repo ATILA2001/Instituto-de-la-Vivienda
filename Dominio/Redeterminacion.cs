@@ -19,6 +19,10 @@ namespace Dominio
         public string Observaciones { get; set; }
         public string CodigoRedet { get; set; } 
         public decimal? Porcentaje { get; set; }
+        public String Empresa { get; set; }
+        public String Area { get; set; }
+        public DateTime? FechaSade { get; set; }
+        public string BuzonSade { get; set; }
 
         public Redeterminacion() { }
     }

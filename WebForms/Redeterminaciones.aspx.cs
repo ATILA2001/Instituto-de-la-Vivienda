@@ -166,6 +166,7 @@ namespace WebForms
             ddlEtapa.DataTextField = "Nombre";
             ddlEtapa.DataValueField = "Id";
             ddlEtapa.DataBind();
+        
 
             cblEtapa.DataSource = ObtenerTipos();
             cblEtapa.DataTextField = "Nombre";
@@ -253,6 +254,46 @@ namespace WebForms
             CargarListaRedeterminacion(filtro);
         }
 
+        protected void ddlEtapas_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddlEtapas = (DropDownList)sender;
+            GridViewRow row = (GridViewRow)ddlEtapas.NamingContainer;
+
+            List<Redeterminacion> listaRedeterminaciones = (List<Redeterminacion>)Session["listaRedeterminacion"];
+            int id = int.Parse(dgvRedeterminacion.DataKeys[row.RowIndex].Value.ToString());
+            Redeterminacion autorizante = listaRedeterminaciones.Find(a => a.Id == id);
+
+            if (autorizante != null)
+            {
+                autorizante.Etapa.Id = int.Parse(ddlEtapas.SelectedValue);
+                RedeterminacionNegocio negocio = new RedeterminacionNegocio();
+                negocio.ActualizarEstado(autorizante);
+                CargarListaRedeterminacion();
+
+                lblMensaje.Text = "Etapa actualizada correctamente.";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+        }
+
+        protected void dgvRedeterminacion_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                DropDownList ddlEtapas = (DropDownList)e.Row.FindControl("ddlEtapas");
+
+                if (ddlEtapas != null)
+                {
+                    DataTable estados = ObtenerTipos();
+                    ddlEtapas.DataSource = estados;
+                    ddlEtapas.DataTextField = "Nombre";
+                    ddlEtapas.DataValueField = "Id";
+                    ddlEtapas.DataBind();
+
+                    string estadoActual = DataBinder.Eval(e.Row.DataItem, "Etapa.Id").ToString();
+                    ddlEtapas.SelectedValue = estadoActual;
+                }
+            }
+        }
     }
 
 }

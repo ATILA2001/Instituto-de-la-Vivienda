@@ -37,7 +37,8 @@
 							<th>Nro</th>
 							<th>Tipo</th>
 							<th>Etapa</th>
-							<th>Porcentaje</th>							<th>Observaciones</th>
+							<th>Porcentaje</th>
+							<th>Observaciones</th>
 							<th></th>
 							<th></th>
 						</tr>
@@ -70,8 +71,8 @@
 								<asp:DropDownList ID="ddlEtapa" CssClass="form-control" runat="server"></asp:DropDownList>
 							</td>
 							<td>
-				<asp:TextBox ID="txtPorcentaje" CssClass="form-control" runat="server" />
-</td>
+								<asp:TextBox ID="txtPorcentaje" CssClass="form-control" runat="server" />
+							</td>
 							<td>
 								<asp:TextBox ID="txtObservacion" CssClass="form-control" runat="server" />
 							</td>
@@ -173,16 +174,24 @@
 			</div>
 
 			<hr />
-			<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1  table-bordered table-hover "
+			<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover"
 				OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
 				OnRowDeleting="dgvRedeterminacion_RowDeleting"
+				 OnRowDataBound="dgvRedeterminacion_RowDataBound"
 				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" Visible="false" />
-
 					<asp:BoundField HeaderText="Obra" DataField="Obra" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Etapa" DataField="Etapa.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:TemplateField HeaderText="Etapa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+						<ItemTemplate>
+							<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
+								OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+							</asp:DropDownList>
+						</ItemTemplate>
+					</asp:TemplateField>
+
 					<asp:TemplateField HeaderText="Expediente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
 						<ItemTemplate>
 							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
@@ -191,10 +200,16 @@
 					</asp:TemplateField>
 					<asp:BoundField HeaderText="Tipo" DataField="Tipo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<%--					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />--%>
+					<asp:BoundField HeaderText="Buzón SADE" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Área" DataField="Area" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 				</Columns>
 			</asp:GridView>
@@ -225,7 +240,7 @@
 				$('#visibilityText').text("Ocultar sección"); // Texto cuando la sección es visible
 			} else {
 				$('#section1').hide(); // Ocultamos la sección
-				$('#visibilityText').text("Agregar Certificado"); // Texto cuando la sección está oculta
+				$('#visibilityText').text("Agregar Redet"); // Texto cuando la sección está oculta
 			}
 
 			// Manejar clic en el mensaje para alternar el estado de visibilidad
@@ -233,7 +248,7 @@
 				// Cambiamos el valor de visibilidad
 				var currentStatus = $('#visibilityText').text();
 
-				if (currentStatus === "Agregar Certificado") {
+				if (currentStatus === "Agregar Redet") {
 					// Si está oculto, lo mostramos
 					localStorage.setItem("sectionVisible", "true");
 					$('#section1').show(); // Mostramos la sección
@@ -242,7 +257,7 @@
 					// Si está visible, lo ocultamos
 					localStorage.setItem("sectionVisible", "false");
 					$('#section1').hide(); // Ocultamos la sección
-					$('#visibilityText').text("Agregar Certificado"); // Cambiar el texto
+					$('#visibilityText').text("Agregar Redet"); // Cambiar el texto
 				}
 			});
 		});
