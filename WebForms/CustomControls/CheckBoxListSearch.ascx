@@ -6,8 +6,10 @@
     </button>
     
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
+        <div class="search-container">
         <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')"/>
-        
+        </div>
+
         <div class="checkbox-container">
             <asp:CheckBoxList ID="chkList" runat="server" CssClass="checkbox-list" AutoPostBack="true" OnSelectedIndexChanged="ChkList_SelectedIndexChanged"></asp:CheckBoxList>
         </div>
@@ -85,7 +87,7 @@
     overflow-y: auto;
     box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     z-index: 1000;
-    padding: 5px;
+    padding: 0px 5px;
     display: none;
     text-align: left;
 }
