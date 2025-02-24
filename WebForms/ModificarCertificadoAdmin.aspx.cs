@@ -48,7 +48,6 @@ namespace WebForms
             try
             {
                 if (
-                    txtExpediente.Text.Trim() != string.Empty &&
                     txtMontoAutorizado.Text.Trim() != string.Empty &&
                     ddlTipo.SelectedIndex != -1 &&
                     txtAutorizante.Text.Trim() != string.Empty )
