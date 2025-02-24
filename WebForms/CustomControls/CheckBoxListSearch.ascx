@@ -9,7 +9,7 @@
         <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')"/>
         
         <div class="checkbox-container">
-            <asp:CheckBoxList ID="chkList" runat="server" CssClass="checkbox-list"></asp:CheckBoxList>
+            <asp:CheckBoxList ID="chkList" runat="server" CssClass="checkbox-list" AutoPostBack="true" OnSelectedIndexChanged="ChkList_SelectedIndexChanged"></asp:CheckBoxList>
         </div>
     </div>
 </div>

@@ -8,6 +8,9 @@ namespace WebForms.CustomControls
 {
     public partial class CheckBoxListSearch : UserControl
     {
+        public event EventHandler SelectedIndexChanged;
+
+
         protected CheckBoxList chkList;
 
         public int SelectedIndex
@@ -86,7 +89,15 @@ namespace WebForms.CustomControls
             .Where(item => item.Selected)
             .ToList();
 
-
+        
+        
+        protected void ChkList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (chkList.SelectedItem != null) 
+            {
+                SelectedIndexChanged?.Invoke(this, e);
+            }
+        }
     }
 }
 

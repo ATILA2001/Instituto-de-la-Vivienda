@@ -13,6 +13,12 @@ namespace WebForms
     public partial class Obras : System.Web.UI.Page
     {
         private ObraNegocio negocio = new ObraNegocio();
+        
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblEmpresa.SelectedIndexChanged += OnCblEmpresa_SelectedIndexChanged;
+        }
+        
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -66,7 +72,7 @@ namespace WebForms
                 var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas,filtro);
+                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas, filtro);
                 dgvObra.DataSource = Session["listaObra"];
                 dgvObra.DataBind();
             }
@@ -205,7 +211,7 @@ namespace WebForms
 
         }
 
-      
+
         protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
@@ -226,6 +232,11 @@ namespace WebForms
         {
             string filtro = txtBuscar.Text.Trim();
             CargarListaObras(filtro);
+        }
+
+        protected void OnCblEmpresa_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaObras();
         }
     }
 }
