@@ -22,7 +22,14 @@ namespace Dominio
 
         public  decimal? AutorizadoInicial { get; set; }
         public decimal? AutorizadoNuevo { get; set; }
-        public decimal? MontoAutorizante { get; set; }
+        public decimal? MontoInicial { get; set; }
+        public decimal? MontoActual { get; set; }
+        public decimal? MontoFaltante { get; set; }
+        public string Linea {  get; set; }
+
+        public DateTime? FechaInicio { get; set; }
+        public DateTime? FechaFin { get; set; }
+
         public decimal? MontoCertificado { get; set; }
         public decimal? Porcentaje { get; set; }
 

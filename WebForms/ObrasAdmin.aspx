@@ -94,19 +94,19 @@
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
 
-						<div class="form-group ">
-					<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
-					<div class="dropdown">
-						<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
-							Todas
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
                
-						</button>
-						<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
-							<!-- Rendimos la CheckBoxList aquí -->
-							<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-						</ul>
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
 					</div>
-				</div>
 
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
@@ -174,21 +174,27 @@
 				Style="display: block; overflow-x: auto;">
 
 				<Columns>
-					<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+					<asp:BoundField HeaderText="ID" DataField="Id" />
 					<asp:BoundField HeaderText="Área" DataField="Area" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Contrata" DataField="Contrata" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Número" DataField="Numero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Año" DataField="Año" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Etapa" DataField="Etapa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:TemplateField HeaderText="Contrata" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+						<ItemTemplate>
+							<%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Año") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 					<asp:BoundField HeaderText="Barrio" DataField="Barrio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Disponible Inicial" DataField="AutorizadoInicial" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Autorizantes" DataField="MontoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Planificado 2025" DataField="MontoCertificado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Ejecucion actual" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:N2}%" />
+					<asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:N2}%" />
+
+					<asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" DataFormatString="{0:dd-MM-yyyy}" />
+
 					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
 				</Columns>
@@ -260,42 +266,43 @@
 			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
 			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
 
-				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
-					actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
+			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
 			});
 
-				// Inicializar para barrios
-				var barriosSeleccionados = JSON.parse(localStorage.getItem('selectedBarrios')) || [];
-				actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
+			// Inicializar para barrios
+			var barriosSeleccionados = JSON.parse(localStorage.getItem('selectedBarrios')) || [];
+			actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
 
-				$('#<%= cblBarrio.ClientID %> input[type=checkbox]').on('change', function () {
-					actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
-				});
+			$('#<%= cblBarrio.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
+			});
 			// Inicializar para areas
 			var areasSeleccionados = JSON.parse(localStorage.getItem('selectedAreas')) || [];
 			actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
 
 			$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
-		actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-	});
+				actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
+			});
 
-				// Limpiar filtros
-				$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
-					// Limpiar localStorage
-					localStorage.removeItem('selectedEmpresas');
-					localStorage.removeItem('selectedBarrios');
-					localStorage.removeItem('selectedAreas');
+			// Limpiar filtros
+			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
+				// Limpiar localStorage
+				localStorage.removeItem('selectedEmpresas');
+				localStorage.removeItem('selectedBarrios');
+				localStorage.removeItem('selectedAreas');
 
 
-					// Restablecer checkboxes
-					$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
+				// Restablecer checkboxes
+				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
 				$('#<%= cblBarrio.ClientID %> input[type=checkbox]').prop('checked', false);
 
 				// Restablecer texto de los botones
 				$('#dropdownEmpresa').text('Todas');
 				$('#dropdownBarrio').text('Todos');
-					$('#dropdownArea').text('Todas');			});
+				$('#dropdownArea').text('Todas');
 			});
+		});
 
 	</script>
 
