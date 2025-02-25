@@ -11,7 +11,7 @@
     <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-12 mb-4">
-                <div class="card shadow-sm border-0" style="background-color: #2c3e50; color: #ecf0f1; border-radius: 12px;">
+                <div class="card shadow-sm border-0" style="background-color: #153244; color: #ecf0f1; border-radius: 12px;">
                     <div class="card-body d-flex flex-wrap justify-content-between gap-3">
                         <div class="form-group" style="max-width: 300px; flex-grow: 1;">
                             <label class="form-label" for="txtBuscar" style="color: #ecf0f1; font-family: 'EncodeSemiBold';">Buscar:</label>
@@ -34,14 +34,14 @@
                                       AutoGenerateColumns="false" runat="server">
                             <Columns>
                                 <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-                                <asp:BoundField HeaderText="Barrio" DataField="Nombre" HeaderStyle-ForeColor="#ecf0f1" 
-                                                HeaderStyle-BackColor="#34495e" HeaderStyle-HorizontalAlign="Center"  />
+                                <asp:BoundField HeaderText="Barrio" DataField="Nombre" HeaderStyle-ForeColor="#34495e" 
+                                                HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center"  />
                                 <asp:CommandField ShowSelectButton="true" SelectText="Modificar" 
                                                   ControlStyle-CssClass="btn btn-outline-warning" 
-                                                  HeaderStyle-ForeColor="#ecf0f1" HeaderStyle-BackColor="#34495e" HeaderStyle-HorizontalAlign="Center"  />
+                                                  HeaderStyle-ForeColor="#34495e" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center"  />
                                 <asp:CommandField ShowDeleteButton="true" 
                                                   ControlStyle-CssClass="btn btn-outline-danger"  
-                                                  HeaderStyle-ForeColor="#ecf0f1" HeaderStyle-BackColor="#34495e" HeaderStyle-HorizontalAlign="Center" />
+                                                  HeaderStyle-ForeColor="#34495e" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
                             </Columns>
                         </asp:GridView>
                     </div>
@@ -50,7 +50,7 @@
 
             <div class="col-md-4">
                 <div class="card shadow-sm border-0" style="border-radius: 12px;">
-                    <div class="card-header text-center" style="background-color: #34495e; color: #ecf0f1; font-family: 'EncodeBold'; border-radius: 12px 12px 0 0;">
+                    <div class="card-header text-center" style="background-color: #153244; color: #ecf0f1; font-family: 'EncodeBold'; border-radius: 12px 12px 0 0;">
                         Agregar Barrio
                     </div>
                     <div class="card-body">

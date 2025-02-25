@@ -3,27 +3,26 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+<style>
+	.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+		color: #ecf0f1 !important; 
+	}
 
-	<style>
-		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
-			color: #ecf0f1 !important; /* Blanco suave para texto */
+	.table-3d {
+		border-radius: 10px; 
+		overflow: hidden; 
+		border-collapse: collapse;
+	}
+
+		.table-3d thead th {
+			background-color: #153244;
+			color: #ecf0f1;
+			font-weight: bold;
+			text-align: center;
+			text-transform: uppercase;
+			border: none;
 		}
-
-		.table-3d {
-			border-radius: 10px; /* Borde redondeado */
-			overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
-			border-collapse: collapse;
-		}
-
-			.table-3d thead th {
-				background-color: #34495e;
-				color: #ecf0f1;
-				font-weight: bold;
-				text-align: center;
-				text-transform: uppercase;
-				border: none;
-			}
-	</style>
+</style>
 
 	<%--	<div id="section1" style="display: none;">
 		<div class="row mt-4">
@@ -353,166 +352,166 @@
 
 	</script>
 	<style>
-		.form-group label {
-			font-size: 14px;
-			color: #212529; /* Gris oscuro para un aspecto formal */
-			font-weight: 600; /* Peso semibold */
+	.form-group label {
+		font-size: 14px;
+		color: #212529; /* Gris oscuro para un aspecto formal */
+		font-weight: 600; /* Peso semibold */
+	}
+
+	/* Estilo del botón dropdown */
+	.form-group .dropdown-toggle {
+		background-color: #f8f9fa; /* Fondo claro */
+		color: #212529; /* Texto negro */
+		border-radius: 0.375rem; /* Bordes redondeados suaves */
+		width: 100%; /* Ocupa todo el ancho */
+		text-align: left; /* Alineación del texto a la izquierda */
+		font-size: 14px; /* Tamaño de texto claro y sobrio */
+		font-weight: normal; /* Si necesitas enfatizar el texto */
+	}
+
+		.form-group .dropdown-toggle:hover {
+			background-color: #e2e6ea; /* Color de fondo en hover */
+			border-color: #adb5bd; /* Color del borde en hover */
+			color: #212529;
 		}
 
-		/* Estilo del botón dropdown */
-		.form-group .dropdown-toggle {
-			background-color: #f8f9fa; /* Fondo claro */
-			color: #212529; /* Texto negro */
-			border-radius: 0.375rem; /* Bordes redondeados suaves */
-			width: 100%; /* Ocupa todo el ancho */
-			text-align: left; /* Alineación del texto a la izquierda */
-			font-size: 14px; /* Tamaño de texto claro y sobrio */
-			font-weight: normal; /* Si necesitas enfatizar el texto */
+	/* Estilo del menú desplegable */
+	.form-group .dropdown-menu {
+		border: 1px solid; /* Mismo borde que el botón */
+		border-radius: 0.375rem; /* Bordes redondeados */
+		padding: 0.5rem; /* Espaciado interno */
+		background-color: #ffffff; /* Fondo blanco */
+		max-height: 200px;
+		overflow-y: auto; /* Scroll para contenido largo */
+	}
+
+		.form-group .dropdown-menu .form-check:hover {
+			background-color: transparent;
 		}
 
-			.form-group .dropdown-toggle:hover {
-				background-color: #e2e6ea; /* Color de fondo en hover */
-				border-color: #adb5bd; /* Color del borde en hover */
-				color: #212529;
-			}
-
-		/* Estilo del menú desplegable */
-		.form-group .dropdown-menu {
-			border: 1px solid; /* Mismo borde que el botón */
-			border-radius: 0.375rem; /* Bordes redondeados */
-			padding: 0.5rem; /* Espaciado interno */
-			background-color: #ffffff; /* Fondo blanco */
-			max-height: 200px;
-			overflow-y: auto; /* Scroll para contenido largo */
+		/* Opcional: elimina el contorno (outline) en estados de foco */
+		.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+			outline: none;
+			box-shadow: none;
+		}
+		/* Estilo de los items en el dropdown */
+		.form-group .dropdown-menu .form-check {
+			margin-bottom: 0.5rem;
 		}
 
-			.form-group .dropdown-menu .form-check:hover {
+			.form-group .dropdown-menu .form-check label {
+				font-size: 14px;
+				color: #495057;
 				background-color: transparent;
 			}
 
-			/* Opcional: elimina el contorno (outline) en estados de foco */
-			.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
-				outline: none;
-				box-shadow: none;
-			}
-			/* Estilo de los items en el dropdown */
-			.form-group .dropdown-menu .form-check {
-				margin-bottom: 0.5rem;
+			.form-group .dropdown-menu .form-check input[type="checkbox"] {
+				margin-right: 8px;
 			}
 
-				.form-group .dropdown-menu .form-check label {
-					font-size: 14px;
-					color: #495057;
-					background-color: transparent;
+				.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+				.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+					color: #495057; /* Mantener el color gris */
+					background-color: transparent; /* Sin fondo azul */
+					font-weight: normal; /* Opcional, mantiene el estilo regular */
 				}
 
-				.form-group .dropdown-menu .form-check input[type="checkbox"] {
-					margin-right: 8px;
-				}
-
-					.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
-					.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
-						color: #495057; /* Mantener el color gris */
-						background-color: transparent; /* Sin fondo azul */
-						font-weight: normal; /* Opcional, mantiene el estilo regular */
-					}
 
 
+	.table-bordered th, .table-bordered td {
+		border: 1px solid #dddddd;
+		text-align: center;
+	}
 
-		.table-bordered th, .table-bordered td {
-			border: 1px solid #dddddd;
+	.table-hover tbody tr:hover {
+		background-color: #f2f2f2;
+	}
+
+	.table1 th, .table1 td {
+		padding: 12px;
+		font-size: 14px;
+	}
+
+	/* Bordes redondeados y sombras en el GridView */
+	.table1 {
+		border-radius: 10px;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+	}
+
+		/* Mejorar el estilo de las celdas del encabezado */
+		.table1 th {
 			text-align: center;
+			font-weight: bold;
+			background: #153244;
+			color: white;
+			border: 1px solid #153244;
 		}
 
-		.table-hover tbody tr:hover {
-			background-color: #f2f2f2;
-		}
+	.form-label {
+		margin-bottom: 0;
+	}
 
-		.table1 th, .table1 td {
-			padding: 12px;
-			font-size: 14px;
-		}
+	.d-flex.align-items-end > .form-control {
+		margin-right: 8px; /* Margen entre el campo y el botón */
+	}
 
-		/* Bordes redondeados y sombras en el GridView */
-		.table1 {
-			border-radius: 10px;
-			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-		}
+	.form-control-uniform {
+		display: inline-block;
+		font-size: 14px; /* Tamaño de texto uniforme */
+		padding: 4px 12px;
+		border: 1px solid;
+	}
 
-			/* Mejorar el estilo de las celdas del encabezado */
-			.table1 th {
-				text-align: center;
-				font-weight: bold;
-				background: #f1c40f;
-				color: white;
-				border: 1px solid #f39c11;
-			}
+	.btn {
+		background-color: #153244; /* Azul institucional */
+		text-align: center;
+		transition: all 0.3s ease-in-out;
+		color: #ecf0f1; /* Blanco suave para el texto */
+		border: none;
+		padding: 8px 12px;
+		font-size: 14px;
+		cursor: pointer;
+		border-radius: 4px; /* Bordes redondeados */
+		display: inline-block;
+		font-weight: bold; /* Si necesitas enfatizar el texto */
+	}
 
-		.form-label {
-			margin-bottom: 0;
-		}
-
-		.d-flex.align-items-end > .form-control {
-			margin-right: 8px; /* Margen entre el campo y el botón */
-		}
-
-		.form-control-uniform {
-			display: inline-block;
-			font-size: 14px; /* Tamaño de texto uniforme */
-			padding: 4px 12px;
-			border: 1px solid;
-		}
-
-		.btn {
-			background-color: #34495e; /* Azul institucional */
-			text-align: center;
-			transition: all 0.3s ease-in-out;
-			color: #ecf0f1; /* Blanco suave para el texto */
-			border: none;
-			padding: 8px 12px;
-			font-size: 14px;
-			cursor: pointer;
-			border-radius: 4px; /* Bordes redondeados */
-			display: inline-block;
-			font-weight: bold; /* Si necesitas enfatizar el texto */
-		}
-
-			.btn:hover {
-				background-color: #2c3e50; /* Gris oscuro al pasar el cursor */
-				color: white;
-			}
-
-
-
-
-		.lbl-left {
-			text-align: left;
-			display: block; /* Asegura que el label ocupe toda la línea si es necesario */
-			font-weight: bold; /* Si necesitas enfatizar el texto */
+		.btn:hover {
+			background-color: #2c3e50; /* Gris oscuro al pasar el cursor */
+			color: white;
 		}
 
 
-		#visibilityMessage {
-			background-color: #34495e; /* Fondo más neutro (gris claro) */
-			text-align: center; /* Centrar el contenido */
-			transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
-			color: #ecf0f1; /* Blanco suave para el texto */
+
+
+	.lbl-left {
+		text-align: left;
+		display: block; /* Asegura que el label ocupe toda la línea si es necesario */
+		font-weight: bold; /* Si necesitas enfatizar el texto */
+	}
+
+
+	#visibilityMessage {
+		background-color: #FFCC00; /* Fondo más neutro (gris claro) */
+		text-align: center; /* Centrar el contenido */
+		transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
+		color: #ecf0f1; /* Blanco suave para el texto */
+	}
+
+	#visibilityText {
+		cursor: pointer;
+		display: inline-block;
+		transition: color 0.3s ease-in-out;
+	}
+
+	#visibilityMessage:hover {
+		background-color: #FFCC00; /* Gris oscuro cuando se pasa el cursor */
+	}
+
+
+		#visibilityMessage:hover #visibilityText {
+			color: white; /* Resaltar cuando se pasa el mouse */
 		}
-
-		#visibilityText {
-			cursor: pointer;
-			display: inline-block;
-			transition: color 0.3s ease-in-out;
-		}
-
-		#visibilityMessage:hover {
-			background-color: #2c3e50; /* Gris oscuro cuando se pasa el cursor */
-		}
-
-
-			#visibilityMessage:hover #visibilityText {
-				color: white; /* Resaltar cuando se pasa el mouse */
-			}
-	</style>
+</style>
 
 </asp:Content>

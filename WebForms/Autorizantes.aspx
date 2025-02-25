@@ -6,17 +6,17 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 	<style>
 		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
-			color: #ecf0f1 !important; /* Blanco suave para texto */
+			color: #ecf0f1 !important; 
 		}
 
 		.table-3d {
-			border-radius: 10px; /* Borde redondeado */
-			overflow: hidden; /* Para que el contenido no sobresalga de los bordes */
+			border-radius: 10px; 
+			overflow: hidden; 
 			border-collapse: collapse;
 		}
 
 			.table-3d thead th {
-				background-color: #34495e;
+				background-color: #153244;
 				color: #ecf0f1;
 				font-weight: bold;
 				text-align: center;
@@ -29,7 +29,7 @@
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
-					<thead class="thead-dark" style="color: #fad404">
+					<thead class="thead-dark" style="color: #153244">
 						<tr>
 							<th>Obra</th>
 							<th>Concepto</th>
@@ -181,43 +181,43 @@
 				OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
 				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
-					<asp:BoundField HeaderText="Obra" DataField="Obra.Id" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" Visible="false" />
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Id" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" Visible="false" />
 
-					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
 
-					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Detalle" DataField="Detalle" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:TemplateField HeaderText="Expediente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Detalle" DataField="Detalle" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:TemplateField HeaderText="Expediente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center">
 						<ItemTemplate>
 							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
 								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
 							</asp:TextBox>
 						</ItemTemplate>
 					</asp:TemplateField>
-					<asp:TemplateField HeaderText="Estado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+					<asp:TemplateField HeaderText="Estado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center">
 						<ItemTemplate>
 							<asp:DropDownList ID="ddlEstadoAutorizante" runat="server" AutoPostBack="true"
 								OnSelectedIndexChanged="ddlEstadoAutorizante_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
 							</asp:DropDownList>
 						</ItemTemplate>
 					</asp:TemplateField>
-					<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
 
-					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
 
-					<asp:TemplateField HeaderText="Autorización GG" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+					<asp:TemplateField HeaderText="Autorización GG" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center">
 						<ItemTemplate>
 							<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
 						</ItemTemplate>
 					</asp:TemplateField>
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#153244" HeaderStyle-HorizontalAlign="Center" />
 				</Columns>
 			</asp:GridView>
 
@@ -440,9 +440,9 @@
 			.table1 th {
 				text-align: center;
 				font-weight: bold;
-				background: #f1c40f;
+				background: #153244;
 				color: white;
-				border: 1px solid #f39c11;
+				border: 1px solid #153244;
 			}
 
 		.form-label {
@@ -461,7 +461,7 @@
 		}
 
 		.btn {
-			background-color: #34495e; /* Azul institucional */
+			background-color: #153244; /* Azul institucional */
 			text-align: center;
 			transition: all 0.3s ease-in-out;
 			color: #ecf0f1; /* Blanco suave para el texto */
@@ -490,7 +490,7 @@
 
 
 		#visibilityMessage {
-			background-color: #34495e; /* Fondo más neutro (gris claro) */
+			background-color: #FFCC00; /* Fondo más neutro (gris claro) */
 			text-align: center; /* Centrar el contenido */
 			transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
 			color: #ecf0f1; /* Blanco suave para el texto */
@@ -503,7 +503,7 @@
 		}
 
 		#visibilityMessage:hover {
-			background-color: #2c3e50; /* Gris oscuro cuando se pasa el cursor */
+			background-color: #FFCC00; /* Gris oscuro cuando se pasa el cursor */
 		}
 
 
