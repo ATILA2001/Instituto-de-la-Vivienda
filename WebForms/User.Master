@@ -29,16 +29,16 @@
 					<div class="collapse navbar-collapse" id="navbarMenu">
 						<ul class="navbar-nav me-auto">
 							<li class="nav-item">
-								<a class="nav-link" href="Obras.aspx">Obras</a>
+								<a class="nav-link" href="Obras.aspx"  style="font-size: 20px;"><strong>Obras</strong></a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="Autorizantes.aspx">Autorizantes</a>
+								<a class="nav-link" href="Autorizantes.aspx"  style="font-size: 20px;"><strong>Autorizantes</strong></a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="Certificados.aspx">Certificados</a>
+								<a class="nav-link" href="Certificados.aspx"  style="font-size: 20px;"><strong>Certificados</strong></a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="Legitimos.aspx">Legítimos Abonos</a>
+								<a class="nav-link" href="Legitimos.aspx"  style="font-size: 20px;"><strong>Legítimos Abonos</strong></a>
 							</li>
 						</ul>
 
