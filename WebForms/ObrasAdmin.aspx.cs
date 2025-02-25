@@ -81,8 +81,8 @@ namespace WebForms
                 var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
-                Session["listaObra"] = negocio.listar(selectedBarrios, selectedEmpresas, selectedAreas, filtro);
-                dgvObra.DataSource = Session["listaObra"];
+                Session["listaObraAdmin"] = negocio.listar(selectedBarrios, selectedEmpresas, selectedAreas, filtro);
+                dgvObra.DataSource = Session["listaObraAdmin"];
                 dgvObra.DataBind();
             }
             catch (Exception ex)

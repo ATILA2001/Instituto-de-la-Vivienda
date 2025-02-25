@@ -14,34 +14,36 @@ namespace WebForms
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+
+
             int codM;
             ObraNegocio negocio = new ObraNegocio();
             if (!IsPostBack)
             {
                 if (Request.QueryString["codM"] != null)
-
-                    // Llenar el DropDownList para Empresas
-                    ddlEmpresa.DataSource = ObtenerEmpresas();  // Método para obtener los datos de las Empresas
-                ddlEmpresa.DataTextField = "Nombre";         // Columna que se muestra
-                ddlEmpresa.DataValueField = "Id";            // Columna que se almacena
-                ddlEmpresa.DataBind();
-
-                // Llenar el DropDownList para Contratas
-                ddlContrata.DataSource = ObtenerContratas(); // Método para obtener los datos de las Contratas
-                ddlContrata.DataTextField = "Nombre";
-                ddlContrata.DataValueField = "Id";
-                ddlContrata.DataBind();
-
-                // Llenar el DropDownList para Barrios
-                ddlBarrio.DataSource = ObtenerBarrios();    // Método para obtener los datos de los Barrios
-                ddlBarrio.DataTextField = "Nombre";
-                ddlBarrio.DataValueField = "Id";
-                ddlBarrio.DataBind();
                 {
+
+                    ddlEmpresa.DataSource = ObtenerEmpresas();
+                    ddlEmpresa.DataTextField = "Nombre";
+                    ddlEmpresa.DataValueField = "Id";
+                    ddlEmpresa.DataBind();
+
+                    ddlContrata.DataSource = ObtenerContratas();
+                    ddlContrata.DataTextField = "Nombre";
+                    ddlContrata.DataValueField = "Id";
+                    ddlContrata.DataBind();
+
+                    ddlBarrio.DataSource = ObtenerBarrios();
+                    ddlBarrio.DataTextField = "Nombre";
+                    ddlBarrio.DataValueField = "Id";
+                    ddlBarrio.DataBind();
+
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
-                    List<Obra> temp = (List<Obra>)Session["listaObra"];
+                    List<Obra> temp = (List<Obra>)Session["listaObraAdmin"];
                     Obra selected = temp.Find(x => x.Id == codM);
+        
+
                     txtNumero.Text = selected.Numero?.ToString();
                     txtAño.Text = selected.Año.ToString();
                     txtEtapa.Text = selected.Etapa.ToString();
@@ -51,7 +53,7 @@ namespace WebForms
                     ddlEmpresa.SelectedValue = selected.Empresa.Id.ToString();
                     ddlContrata.SelectedValue = selected.Contrata.Id.ToString();
                     ddlBarrio.SelectedValue = selected.Barrio.Id.ToString();
-                }
+                     }
             }
         }
         protected void btnModificar_Click(object sender, EventArgs e)
