@@ -100,15 +100,15 @@
 
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-					<asp:BoundField HeaderText="Área" DataField="Area" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Contrata" DataField="Contrata" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Número" DataField="Numero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Año" DataField="Año" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Etapa" DataField="Etapa" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Barrio" DataField="Barrio" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+					<asp:BoundField HeaderText="Área" DataField="Area"  />
+					<asp:BoundField HeaderText="Empresa" DataField="Empresa"  />
+					<asp:BoundField HeaderText="Contrata" DataField="Contrata"  />
+					<asp:BoundField HeaderText="Número" DataField="Numero"  />
+					<asp:BoundField HeaderText="Año" DataField="Año" />
+					<asp:BoundField HeaderText="Etapa" DataField="Etapa"  />
+					<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero"  />
+					<asp:BoundField HeaderText="Barrio" DataField="Barrio"  />
+					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
 				</Columns>
 			</asp:GridView>
 

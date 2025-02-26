@@ -16,23 +16,21 @@
 					<Columns>
 						<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 
-						<asp:BoundField HeaderText="Línea de Gestión" DataField="LineaGestion.Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Nombre FF" DataField="Nombre" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Grupo" DataField="LineaGestion.Grupo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Reparticion" DataField="LineaGestion.Reparticion" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-						<asp:BoundField HeaderText="Tipo" DataField="LineaGestion.Tipo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+						<asp:BoundField HeaderText="Línea de Gestión" DataField="LineaGestion.Nombre" />
+						<asp:BoundField HeaderText="Nombre FF" DataField="Nombre"/>
+						<asp:BoundField HeaderText="Grupo" DataField="LineaGestion.Grupo"/>
+						<asp:BoundField HeaderText="Reparticion" DataField="LineaGestion.Reparticion"  />
+						<asp:BoundField HeaderText="Tipo" DataField="LineaGestion.Tipo"  />
 
-						<asp:BoundField HeaderText="Fuente" DataField="Fuente" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+						<asp:BoundField HeaderText="Fuente" DataField="Fuente"  />
 
 						<asp:CommandField ShowSelectButton="true" SelectText="Modificar"
 							ControlStyle-CssClass="btn btn-outline-warning"
-							HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f"
-							HeaderStyle-HorizontalAlign="Center" />
+							 />
 
 						<asp:CommandField ShowDeleteButton="true"
 							ControlStyle-CssClass="btn btn-outline-danger"
-							HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f"
-							HeaderStyle-HorizontalAlign="Center" />
+							 />
 
 					</Columns>
 				</asp:GridView>
