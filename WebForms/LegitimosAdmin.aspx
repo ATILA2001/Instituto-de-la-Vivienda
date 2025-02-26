@@ -222,47 +222,44 @@
 	<style>
 	.form-group label {
 		font-size: 14px;
-		color: #212529; /* Gris oscuro para un aspecto formal */
-		font-weight: 600; /* Peso semibold */
+		color: #212529;
+		font-weight: 600;
 	}
 
-	/* Estilo del botón dropdown */
 	.form-group .dropdown-toggle {
-		background-color: #f8f9fa; /* Fondo claro */
-		color: #212529; /* Texto negro */
-		border-radius: 0.375rem; /* Bordes redondeados suaves */
-		width: 100%; /* Ocupa todo el ancho */
-		text-align: left; /* Alineación del texto a la izquierda */
-		font-size: 14px; /* Tamaño de texto claro y sobrio */
-		font-weight: normal; /* Si necesitas enfatizar el texto */
+		background-color: #f8f9fa;
+		color: #212529;
+		border-radius: 0.375rem;
+		width: 100%;
+		text-align: left;
+		font-size: 14px;
+		font-weight: normal;
 	}
 
 		.form-group .dropdown-toggle:hover {
-			background-color: #e2e6ea; /* Color de fondo en hover */
-			border-color: #adb5bd; /* Color del borde en hover */
+			background-color: #e2e6ea;
+			border-color: #adb5bd;
 			color: #212529;
 		}
 
-	/* Estilo del menú desplegable */
 	.form-group .dropdown-menu {
-		border: 1px solid; /* Mismo borde que el botón */
-		border-radius: 0.375rem; /* Bordes redondeados */
-		padding: 0.5rem; /* Espaciado interno */
-		background-color: #ffffff; /* Fondo blanco */
+		border: 1px solid;
+		border-radius: 0.375rem;
+		padding: 0.5rem;
+		background-color: #ffffff;
 		max-height: 200px;
-		overflow-y: auto; /* Scroll para contenido largo */
+		overflow-y: auto;
 	}
 
 		.form-group .dropdown-menu .form-check:hover {
 			background-color: transparent;
 		}
 
-		/* Opcional: elimina el contorno (outline) en estados de foco */
 		.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
 			outline: none;
 			box-shadow: none;
 		}
-		/* Estilo de los items en el dropdown */
+
 		.form-group .dropdown-menu .form-check {
 			margin-bottom: 0.5rem;
 		}
@@ -279,12 +276,10 @@
 
 				.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
 				.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
-					color: #495057; /* Mantener el color gris */
-					background-color: transparent; /* Sin fondo azul */
-					font-weight: normal; /* Opcional, mantiene el estilo regular */
+					color: #495057;
+					background-color: transparent;
+					font-weight: normal;
 				}
-
-
 
 	.table-bordered th, .table-bordered td {
 		border: 1px solid #dddddd;
@@ -300,13 +295,11 @@
 		font-size: 14px;
 	}
 
-	/* Bordes redondeados y sombras en el GridView */
 	.table1 {
 		border-radius: 10px;
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 	}
 
-		/* Mejorar el estilo de las celdas del encabezado */
 		.table1 th {
 			text-align: center;
 			font-weight: bold;
@@ -320,50 +313,46 @@
 	}
 
 	.d-flex.align-items-end > .form-control {
-		margin-right: 8px; /* Margen entre el campo y el botón */
+		margin-right: 8px;
 	}
 
 	.form-control-uniform {
 		display: inline-block;
-		font-size: 14px; /* Tamaño de texto uniforme */
+		font-size: 14px;
 		padding: 4px 12px;
 		border: 1px solid;
 	}
 
 	.btn {
-		background-color: #153244; /* Azul institucional */
+		background-color: #153244;
 		text-align: center;
 		transition: all 0.3s ease-in-out;
-		color: #ecf0f1; /* Blanco suave para el texto */
+		color: #ecf0f1;
 		border: none;
 		padding: 8px 12px;
 		font-size: 14px;
 		cursor: pointer;
-		border-radius: 4px; /* Bordes redondeados */
+		border-radius: 4px;
 		display: inline-block;
-		font-weight: bold; /* Si necesitas enfatizar el texto */
+		font-weight: bold;
 	}
 
 		.btn:hover {
-			background-color: #2c3e50; /* Gris oscuro al pasar el cursor */
-			color: white;
+			background-color: #8DE2D6;
+			color: #153244;
 		}
-
-
-
 
 	.lbl-left {
 		text-align: left;
-		display: block; /* Asegura que el label ocupe toda la línea si es necesario */
-		font-weight: bold; /* Si necesitas enfatizar el texto */
+		display: block;
+		font-weight: bold;
 	}
 
-
 	#visibilityMessage {
-		background-color: #FFCC00; /* Fondo más neutro (gris claro) */
-		text-align: center; /* Centrar el contenido */
-		transition: all 0.3s ease-in-out; /* Suaviza las animaciones */
-		color: #ecf0f1; /* Blanco suave para el texto */
+		background-color: #8DE2D6;
+		text-align: center;
+		transition: all 0.3s ease-in-out;
+		color: #153244;
 	}
 
 	#visibilityText {
@@ -373,12 +362,11 @@
 	}
 
 	#visibilityMessage:hover {
-		background-color: #FFCC00; /* Gris oscuro cuando se pasa el cursor */
+		background-color: #153244;
 	}
 
-
 		#visibilityMessage:hover #visibilityText {
-			color: white; /* Resaltar cuando se pasa el mouse */
+			color: white;
 		}
 </style>
 </asp:Content>
