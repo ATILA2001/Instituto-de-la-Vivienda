@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -307,7 +308,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
+        public List<Legitimo> listarFiltro(List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
@@ -350,6 +351,15 @@ namespace Negocio
                     for (int i = 0; i < empresa.Count; i++)
                     {
                         datos.setearParametros($"@empresa{i}", empresa[i]);
+                    }
+                }
+                if (areas != null && areas.Count > 0)
+                {
+                    string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
+                    query += $" AND A.NOMBRE IN ({areaParam})";
+                    for (int i = 0; i < areas.Count; i++)
+                    {
+                        datos.setearParametros($"@area{i}", areas[i]);
                     }
                 }
                 if (autorizante != null && autorizante.Count > 0)

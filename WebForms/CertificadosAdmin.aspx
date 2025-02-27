@@ -7,7 +7,21 @@
 	<div class="row mt-4">
 		<div class="col-md-12">
 			<div class="text-end">
+				
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+					<div class="form-group ">
+				<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
+				<div class="dropdown">
+					<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+						Todas
+               
+					</button>
+					<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+						<!-- Rendimos la CheckBoxList aquí -->
+						<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+					</ul>
+				</div>
+</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
@@ -90,7 +104,6 @@
 					</div>
 				</div>
 			</div>
-
 			<hr />
 			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover "
 				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
@@ -98,7 +111,8 @@
 				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
-
+					
+					<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" />
 					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
 					<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />

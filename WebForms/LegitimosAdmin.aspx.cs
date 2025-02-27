@@ -22,17 +22,22 @@ namespace WebForms
                 CargarListaLegitimos();
             }
         }
-
+        private DataTable ObtenerAreas()
+        {
+            AreaNegocio areaNegocio = new AreaNegocio();
+            return areaNegocio.listarddl();
+        }
         private void CargarListaLegitimos(string filtro= null)
         {
             try
             {
+                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaLegitimos"] = negocio.listarFiltro( selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
+                Session["listaLegitimos"] = negocio.listarFiltro(selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -137,7 +142,10 @@ namespace WebForms
 
         private void BindDropDownList()
         {
-
+            cblArea.DataSource = ObtenerAreas();
+            cblArea.DataTextField = "Nombre";
+            cblArea.DataValueField = "Id";
+            cblArea.DataBind();
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
             cblEmpresa.DataValueField = "Id";

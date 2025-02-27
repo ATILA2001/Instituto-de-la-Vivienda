@@ -55,6 +55,7 @@ namespace Negocio
                     }
                 }
 
+
                 if (estado != null && estado.Count > 0)
                 {
                     string estadoParam = string.Join(",", estado.Select((e, i) => $"@estado{i}"));
@@ -155,7 +156,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar( List<string> estado, List<string> empresa, List<string> concepto, List<string> obra,string filtro = null)
+        public List<Autorizante> listar(List<string> areas, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra,string filtro = null)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
@@ -180,6 +181,15 @@ namespace Negocio
                     for (int i = 0; i < estado.Count; i++)
                     {
                         datos.setearParametros($"@estado{i}", estado[i]);
+                    }
+                }
+                if (areas != null && areas.Count > 0)
+                {
+                    string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
+                    query += $" AND AR.NOMBRE IN ({areaParam})";
+                    for (int i = 0; i < areas.Count; i++)
+                    {
+                        datos.setearParametros($"@area{i}", areas[i]);
                     }
                 }
 

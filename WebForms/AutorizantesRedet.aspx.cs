@@ -37,13 +37,15 @@ namespace WebForms
         {
             try
             {
+                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
 
-                Session["listaAutorizanteAdmin"] = negocio.listar(selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
+                Session["listaAutorizanteAdmin"] = negocio.listar(selectedAreas, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
                 dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
@@ -70,11 +72,20 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
-     
-      
 
+
+        private DataTable ObtenerAreas()
+        {
+            AreaNegocio areaNegocio = new AreaNegocio();
+            return areaNegocio.listarddl();
+        }
         private void BindDropDownList()
         {
+            cblArea.DataSource = ObtenerAreas();
+            cblArea.DataTextField = "Nombre";
+            cblArea.DataValueField = "Id";
+            cblArea.DataBind();
+
             cblEstado.DataSource = ObtenerEstado();
             cblEstado.DataTextField = "Nombre";
             cblEstado.DataValueField = "Id";

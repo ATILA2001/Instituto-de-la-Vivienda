@@ -11,6 +11,22 @@
 			<div class="text-end">
 
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+				
+
+				<div class="form-group ">
+				<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
+				<div class="dropdown">
+					<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+						Todas
+               
+					</button>
+					<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+						<!-- Rendimos la CheckBoxList aquí -->
+						<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+					</ul>
+				</div>
+</div>
+
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
 						<div class="dropdown">
@@ -76,8 +92,9 @@
 
 					</div>
 				</div>
-			</div>
+			</div>			</div>
 
+		</div>
 			<hr />
 			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  "
 				OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged" AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
@@ -106,7 +123,7 @@
 			<div class="text-center p-4">
 				<asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
 			</div>
-		</div>
+		
 	</div>
 	<script type="text/javascript">
 		function soloNumeros(e) {

@@ -21,19 +21,24 @@ namespace WebForms
                 CargarListaCertificados();
             }
         }
-
+        private DataTable ObtenerAreas()
+        {
+            AreaNegocio areaNegocio = new AreaNegocio();
+            return areaNegocio.listarddl();
+        }
         private void CargarListaCertificados(string filtro = null)
         {
             try
             {
-               
+                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin( selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -134,7 +139,10 @@ namespace WebForms
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
             cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind();
+            cblEmpresa.DataBind(); cblArea.DataSource = ObtenerAreas();
+            cblArea.DataTextField = "Nombre";
+            cblArea.DataValueField = "Id";
+            cblArea.DataBind();
 
             cblAutorizante.DataSource = ObtenerAutorizantes();
             cblAutorizante.DataTextField = "Nombre";
