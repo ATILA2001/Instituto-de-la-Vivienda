@@ -84,6 +84,10 @@
     <Content Include="Error.aspx" />
     <Content Include="HomeAdmin.aspx" />
     <Content Include="HomeUser.aspx" />
+    <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
+    <Content Include="Images\IVC-Azul.png" />
+    <Content Include="Images\IVC-Blanco.png" />
+    <Content Include="Images\IVC-Celeste.png" />
     <Content Include="Legitimos.aspx" />
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="LineasGestion.aspx" />
