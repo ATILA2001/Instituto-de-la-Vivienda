@@ -98,8 +98,6 @@
     <Content Include="CustomControls\CheckBoxListSearch.ascx" />
     <Content Include="Devengados.aspx" />
     <Content Include="Error.aspx" />
-    <Content Include="HomeAdmin.aspx" />
-    <Content Include="HomeUser.aspx" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
     <Content Include="Images\IVC-Blanco.png" />
@@ -231,20 +229,6 @@
     </Compile>
     <Compile Include="Error.aspx.designer.cs">
       <DependentUpon>Error.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="HomeAdmin.aspx.cs">
-      <DependentUpon>HomeAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="HomeAdmin.aspx.designer.cs">
-      <DependentUpon>HomeAdmin.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="HomeUser.aspx.cs">
-      <DependentUpon>HomeUser.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="HomeUser.aspx.designer.cs">
-      <DependentUpon>HomeUser.aspx</DependentUpon>
     </Compile>
     <Compile Include="Legitimos.aspx.cs">
       <DependentUpon>Legitimos.aspx</DependentUpon>
