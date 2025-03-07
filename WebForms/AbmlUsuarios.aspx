@@ -16,23 +16,23 @@
 			<Columns>
 
 				<asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-CssClass="oculto" ItemStyle-CssClass="oculto" />
-				<asp:BoundField HeaderText="Area" DataField="AREA" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-				<asp:BoundField HeaderText="Usuario" DataField="NOMBRE" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-				<asp:BoundField HeaderText="Correo" DataField="CORREO" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+				<asp:BoundField HeaderText="Area" DataField="AREA"/>
+				<asp:BoundField HeaderText="Usuario" DataField="NOMBRE" />
+				<asp:BoundField HeaderText="Correo" DataField="CORREO"  />
 
-				<asp:TemplateField HeaderText="Tipo" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+				<asp:TemplateField HeaderText="Tipo" >
 					<ItemTemplate>
 						<%# Convert.ToInt32(Eval("TIPO")) == 1 ? "Admin" : "User" %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
-				<asp:TemplateField HeaderText="Estado" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center">
+				<asp:TemplateField HeaderText="Estado" >
 					<ItemTemplate>
 						<%# Convert.ToBoolean(Eval("ESTADO")) ? "Habilitado" : "Bloqueado" %>
 					</ItemTemplate>
 				</asp:TemplateField>
-				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderText="Modificar" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
-				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderText="Eliminar" HeaderStyle-ForeColor="White" HeaderStyle-BackColor="#f1c40f" HeaderStyle-HorizontalAlign="Center" />
+				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderText="Modificar"  />
+				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderText="Eliminar" />
 
 			</Columns>
 
@@ -40,7 +40,8 @@
 	</div>
 
 	<asp:Label ID="lblMensaje" Text="" runat="server" />
-	<style>
+	<hr />	
+		<style>
 	.form-group label {
 		font-size: 14px;
 		color: #212529;

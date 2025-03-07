@@ -78,12 +78,30 @@
     <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
-    <Content Include="custom.css" />
+    <Content Include="Content\bootstrap-grid.css" />
+    <Content Include="Content\bootstrap-grid.min.css" />
+    <Content Include="Content\bootstrap-grid.rtl.css" />
+    <Content Include="Content\bootstrap-grid.rtl.min.css" />
+    <Content Include="Content\bootstrap-reboot.css" />
+    <Content Include="Content\bootstrap-reboot.min.css" />
+    <Content Include="Content\bootstrap-reboot.rtl.css" />
+    <Content Include="Content\bootstrap-reboot.rtl.min.css" />
+    <Content Include="Content\bootstrap-utilities.css" />
+    <Content Include="Content\bootstrap-utilities.min.css" />
+    <Content Include="Content\bootstrap-utilities.rtl.css" />
+    <Content Include="Content\bootstrap-utilities.rtl.min.css" />
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\bootstrap.rtl.css" />
+    <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Custom.css" />
     <Content Include="CustomControls\CheckBoxListSearch.ascx" />
     <Content Include="Devengados.aspx" />
     <Content Include="Error.aspx" />
-    <Content Include="HomeAdmin.aspx" />
-    <Content Include="HomeUser.aspx" />
+    <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
+    <Content Include="Images\IVC-Azul.png" />
+    <Content Include="Images\IVC-Blanco.png" />
+    <Content Include="Images\IVC-Celeste.png" />
     <Content Include="Legitimos.aspx" />
     <Content Include="LegitimosAdmin.aspx" />
     <Content Include="LineasGestion.aspx" />
@@ -107,6 +125,12 @@
     <Content Include="ObrasRedet.aspx" />
     <Content Include="Redeterminaciones.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="Scripts\bootstrap.bundle.js" />
+    <Content Include="Scripts\bootstrap.bundle.min.js" />
+    <Content Include="Scripts\bootstrap.esm.js" />
+    <Content Include="Scripts\bootstrap.esm.min.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="UsuariosPendientes.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -205,20 +229,6 @@
     </Compile>
     <Compile Include="Error.aspx.designer.cs">
       <DependentUpon>Error.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="HomeAdmin.aspx.cs">
-      <DependentUpon>HomeAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="HomeAdmin.aspx.designer.cs">
-      <DependentUpon>HomeAdmin.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="HomeUser.aspx.cs">
-      <DependentUpon>HomeUser.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="HomeUser.aspx.designer.cs">
-      <DependentUpon>HomeUser.aspx</DependentUpon>
     </Compile>
     <Compile Include="Legitimos.aspx.cs">
       <DependentUpon>Legitimos.aspx</DependentUpon>
@@ -375,6 +385,11 @@
       <DependentUpon>ObrasRedet.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Redet.Master.cs">
       <DependentUpon>Redet.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -417,9 +432,143 @@
     <None Include=".editorconfig" />
     <Content Include="libman.json" />
     <Content Include="connectionStrings.config" />
+    <Content Include="Content\bootstrap.rtl.min.css.map" />
+    <Content Include="Content\bootstrap.rtl.css.map" />
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.css.map" />
+    <Content Include="Content\bootstrap-utilities.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.css.map" />
+    <Content Include="Content\bootstrap-reboot.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.css.map" />
+    <Content Include="Content\bootstrap-grid.min.css.map" />
+    <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Fonts\Archivo-Italic-VariableFont_wdth,wght.ttf" />
+    <Content Include="Fonts\Archivo-VariableFont_wdth,wght.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\static\Archivo-Black.ttf" />
+    <Content Include="Fonts\static\Archivo-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo-Light.ttf" />
+    <Content Include="Fonts\static\Archivo-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo-ThinItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Black.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Light.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo_Condensed-ThinItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Black.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Light.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo_Expanded-ThinItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Black.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Light.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo_ExtraCondensed-ThinItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Black.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Light.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiCondensed-ThinItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Black.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-BlackItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Bold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-BoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-ExtraBold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-ExtraBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-ExtraLight.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-ExtraLightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Italic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Light.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-LightItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Medium.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-MediumItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Regular.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-SemiBold.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-SemiBoldItalic.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-Thin.ttf" />
+    <Content Include="Fonts\static\Archivo_SemiExpanded-ThinItalic.ttf" />
     <None Include="packages.config" />
     <Content Include="User.Master" />
     <Content Include="Redet.Master" />
+    <Content Include="Scripts\bootstrap.min.js.map" />
+    <Content Include="Scripts\bootstrap.js.map" />
+    <Content Include="Scripts\bootstrap.esm.min.js.map" />
+    <Content Include="Scripts\bootstrap.esm.js.map" />
+    <Content Include="Scripts\bootstrap.bundle.min.js.map" />
+    <Content Include="Scripts\bootstrap.bundle.js.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -437,7 +586,12 @@
       <Name>Negocio</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

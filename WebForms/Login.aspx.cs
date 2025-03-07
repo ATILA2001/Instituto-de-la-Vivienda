@@ -27,12 +27,12 @@ namespace WebForms
                     Session.Add("Usuario", usuario);
                     if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                     {
-                        Response.Redirect("HomeAdmin.aspx", false);
+                        Response.Redirect("BdProyectos.aspx", false);
                     }
                     else
                     {
                         if(((Dominio.Usuario)Session["Usuario"]).Estado == true) { 
-                        Response.Redirect("HomeUser.aspx", false);
+                        Response.Redirect("Obras.aspx", false);
                         }
                         else
                         {
@@ -55,9 +55,6 @@ namespace WebForms
                 Response.Redirect("Error.aspx");
             }
         }
-        protected void btnVolver_Click(object sender, EventArgs e)
-        {
-            Response.Redirect("HomeUser.aspx");
-        }
+       
     }
 }

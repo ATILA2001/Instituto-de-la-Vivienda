@@ -20,7 +20,7 @@
 					</div>
 					<div class="d-flex justify-content-between">
 						<div class="ms-auto">
-							<asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-outline-dark" Style="background-color: #f1c40f; border-color: #f1c40f;" Text="Iniciar" runat="server" />
+							<asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-outline-dark" Text="Iniciar" runat="server" />
 						</div>
 					</div>
 				</div>
@@ -44,5 +44,24 @@
 		document.getElementById('<%= txtEmail.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
 		document.getElementById('<%= txtPass.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
 	</script>
+	<style>
+		.btn {
+			background-color: #153244;
+			text-align: center;
+			transition: all 0.3s ease-in-out;
+			color: #ecf0f1;
+			border: none;
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			border-radius: 4px;
+			display: inline-block;
+			font-weight: bold;
+		}
 
+			.btn:hover {
+				background-color: #8DE2D6;
+				color: #153244;
+			}
+	</style>
 </asp:Content>
