@@ -22,17 +22,17 @@ namespace WebForms
             }
         }
 
-        protected void btnLimpiar_Click(object sender, EventArgs e)
-        {
-            ddlConcepto.SelectedIndex = -1;
-            txtDetalle.Text = string.Empty;
-            txtMontoAutorizado.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtFecha.Text = string.Empty;
-            ddlObra.SelectedIndex = -1;
-            ddlEstado.SelectedIndex = -1;
+        //protected void btnLimpiar_Click(object sender, EventArgs e)
+        //{
+        //    ddlConcepto.SelectedIndex = -1;
+        //    txtDetalle.Text = string.Empty;
+        //    txtMontoAutorizado.Text = string.Empty;
+        //    txtExpediente.Text = string.Empty;
+        //    txtFecha.Text = string.Empty;
+        //    ddlObra.SelectedIndex = -1;
+        //    ddlEstado.SelectedIndex = -1;
 
-        }
+        //}
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
@@ -122,45 +122,45 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void btnAgregar_Click(object sender, EventArgs e)
-        {
-            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
-            Autorizante nuevoAutorizante = new Autorizante();
+        //protected void btnAgregar_Click(object sender, EventArgs e)
+        //{
+        //    AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+        //    Autorizante nuevoAutorizante = new Autorizante();
 
-            nuevoAutorizante.Obra = new Obra();
-            nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
-            nuevoAutorizante.Concepto = new Concepto();
-            nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
-            nuevoAutorizante.Detalle = txtDetalle.Text;
-            nuevoAutorizante.Expediente = txtExpediente.Text;
-            nuevoAutorizante.Estado = new EstadoAutorizante();
-            nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
-            nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
-            nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
-            nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
-            autorizanteNegocio.agregar(nuevoAutorizante);
+        //    nuevoAutorizante.Obra = new Obra();
+        //    nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
+        //    nuevoAutorizante.Concepto = new Concepto();
+        //    nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
+        //    nuevoAutorizante.Detalle = txtDetalle.Text;
+        //    nuevoAutorizante.Expediente = txtExpediente.Text;
+        //    nuevoAutorizante.Estado = new EstadoAutorizante();
+        //    nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
+        //    nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+        //    nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
+        //    nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
+        //    autorizanteNegocio.agregar(nuevoAutorizante);
 
-            lblMensaje.Text = "Autorizante agregado con éxito.";
-            CargarListaAutorizantes();
-            CalcularSubtotal();
-        }
+        //    lblMensaje.Text = "Autorizante agregado con éxito.";
+        //    CargarListaAutorizantes();
+        //    CalcularSubtotal();
+        //}
         private void BindDropDownList()
         {
 
-            ddlEstado.DataSource = ObtenerEstado();
-            ddlEstado.DataTextField = "Nombre";
-            ddlEstado.DataValueField = "Id";
-            ddlEstado.DataBind();
+            //ddlEstado.DataSource = ObtenerEstado();
+            //ddlEstado.DataTextField = "Nombre";
+            //ddlEstado.DataValueField = "Id";
+            //ddlEstado.DataBind();
 
-            ddlConcepto.DataSource = ObtenerConcepto();
-            ddlConcepto.DataTextField = "Nombre";
-            ddlConcepto.DataValueField = "Id";
-            ddlConcepto.DataBind();
+            //ddlConcepto.DataSource = ObtenerConcepto();
+            //ddlConcepto.DataTextField = "Nombre";
+            //ddlConcepto.DataValueField = "Id";
+            //ddlConcepto.DataBind();
 
-            ddlObra.DataSource = ObtenerObras();
-            ddlObra.DataTextField = "Nombre";
-            ddlObra.DataValueField = "Id";
-            ddlObra.DataBind();
+            //ddlObra.DataSource = ObtenerObras();
+            //ddlObra.DataTextField = "Nombre";
+            //ddlObra.DataValueField = "Id";
+            //ddlObra.DataBind();
 
             cblEstado.DataSource = ObtenerEstado();
             cblEstado.DataTextField = "Nombre";
