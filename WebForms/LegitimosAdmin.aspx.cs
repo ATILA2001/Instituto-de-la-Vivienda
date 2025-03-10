@@ -32,12 +32,13 @@ namespace WebForms
             try
             {
                 var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaLegitimos"] = negocio.listarFiltro(selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
+                Session["listaLegitimos"] = negocio.listarFiltro(selectedLineas,selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -169,6 +170,11 @@ namespace WebForms
             cblFecha.DataValueField = "Valor";
             cblFecha.DataBind();
 
+            cblLinea.DataSource = ObtenerLineaGestion();
+            cblLinea.DataTextField = "Nombre";
+            cblLinea.DataValueField = "Id";
+            cblLinea.DataBind();
+
 
         }
         private DataTable ObtenerLegitimos()
@@ -189,7 +195,11 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-
+        private DataTable ObtenerLineaGestion()
+        {
+            LineaGestionNegocio barrioNegocio = new LineaGestionNegocio();
+            return barrioNegocio.listarddl();
+        }
     }
 
 }
