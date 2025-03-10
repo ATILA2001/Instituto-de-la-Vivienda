@@ -33,6 +33,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.CheckBoxList cblEmpresa;
 
         /// <summary>
+        /// Control cblLinea.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBoxList cblLinea;
+
+        /// <summary>
         /// Control cblAutorizante.
         /// </summary>
         /// <remarks>

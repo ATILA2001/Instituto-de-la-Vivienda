@@ -11,21 +11,21 @@
 			<div class="text-end">
 
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-				
 
-				<div class="form-group ">
-				<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
-				<div class="dropdown">
-					<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
-						Todas
+
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
                
-					</button>
-					<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
-						<!-- Rendimos la CheckBoxList aquí -->
-						<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-					</ul>
-				</div>
-</div>
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
@@ -35,6 +35,18 @@
 							</button>
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+						</div>
+					</div>
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+						<div class="dropdown">
+							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
 							</ul>
 						</div>
 					</div>
@@ -92,39 +104,40 @@
 
 					</div>
 				</div>
-			</div>			</div>
-
-		</div>
-			<hr />
-			<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  "
-				OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged" AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
-				<Columns>
-					<asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre"  />
-					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion"  />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante"  />
-					<asp:TemplateField HeaderText="Expediente" >
-						<ItemTemplate>
-							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:BoundField HeaderText="Inicio Ejecución" DataField="InicioEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}"  />
-					<asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}"/>
-					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"  />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
-					<asp:BoundField HeaderText="Linea de gestion" DataField="Linea" DataFormatString="{0:dd-MM-yyyy}"  />
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" DeleteText="Eliminar"  />
-				</Columns>
-			</asp:GridView>
-			<div class="text-center p-4">
-				<asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
 			</div>
-		
+		</div>
+
+	</div>
+	<hr />
+	<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  "
+		OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged" AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
+		<Columns>
+			<asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre" />
+			<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
+			<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+			<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />
+			<asp:TemplateField HeaderText="Expediente">
+				<ItemTemplate>
+					<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+						OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+				</ItemTemplate>
+			</asp:TemplateField>
+			<asp:BoundField HeaderText="Inicio Ejecución" DataField="InicioEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
+			<asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
+			<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
+			<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:BoundField HeaderText="Linea de gestion" DataField="Linea" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
+			<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" DeleteText="Eliminar" />
+		</Columns>
+	</asp:GridView>
+	<div class="text-center p-4">
+		<asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
+	</div>
+
 	</div>
 	<script type="text/javascript">
 		function soloNumeros(e) {
@@ -195,6 +208,22 @@
 			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
 				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
 			});
+			// Inicializar para area
+			var areasSeleccionadas = JSON.parse(localStorage.getItem('selectedAreas')) || [];
+			actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
+
+
+			$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
+			});
+			// Inicializar para linea
+			var LineasSeleccionadas = JSON.parse(localStorage.getItem('selectedLineas')) || [];
+			actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
+
+
+			$('#<%= cblLinea.ClientID %> input[type=checkbox]').on('change', function () {
+				actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
+			});
 
 			// Inicializar para  Autorizante 
 			var AutorizanteSeleccionados = JSON.parse(localStorage.getItem('selectedAutorizantes')) || [];
@@ -219,15 +248,23 @@
 				localStorage.removeItem('selectedEmpresas');
 				localStorage.removeItem('selectedAutorizantes');
 				localStorage.removeItem('selectedFechas');
+
+				localStorage.removeItem('selectedAreas');
+
+				localStorage.removeItem('selectedLineas');
 				// Restablecer checkboxes
 				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
 				$('#<%= cblFecha.ClientID %> input[type=checkbox]').prop('checked', false);
 				$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblArea.ClientID %> input[type=checkbox]').prop('checked', false);
+				$('#<%= cblLinea.ClientID %> input[type=checkbox]').prop('checked', false);
 				// Restablecer texto de los botones
 
 				$('#dropdownEmpresa').text('Todas');
 				$('#dropdownAutorizante').text('Todos');
 				$('#dropdownFecha').text('Todas');
+				$('#dropdownArea').text('Todas');
+				$('#dropdownLinea').text('Todas');
 			});
 		});
 
@@ -238,154 +275,154 @@
 
 	</script>
 	<style>
-	.form-group label {
-		font-size: 14px;
-		color: #212529;
-		font-weight: 600;
-	}
-
-	.form-group .dropdown-toggle {
-		background-color: #f8f9fa;
-		color: #212529;
-		border-radius: 0.375rem;
-		width: 100%;
-		text-align: left;
-		font-size: 14px;
-		font-weight: normal;
-	}
-
-		.form-group .dropdown-toggle:hover {
-			background-color: #e2e6ea;
-			border-color: #adb5bd;
+		.form-group label {
+			font-size: 14px;
 			color: #212529;
+			font-weight: 600;
 		}
 
-	.form-group .dropdown-menu {
-		border: 1px solid;
-		border-radius: 0.375rem;
-		padding: 0.5rem;
-		background-color: #ffffff;
-		max-height: 200px;
-		overflow-y: auto;
-	}
-
-		.form-group .dropdown-menu .form-check:hover {
-			background-color: transparent;
+		.form-group .dropdown-toggle {
+			background-color: #f8f9fa;
+			color: #212529;
+			border-radius: 0.375rem;
+			width: 100%;
+			text-align: left;
+			font-size: 14px;
+			font-weight: normal;
 		}
 
-		.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
-			outline: none;
-			box-shadow: none;
+			.form-group .dropdown-toggle:hover {
+				background-color: #e2e6ea;
+				border-color: #adb5bd;
+				color: #212529;
+			}
+
+		.form-group .dropdown-menu {
+			border: 1px solid;
+			border-radius: 0.375rem;
+			padding: 0.5rem;
+			background-color: #ffffff;
+			max-height: 200px;
+			overflow-y: auto;
 		}
 
-		.form-group .dropdown-menu .form-check {
-			margin-bottom: 0.5rem;
-		}
-
-			.form-group .dropdown-menu .form-check label {
-				font-size: 14px;
-				color: #495057;
+			.form-group .dropdown-menu .form-check:hover {
 				background-color: transparent;
 			}
 
-			.form-group .dropdown-menu .form-check input[type="checkbox"] {
-				margin-right: 8px;
+			.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+				outline: none;
+				box-shadow: none;
 			}
 
-				.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
-				.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+			.form-group .dropdown-menu .form-check {
+				margin-bottom: 0.5rem;
+			}
+
+				.form-group .dropdown-menu .form-check label {
+					font-size: 14px;
 					color: #495057;
 					background-color: transparent;
-					font-weight: normal;
 				}
 
-	.table-bordered th, .table-bordered td {
-		border: 1px solid #dddddd;
-		text-align: center;
-	}
+				.form-group .dropdown-menu .form-check input[type="checkbox"] {
+					margin-right: 8px;
+				}
 
-	.table-hover tbody tr:hover {
-		background-color: #f2f2f2;
-	}
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+					.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+						color: #495057;
+						background-color: transparent;
+						font-weight: normal;
+					}
 
-	.table1 th, .table1 td {
-		padding: 12px;
-		font-size: 14px;
-	}
-
-	.table1 {
-		border-radius: 10px;
-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-	}
-
-		.table1 th {
+		.table-bordered th, .table-bordered td {
+			border: 1px solid #dddddd;
 			text-align: center;
-			font-weight: bold;
-			background: #153244;
-			color: white;
-			border: 1px solid #153244;
 		}
 
-	.form-label {
-		margin-bottom: 0;
-	}
+		.table-hover tbody tr:hover {
+			background-color: #f2f2f2;
+		}
 
-	.d-flex.align-items-end > .form-control {
-		margin-right: 8px;
-	}
+		.table1 th, .table1 td {
+			padding: 12px;
+			font-size: 14px;
+		}
 
-	.form-control-uniform {
-		display: inline-block;
-		font-size: 14px;
-		padding: 4px 12px;
-		border: 1px solid;
-	}
+		.table1 {
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+		}
 
-	.btn {
-		background-color: #153244;
-		text-align: center;
-		transition: all 0.3s ease-in-out;
-		color: #ecf0f1;
-		border: none;
-		padding: 8px 12px;
-		font-size: 14px;
-		cursor: pointer;
-		border-radius: 4px;
-		display: inline-block;
-		font-weight: bold;
-	}
+			.table1 th {
+				text-align: center;
+				font-weight: bold;
+				background: #153244;
+				color: white;
+				border: 1px solid #153244;
+			}
 
-		.btn:hover {
+		.form-label {
+			margin-bottom: 0;
+		}
+
+		.d-flex.align-items-end > .form-control {
+			margin-right: 8px;
+		}
+
+		.form-control-uniform {
+			display: inline-block;
+			font-size: 14px;
+			padding: 4px 12px;
+			border: 1px solid;
+		}
+
+		.btn {
+			background-color: #153244;
+			text-align: center;
+			transition: all 0.3s ease-in-out;
+			color: #ecf0f1;
+			border: none;
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			border-radius: 4px;
+			display: inline-block;
+			font-weight: bold;
+		}
+
+			.btn:hover {
+				background-color: #8DE2D6;
+				color: #153244;
+			}
+
+		.lbl-left {
+			text-align: left;
+			display: block;
+			font-weight: bold;
+		}
+
+		#visibilityMessage {
 			background-color: #8DE2D6;
+			text-align: center;
+			transition: all 0.3s ease-in-out;
 			color: #153244;
 		}
 
-	.lbl-left {
-		text-align: left;
-		display: block;
-		font-weight: bold;
-	}
-
-	#visibilityMessage {
-		background-color: #8DE2D6;
-		text-align: center;
-		transition: all 0.3s ease-in-out;
-		color: #153244;
-	}
-
-	#visibilityText {
-		cursor: pointer;
-		display: inline-block;
-		transition: color 0.3s ease-in-out;
-	}
-
-	#visibilityMessage:hover {
-		background-color: #153244;
-	}
-
-		#visibilityMessage:hover #visibilityText {
-			color: white;
+		#visibilityText {
+			cursor: pointer;
+			display: inline-block;
+			transition: color 0.3s ease-in-out;
 		}
-</style>
+
+		#visibilityMessage:hover {
+			background-color: #153244;
+		}
+
+			#visibilityMessage:hover #visibilityText {
+				color: white;
+			}
+	</style>
 </asp:Content>
 

@@ -308,7 +308,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
+        public List<Legitimo> listarFiltro(List<string> linea, List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
@@ -346,7 +346,15 @@ LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_C
 left join BD_PROYECTOS BD ON O.ID = BD.ID_BASE
 LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
 WHERE 1 = 1";
-
+                if (linea != null && linea.Count > 0)
+                {
+                    string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
+                    query += $" AND LG.NOMBRE IN ({lineasParam})";
+                    for (int i = 0; i < linea.Count; i++)
+                    {
+                        datos.setearParametros($"@linea{i}", linea[i]);
+                    }
+                }
                 if (empresa != null && empresa.Count > 0)
                 {
                     string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
