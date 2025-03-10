@@ -116,6 +116,7 @@
 					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"  />
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
+					<asp:BoundField HeaderText="Linea de gestion" DataField="Linea" DataFormatString="{0:dd-MM-yyyy}"  />
 					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" DeleteText="Eliminar"  />
 				</Columns>

@@ -19,7 +19,7 @@ namespace Dominio
         public decimal? Sigaf { get; set; }
         public DateTime? FechaSade { get; set; }
         public string BuzonSade { get; set; }
-
+        public string Linea { get; set; }
         public string Empresa { get; set; }
     }
 }
