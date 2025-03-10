@@ -38,7 +38,9 @@ namespace WebForms
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
+                string filtroExpediente = ddlExpediente.SelectedValue;
+
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro, filtroExpediente);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();

@@ -183,7 +183,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null)
+        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null,string filtroExpediente = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -261,6 +261,20 @@ namespace Negocio
                         throw new Exception("Error al procesar el filtro de fechas.", ex);
                     }
                 }
+
+                if (!string.IsNullOrEmpty(filtroExpediente))
+                {
+                    if (filtroExpediente.ToLower() == "vacio")
+                    {
+                        query += " AND (C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '') ";
+                    }
+                    else if (filtroExpediente.ToLower() == "novacio" || filtroExpediente.ToLower() == "no vacio")
+                    {
+                        query += " AND (C.EXPEDIENTE_PAGO IS NOT NULL AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) <> '') ";
+                    }
+                }
+
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (A.DETALLE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro  OR EM.NOMBRE LIKE @filtro OR C.CODIGO_AUTORIZANTE LIKE @filtro OR C.EXPEDIENTE_PAGO LIKE @filtro OR T.NOMBRE LIKE @filtro OR C.MONTO_TOTAL LIKE @filtro OR C.MES_APROBACION LIKE @filtro OR A.MONTO_AUTORIZADO LIKE @filtro OR E.NOMBRE LIKE @filtro) ";
