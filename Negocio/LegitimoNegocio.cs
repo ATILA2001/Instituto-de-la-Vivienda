@@ -317,32 +317,35 @@ namespace Negocio
             {
                 string query = @"
             SELECT 
-                L.ID,
-                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
-                L.CODIGO_AUTORIZANTE,
-                L.EXPEDIENTE,
-                L.INICIO_EJECUCION,
-                L.FIN_EJECUCION,
-                L.CERTIFICADO,
-                L.MES_APROBACION,
-                EM.NOMBRE AS EMPRESA,
-                A.ID AS AREA_ID,
-                A.NOMBRE AS AREA,
-                CASE 
-                    WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 
-                    THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-                    ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-                         * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) 
-                END AS SIGAF,
-                PS.[BUZON DESTINO],
-                PS.[FECHA ULTIMO PASE]
-            FROM LEGITIMOS_ABONOS AS L
-            INNER JOIN OBRAS AS O ON L.OBRA = O.ID
-            INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
-            INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
-            INNER JOIN AREAS AS A ON O.AREA = A.ID
-            LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
-            WHERE 1 = 1";
+    L.ID,
+    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+    L.CODIGO_AUTORIZANTE,
+    L.EXPEDIENTE,
+    L.INICIO_EJECUCION,
+    L.FIN_EJECUCION,
+    L.CERTIFICADO,
+    L.MES_APROBACION,
+    EM.NOMBRE AS EMPRESA,
+    A.ID AS AREA_ID,
+    A.NOMBRE AS AREA,
+	LG.NOMBRE AS LINEA,
+    CASE 
+        WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 
+        THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
+        ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
+             * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) 
+    END AS SIGAF,
+    PS.[BUZON DESTINO],
+    PS.[FECHA ULTIMO PASE]
+FROM LEGITIMOS_ABONOS AS L
+INNER JOIN OBRAS AS O ON L.OBRA = O.ID
+INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
+INNER JOIN AREAS AS A ON O.AREA = A.ID
+LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
+left join BD_PROYECTOS BD ON O.ID = BD.ID_BASE
+LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
+WHERE 1 = 1";
 
                 if (empresa != null && empresa.Count > 0)
                 {
@@ -446,7 +449,8 @@ namespace Negocio
                         },
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
-                        BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString()
+                        BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
+                        Linea = datos.Lector["LINEA"]?.ToString()
 
                     };
 
