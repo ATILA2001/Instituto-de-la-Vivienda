@@ -57,10 +57,15 @@
 
 /* Botón de apertura */
 .dropdown-button {
-    background-color: #f1f1f1;
-    border: 1px solid #ccc;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
+}
+
+.dropdown-button:hover {
+    background-color: #e2e6ea;
 }
 
 /* Contenedor fijo para el input */
