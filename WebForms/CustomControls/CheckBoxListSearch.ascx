@@ -1,10 +1,14 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="CheckBoxListSearch.ascx.cs" Inherits="WebForms.CustomControls.CheckBoxListSearch" %>
 
+<link rel="stylesheet" href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+
+
+
 <div class="dropdown">
-    <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')">
-        Seleccionar filtros ▼
-    </button>
-    
+    <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')">Filtros ▼</button>
+     <asp:LinkButton ID="btnDeselectAll" runat="server" CssClass="btn btn-secondary" OnClick="BtnDeselectAll_Click" />
+        
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
         <div class="search-container">
         <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')"/>

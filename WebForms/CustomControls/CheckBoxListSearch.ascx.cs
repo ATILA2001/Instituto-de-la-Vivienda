@@ -12,6 +12,15 @@ namespace WebForms.CustomControls
 
 
         protected CheckBoxList chkList;
+        protected LinkButton btnDeselectAll;
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                UpdateDeselectAllButtonState();
+            }
+        }
 
         public int SelectedIndex
         {
@@ -89,14 +98,29 @@ namespace WebForms.CustomControls
             .Where(item => item.Selected)
             .ToList();
 
-        
-        
+        public void DeselectAllAndReload()
+        {
+            chkList.ClearSelection();
+            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+            UpdateDeselectAllButtonState();
+        }
+
         protected void ChkList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (chkList.SelectedItem != null) 
-            {
-                SelectedIndexChanged?.Invoke(this, e);
-            }
+            SelectedIndexChanged?.Invoke(this, e);
+            UpdateDeselectAllButtonState();
+        }
+
+        private void UpdateDeselectAllButtonState()
+        {
+            bool hasSelectedItems = chkList.Items.Cast<ListItem>().Any(item => item.Selected);
+            btnDeselectAll.CssClass = hasSelectedItems ? "btn btn-secondary bi bi-funnel-fill" : "btn btn-secondary bi bi-funnel";
+            btnDeselectAll.Enabled = hasSelectedItems;
+        }
+
+        protected void BtnDeselectAll_Click(object sender, EventArgs e)
+        {
+            DeselectAllAndReload();
         }
     }
 }
