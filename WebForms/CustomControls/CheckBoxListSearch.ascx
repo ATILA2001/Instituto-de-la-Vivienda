@@ -107,11 +107,13 @@
     width: 100%;
     padding: 5px;
     box-sizing: border-box;
-    margin-bottom: 5px;
+    margin: 5px 0px;
     position: sticky;
     top: 0;
     background: white;
     z-index: 10;
+    border: 1px, solid black;
+    border-radius: 5px;
 }
 
 
@@ -122,11 +124,12 @@
 }
 
 /* Contenedor con scroll solo para los checkboxes */
-.checkbox-container {
-    flex-grow: 1;
-    overflow-y: auto;
-/*    padding: 5px;*/
-}
+    .checkbox-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        white-space: nowrap;
+        /*    padding: 5px;*/
+    }
 
 .checkbox-list {
     margin: 0;
