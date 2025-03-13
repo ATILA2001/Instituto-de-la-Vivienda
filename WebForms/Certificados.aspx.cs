@@ -13,6 +13,20 @@ namespace WebForms
     public partial class Certificados : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+        }
+
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
 
