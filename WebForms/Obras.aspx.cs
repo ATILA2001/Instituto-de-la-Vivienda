@@ -16,7 +16,8 @@ namespace WebForms
         
         protected void Page_Init(object sender, EventArgs e)
         {
-            cblEmpresa.SelectedIndexChanged += OnCblEmpresa_SelectedIndexChanged;
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
         }
         
         protected void Page_Load(object sender, EventArgs e)
@@ -234,9 +235,10 @@ namespace WebForms
             CargarListaObras(filtro);
         }
 
-        protected void OnCblEmpresa_SelectedIndexChanged(object sender, EventArgs e)
+        protected void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaObras();
         }
+
     }
 }
