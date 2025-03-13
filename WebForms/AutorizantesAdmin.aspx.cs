@@ -13,6 +13,21 @@ namespace WebForms
     public partial class AutorizantesAdmin : System.Web.UI.Page
     {
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblConcepto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEstado.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblObra.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+        }
+
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaAutorizantes();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
