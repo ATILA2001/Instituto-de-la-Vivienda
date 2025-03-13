@@ -14,6 +14,18 @@ namespace WebForms
     {
         private LegitimoNegocio negocio = new LegitimoNegocio();
 
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+        }
+
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaLegitimos();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
