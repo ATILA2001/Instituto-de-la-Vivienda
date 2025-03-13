@@ -15,6 +15,15 @@ namespace WebForms
     {
 
         /// <summary>
+        /// Control UpdatePanel1.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
+
+        /// <summary>
         /// Control cblEmpresa.
         /// </summary>
         /// <remarks>
@@ -30,7 +39,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList cblBarrio;
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblBarrio;
 
         /// <summary>
         /// Control txtBuscar.

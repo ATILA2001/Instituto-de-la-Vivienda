@@ -84,7 +84,9 @@
 			</div>
 		</div>
 	</div>--%>
-
+    
+	<asp:UpdatePanel ID="UpdatePanel1" runat="server">
+		<ContentTemplate>
 
 
 	<div class="row mt-4">
@@ -113,14 +115,17 @@
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblBarrio">Barrio:</label>
 						<div class="dropdown">
-							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownBarrio" data-bs-toggle="dropdown" aria-expanded="false">
+
+<%--							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownBarrio" data-bs-toggle="dropdown" aria-expanded="false">
 								Todos
                    
 							</button>
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownBarrio" style="max-height: 200px; overflow-y: auto;">
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblBarrio" runat="server" CssClass="dropdown-item form-check" />
-							</ul>
+							</ul>--%>
+
+                                <CustomControls:CheckBoxListSearch ID="cblBarrio" runat="server" />
 						</div>
 					</div>
 
@@ -190,6 +195,11 @@
 			</div>
 		</div>
 	</div>
+	
+		
+		</ContentTemplate>
+	</asp:UpdatePanel>
+
 	<script type="text/javascript">
 		function soloNumeros(e) {
 			var tecla = (document) ? e.keyCode : e.which;
