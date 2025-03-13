@@ -21,7 +21,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList cblEmpresa;
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblEmpresa;
 
         /// <summary>
         /// Control cblObra.
@@ -30,7 +30,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList cblObra;
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblObra;
 
         /// <summary>
         /// Control cblEstado.
@@ -39,7 +39,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList cblEstado;
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblEstado;
 
         /// <summary>
         /// Control cblConcepto.
@@ -48,7 +48,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBoxList cblConcepto;
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblConcepto;
 
         /// <summary>
         /// Control txtBuscar.
