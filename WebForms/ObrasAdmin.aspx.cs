@@ -13,6 +13,19 @@ namespace WebForms
     public partial class ObrasAdmin : System.Web.UI.Page
     {
         private ObraNegocio negocio = new ObraNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+        }
+
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaObras();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
