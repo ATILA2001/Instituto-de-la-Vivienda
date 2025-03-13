@@ -13,9 +13,11 @@ namespace WebForms.CustomControls
 
         protected CheckBoxList chkList;
         protected LinkButton btnDeselectAll;
+        protected Literal litTitle;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            UpdateDropdownTitle();
             if (!IsPostBack)
             {
                 UpdateDeselectAllButtonState();
@@ -98,17 +100,30 @@ namespace WebForms.CustomControls
             .Where(item => item.Selected)
             .ToList();
 
+        private void UpdateDropdownTitle()
+        {
+            // Calculamos la cantidad de elementos seleccionados
+            int selectedCount = chkList.Items.Cast<ListItem>().Count(item => item.Selected);
+            // Si hay selección mostramos la cantidad, de lo contrario "Todos ▼"
+            string title = selectedCount > 0
+                ? $"{selectedCount} seleccionado{(selectedCount > 1 ? "s" : "")} ▼"
+                : "Todos ▼";
+            litTitle.Text = title;
+        }
+
         public void DeselectAllAndReload()
         {
             chkList.ClearSelection();
             SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
             UpdateDeselectAllButtonState();
+            UpdateDropdownTitle();
         }
 
         protected void ChkList_SelectedIndexChanged(object sender, EventArgs e)
         {
             SelectedIndexChanged?.Invoke(this, e);
             UpdateDeselectAllButtonState();
+            UpdateDropdownTitle();
         }
 
         private void UpdateDeselectAllButtonState()
@@ -121,6 +136,8 @@ namespace WebForms.CustomControls
         protected void BtnDeselectAll_Click(object sender, EventArgs e)
         {
             DeselectAllAndReload();
+            ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
+
         }
     }
 }

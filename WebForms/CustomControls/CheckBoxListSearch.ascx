@@ -6,7 +6,10 @@
 
 
 <div class="dropdown">
-    <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')">Filtros ▼</button>
+    <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')">
+        <%--<span id="<%= chkList.ClientID %>_title">Todos ▼</span>--%>
+        <asp:Literal ID="litTitle" runat="server" Text="Todos ▼" />
+    </button>
      <asp:LinkButton ID="btnDeselectAll" runat="server" CssClass="btn btn-secondary" OnClick="BtnDeselectAll_Click" />
         
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
@@ -34,6 +37,18 @@
         });
     });
 
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".checkbox-list").forEach(list => {
+            updateDropdownTitle(list.id);
+        });
+    });
+
+    document.querySelectorAll(".checkbox-list input[type='checkbox']").forEach(cb => {
+        cb.addEventListener('change', function () {
+            updateDropdownTitle(cb.closest('.checkbox-list').id);
+        });
+    });
+
 
     function toggleDropdown(dropdownId) {
         var dropdown = document.getElementById(dropdownId);
@@ -50,6 +65,15 @@
             cb.parentElement.style.display = label.includes(filter) ? "flex" : "none";
         });
     }
+
+    function updateDropdownTitle(listId) {
+        var checkboxes = document.querySelectorAll("#" + listId + " input[type='checkbox']");
+        var selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        var title = selectedCount > 0 ? selectedCount + " seleccionado" + (selectedCount > 1 ? "s" : "") + " ▼" : "Todos ▼";
+        document.getElementById(listId + "_title").textContent = title;
+    }
+
+
 </script>
 
 <style>
