@@ -1,5 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="BdProyectos.aspx.cs" Inherits="WebForms.BdProyectos" %>
 
+<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -77,13 +79,14 @@
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
 						<div class="dropdown">
-							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
 								Todas
 							</button>
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>
+							</ul>--%>
+                            <CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
 						</div>
 					</div>
 
@@ -91,26 +94,28 @@
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
 						<div class="dropdown">
-							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
 								Todas
 							</button>
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>
+							</ul>--%>
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
 						</div>
 					</div>
 
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
 						<div class="dropdown">
-							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownProyecto" data-bs-toggle="dropdown" aria-expanded="false">
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownProyecto" data-bs-toggle="dropdown" aria-expanded="false">
 								Todas
 							</button>
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownProyecto" style="max-height: 200px; overflow-y: auto;">
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblProyecto" runat="server" CssClass="dropdown-item form-check" />
-							</ul>
+							</ul>--%>
+                            <CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
 						</div>
 					</div>
 

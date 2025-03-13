@@ -13,6 +13,19 @@ namespace WebForms
     public partial class BdProyectos : System.Web.UI.Page
     {
         BdProyectoNegocio bdProyectoNegocio = new BdProyectoNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+        }
+
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarListaProyectos();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
