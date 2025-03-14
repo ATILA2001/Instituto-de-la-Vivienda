@@ -299,5 +299,14 @@ namespace WebForms
             }
         }
 
+
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            cblEmpresa.DeselectAllAndReload();
+            cblConcepto.DeselectAllAndReload();
+            cblEstado.DeselectAllAndReload();
+            cblObra.DeselectAllAndReload();
+        }
+
     }
 }
