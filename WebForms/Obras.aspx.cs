@@ -240,5 +240,10 @@ namespace WebForms
             CargarListaObras();
         }
 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            cblEmpresa.DeselectAllAndReload();
+            cblBarrio.DeselectAllAndReload();
+        }
     }
 }
