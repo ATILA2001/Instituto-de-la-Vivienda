@@ -190,6 +190,8 @@
 					<asp:BoundField HeaderText="Barrio" DataField="Barrio" />
 					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
 					<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea"  />
+					<asp:BoundField HeaderText="Proyecto" DataField="Proyecto"  />
+
 					<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado"  DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />

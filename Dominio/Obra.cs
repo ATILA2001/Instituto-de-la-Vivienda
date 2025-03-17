@@ -26,6 +26,8 @@ namespace Dominio
         public decimal? MontoActual { get; set; }
         public decimal? MontoFaltante { get; set; }
         public string Linea {  get; set; }
+        public string Proyecto { get; set; }
+
 
         public DateTime? FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
