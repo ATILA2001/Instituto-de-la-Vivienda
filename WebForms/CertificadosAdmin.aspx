@@ -6,6 +6,77 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
+	<style>
+	.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+		color: #ecf0f1 !important; 
+	}
+
+	.table-3d {
+		border-radius: 10px; 
+		overflow: hidden; 
+		border-collapse: collapse;
+	}
+
+		.table-3d thead th {
+			background-color: #153244;
+			color: #ecf0f1;
+			font-weight: bold;
+			text-align: center;
+			text-transform: uppercase;
+			border: none;
+		}
+</style>
+	<div id="section1" style="display: none;">
+		<div class="row mt-4">
+			<div class="col-md-12">
+				<table class="table  table-3d">
+					<thead class="thead-dark" >
+						<tr>
+
+							<th>Código Autorizante</th>
+							<th>Expediente</th>
+							<th>Tipo</th>
+							<th>Monto Autorizado</th>
+							<th>Mes Aprobacion</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+
+
+							<td>
+								<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+							</td>
+
+							<td>
+								<asp:DropDownList ID="ddlTipo" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+
+							<td>
+								<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
 	<div class="row mt-4">
 		<div class="col-md-12">
 			<div class="text-end">

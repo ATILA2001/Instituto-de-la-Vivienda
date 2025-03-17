@@ -26,11 +26,11 @@
 			}
 	</style>
 
-	<%--	<div id="section1" style="display: none;">
+	<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
-					<thead class="thead-dark" >
+					<thead class="thead-dark">
 						<tr>
 							<th>Obra</th>
 							<th>Concepto</th>
@@ -47,7 +47,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td>
+								<td>
 								<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
 							</td>
 
@@ -86,7 +86,7 @@
 			</div>
 		</div>
 	</div>
-	--%>
+
 
 	<div class="row mt-4">
 		<div class="col-md-12">
@@ -104,7 +104,7 @@
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
 						</div>
 					</div>
 
@@ -117,7 +117,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
@@ -130,7 +130,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownObra" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblObra" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
 						</div>
 					</div>
 
@@ -144,7 +144,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEstado" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblEstado" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
 						</div>
 					</div>
 
@@ -157,7 +157,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownConcepto" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblConcepto" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblConcepto" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblConcepto" runat="server" />
 						</div>
 					</div>
 
@@ -193,63 +193,63 @@
 					</div>
 				</div>
 			</div>
-	
-		<hr />
 
-		<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover "
-			OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
-			OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
-			AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
-			<Columns>
-				<asp:BoundField HeaderText="Obra" DataField="Obra.Id" Visible="false" />
+			<hr />
 
-				<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />
+			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover "
+				OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
+				OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
+				<Columns>
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Id" Visible="false" />
 
-				<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
-				<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" />
-				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+					<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />
 
-				<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />
-				<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" />
-				<asp:BoundField HeaderText="Detalle" DataField="Detalle" />
-				<asp:TemplateField HeaderText="Expediente">
-					<ItemTemplate>
-						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
-						</asp:TextBox>
-					</ItemTemplate>
-				</asp:TemplateField>
-				<asp:TemplateField HeaderText="Estado">
-					<ItemTemplate>
-						<asp:DropDownList ID="ddlEstadoAutorizante" runat="server" AutoPostBack="true"
-							OnSelectedIndexChanged="ddlEstadoAutorizante_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
-						</asp:DropDownList>
-					</ItemTemplate>
-				</asp:TemplateField>
-				<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
-				<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
-				<asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
+					<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" />
+					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 
-				<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" />
-				<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />
+					<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" />
+					<asp:BoundField HeaderText="Detalle" DataField="Detalle" />
+					<asp:TemplateField HeaderText="Expediente">
+						<ItemTemplate>
+							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+							</asp:TextBox>
+						</ItemTemplate>
+					</asp:TemplateField>
+					<asp:TemplateField HeaderText="Estado">
+						<ItemTemplate>
+							<asp:DropDownList ID="ddlEstadoAutorizante" runat="server" AutoPostBack="true"
+								OnSelectedIndexChanged="ddlEstadoAutorizante_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+							</asp:DropDownList>
+						</ItemTemplate>
+					</asp:TemplateField>
+					<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
 
-				<asp:TemplateField HeaderText="Autorización GG">
-					<ItemTemplate>
-						<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
-					</ItemTemplate>
-				</asp:TemplateField>
-				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" />
-				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" />
-			</Columns>
-		</asp:GridView>
+					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" />
+					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+
+					<asp:TemplateField HeaderText="Autorización GG">
+						<ItemTemplate>
+							<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
+						</ItemTemplate>
+					</asp:TemplateField>
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" />
+				</Columns>
+			</asp:GridView>
 
 
-		<div class="text-center p-4">
-			<asp:Label ID="lblMensaje" Text="" runat="server" />
+			<div class="text-center p-4">
+				<asp:Label ID="lblMensaje" Text="" runat="server" />
+			</div>
 		</div>
 	</div>
 	</div>
-			</div>
 
 	<script type="text/javascript">
 		function soloNumeros(e) {
