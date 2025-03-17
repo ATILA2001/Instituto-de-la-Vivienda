@@ -215,9 +215,10 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblArea.DeselectAllAndReload();
-            cblLinea.DeselectAllAndReload();
-            cblProyecto.DeselectAllAndReload();
+            cblArea.ClearSelection();
+            cblLinea.ClearSelection();
+            cblProyecto.ClearSelection();
+            CargarListaProyectos();
         }
 
     }

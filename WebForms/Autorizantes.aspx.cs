@@ -302,10 +302,12 @@ namespace WebForms
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
-            cblEmpresa.DeselectAllAndReload();
-            cblConcepto.DeselectAllAndReload();
-            cblEstado.DeselectAllAndReload();
-            cblObra.DeselectAllAndReload();
+            txtBuscar.Text = string.Empty;
+            cblEmpresa.ClearSelection();
+            cblConcepto.ClearSelection();
+            cblEstado.ClearSelection();
+            cblObra.ClearSelection();
+            CargarListaAutorizantes();
         }
 
     }

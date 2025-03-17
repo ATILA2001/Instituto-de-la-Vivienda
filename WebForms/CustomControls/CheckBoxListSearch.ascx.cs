@@ -111,10 +111,9 @@ namespace WebForms.CustomControls
             litTitle.Text = title;
         }
 
-        public void DeselectAllAndReload()
+        public void ClearSelection()
         {
             chkList.ClearSelection();
-            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
             UpdateDeselectAllButtonState();
             UpdateDropdownTitle();
         }
@@ -135,7 +134,7 @@ namespace WebForms.CustomControls
 
         protected void BtnDeselectAll_Click(object sender, EventArgs e)
         {
-            DeselectAllAndReload();
+            ClearSelection();
             ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
 
         }
