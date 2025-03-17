@@ -273,5 +273,14 @@ namespace WebForms
             string filtro = txtBuscar.Text.Trim();
             CargarListaObras(filtro);
         }
+
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.DeselectAllAndReload();
+            cblBarrio.DeselectAllAndReload();
+            cblEmpresa.DeselectAllAndReload();
+        }
+
     }
 }
