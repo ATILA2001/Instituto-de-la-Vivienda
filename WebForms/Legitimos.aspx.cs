@@ -255,6 +255,14 @@ namespace WebForms
             CargarListaLegitimos(filtro);
         }
 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblAutorizante.DeselectAllAndReload();
+            cblEmpresa.DeselectAllAndReload();
+            cblFecha.DeselectAllAndReload();
+        }
+
     }
 
 }
