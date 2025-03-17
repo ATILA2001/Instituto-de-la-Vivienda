@@ -292,6 +292,17 @@ namespace WebForms
                 }
             }
         }
+
+        protected void BtnClearFilters_Click(object sender, EventArgs e) 
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.DeselectAllAndReload();
+            cblEmpresa.DeselectAllAndReload();
+            cblConcepto.DeselectAllAndReload();
+            cblEstado.DeselectAllAndReload();
+            cblObra.DeselectAllAndReload();
+        }
+
     }
 
 }
