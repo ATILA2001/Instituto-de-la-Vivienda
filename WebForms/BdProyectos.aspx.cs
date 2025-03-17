@@ -211,5 +211,14 @@ namespace WebForms
             LineaGestionNegocio barrioNegocio = new LineaGestionNegocio();
             return barrioNegocio.listarddl();
         }
+
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.DeselectAllAndReload();
+            cblLinea.DeselectAllAndReload();
+            cblArea.DeselectAllAndReload();
+        }
+
     }
 }
