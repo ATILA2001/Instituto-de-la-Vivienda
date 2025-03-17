@@ -41,7 +41,7 @@ namespace WebForms
             AreaNegocio areaNegocio = new AreaNegocio();
             return areaNegocio.listarddl();
         }
-        private void CargarListaLegitimos(string filtro= null)
+        private void CargarListaLegitimos(string filtro = null)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace WebForms
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaLegitimos"] = negocio.listarFiltro(selectedLineas,selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
+                Session["listaLegitimos"] = negocio.listarFiltro(selectedLineas, selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -83,7 +83,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos(); 
+                    CargarListaLegitimos();
                 }
             }
             catch (Exception ex)
@@ -214,6 +214,16 @@ namespace WebForms
             LineaGestionNegocio barrioNegocio = new LineaGestionNegocio();
             return barrioNegocio.listarddl();
         }
-    }
 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.DeselectAllAndReload();
+            cblEmpresa.DeselectAllAndReload();
+            cblAutorizante.DeselectAllAndReload();
+            cblFecha.DeselectAllAndReload();
+            cblLinea.DeselectAllAndReload();
+        }
+
+    }
 }
