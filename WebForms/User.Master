@@ -33,6 +33,18 @@
         }
     </style>
 
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('<%= form1.ClientID %>');
+        form.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
+
 </head>
 <body class="bg-light">
 	<form id="form1" runat="server">
