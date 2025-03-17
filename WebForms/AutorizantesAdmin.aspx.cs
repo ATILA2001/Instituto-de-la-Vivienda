@@ -37,7 +37,7 @@ namespace WebForms
                 CalcularSubtotal();
             }
         }
-        /*
+        
                 protected void btnLimpiar_Click(object sender, EventArgs e)
                 {
                     ddlConcepto.SelectedIndex = -1;
@@ -49,7 +49,7 @@ namespace WebForms
                     ddlEstado.SelectedIndex = -1;
 
                 }
-          */
+          
         private DataTable ObtenerAreas()
         {
             AreaNegocio areaNegocio = new AreaNegocio();
@@ -62,7 +62,7 @@ namespace WebForms
             CargarListaAutorizantes(filtro);
         }
 
-        /*    protected void btnAgregar_Click(object sender, EventArgs e)
+          protected void btnAgregar_Click(object sender, EventArgs e)
             {
                 AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
                 Autorizante nuevoAutorizante = new Autorizante();
@@ -84,7 +84,7 @@ namespace WebForms
                 CargarListaAutorizantes();
                 CalcularSubtotal();
             }
-          */
+          
         
 
         private void CargarListaAutorizantes(string filtro = null)
@@ -153,7 +153,7 @@ namespace WebForms
         }
 
         private void BindDropDownList()
-        {/*
+        {
             ddlEstado.DataSource = ObtenerEstado();
             ddlEstado.DataTextField = "Nombre";
             ddlEstado.DataValueField = "Id";
@@ -168,7 +168,7 @@ namespace WebForms
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
-            */
+            
             cblArea.DataSource = ObtenerAreas();
             cblArea.DataTextField = "Nombre";
             cblArea.DataValueField = "Id";
