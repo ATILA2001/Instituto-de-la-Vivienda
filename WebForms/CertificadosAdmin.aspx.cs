@@ -245,5 +245,16 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.DeselectAllAndReload();
+            cblEmpresa.DeselectAllAndReload();
+            cblAutorizante.DeselectAllAndReload();
+            cblTipo.DeselectAllAndReload();
+            cblFecha.DeselectAllAndReload();
+            ddlExpediente.SelectedIndex = 0;
+        }
+
     }
 }
