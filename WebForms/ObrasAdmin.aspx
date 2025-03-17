@@ -248,67 +248,7 @@
 				}
 			});
 		});
-		$(document).ready(function () {
-			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
-				var seleccionados = [];
-				var $checkBoxList = $('#' + checkBoxListId);
-				var $dropdown = $('#' + dropdownId);
-
-				// Procesar checkboxes seleccionados
-				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
-					seleccionados.push($(this).next('label').text());
-				});
-
-				// Guardar en localStorage
-				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
-
-				// Actualizar el texto del botón
-				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
-				$dropdown.text(textoBoton);
-			}
-
-			// Inicializar para empresas
-			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
-			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-
-			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-			});
-
-			// Inicializar para barrios
-			var barriosSeleccionados = JSON.parse(localStorage.getItem('selectedBarrios')) || [];
-			actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
-
-			$('#<%= cblBarrio.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblBarrio.ClientID %>', 'dropdownBarrio', 'selectedBarrios');
-			});
-			// Inicializar para areas
-			var areasSeleccionados = JSON.parse(localStorage.getItem('selectedAreas')) || [];
-			actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-
-			$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-			});
-
-			// Limpiar filtros
-			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
-				// Limpiar localStorage
-				localStorage.removeItem('selectedEmpresas');
-				localStorage.removeItem('selectedBarrios');
-				localStorage.removeItem('selectedAreas');
-
-
-				// Restablecer checkboxes
-				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblBarrio.ClientID %> input[type=checkbox]').prop('checked', false);
-
-				// Restablecer texto de los botones
-				$('#dropdownEmpresa').text('Todas');
-				$('#dropdownBarrio').text('Todos');
-				$('#dropdownArea').text('Todas');
-			});
-		});
-
+		
 	</script>
 	<style>
 	.form-group label {

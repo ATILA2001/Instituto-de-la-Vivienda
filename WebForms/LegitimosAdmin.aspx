@@ -61,7 +61,7 @@
 							<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
 						</td>
 						<td>
-							<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+							<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" />
 						</td>
 						<td>
 							<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
@@ -219,15 +219,7 @@
 
 	</div>
 	<script type="text/javascript">
-		function soloNumeros(e) {
-			var tecla = (document) ? e.keyCode : e.which;
-			if (tecla == 8 || tecla == 46) {
-				return true;
-			}
-			var patron = /^[0-9]$/;
-			var te = String.fromCharCode(tecla);
-			return patron.test(te);
-		}
+	
 		$(document).ready(function () {
 			// Inicializamos la visibilidad según el valor de localStorage
 			var sectionVisible = localStorage.getItem("sectionVisible");
@@ -259,98 +251,6 @@
 				}
 			});
 		});
-
-		$(document).ready(function () {
-			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
-				var seleccionados = [];
-				var $checkBoxList = $('#' + checkBoxListId);
-				var $dropdown = $('#' + dropdownId);
-
-				// Procesar checkboxes seleccionados
-				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
-					seleccionados.push($(this).next('label').text());
-				});
-
-				// Guardar en localStorage
-				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
-
-				// Actualizar el texto del botón
-				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
-				$dropdown.text(textoBoton);
-			}
-
-			// Inicializar para empresas
-			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
-			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-
-
-			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-			});
-			// Inicializar para area
-			var areasSeleccionadas = JSON.parse(localStorage.getItem('selectedAreas')) || [];
-			actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-
-
-			$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-			});
-			// Inicializar para linea
-			var LineasSeleccionadas = JSON.parse(localStorage.getItem('selectedLineas')) || [];
-			actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
-
-
-			$('#<%= cblLinea.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
-			});
-
-			// Inicializar para  Autorizante 
-			var AutorizanteSeleccionados = JSON.parse(localStorage.getItem('selectedAutorizantes')) || [];
-			actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
-
-			$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblAutorizante.ClientID %>', 'dropdownAutorizante', 'selectedAutorizantes');
-			});
-
-			// Inicializar para fecha
-			var FechaSeleccionadas = JSON.parse(localStorage.getItem('selectedFechas')) || [];
-			actualizarSeleccion('<%= cblFecha.ClientID %>', 'dropdownFecha', 'selectedFechas');
-
-
-			$('#<%= cblFecha.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblFecha.ClientID %>', 'dropdownFecha', 'selectedFechas');
-			});
-
-			// Limpiar filtros
-			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
-				// Limpiar localStorage
-				localStorage.removeItem('selectedEmpresas');
-				localStorage.removeItem('selectedAutorizantes');
-				localStorage.removeItem('selectedFechas');
-
-				localStorage.removeItem('selectedAreas');
-
-				localStorage.removeItem('selectedLineas');
-				// Restablecer checkboxes
-				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblFecha.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblAutorizante.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblArea.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblLinea.ClientID %> input[type=checkbox]').prop('checked', false);
-				// Restablecer texto de los botones
-
-				$('#dropdownEmpresa').text('Todas');
-				$('#dropdownAutorizante').text('Todos');
-				$('#dropdownFecha').text('Todas');
-				$('#dropdownArea').text('Todas');
-				$('#dropdownLinea').text('Todas');
-			});
-		});
-
-
-
-
-
 
 	</script>
 	<style>

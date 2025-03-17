@@ -253,15 +253,7 @@
 	</div>
 
 	<script type="text/javascript">
-		function soloNumeros(e) {
-			var tecla = (document) ? e.keyCode : e.which;
-			if (tecla == 8 || tecla == 46) {
-				return true;
-			}
-			var patron = /^[0-9]$/;
-			var te = String.fromCharCode(tecla);
-			return patron.test(te);
-		}
+	
 		$(document).ready(function () {
 			// Inicializamos la visibilidad según el valor de localStorage
 			var sectionVisible = localStorage.getItem("sectionVisible");
@@ -293,83 +285,6 @@
 				}
 			});
 		});
-
-
-		$(document).ready(function () {
-			function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
-				var seleccionados = [];
-				var $checkBoxList = $('#' + checkBoxListId);
-				var $dropdown = $('#' + dropdownId);
-
-				// Procesar checkboxes seleccionados
-				$checkBoxList.find('input[type=checkbox]:checked').each(function () {
-					seleccionados.push($(this).next('label').text());
-				});
-
-				// Guardar en localStorage
-				localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
-
-				// Actualizar el texto del botón
-				var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
-				$dropdown.html(textoBoton);
-			}
-
-			// Inicializar para empresas
-			var empresasSeleccionadas = JSON.parse(localStorage.getItem('selectedEmpresas')) || [];
-			actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-
-
-			$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblEmpresa.ClientID %>', 'dropdownEmpresa', 'selectedEmpresas');
-			});
-
-			// Inicializar para obra 
-			var obraSeleccionados = JSON.parse(localStorage.getItem('selectedObras')) || [];
-			actualizarSeleccion('<%= cblObra.ClientID %>', 'dropdownObra', 'selectedObras');
-
-			$('#<%= cblObra.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblObra.ClientID %>', 'dropdownObra', 'selectedObras');
-			});
-			// Inicializar para  estado 
-			var estadoSeleccionados = JSON.parse(localStorage.getItem('selectedEstados')) || [];
-			actualizarSeleccion('<%= cblEstado.ClientID %>', 'dropdownEstado', 'selectedEstados');
-
-			$('#<%= cblEstado.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblEstado.ClientID %>', 'dropdownEstado', 'selectedEstados');
-			});
-			// Inicializar para  concepto
-			var conceptoSeleccionados = JSON.parse(localStorage.getItem('selectedConceptos')) || [];
-			actualizarSeleccion('<%= cblConcepto.ClientID %>', 'dropdownConcepto', 'selectedConcepto');
-
-			$('#<%= cblConcepto.ClientID %> input[type=checkbox]').on('change', function () {
-				actualizarSeleccion('<%= cblConcepto.ClientID %>', 'dropdownConcepto', 'selectedConcepto');
-			});
-
-
-
-			// Limpiar filtros
-			$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
-				// Limpiar localStorage
-				localStorage.removeItem('selectedEmpresas');
-				localStorage.removeItem('selectedObras');
-				localStorage.removeItem('selectedEstados');
-				localStorage.removeItem('selectedConceptos');
-
-				// Restablecer checkboxes
-				$('#<%= cblEmpresa.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblObra.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblEstado.ClientID %> input[type=checkbox]').prop('checked', false);
-				$('#<%= cblConcepto.ClientID %> input[type=checkbox]').prop('checked', false);
-				// Restablecer texto de los botones
-
-				$('#dropdownEmpresa').text('Todas');
-				$('#dropdownObra').text('Todas');
-				$('#dropdownEstado').text('Todos');
-				$('#dropdownConcepto').text('Todos');
-
-			});
-		});
-
 
 
 	</script>

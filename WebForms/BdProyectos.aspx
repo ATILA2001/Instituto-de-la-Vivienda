@@ -178,15 +178,7 @@
 		</div>
 
 		<script type="text/javascript">
-			function soloNumeros(e) {
-				var tecla = (document) ? e.keyCode : e.which;
-				if (tecla == 8 || tecla == 46) {
-					return true;
-				}
-				var patron = /^[0-9]$/;
-				var te = String.fromCharCode(tecla);
-				return patron.test(te);
-			}
+			
 
 			$(document).ready(function () {
 				// Inicializamos la visibilidad según el valor almacenado en localStorage
@@ -215,67 +207,7 @@
 					}
 				});
 			});
-			$(document).ready(function () {
-				function actualizarSeleccion(checkBoxListId, dropdownId, localStorageKey) {
-					var seleccionados = [];
-					var $checkBoxList = $('#' + checkBoxListId);
-					var $dropdown = $('#' + dropdownId);
-
-					// Procesar checkboxes seleccionados
-					$checkBoxList.find('input[type=checkbox]:checked').each(function () {
-						seleccionados.push($(this).next('label').text());
-					});
-
-					// Guardar en localStorage
-					localStorage.setItem(localStorageKey, JSON.stringify(seleccionados));
-
-					// Actualizar el texto del botón
-					var textoBoton = seleccionados.length > 0 ? seleccionados.length + ' seleccionado' + (seleccionados.length > 1 ? 's' : '') : 'Sin seleccionar';
-					$dropdown.text(textoBoton);
-				}
-
-				// Inicializar para area
-				var areasSeleccionadas = JSON.parse(localStorage.getItem('selectedAreas')) || [];
-				actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-
-				$('#<%= cblArea.ClientID %> input[type=checkbox]').on('change', function () {
-					actualizarSeleccion('<%= cblArea.ClientID %>', 'dropdownArea', 'selectedAreas');
-				});
-
-				// Inicializar para Linea
-				var lineasSeleccionados = JSON.parse(localStorage.getItem('selectedlineas')) || [];
-				actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
-
-				$('#<%= cblLinea.ClientID %> input[type=checkbox]').on('change', function () {
-					actualizarSeleccion('<%= cblLinea.ClientID %>', 'dropdownLinea', 'selectedLineas');
-				});
-				// Inicializar para Proyecto
-				var ProyectosSeleccionados = JSON.parse(localStorage.getItem('selectedProyectos')) || [];
-				actualizarSeleccion('<%= cblProyecto.ClientID %>', 'dropdownProyecto', 'selectedProyectos');
-
-				$('#<%= cblProyecto.ClientID %> input[type=checkbox]').on('change', function () {
-					actualizarSeleccion('<%= cblProyecto.ClientID %>', 'dropdownProyecto', 'selectedProyectos');
-				});
-				// Limpiar filtros
-				$('#<%= btnLimpiarFiltros.ClientID %>').on('click', function () {
-					// Limpiar localStorage
-					localStorage.removeItem('selectedAreas');
-					localStorage.removeItem('selectedLineas');
-					localStorage.removeItem('selectedProyectos');
-					// Restablecer checkboxes
-
-					$('#<%= cblArea.ClientID %> input[type=checkbox]').prop('checked', false);
-					$('#<%= cblLinea.ClientID %> input[type=checkbox]').prop('checked', false);
-
-					$('#<%= cblProyecto.ClientID %> input[type=checkbox]').prop('checked', false);
-					// Restablecer texto de los botones
-
-					$('#dropdownLinea').text('Todas');
-					$('#dropdownArea').text('Todos');
-					$('#dropdownProyecto').text('Todos');
-				});
-			});
-
+		
 		</script>
 
 		<style>
