@@ -42,6 +42,8 @@ namespace WebForms
         {
             try
             {
+
+                if(txtAutorizante.Text.Trim() != string.Empty) { 
                 Legitimo nuevoLegitimo = new Legitimo
                 {
                     CodigoAutorizante = txtAutorizante.Text,
@@ -63,6 +65,12 @@ namespace WebForms
                     CargarListaLegitimos();
                     CalcularSubtotal();
 
+                }
+                }
+                else
+                {
+                    lblMensaje.Text = "Debe llenar todos los campos correctamente.";
+                    lblMensaje.CssClass = "alert alert-danger";
                 }
             }
             catch (Exception ex)
