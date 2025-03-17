@@ -217,7 +217,7 @@ namespace WebForms
             txtBuscar.Text = string.Empty;
             cblArea.DeselectAllAndReload();
             cblLinea.DeselectAllAndReload();
-            cblArea.DeselectAllAndReload();
+            cblProyecto.DeselectAllAndReload();
         }
 
     }
