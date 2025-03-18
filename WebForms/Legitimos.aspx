@@ -107,7 +107,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
 						</div>
 					</div>
 
@@ -121,7 +121,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
 						</div>
 					</div>
 
@@ -173,12 +173,14 @@
 					<asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
 					<asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Estado" DataField="Estado" />
 					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
-		<%--			<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
+					<%--			<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" DeleteText="Eliminar" />
-		--%>		</Columns>
+					--%>
+				</Columns>
 			</asp:GridView>
 			<div class="text-center p-4">
 				<asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
@@ -186,7 +188,7 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		
+
 		$(document).ready(function () {
 			// Inicializamos la visibilidad según el valor de localStorage
 			var sectionVisible = localStorage.getItem("sectionVisible");

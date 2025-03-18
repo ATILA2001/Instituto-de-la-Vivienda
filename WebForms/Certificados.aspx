@@ -190,6 +190,8 @@
 								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
 						</ItemTemplate>
 					</asp:TemplateField>
+										<asp:BoundField HeaderText="Estado" DataField="Estado"  />
+
 					<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre"  />
 					<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}"/>
 					<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />

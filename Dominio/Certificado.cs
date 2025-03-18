@@ -23,6 +23,8 @@ namespace Dominio
         public DateTime? FechaSade { get; set; }
         public string BuzonSade {  get; set; }
         public string Empresa { get; set; }
+        public string Estado { get; set; }
+
         public Certificado() { }
     }
 }

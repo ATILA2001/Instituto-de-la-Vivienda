@@ -7,77 +7,77 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
 	<style>
-	.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
-		color: #ecf0f1 !important;
-	}
-
-	.table-3d {
-		border-radius: 10px;
-		overflow: hidden;
-		border-collapse: collapse;
-	}
-
-		.table-3d thead th {
-			background-color: #153244;
-			color: #ecf0f1;
-			font-weight: bold;
-			text-align: center;
-			text-transform: uppercase;
-			border: none;
+		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+			color: #ecf0f1 !important;
 		}
-</style>
-<div id="section1" style="display: none;">
-	<div class="row mt-4">
-		<div class="col-md-12">
-			<table class="table  table-3d">
-				<thead class="thead-dark" >
-					<tr>
-						<th>Obra</th>
-						<th>Código Autorizante</th>
-						<th>Expediente</th>
-						<th>Inicio Ejecución</th>
-						<th>Fin Ejecución</th>
-						<th>Monto Certificado</th>
-						<th>Mes Aprobación</th>
-						<th></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
-						</td>
-						<td>
-							<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
-						</td>
-						<td>
-							<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-						</td>
-						<td>
-							<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-						</td>
-						<td>
-							<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-						</td>
-						<td>
-							<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" />
-						</td>
-						<td>
-							<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
-						</td>
-						<td class="text-right">
-							<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
-						</td>
-						<td class="text-right">
-							<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-								CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-					</tr>
-				</tbody>
-			</table>
+
+		.table-3d {
+			border-radius: 10px;
+			overflow: hidden;
+			border-collapse: collapse;
+		}
+
+			.table-3d thead th {
+				background-color: #153244;
+				color: #ecf0f1;
+				font-weight: bold;
+				text-align: center;
+				text-transform: uppercase;
+				border: none;
+			}
+	</style>
+	<div id="section1" style="display: none;">
+		<div class="row mt-4">
+			<div class="col-md-12">
+				<table class="table  table-3d">
+					<thead class="thead-dark">
+						<tr>
+							<th>Obra</th>
+							<th>Código Autorizante</th>
+							<th>Expediente</th>
+							<th>Inicio Ejecución</th>
+							<th>Fin Ejecución</th>
+							<th>Monto Certificado</th>
+							<th>Mes Aprobación</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
+							</td>
+							<td>
+								<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" />
+							</td>
+							<td>
+								<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+							</td>
+							<td class="text-right">
+								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
+									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
-</div>
 
 	<div class="row mt-4">
 		<div class="col-md-12">
@@ -97,7 +97,7 @@
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
 						</div>
 					</div>
 
@@ -110,7 +110,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 					<div class="form-group ">
@@ -123,7 +123,7 @@
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
 						</div>
 					</div>
 
@@ -136,7 +136,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
 						</div>
 					</div>
 
@@ -150,7 +150,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
 						</div>
 					</div>
 
@@ -205,6 +205,7 @@
 			<asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
 			<asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
 			<asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+			<asp:BoundField HeaderText="Estado" DataField="Estado" />
 			<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
 			<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
 			<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
@@ -219,7 +220,7 @@
 
 	</div>
 	<script type="text/javascript">
-	
+
 		$(document).ready(function () {
 			// Inicializamos la visibilidad según el valor de localStorage
 			var sectionVisible = localStorage.getItem("sectionVisible");
