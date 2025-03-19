@@ -19,6 +19,7 @@ namespace WebForms
             cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
         }
 
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
@@ -61,8 +62,8 @@ namespace WebForms
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes,filtro);
+                var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes,selectedEstadoExpedientes,filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -163,6 +164,31 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return barrioNegocio.listarddl(usuarioLogueado);
         }
+
+        private DataTable ObtenerEstadosExpedientes()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ID", typeof(int));
+            dt.Columns.Add("NOMBRE", typeof(string));
+
+            DataRow _1 = dt.NewRow();
+            _1["ID"] = 0;
+            _1["NOMBRE"] = "NO INICIADO";
+            dt.Rows.Add(_1);
+
+            DataRow _2 = dt.NewRow();
+            _2["ID"] = 1;
+            _2["NOMBRE"] = "EN TRAMITE";
+            dt.Rows.Add(_2);
+
+            DataRow _3 = dt.NewRow();
+            _3["ID"] = 2;
+            _3["NOMBRE"] = "DEVENGADO";
+            dt.Rows.Add(_3);
+
+            return dt;
+        }
+
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             TextBox txtExpediente = (TextBox)sender;
@@ -234,6 +260,10 @@ namespace WebForms
             cblFecha.DataValueField = "Valor";
             cblFecha.DataBind();
 
+            cblEstadoExpediente.DataSource = ObtenerEstadosExpedientes();
+            cblEstadoExpediente.DataTextField = "NOMBRE";
+            cblEstadoExpediente.DataValueField = "ID";
+            cblEstadoExpediente.DataBind();
 
         }
         private DataTable ObtenerEmpresas()
@@ -261,6 +291,7 @@ namespace WebForms
             cblAutorizante.ClearSelection();
             cblEmpresa.ClearSelection();
             cblFecha.ClearSelection();
+            cblEstadoExpediente.ClearSelection();
             CargarListaLegitimos();
         }
 

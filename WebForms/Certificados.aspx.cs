@@ -20,6 +20,7 @@ namespace WebForms
             cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
         }
 
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
@@ -75,7 +76,10 @@ namespace WebForms
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, filtro);
+                var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+
+
+                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -178,6 +182,31 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return autorizanteNegocio.listarddl(usuarioLogueado);
         }
+
+        private DataTable ObtenerEstadosExpedientes()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ID", typeof(int));
+            dt.Columns.Add("NOMBRE", typeof(string));
+
+            DataRow _1 = dt.NewRow();
+            _1["ID"] = 0;
+            _1["NOMBRE"] = "NO INICIADO";
+            dt.Rows.Add(_1);
+
+            DataRow _2 = dt.NewRow();
+            _2["ID"] = 1;
+            _2["NOMBRE"] = "EN TRAMITE";
+            dt.Rows.Add(_2);
+
+            DataRow _3 = dt.NewRow();
+            _3["ID"] = 2;
+            _3["NOMBRE"] = "DEVENGADO";
+            dt.Rows.Add(_3);
+
+            return dt;
+        }
+
         private void BindDropDownList()
         {
             //ddlTipo.DataSource = ObtenerTipos();
@@ -218,6 +247,10 @@ namespace WebForms
             cblFecha.DataValueField = "Valor";
             cblFecha.DataBind();
 
+            cblEstadoExpediente.DataSource = ObtenerEstadosExpedientes();
+            cblEstadoExpediente.DataTextField = "Nombre";
+            cblEstadoExpediente.DataValueField = "Id";
+            cblEstadoExpediente.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
@@ -277,6 +310,7 @@ namespace WebForms
             cblEmpresa.ClearSelection();
             cblTipo.ClearSelection();
             cblFecha.ClearSelection();
+            cblEstadoExpediente.ClearSelection();
             CargarListaCertificados();
         }
 

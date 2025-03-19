@@ -1,4 +1,5 @@
 ﻿using Dominio;
+using Dominio.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -41,7 +42,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null)
+        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente ,string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -109,6 +110,35 @@ namespace Negocio
                         throw new Exception("Error al procesar el filtro de fechas.", ex);
                     }
                 }
+
+
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
+                {
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
+                    {
+                        [EstadoExpediente.NoIniciado] = "(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))",
+                        [EstadoExpediente.Devengado] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))"
+                    };
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
+                    {
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
+                    }
+                }
+
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (A.DETALLE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR EM.NOMBRE LIKE @filtro OR C.CODIGO_AUTORIZANTE LIKE @filtro OR C.EXPEDIENTE_PAGO LIKE @filtro OR T.NOMBRE LIKE @filtro OR C.MONTO_TOTAL LIKE @filtro OR C.MES_APROBACION LIKE @filtro OR A.MONTO_AUTORIZADO LIKE @filtro OR E.NOMBRE LIKE @filtro) ";
@@ -183,7 +213,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null, string filtroExpediente = null)
+        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -262,17 +292,68 @@ namespace Negocio
                     }
                 }
 
-                if (!string.IsNullOrEmpty(filtroExpediente))
+
+
+
+
+                // Dentro del método listarFiltroAdmin:
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
                 {
-                    if (filtroExpediente.ToLower() == "vacio")
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
                     {
-                        query += " AND (C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '') ";
-                    }
-                    else if (filtroExpediente.ToLower() == "novacio" || filtroExpediente.ToLower() == "no vacio")
+                        [EstadoExpediente.NoIniciado] = "(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))",
+                        [EstadoExpediente.Devengado] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))"
+                    };
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
                     {
-                        query += " AND (C.EXPEDIENTE_PAGO IS NOT NULL AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) <> '') ";
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
                     }
                 }
+
+                //if (estadoExpediente != null && estadoExpediente.Count > 0)
+                //{
+                //    var condiciones = new List<string>();
+
+                //    foreach (var estado in estadoExpediente)
+                //    {
+                //        switch (estado)
+                //        {
+                //            case "0": // NO INICIADO
+                //                condiciones.Add("(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')");
+                //                break;
+                //            case "1": // EN TRAMITE
+                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                //                    AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
+                //                break;
+                //            case "2": // DEVENGADO
+                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                //                    AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
+                //                break;
+                //        }
+                //    }
+
+                //    if (condiciones.Any())
+                //    {
+                //        query += $" AND ({string.Join(" OR ", condiciones)})";
+                //    }
+                //}
 
 
                 if (!string.IsNullOrEmpty(filtro))

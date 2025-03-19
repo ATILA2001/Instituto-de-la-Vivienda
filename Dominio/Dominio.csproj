@@ -50,6 +50,7 @@
     <Compile Include="Contrata.cs" />
     <Compile Include="Devengado.cs" />
     <Compile Include="Empresa.cs" />
+    <Compile Include="Enums\EstadoExpediente.cs" />
     <Compile Include="EstadoAutorizante.cs" />
     <Compile Include="EstadoRedet.cs" />
     <Compile Include="Legitimo.cs" />
