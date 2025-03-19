@@ -136,7 +136,7 @@ namespace WebForms.CustomControls
         {
             ClearSelection();
             ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
-
+            ChkList_SelectedIndexChanged(this,e);
         }
     }
 }
