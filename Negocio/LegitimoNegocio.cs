@@ -1,4 +1,5 @@
 ﻿using Dominio;
+using Dominio.Enums;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -192,14 +193,27 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(Usuario usuario, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
+        public List<Legitimo> listarFiltro(Usuario usuario, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = " SELECT L.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, L.CODIGO_AUTORIZANTE, L.EXPEDIENTE, L.INICIO_EJECUCION, L.FIN_EJECUCION, L.CERTIFICADO, L.MES_APROBACION, EM.NOMBRE AS EMPRESA, CASE WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE O.AREA = @area ";
+                string query = " SELECT L.ID, CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA," +
+                    " L.CODIGO_AUTORIZANTE, L.EXPEDIENTE, L.INICIO_EJECUCION, L.FIN_EJECUCION," +
+                    " L.CERTIFICADO, L.MES_APROBACION, EM.NOMBRE AS EMPRESA," +
+                    " CASE WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1" +
+                    " THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D" +
+                    " WHERE D.EE_FINANCIERA = L.EXPEDIENTE) " +
+                    "ELSE (SELECT SUM(D.IMPORTE_PP) " +
+                    "FROM DEVENGADOS D " +
+                    "WHERE D.EE_FINANCIERA = L.EXPEDIENTE) * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) " +
+                    "FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) END AS SIGAF, " +
+
+                    "CASE WHEN L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '' THEN 'NO INICIADO' WHEN EXISTS(SELECT 1 FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO," +
+                    
+                    "PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE O.AREA = @area ";
 
                 if (empresa != null && empresa.Count > 0)
                 {
@@ -252,6 +266,32 @@ namespace Negocio
                     }
                 }
 
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
+                {
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
+                    {
+                        [EstadoExpediente.NoIniciado] = "(L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(L.EXPEDIENTE IS NOT NULL 
+        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+        AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
+                        [EstadoExpediente.Devengado] = @"(L.EXPEDIENTE IS NOT NULL 
+        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+        AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
+                    };
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
+                    {
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
@@ -272,6 +312,8 @@ namespace Negocio
                         Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
+                        Estado = datos.Lector["ESTADO"] as string,
+
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         InicioEjecucion = datos.Lector["INICIO_EJECUCION"] != DBNull.Value
                             ? (DateTime?)Convert.ToDateTime(datos.Lector["INICIO_EJECUCION"])
@@ -308,7 +350,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(List<string> linea, List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, string filtro = null)
+        public List<Legitimo> listarFiltro(List<string> linea, List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante,List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
@@ -317,35 +359,42 @@ namespace Negocio
             {
                 string query = @"
             SELECT 
-    L.ID,
-    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
-    L.CODIGO_AUTORIZANTE,
-    L.EXPEDIENTE,
-    L.INICIO_EJECUCION,
-    L.FIN_EJECUCION,
-    L.CERTIFICADO,
-    L.MES_APROBACION,
-    EM.NOMBRE AS EMPRESA,
-    A.ID AS AREA_ID,
-    A.NOMBRE AS AREA,
-	LG.NOMBRE AS LINEA,
-    CASE 
-        WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 
-        THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-        ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-             * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) 
-    END AS SIGAF,
-    PS.[BUZON DESTINO],
-    PS.[FECHA ULTIMO PASE]
-FROM LEGITIMOS_ABONOS AS L
-INNER JOIN OBRAS AS O ON L.OBRA = O.ID
-INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
-INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
-INNER JOIN AREAS AS A ON O.AREA = A.ID
-LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
-left join BD_PROYECTOS BD ON O.ID = BD.ID_BASE
-LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
-WHERE 1 = 1";
+                L.ID,
+                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+                L.CODIGO_AUTORIZANTE,
+                L.EXPEDIENTE,
+                L.INICIO_EJECUCION,
+                L.FIN_EJECUCION,
+                L.CERTIFICADO,
+                L.MES_APROBACION,
+                EM.NOMBRE AS EMPRESA,
+                A.ID AS AREA_ID,
+                A.NOMBRE AS AREA,
+                LG.NOMBRE AS LINEA,
+                CASE 
+                    WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 
+                    THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
+                    ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
+                         * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) 
+                END AS SIGAF,
+                CASE 
+    WHEN L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '' THEN 'NO INICIADO'
+    WHEN EXISTS (SELECT 1 FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) THEN 'DEVENGADO'
+    ELSE 'EN TRAMITE'
+END AS ESTADO,
+
+                PS.[BUZON DESTINO],
+                PS.[FECHA ULTIMO PASE]
+            FROM LEGITIMOS_ABONOS AS L
+            INNER JOIN OBRAS AS O ON L.OBRA = O.ID
+            INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+            INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
+            INNER JOIN AREAS AS A ON O.AREA = A.ID
+            LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
+            LEFT JOIN BD_PROYECTOS BD ON O.ID = BD.ID_BASE
+            LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
+            WHERE 1 = 1";
+
                 if (linea != null && linea.Count > 0)
                 {
                     string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
@@ -415,6 +464,33 @@ WHERE 1 = 1";
                     }
                 }
 
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
+                {
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
+                    {
+                        [EstadoExpediente.NoIniciado] = "(L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(L.EXPEDIENTE IS NOT NULL 
+        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+        AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
+                        [EstadoExpediente.Devengado] = @"(L.EXPEDIENTE IS NOT NULL 
+        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+        AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
+                    };
+
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
+                    {
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (O.DESCRIPCION LIKE @filtro OR  A.NOMBRE LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
@@ -433,6 +509,7 @@ WHERE 1 = 1";
                         Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
+                        Estado = datos.Lector["ESTADO"] as string,
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         InicioEjecucion = datos.Lector["INICIO_EJECUCION"] != DBNull.Value
                             ? Convert.ToDateTime(datos.Lector["INICIO_EJECUCION"])

@@ -149,12 +149,13 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label lbl-left" for="ddlExpediente">Expediente:</label>
-						<asp:DropDownList ID="ddlExpediente" runat="server" CssClass="form-control form-control-sm">
+						<label class="form-label lbl-left" for="cblEstadoExpediente">Estado:</label>
+						<%--<asp:DropDownList ID="ddlExpediente" runat="server" CssClass="form-control form-control-sm">
 							<asp:ListItem Text="Todos" Value="" />
 							<asp:ListItem Text="Vacío" Value="vacio" />
 							<asp:ListItem Text="No Vacío" Value="novacio" />
-						</asp:DropDownList>
+						</asp:DropDownList>--%>
+                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
 					</div>
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
@@ -212,6 +213,8 @@
 								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
 						</ItemTemplate>
 					</asp:TemplateField>
+					<asp:BoundField HeaderText="Estado" DataField="Estado" />
+
 					<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />
 					<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />

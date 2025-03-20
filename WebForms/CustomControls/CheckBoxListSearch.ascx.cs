@@ -12,7 +12,7 @@ namespace WebForms.CustomControls
 
 
         protected CheckBoxList chkList;
-        protected LinkButton btnDeselectAll;
+        protected Button btnDeselectAll;
         protected Literal litTitle;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -106,8 +106,8 @@ namespace WebForms.CustomControls
             int selectedCount = chkList.Items.Cast<ListItem>().Count(item => item.Selected);
             // Si hay selección mostramos la cantidad, de lo contrario "Todos ▼"
             string title = selectedCount > 0
-                ? $"{selectedCount} seleccionado{(selectedCount > 1 ? "s" : "")} ▼"
-                : "Todos ▼";
+                ? $"{selectedCount} seleccionado{(selectedCount > 1 ? "s" : "")} <i class=\"bi bi-caret-down-fill\"></i>"
+                : "Todos <i class=\"bi bi-caret-down\"></i>";
             litTitle.Text = title;
         }
 
@@ -123,20 +123,26 @@ namespace WebForms.CustomControls
             SelectedIndexChanged?.Invoke(this, e);
             UpdateDeselectAllButtonState();
             UpdateDropdownTitle();
+            ScriptManager.RegisterStartupScript(this, GetType(), "keepDropdown",
+    $"setTimeout(function() {{ document.getElementById('{chkList.ClientID}_dropdown').style.display = 'block'; }}, 0);", true);
+
         }
 
         private void UpdateDeselectAllButtonState()
         {
             bool hasSelectedItems = chkList.Items.Cast<ListItem>().Any(item => item.Selected);
-            btnDeselectAll.CssClass = hasSelectedItems ? "btn btn-secondary bi bi-funnel-fill" : "btn btn-secondary bi bi-funnel";
             btnDeselectAll.Enabled = hasSelectedItems;
+            btnDeselectAll.Visible = hasSelectedItems;
         }
 
         protected void BtnDeselectAll_Click(object sender, EventArgs e)
         {
             ClearSelection();
-            ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
-
+            //ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
+            ChkList_SelectedIndexChanged(this,e);
+            ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle",
+    $"updateDropdownTitle('{chkList.ClientID}'); document.getElementById('{chkList.ClientID}_dropdown').style.display = 'block';", true);
+            ChkList_SelectedIndexChanged(this, e);
         }
     }
 }

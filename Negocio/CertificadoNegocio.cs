@@ -1,4 +1,5 @@
 ﻿using Dominio;
+using Dominio.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -41,14 +42,14 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null)
+        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente ,string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT A.ID as ID_AUTORIZANTE,A.DETALLE, C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, CONCAT( O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') + '%' AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID WHERE O.AREA = @area ";
+                string query = "SELECT A.ID as ID_AUTORIZANTE, A.DETALLE, C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') + '%' AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, CASE WHEN C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '' THEN 'NO INICIADO' WHEN (CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END) IS NOT NULL THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID WHERE O.AREA = @area ";
 
                 if (empresa != null && empresa.Count > 0)
                 {
@@ -109,6 +110,35 @@ namespace Negocio
                         throw new Exception("Error al procesar el filtro de fechas.", ex);
                     }
                 }
+
+
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
+                {
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
+                    {
+                        [EstadoExpediente.NoIniciado] = "(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))",
+                        [EstadoExpediente.Devengado] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))"
+                    };
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
+                    {
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
+                    }
+                }
+
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (A.DETALLE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR EM.NOMBRE LIKE @filtro OR C.CODIGO_AUTORIZANTE LIKE @filtro OR C.EXPEDIENTE_PAGO LIKE @filtro OR T.NOMBRE LIKE @filtro OR C.MONTO_TOTAL LIKE @filtro OR C.MES_APROBACION LIKE @filtro OR A.MONTO_AUTORIZADO LIKE @filtro OR E.NOMBRE LIKE @filtro) ";
@@ -135,7 +165,7 @@ namespace Negocio
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
-
+                        Estado = datos.Lector["ESTADO"]?.ToString(),
 
                         Tipo = new TipoPago
                         {
@@ -183,15 +213,15 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, string filtro = null,string filtroExpediente = null)
+        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT A.ID as ID_AUTORIZANTE,C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION,EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA=EM.ID ";
-                
+                string query = "SELECT A.ID as ID_AUTORIZANTE, C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, CASE WHEN C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '' THEN 'NO INICIADO' WHEN (CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END) IS NOT NULL THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID ";
+
                 if (areas != null && areas.Count > 0)
                 {
                     string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
@@ -262,17 +292,68 @@ namespace Negocio
                     }
                 }
 
-                if (!string.IsNullOrEmpty(filtroExpediente))
+
+
+
+
+                // Dentro del método listarFiltroAdmin:
+                if (estadoExpediente != null && estadoExpediente.Count > 0)
                 {
-                    if (filtroExpediente.ToLower() == "vacio")
+                    var condicionesSql = new Dictionary<EstadoExpediente, string>
                     {
-                        query += " AND (C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '') ";
-                    }
-                    else if (filtroExpediente.ToLower() == "novacio" || filtroExpediente.ToLower() == "no vacio")
+                        [EstadoExpediente.NoIniciado] = "(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')",
+                        [EstadoExpediente.EnTramite] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))",
+                        [EstadoExpediente.Devengado] = @"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                            AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                            AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                            WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))"
+                    };
+
+                    var condiciones = estadoExpediente
+                        .Select(e => int.Parse(e))
+                        .Where(e => Enum.IsDefined(typeof(EstadoExpediente), e))
+                        .Select(e => condicionesSql[(EstadoExpediente)e]);
+
+                    if (condiciones.Any())
                     {
-                        query += " AND (C.EXPEDIENTE_PAGO IS NOT NULL AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) <> '') ";
+                        query += $" AND ({string.Join(" OR ", condiciones)})";
                     }
                 }
+
+                //if (estadoExpediente != null && estadoExpediente.Count > 0)
+                //{
+                //    var condiciones = new List<string>();
+
+                //    foreach (var estado in estadoExpediente)
+                //    {
+                //        switch (estado)
+                //        {
+                //            case "0": // NO INICIADO
+                //                condiciones.Add("(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')");
+                //                break;
+                //            case "1": // EN TRAMITE
+                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                //                    AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
+                //                break;
+                //            case "2": // DEVENGADO
+                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
+                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
+                //                    AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
+                //                break;
+                //        }
+                //    }
+
+                //    if (condiciones.Any())
+                //    {
+                //        query += $" AND ({string.Join(" OR ", condiciones)})";
+                //    }
+                //}
 
 
                 if (!string.IsNullOrEmpty(filtro))
@@ -297,7 +378,7 @@ namespace Negocio
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
-
+                        Estado = datos.Lector["ESTADO"]?.ToString(),
 
                         Tipo = new TipoPago
                         {

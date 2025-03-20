@@ -2,19 +2,21 @@
 
 <link rel="stylesheet" href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
-
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,1,200"/>
 
 <div class="dropdown">
     <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')">
-        <%--<span id="<%= chkList.ClientID %>_title">Todos ▼</span>--%>
         <asp:Literal ID="litTitle" runat="server" Text="Todos ▼" />
     </button>
-     <asp:LinkButton ID="btnDeselectAll" runat="server" CssClass="btn btn-secondary" OnClick="BtnDeselectAll_Click" />
-        
+
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
         <div class="search-container">
-        <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')"/>
+            <div class="search-row">
+                <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" />
+                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-secondary" OnClick="BtnDeselectAll_Click" Text="filter_alt_off">
+            
+                </asp:Button>
+            </div>
         </div>
 
         <div class="checkbox-container">
@@ -66,116 +68,115 @@
         });
     }
 
-    function updateDropdownTitle(listId) {
-        var checkboxes = document.querySelectorAll("#" + listId + " input[type='checkbox']");
-        var selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-        var title = selectedCount > 0 ? selectedCount + " seleccionado" + (selectedCount > 1 ? "s" : "") + " ▼" : "Todos ▼";
-        document.getElementById(listId + "_title").textContent = title;
-    }
-
-
 </script>
 
 <style>
-/* Contenedor del dropdown */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
+    .search-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+    }
 
-/* Botón de apertura */
-.dropdown-button {
-    background-color: transparent;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-}
+        .search-row input[type='text'] {
+            flex: 1;
+        }
 
-.dropdown-button:hover {
-    background-color: #e2e6ea;
-}
+    /* Contenedor del dropdown */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
 
-/* Contenedor fijo para el input */
-.search-container {
-    padding: 5px;
-    background: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid #ccc;
-}
+    /* Botón de apertura */
+    .dropdown-button {
+        background-color: transparent;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
 
-/* Contenido desplegable */
-.dropdown-content {
-    position: absolute;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    
-    width: auto;
-    min-width: 250px;
-    max-width: none;
-       
-    max-height: 500px;
-    overflow-y: auto;
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-    z-index: 1000;
-    padding: 0px 5px;
-    display: none;
-    text-align: left;
-}
+        .dropdown-button:hover {
+            background-color: #e2e6ea;
+        }
+
+    /* Contenedor fijo para el input */
+    .search-container {
+        padding: 5px;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .material-symbols-rounded.btn {
+        height: 2.5em;
+        width: 3em;
+        padding: 0;
+    }
 
 
-/* Cuadro de búsqueda */
-.dropdown-content input[type='text'] {
-    width: 100%;
-    padding: 5px;
-    box-sizing: border-box;
-    margin: 5px 0px;
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-    border: 1px, solid black;
-    border-radius: 5px;
-}
+    /* Contenido desplegable */
+    .dropdown-content {
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        width: auto;
+        min-width: 250px;
+        max-width: none;
+        max-height: 500px;
+        overflow-y: auto;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+        z-index: 1000;
+        padding: 0px 5px;
+        display: none;
+        text-align: left;
+    }
 
 
-.dropdown-content input[type='text'] {
-    width: 100%;
-    padding: 5px;
-    box-sizing: border-box;
-}
+        /* Cuadro de búsqueda */
+        .dropdown-content input[type='text'] {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            margin: 5px 0px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            border: 1px, solid black;
+            border-radius: 5px;
+        }
 
-/* Contenedor con scroll solo para los checkboxes */
+    /* Contenedor con scroll solo para los checkboxes */
     .checkbox-container {
         flex-grow: 1;
         overflow-y: auto;
         white-space: nowrap;
-        /*    padding: 5px;*/
     }
 
-.checkbox-list {
-    margin: 0;
-    padding: 0;
-}
+    .checkbox-list {
+        margin: 0;
+        padding: 0;
+    }
 
-.checkbox-list span {
-    display: block;   /* Cada ítem en su propia línea */
-    white-space: nowrap;
-    margin: 3px 0;
-}
+        .checkbox-list span {
+            display: block; /* Cada ítem en su propia línea */
+            white-space: nowrap;
+            margin: 3px 0;
+        }
 
-/* Alineamos el checkbox y su texto en la misma fila */
-.checkbox-list input[type='checkbox'] {
-    vertical-align: middle;
-    margin-right: 5px;
-}
+        /* Alineamos el checkbox y su texto en la misma fila */
+        .checkbox-list input[type='checkbox'] {
+            vertical-align: middle;
+            margin-right: 5px;
+        }
 
 
-.checkbox-list label {
-    vertical-align: middle;
-    white-space: nowrap;     /* Evita que el texto salte de línea */
-}
-
+        .checkbox-list label {
+            vertical-align: middle;
+            white-space: nowrap; /* Evita que el texto salte de línea */
+        }
 </style>
