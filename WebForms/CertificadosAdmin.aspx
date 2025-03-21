@@ -196,7 +196,7 @@
 			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover "
 				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
 				OnRowDeleting="dgvCertificado_RowDeleting"
-				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; overflow-y:auto; max-height: 80vh;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 
@@ -356,6 +356,10 @@
 				background: #153244;
 				color: white;
 				border: 1px solid #153244;
+
+							position: sticky;
+        top: 0;
+        z-index: 1;
 			}
 
 		.form-label {
