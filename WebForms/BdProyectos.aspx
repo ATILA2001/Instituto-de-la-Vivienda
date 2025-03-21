@@ -90,32 +90,17 @@
 						</div>
 					</div>
 
-
 					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+                            <CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
 						</div>
 					</div>
 
 					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownProyecto" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownProyecto" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblProyecto" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
 						</div>
 					</div>
 
@@ -175,6 +160,7 @@
 			<div class="text-center p-4">
 				<asp:Label ID="lblMensaje" Text="" runat="server" />
 			</div>
+		</div>
 		</div>
 
 		<script type="text/javascript">

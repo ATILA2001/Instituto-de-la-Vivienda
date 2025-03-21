@@ -110,35 +110,24 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label lbl-left" for="cblEstadoExpediente">Estado:</label>
+                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblTipo">Tipo:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownTipo" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownTipo" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblTipo" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblTipo" runat="server" />
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Mes certificado:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label lbl-left" for="cblEstadoExpediente">Estado expediente:</label>
-                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
-                    </div>
 
                     <div class="form-group text-left" style="flex: 1; max-width: 300px;">
                         <label class="form-label lbl-left" for="txtBuscar">Buscar:</label>

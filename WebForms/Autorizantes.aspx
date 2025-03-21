@@ -94,71 +94,42 @@
 	<div class="row mt-4">
 		<div class="col-md-12">
 			<div class="text-end">
-
-
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-					<div class="form-group">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
-						<div class="dropdown">
-<%--							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
-						</div>
-					</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblObra">Obra:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownObra" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownObra" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblObra" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
 						</div>
 					</div>
 
-
 					<div class="form-group">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEstado">Estado:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEstado" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEstado" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEstado" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblConcepto">Concepto:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownConcepto" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownConcepto" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblConcepto" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblConcepto" runat="server" />
 						</div>
 					</div>
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEstado">Estado:</label>
+						<div class="dropdown">
+                            <CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
+						</div>
+					</div>
+
 
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
 						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
 					</div>
-
-
-
-
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>

@@ -89,14 +89,6 @@
                     <div class="form-group ">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-               
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
                         </div>
                     </div>
@@ -104,38 +96,13 @@
                     <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
-                        <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblAutorizante">Autorizante:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownAutorizante" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
                         </div>
                     </div>
@@ -144,12 +111,6 @@
                     <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
                     </div>
@@ -158,6 +119,15 @@
                         <label class="form-label lbl-left" for="cblEstadoExpediente">Estado:</label>
                         <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
                     </div>
+
+                    <div class="form-group ">
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+                        <div class="dropdown">
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+                        </div>
+                    </div>
+
+
 
                     <div class="form-group text-left" style="flex: 1; max-width: 300px;">
                         <label class="form-label lbl-left" for="txtBuscar">Buscar:</label>

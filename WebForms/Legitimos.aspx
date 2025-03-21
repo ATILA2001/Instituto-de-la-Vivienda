@@ -113,14 +113,8 @@
 
 
                     <div class="form-group">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Mes aprobación:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
                     </div>

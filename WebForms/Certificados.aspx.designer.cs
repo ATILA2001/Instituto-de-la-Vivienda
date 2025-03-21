@@ -33,6 +33,15 @@ namespace WebForms
         protected global::WebForms.CustomControls.CheckBoxListSearch cblAutorizante;
 
         /// <summary>
+        /// cblEstadoExpediente control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblEstadoExpediente;
+
+        /// <summary>
         /// cblTipo control.
         /// </summary>
         /// <remarks>
@@ -49,15 +58,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::WebForms.CustomControls.CheckBoxListSearch cblFecha;
-
-        /// <summary>
-        /// cblEstadoExpediente control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblEstadoExpediente;
 
         /// <summary>
         /// txtBuscar control.
