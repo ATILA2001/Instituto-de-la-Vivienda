@@ -51,10 +51,19 @@
         });
     });
 
-
     function toggleDropdown(dropdownId) {
         var dropdown = document.getElementById(dropdownId);
-        dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+        var isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+
+        if (!isVisible) {
+            // Get the listId from the dropdownId by removing '_dropdown' suffix
+            var listId = dropdownId.replace('_dropdown', '');
+            var searchInput = document.getElementById(listId + "_txtSearch");
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
     }
 
     function filterCheckboxes(listId) {
