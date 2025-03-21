@@ -12,7 +12,7 @@
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
         <div class="search-container">
             <div class="search-row">
-                <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" />
+                <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" class="form-control" />
                 <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-secondary" OnClick="BtnDeselectAll_Click" Text="filter_alt_off">
             
                 </asp:Button>
