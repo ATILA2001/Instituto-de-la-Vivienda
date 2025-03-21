@@ -56,6 +56,7 @@
     <Compile Include="Legitimo.cs" />
     <Compile Include="LineaGestion.cs" />
     <Compile Include="LineaGestionFF.cs" />
+    <Compile Include="Movimiento.cs" />
     <Compile Include="Obra.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BdProyecto.cs" />
