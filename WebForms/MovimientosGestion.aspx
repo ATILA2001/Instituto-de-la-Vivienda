@@ -139,11 +139,17 @@
                         <Columns>
                             <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                             <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
+                                             <asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
+                            <asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" />
+                            <asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
+
 
                             <asp:BoundField HeaderText="Movimiento" DataField="Monto" DataFormatString="{0:C}" />
                             <asp:BoundField HeaderText="Fecha" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
-
+                                    <asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
                             <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
+
 
                         </Columns>
                     </asp:GridView>

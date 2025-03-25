@@ -16,7 +16,11 @@ namespace Negocio
 
             try
             {
-                string query = "select M.ID,M.MOVIMIENTO,M.FECHA,O.DESCRIPCION AS OBRA from MOVIMIENTOS_GESTION M INNER JOIN OBRAS O ON M.ID_BASE = O.ID WHERE 1=1";
+                string query = "select M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA, M.MOVIMIENTO,M.FECHA, BD.AUTORIZADO_NUEVO from MOVIMIENTOS_GESTION M " +
+                    "INNER JOIN OBRAS O ON M.ID_BASE = O.ID " +
+                    "inner join BD_PROYECTOS BD on O.ID = BD.ID_BASE " +
+                    "inner join BARRIOS BA on O.BARRIO = BA.ID " +
+                    "inner join LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID WHERE 1=1 ";
 
                 if (obras != null && obras.Count > 0)
                 {
@@ -45,6 +49,10 @@ namespace Negocio
                     aux.Obra.Descripcion = datos.Lector["OBRA"] as string;
                     aux.Monto = (decimal)datos.Lector["MOVIMIENTO"];
                     aux.Fecha = (DateTime)datos.Lector["FECHA"];
+                    aux.AutorizadoNuevo = (decimal)datos.Lector["AUTORIZADO_NUEVO"];
+                    aux.Proyecto = datos.Lector["PROYECTO"] as string;
+                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] as string;
+                    aux.Linea = datos.Lector["LINEA"] as string;
 
                     lista.Add(aux);
                 }
