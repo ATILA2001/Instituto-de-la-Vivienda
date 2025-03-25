@@ -83,7 +83,7 @@ namespace Negocio
             }
         }
 
-        public List<BdProyecto> Listar(List <string> linea, List<string> proye, List<string> area, string filtro = null)
+        public List<BdProyecto> Listar(List<string> linea, List<string> proye, List<string> area, string filtro = null)
         {
             List<BdProyecto> lista = new List<BdProyecto>();
             AccesoDatos datos = new AccesoDatos();
@@ -91,25 +91,32 @@ namespace Negocio
             {
                 string query = @"
                 SELECT 
-                BD.ID,
-                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
-                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
-                PROYECTO,
-                SUBPROYECTO,
-                L.NOMBRE AS NombreLineaGestion,
-                AUTORIZADO_INICIAL,
-                AUTORIZADO_NUEVO,
-                O.ID as ID_OBRA,
-                L.ID as ID_LINEA,
-                A.ID AS ID_AREA,
-                A.NOMBRE AS AREA
-                FROM BD_PROYECTOS AS BD
-                INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
-                INNER JOIN AREAS AS A ON O.AREA = A.ID
-                INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
-                INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
-                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID where 1=1";
-               
+    BD.ID,
+    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
+    PROYECTO,
+    SUBPROYECTO,
+    L.NOMBRE AS NombreLineaGestion,
+    AUTORIZADO_INICIAL,
+    AUTORIZADO_INICIAL + ISNULL(
+        (
+            SELECT SUM(MG.MOVIMIENTO)
+            FROM MOVIMIENTOS_GESTION AS MG
+            WHERE MG.ID_BASE = BD.ID_BASE
+        ), 0
+    ) AS AUTORIZADO_NUEVO,
+    O.ID as ID_OBRA,
+    L.ID as ID_LINEA,
+    A.ID AS ID_AREA,
+    A.NOMBRE AS AREA
+FROM BD_PROYECTOS AS BD
+INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
+INNER JOIN AREAS AS A ON O.AREA = A.ID
+INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
+INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID
+WHERE 1=1";
+
                 if (linea != null && linea.Count > 0)
                 {
                     string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
@@ -137,7 +144,7 @@ namespace Negocio
                         datos.setearParametros($"@proye{i}", proye[i]);
                     }
                 }
-                
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
 
@@ -178,7 +185,7 @@ namespace Negocio
                         },
                         AutorizadoInicial = Convert.ToDecimal(datos.Lector["AUTORIZADO_INICIAL"]),
                         AutorizadoNuevo = Convert.ToDecimal(datos.Lector["AUTORIZADO_NUEVO"]),
-                        
+
                     };
 
                     lista.Add(proyecto);
