@@ -27,7 +27,7 @@
                 border: none;
             }
     </style>
-    <%--<div id="section1" style="display: none;">
+   <div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
@@ -76,7 +76,7 @@
 				</table>
 			</div>
 		</div>
-	</div>--%>
+	</div>
 
     <div class="row mt-4">
         <div class="col-md-12">
@@ -146,11 +146,11 @@
                     <div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
 
-                        <%--<div class="form-group d-flex align-items-end">
+                        <div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Certificado</strong>
 							</button>
-						</div>--%>
+						</div>
 
                         <div class="form-group  d-flex align-items-end">
                             <%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
