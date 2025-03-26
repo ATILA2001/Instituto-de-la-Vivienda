@@ -213,14 +213,14 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente, string filtro = null)
+        public List<Certificado> listarFiltroAdmin(List<string> areas, List<string> barrios, List<string> proyectos, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
 
             try
             {
-                string query = "SELECT A.ID as ID_AUTORIZANTE, C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, CASE WHEN C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '' THEN 'NO INICIADO' WHEN (CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END) IS NOT NULL THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID ";
+                string query = "SELECT A.ID as ID_AUTORIZANTE,BA.NOMBRE as NOMBRE_BARRIO,B.PROYECTO, C.ID, CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, O.DESCRIPCION, EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO, T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID, AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO, CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END AS SIGAF, CASE WHEN C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '' THEN 'NO INICIADO' WHEN (CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE C2.EXPEDIENTE_PAGO = C.EXPEDIENTE_PAGO) END) IS NOT NULL THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO, PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM CERTIFICADOS C INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE INNER JOIN OBRAS O ON A.OBRA = O.ID INNER JOIN AREAS AR ON O.AREA = AR.ID INNER JOIN ESTADOS_AUTORIZANTES E ON A.ESTADO = E.ID INNER JOIN CONTRATA CO ON O.CONTRATA = CO.ID LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS BA ON O.BARRIO = BA.ID ";
 
                 if (areas != null && areas.Count > 0)
                 {
@@ -229,6 +229,25 @@ namespace Negocio
                     for (int i = 0; i < areas.Count; i++)
                     {
                         datos.setearParametros($"@area{i}", areas[i]);
+                    }
+                }
+                if (barrios != null && barrios.Count > 0)
+                {
+                    string barrioParam = string.Join(",", barrios.Select((e, i) => $"@barrio{i}"));
+                    query += $" AND BA.NOMBRE IN ({barrioParam})";
+                    for (int i = 0; i < barrios.Count; i++)
+                    {
+                        datos.setearParametros($"@barrio{i}", barrios[i]);
+                    }
+                }
+
+                if (proyectos != null && proyectos.Count > 0)
+                {
+                    string proyectoParam = string.Join(",", proyectos.Select((e, i) => $"@proyecto{i}"));
+                    query += $" AND B.PROYECTO IN ({proyectoParam})";
+                    for (int i = 0; i < proyectos.Count; i++)
+                    {
+                        datos.setearParametros($"@proyecto{i}", proyectos[i]);
                     }
                 }
 
@@ -323,38 +342,6 @@ namespace Negocio
                     }
                 }
 
-                //if (estadoExpediente != null && estadoExpediente.Count > 0)
-                //{
-                //    var condiciones = new List<string>();
-
-                //    foreach (var estado in estadoExpediente)
-                //    {
-                //        switch (estado)
-                //        {
-                //            case "0": // NO INICIADO
-                //                condiciones.Add("(C.EXPEDIENTE_PAGO IS NULL OR LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) = '')");
-                //                break;
-                //            case "1": // EN TRAMITE
-                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
-                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
-                //                    AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
-                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
-                //                break;
-                //            case "2": // DEVENGADO
-                //                condiciones.Add(@"(C.EXPEDIENTE_PAGO IS NOT NULL 
-                //                    AND LTRIM(RTRIM(C.EXPEDIENTE_PAGO)) != '' 
-                //                    AND EXISTS (SELECT 1 FROM DEVENGADOS D 
-                //                    WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO))");
-                //                break;
-                //        }
-                //    }
-
-                //    if (condiciones.Any())
-                //    {
-                //        query += $" AND ({string.Join(" OR ", condiciones)})";
-                //    }
-                //}
-
 
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -399,6 +386,7 @@ namespace Negocio
                             Obra = new Obra
                             {
                                 Descripcion = datos.Lector["DESCRIPCION"]?.ToString(),
+                                Proyecto = datos.Lector["PROYECTO"]?.ToString(),
                                 Area = new Area
                                 {
                                     Id = datos.Lector["AREAS_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AREAS_ID"]) : 0,
@@ -407,6 +395,10 @@ namespace Negocio
                                 Contrata = new Contrata
                                 {
                                     Nombre = datos.Lector["CONTRATA"]?.ToString()
+                                },
+                                Barrio = new Barrio
+                                {
+                                    Nombre = datos.Lector["NOMBRE_BARRIO"]?.ToString()
                                 }
                             }
                         }

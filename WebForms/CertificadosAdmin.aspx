@@ -7,30 +7,30 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
 	<style>
-	.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
-		color: #ecf0f1 !important; 
-	}
-
-	.table-3d {
-		border-radius: 10px; 
-		overflow: hidden; 
-		border-collapse: collapse;
-	}
-
-		.table-3d thead th {
-			background-color: #153244;
-			color: #ecf0f1;
-			font-weight: bold;
-			text-align: center;
-			text-transform: uppercase;
-			border: none;
+		.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
+			color: #ecf0f1 !important;
 		}
-</style>
+
+		.table-3d {
+			border-radius: 10px;
+			overflow: hidden;
+			border-collapse: collapse;
+		}
+
+			.table-3d thead th {
+				background-color: #153244;
+				color: #ecf0f1;
+				font-weight: bold;
+				text-align: center;
+				text-transform: uppercase;
+				border: none;
+			}
+	</style>
 	<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
-					<thead class="thead-dark" >
+					<thead class="thead-dark">
 						<tr>
 
 							<th>Código Autorizante</th>
@@ -93,7 +93,38 @@
 								<!-- Rendimos la CheckBoxList aquí -->
 								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-							<customcontrols:checkboxlistsearch id="cblArea" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
+						</div>
+					</div>
+
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblBarrio">Barrio:</label>
+						<div class="dropdown">
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+						Todas
+               
+					</button>
+					<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+						<!-- Rendimos la CheckBoxList aquí -->
+						<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+					</ul>--%>
+							<CustomControls:CheckBoxListSearch ID="cblBarrio" runat="server" />
+						</div>
+					</div>
+
+
+					<div class="form-group ">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
+						<div class="dropdown">
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
+						Todas
+               
+					</button>
+					<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
+						<!-- Rendimos la CheckBoxList aquí -->
+						<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
+					</ul>--%>
+							<CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
 						</div>
 					</div>
 
@@ -106,7 +137,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
@@ -119,7 +150,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
 						</div>
 					</div>
 
@@ -132,7 +163,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownTipo" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblTipo" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblTipo" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblTipo" runat="server" />
 						</div>
 					</div>
 
@@ -145,7 +176,7 @@
 							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
 								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
 							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
 						</div>
 					</div>
 					<div class="form-group">
@@ -155,7 +186,7 @@
 							<asp:ListItem Text="Vacío" Value="vacio" />
 							<asp:ListItem Text="No Vacío" Value="novacio" />
 						</asp:DropDownList>--%>
-                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
+						<CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
 					</div>
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
@@ -196,15 +227,15 @@
 			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover "
 				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
 				OnRowDeleting="dgvCertificado_RowDeleting"
-				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; overflow-y:auto; max-height: 80vh;">
+				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto; overflow-y: auto; max-height: 80vh;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 
 					<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" />
-					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
-					<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />
-
+					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
+					<asp:BoundField HeaderText="Barrio" DataField="Autorizante.Obra.Barrio.Nombre" />
+					<asp:BoundField HeaderText="Proyecto" DataField="Autorizante.Obra.Proyecto" />
 					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 					<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
 					<asp:TemplateField HeaderText="Expediente">
@@ -235,7 +266,7 @@
 	</div>
 
 	<script type="text/javascript">
-		
+
 		$(document).ready(function () {
 			// Inicializamos la visibilidad según el valor de localStorage
 			var sectionVisible = localStorage.getItem("sectionVisible");
@@ -356,10 +387,9 @@
 				background: #153244;
 				color: white;
 				border: 1px solid #153244;
-
-							position: sticky;
-        top: 0;
-        z-index: 1;
+				position: sticky;
+				top: 0;
+				z-index: 1;
 			}
 
 		.form-label {
