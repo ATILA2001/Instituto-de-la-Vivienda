@@ -90,32 +90,17 @@
 						</div>
 					</div>
 
-
 					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+                            <CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
 						</div>
 					</div>
 
 					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblProyecto">Proyecto:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownProyecto" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownProyecto" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblProyecto" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblProyecto" runat="server" />
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
 						</div>
 					</div>
 
@@ -167,14 +152,32 @@
 					<asp:BoundField HeaderText="Linea de Gestión" DataField="LineaGestion.Nombre" SortExpression="LineaGestion.Nombre"/>
 					<asp:BoundField HeaderText="Monto Inicial" DataField="AutorizadoInicial" DataFormatString="{0:C}"  />
 					<asp:BoundField HeaderText="Monto Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning"  />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" />
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-outline-warning"
+                                    ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-outline-danger"
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 				</Columns>
 			</asp:GridView>
 
 			<div class="text-center p-4">
 				<asp:Label ID="lblMensaje" Text="" runat="server" />
 			</div>
+		</div>
 		</div>
 
 		<script type="text/javascript">

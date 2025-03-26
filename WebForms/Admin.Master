@@ -66,6 +66,7 @@
 
 
 							<li class="nav-item"><a class="nav-link" href="BdProyectos.aspx"  style="font-size: 20px;"><strong>Proyectos</strong></a></li>
+<%--							<li class="nav-item"><a class="nav-link" href="MovimientosGestion.aspx"  style="font-size: 20px;"><strong>Movimientos</strong></a></li>--%>
 
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><strong>Consolidado</strong></a>

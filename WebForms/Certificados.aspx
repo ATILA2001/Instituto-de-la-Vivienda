@@ -27,7 +27,7 @@
                 border: none;
             }
     </style>
-    <%--<div id="section1" style="display: none;">
+   <div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
@@ -76,7 +76,7 @@
 				</table>
 			</div>
 		</div>
-	</div>--%>
+	</div>
 
     <div class="row mt-4">
         <div class="col-md-12">
@@ -110,35 +110,24 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label lbl-left" for="cblEstadoExpediente">Estado:</label>
+                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblTipo">Tipo:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownTipo" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownTipo" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblTipo" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblTipo" runat="server" />
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Mes certificado:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label lbl-left" for="cblEstadoExpediente">Estado expediente:</label>
-                        <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
-                    </div>
 
                     <div class="form-group text-left" style="flex: 1; max-width: 300px;">
                         <label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
@@ -157,11 +146,11 @@
                     <div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
 
-                        <%--<div class="form-group d-flex align-items-end">
+                        <div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Certificado</strong>
 							</button>
-						</div>--%>
+						</div>
 
                         <div class="form-group  d-flex align-items-end">
                             <%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
@@ -205,9 +194,25 @@
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"/>
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"/>
 
-                    <%--	<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" />
-                    --%>
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-outline-warning"
+                                    ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-outline-danger"
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                 </Columns>
             </asp:GridView>
 

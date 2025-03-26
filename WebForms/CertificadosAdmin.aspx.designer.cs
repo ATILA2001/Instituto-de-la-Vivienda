@@ -87,6 +87,24 @@ namespace WebForms
         protected global::WebForms.CustomControls.CheckBoxListSearch cblArea;
 
         /// <summary>
+        /// cblBarrio control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblBarrio;
+
+        /// <summary>
+        /// cblProyecto control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::WebForms.CustomControls.CheckBoxListSearch cblProyecto;
+
+        /// <summary>
         /// cblEmpresa control.
         /// </summary>
         /// <remarks>

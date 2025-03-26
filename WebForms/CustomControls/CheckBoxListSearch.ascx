@@ -12,7 +12,7 @@
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
         <div class="search-container">
             <div class="search-row">
-                <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" />
+                <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" class="form-control" />
                 <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-secondary" OnClick="BtnDeselectAll_Click" Text="filter_alt_off">
             
                 </asp:Button>
@@ -51,10 +51,19 @@
         });
     });
 
-
     function toggleDropdown(dropdownId) {
         var dropdown = document.getElementById(dropdownId);
-        dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+        var isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+
+        if (!isVisible) {
+            // Get the listId from the dropdownId by removing '_dropdown' suffix
+            var listId = dropdownId.replace('_dropdown', '');
+            var searchInput = document.getElementById(listId + "_txtSearch");
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
     }
 
     function filterCheckboxes(listId) {

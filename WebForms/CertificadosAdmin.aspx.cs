@@ -17,6 +17,8 @@ namespace WebForms
         protected void Page_Init(object sender, EventArgs e) 
         {
             cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
@@ -94,6 +96,8 @@ namespace WebForms
             try
             {
                 var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
@@ -104,7 +108,7 @@ namespace WebForms
                 //string filtroExpediente = ddlExpediente.SelectedValue;
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -195,6 +199,19 @@ namespace WebForms
 
             return autorizanteNegocio.listarddl();
         }
+        private DataTable ObtenerProyectos()
+        { 
+            BdProyectoNegocio proyectoNegocio = new BdProyectoNegocio();
+
+            return proyectoNegocio.listarddl();
+        }
+
+        private DataTable ObtenerBarrios()
+        {
+            BarrioNegocio barrioNegocio = new BarrioNegocio();
+
+            return barrioNegocio.listarddl();
+        }
 
         private DataTable ObtenerEstadosExpedientes()
         {
@@ -236,10 +253,23 @@ namespace WebForms
             cblTipo.DataValueField = "Id";
             cblTipo.DataBind();
 
+            cblBarrio.DataSource = ObtenerBarrios();
+            cblBarrio.DataTextField = "Nombre";
+            cblBarrio.DataValueField = "Id";
+            cblBarrio.DataBind();
+
+            cblProyecto.DataSource = ObtenerProyectos();
+            cblProyecto.DataTextField = "Nombre";
+            cblProyecto.DataValueField = "Id";
+            cblProyecto.DataBind();
+
+
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
             cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind(); cblArea.DataSource = ObtenerAreas();
+            cblEmpresa.DataBind(); 
+            
+            cblArea.DataSource = ObtenerAreas();
             cblArea.DataTextField = "Nombre";
             cblArea.DataValueField = "Id";
             cblArea.DataBind();
@@ -337,6 +367,8 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
             cblArea.ClearSelection();
+            cblBarrio.ClearSelection();
+            cblProyecto.ClearSelection();
             cblEmpresa.ClearSelection();
             cblAutorizante.ClearSelection();
             cblTipo.ClearSelection();

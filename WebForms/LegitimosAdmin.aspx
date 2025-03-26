@@ -89,14 +89,6 @@
                     <div class="form-group ">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-               
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
                         </div>
                     </div>
@@ -104,52 +96,21 @@
                     <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
-                        <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownLinea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblLinea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblAutorizante">Autorizante:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownAutorizante" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownAutorizante" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblAutorizante" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
                         </div>
                     </div>
 
 
                     <div class="form-group">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Mes aprobación:</label>
                         <div class="dropdown">
-                            <%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownFecha" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownFecha" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblFecha" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
                     </div>
@@ -158,6 +119,15 @@
                         <label class="form-label lbl-left" for="cblEstadoExpediente">Estado:</label>
                         <CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
                     </div>
+
+                    <div class="form-group ">
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+                        <div class="dropdown">
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+                        </div>
+                    </div>
+
+
 
                     <div class="form-group text-left" style="flex: 1; max-width: 300px;">
                         <label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
@@ -215,16 +185,34 @@
             <asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
             <asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
             <asp:BoundField HeaderText="Linea de gestion" DataField="Linea" DataFormatString="{0:dd-MM-yyyy}" />
-            <asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn  btn-sm btn-outline-warning" />
-            <asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" DeleteText="Eliminar" />
+
+            <asp:TemplateField HeaderText="Acciones">
+                <ItemTemplate>
+                    <div class="d-flex justify-content-center gap-2">
+                        <asp:LinkButton ID="btnModificar" runat="server"
+                            CommandName="Select"
+                            CssClass="btn btn-sm btn-outline-warning"
+                            ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+                        </asp:LinkButton>
+                        <asp:LinkButton ID="btnEliminar" runat="server"
+                            CommandName="Delete"
+                            CssClass="btn btn-sm btn-outline-danger"
+                            ToolTip="Eliminar"
+                            OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+                        </asp:LinkButton>
+                    </div>
+                </ItemTemplate>
+            </asp:TemplateField>
         </Columns>
     </asp:GridView>
     <div class="text-center p-4">
         <asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
     </div>
 
-    </div>
-	<script type="text/javascript">
+
+    <script type="text/javascript">
 
         $(document).ready(function () {
             // Inicializamos la visibilidad según el valor de localStorage
@@ -260,154 +248,154 @@
 
     </script>
     <style>
-    	.form-group label {
-    		font-size: 14px;
-    		color: #212529;
-    		font-weight: 600;
-    	}
+        .form-group label {
+            font-size: 14px;
+            color: #212529;
+            font-weight: 600;
+        }
 
-    	.form-group .dropdown-toggle {
-    		background-color: #f8f9fa;
-    		color: #212529;
-    		border-radius: 0.375rem;
-    		width: 100%;
-    		text-align: left;
-    		font-size: 14px;
-    		font-weight: normal;
-    	}
+        .form-group .dropdown-toggle {
+            background-color: #f8f9fa;
+            color: #212529;
+            border-radius: 0.375rem;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+            font-weight: normal;
+        }
 
-    		.form-group .dropdown-toggle:hover {
-    			background-color: #e2e6ea;
-    			border-color: #adb5bd;
-    			color: #212529;
-    		}
+            .form-group .dropdown-toggle:hover {
+                background-color: #e2e6ea;
+                border-color: #adb5bd;
+                color: #212529;
+            }
 
-    	.form-group .dropdown-menu {
-    		border: 1px solid;
-    		border-radius: 0.375rem;
-    		padding: 0.5rem;
-    		background-color: #ffffff;
-    		max-height: 200px;
-    		overflow-y: auto;
-    	}
+        .form-group .dropdown-menu {
+            border: 1px solid;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            background-color: #ffffff;
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
-    		.form-group .dropdown-menu .form-check:hover {
-    			background-color: transparent;
-    		}
+            .form-group .dropdown-menu .form-check:hover {
+                background-color: transparent;
+            }
 
-    		.form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
-    			outline: none;
-    			box-shadow: none;
-    		}
+            .form-group .dropdown-menu .form-check input[type="checkbox"]:focus {
+                outline: none;
+                box-shadow: none;
+            }
 
-    		.form-group .dropdown-menu .form-check {
-    			margin-bottom: 0.5rem;
-    		}
+            .form-group .dropdown-menu .form-check {
+                margin-bottom: 0.5rem;
+            }
 
-    			.form-group .dropdown-menu .form-check label {
-    				font-size: 14px;
-    				color: #495057;
-    				background-color: transparent;
-    			}
+                .form-group .dropdown-menu .form-check label {
+                    font-size: 14px;
+                    color: #495057;
+                    background-color: transparent;
+                }
 
-    			.form-group .dropdown-menu .form-check input[type="checkbox"] {
-    				margin-right: 8px;
-    			}
+                .form-group .dropdown-menu .form-check input[type="checkbox"] {
+                    margin-right: 8px;
+                }
 
-    				.form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
-    				.form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
-    					color: #495057;
-    					background-color: transparent;
-    					font-weight: normal;
-    				}
+                    .form-group .dropdown-menu .form-check input[type="checkbox"]:focus + label,
+                    .form-group .dropdown-menu .form-check input[type="checkbox"]:checked + label {
+                        color: #495057;
+                        background-color: transparent;
+                        font-weight: normal;
+                    }
 
-    	.table-bordered th, .table-bordered td {
-    		border: 1px solid #dddddd;
-    		text-align: center;
-    	}
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #dddddd;
+            text-align: center;
+        }
 
-    	.table-hover tbody tr:hover {
-    		background-color: #f2f2f2;
-    	}
+        .table-hover tbody tr:hover {
+            background-color: #f2f2f2;
+        }
 
-    	.table1 th, .table1 td {
-    		padding: 12px;
-    		font-size: 14px;
-    	}
+        .table1 th, .table1 td {
+            padding: 12px;
+            font-size: 14px;
+        }
 
-    	.table1 {
-    		border-radius: 10px;
-    		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    	}
+        .table1 {
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
 
-    		.table1 th {
-    			text-align: center;
-    			font-weight: bold;
-    			background: #153244;
-    			color: white;
-    			border: 1px solid #153244;
-    		}
+            .table1 th {
+                text-align: center;
+                font-weight: bold;
+                background: #153244;
+                color: white;
+                border: 1px solid #153244;
+            }
 
-    	.form-label {
-    		margin-bottom: 0;
-    	}
+        .form-label {
+            margin-bottom: 0;
+        }
 
-    	.d-flex.align-items-end > .form-control {
-    		margin-right: 8px;
-    	}
+        .d-flex.align-items-end > .form-control {
+            margin-right: 8px;
+        }
 
-    	.form-control-uniform {
-    		display: inline-block;
-    		font-size: 14px;
-    		padding: 4px 12px;
-    		border: 1px solid;
-    	}
+        .form-control-uniform {
+            display: inline-block;
+            font-size: 14px;
+            padding: 4px 12px;
+            border: 1px solid;
+        }
 
-    	.btn {
-    		background-color: #153244;
-    		text-align: center;
-    		transition: all 0.3s ease-in-out;
-    		color: #ecf0f1;
-    		border: none;
-    		padding: 8px 12px;
-    		font-size: 14px;
-    		cursor: pointer;
-    		border-radius: 4px;
-    		display: inline-block;
-    		font-weight: bold;
-    	}
+        .btn {
+            background-color: #153244;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            color: #ecf0f1;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+        }
 
-    		.btn:hover {
-    			background-color: #8DE2D6;
-    			color: #153244;
-    		}
+            .btn:hover {
+                background-color: #8DE2D6;
+                color: #153244;
+            }
 
-    	.lbl-left {
-    		text-align: left;
-    		display: block;
-    		font-weight: bold;
-    	}
+        .lbl-left {
+            text-align: left;
+            display: block;
+            font-weight: bold;
+        }
 
-    	#visibilityMessage {
-    		background-color: #8DE2D6;
-    		text-align: center;
-    		transition: all 0.3s ease-in-out;
-    		color: #153244;
-    	}
+        #visibilityMessage {
+            background-color: #8DE2D6;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            color: #153244;
+        }
 
-    	#visibilityText {
-    		cursor: pointer;
-    		display: inline-block;
-    		transition: color 0.3s ease-in-out;
-    	}
+        #visibilityText {
+            cursor: pointer;
+            display: inline-block;
+            transition: color 0.3s ease-in-out;
+        }
 
-    	#visibilityMessage:hover {
-    		background-color: #153244;
-    	}
+        #visibilityMessage:hover {
+            background-color: #153244;
+        }
 
-    		#visibilityMessage:hover #visibilityText {
-    			color: white;
-    		}
+            #visibilityMessage:hover #visibilityText {
+                color: white;
+            }
     </style>
 </asp:Content>
 

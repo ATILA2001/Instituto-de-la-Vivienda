@@ -27,7 +27,7 @@
 			}
 	</style>
 
-	<%--<div id="section1" style="display: none;">
+	<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
@@ -86,7 +86,7 @@
 				</table>
 			</div>
 		</div>
-	</div>--%>
+	</div>
 
 
 
@@ -94,71 +94,42 @@
 	<div class="row mt-4">
 		<div class="col-md-12">
 			<div class="text-end">
-
-
 				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-					<div class="form-group">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
-						<div class="dropdown">
-<%--							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
-						</div>
-					</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblObra">Obra:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownObra" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownObra" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblObra" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
 						</div>
 					</div>
 
-
 					<div class="form-group">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEstado">Estado:</label>
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEstado" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEstado" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblEstado" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
+							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblConcepto">Concepto:</label>
 						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownConcepto" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownConcepto" style="max-height: 200px; overflow-y: auto;">
-								<asp:CheckBoxList ID="cblConcepto" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
                             <CustomControls:CheckBoxListSearch ID="cblConcepto" runat="server" />
 						</div>
 					</div>
+
+					<div class="form-group">
+						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEstado">Estado:</label>
+						<div class="dropdown">
+                            <CustomControls:CheckBoxListSearch ID="cblEstado" runat="server" />
+						</div>
+					</div>
+
 
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
 						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
 					</div>
-
-
-
-
 
 					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
 						<label class="form-label lbl-left" for="txtSubtotal">Subtotal:</label>
@@ -167,11 +138,12 @@
 
 					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
-						<%--<div class="form-group d-flex align-items-end">
+						<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Autorizante</strong>
-							</button>BtnClearFilters_Click
-						</div>--%>
+							</button>
+						</div>
+
 						<div class="form-group  d-flex align-items-end">
 							<%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
 							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
@@ -223,9 +195,26 @@
 							<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
 						</ItemTemplate>
 					</asp:TemplateField>
-				<%--	<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning" />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" />
-				--%></Columns>
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-outline-warning"
+                                    ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-outline-danger"
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+				</Columns>
 			</asp:GridView>
 
 			<div class="text-center p-4">
