@@ -109,7 +109,7 @@
 
 
                     <div class="form-group">
-                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Fecha:</label>
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblFecha">Mes aprobación:</label>
                         <div class="dropdown">
                             <CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
                         </div>
