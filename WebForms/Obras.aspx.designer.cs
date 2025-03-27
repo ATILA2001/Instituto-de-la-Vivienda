@@ -15,6 +15,7 @@ namespace WebForms
     {
 
         /// <summary>
+<<<<<<< Updated upstream
         /// Control UpdatePanel1.
         /// </summary>
         /// <remarks>
@@ -25,6 +26,9 @@ namespace WebForms
 
         /// <summary>
         /// Control cblEmpresa.
+=======
+        /// cblEmpresa control.
+>>>>>>> Stashed changes
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.

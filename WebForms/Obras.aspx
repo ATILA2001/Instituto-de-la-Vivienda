@@ -85,8 +85,7 @@
 		</div>
 	</div>--%>
     
-	<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-		<ContentTemplate>
+
 
 
 	<div class="row mt-4">
@@ -209,8 +208,7 @@
 	</div>
 	
 		
-		</ContentTemplate>
-	</asp:UpdatePanel>
+
 
 	<script type="text/javascript">
 		function soloNumeros(e) {
