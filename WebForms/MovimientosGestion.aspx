@@ -63,8 +63,7 @@
         </div>
     </div>
 
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-        <ContentTemplate>
+
 
 
             <div class="row mt-4">
@@ -116,7 +115,7 @@
 
                                 <div class="form-group d-flex align-items-end">
                                     <button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
-                                        <strong id="visibilityText">Agregar Obra</strong>
+                                        <strong id="visibilityText">Cargar Movimiento</strong>
                                     </button>
                                 </div>
 
@@ -178,8 +177,7 @@
             </div>
 
 
-        </ContentTemplate>
-    </asp:UpdatePanel>
+
 
     <script type="text/javascript">
         function soloNumeros(e) {
@@ -193,32 +191,54 @@
         }
 
         $(document).ready(function () {
-            // Inicializamos la visibilidad según el valor almacenado en localStorage
-            var sectionVisible = localStorage.getItem("sectionVisible");
+            // Textos constantes
+            const mostrarTexto = "Cargar Movimiento";
+            const ocultarTexto = "Ocultar sección";
 
-            if (sectionVisible === "true") {
-                $('#section1').show();
-                $('#visibilityText').text("Ocultar sección");
-            } else {
-                $('#section1').hide();
-                $('#visibilityText').text("Cargar Movimiento");
+            // Variables DOM
+            const section = $('#section1');
+            const visibilityText = $('#visibilityText');
+            const visibilityMessage = $('#visibilityMessage');
+
+            // Asegúrate de que los elementos existan
+            if (!section.length || !visibilityText.length || !visibilityMessage.length) {
+                console.error("Uno o más elementos no se encontraron en el DOM.");
+                return;
             }
 
-            // Manejar clic en el botón para alternar la visibilidad
-            $('#visibilityMessage').on('click', function () {
-                var currentStatus = $('#visibilityText').text();
+            // Función para inicializar el estado
+            const initializeVisibility = () => {
+                // Lee el estado del localStorage o usa "false" por defecto
+                const sectionVisible = localStorage.getItem("sectionVisible") === "true";
 
-                if (currentStatus === "Cargar Movimiento") {
-                    localStorage.setItem("sectionVisible", "true");
-                    $('#section1').show();
-                    $('#visibilityText').text("Ocultar sección");
-                } else {
-                    localStorage.setItem("sectionVisible", "false");
-                    $('#section1').hide();
-                    $('#visibilityText').text("Cargar Movimiento");
-                }
-            });
+                // Aplica visibilidad y actualiza el texto del botón
+                section.toggle(sectionVisible);
+                visibilityText.text(sectionVisible ? ocultarTexto : mostrarTexto);
+            };
+
+            // Función para alternar la visibilidad
+            const toggleVisibility = () => {
+                // Comprueba el estado actual de la sección
+                const sectionVisible = section.is(':visible');
+
+                // Guarda el nuevo estado en localStorage
+                localStorage.setItem("sectionVisible", !sectionVisible);
+
+                // Alterna la visibilidad de la sección
+                section.toggle();
+
+                // Actualiza el texto del botón
+                visibilityText.text(sectionVisible ? mostrarTexto : ocultarTexto);
+            };
+
+            // Inicializa al cargar la página
+            initializeVisibility();
+
+            // Asigna el evento al botón
+            visibilityMessage.off('click').on('click', toggleVisibility);
         });
+
+
 
     </script>
     <style>

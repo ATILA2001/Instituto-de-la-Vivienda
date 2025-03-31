@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Negocio
@@ -16,11 +18,16 @@ namespace Negocio
 
             try
             {
-                string query = "select M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA, M.MOVIMIENTO,M.FECHA, BD.AUTORIZADO_NUEVO from MOVIMIENTOS_GESTION M " +
-                    "INNER JOIN OBRAS O ON M.ID_BASE = O.ID " +
-                    "inner join BD_PROYECTOS BD on O.ID = BD.ID_BASE " +
-                    "inner join BARRIOS BA on O.BARRIO = BA.ID " +
-                    "inner join LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID WHERE 1=1 ";
+                string query = "select M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA, M.MOVIMIENTO,M.FECHA," +
+                    "                    BD.AUTORIZADO_INICIAL + ISNULL(" +
+                    "    (SELECT SUM(M2.MOVIMIENTO)" +
+                    "       FROM MOVIMIENTOS_GESTION M2" +
+                    "      WHERE M2.ID_BASE = M.ID_BASE), 0" +
+                    ") AS AUTORIZADO_NUEVO" +
+                    "                     from MOVIMIENTOS_GESTION M" +
+                    "                    INNER JOIN OBRAS O ON M.ID_BASE = O.ID" +
+                    "                    inner join BD_PROYECTOS BD on O.ID = BD.ID_BASE" +
+                    "                    inner join BARRIOS BA on O.BARRIO = BA.ID                    inner join LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID WHERE 1 = 1 ";
 
                 if (obras != null && obras.Count > 0)
                 {

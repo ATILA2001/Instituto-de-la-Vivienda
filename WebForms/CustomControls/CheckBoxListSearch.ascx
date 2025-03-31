@@ -13,7 +13,11 @@
         <div class="search-container">
             <div class="search-row">
                 <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" class="form-control" />
-                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-secondary" OnClick="BtnDeselectAll_Click" Text="filter_alt_off">
+                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-secondary"
+                    OnClick="BtnDeselectAll_Click"
+                    OnClientClick="sessionStorage.setItem('shouldCloseDropdown', 'true'); return true;"
+                    ToolTip="Deseleccionar todo"
+                    Text="filter_alt_off">
             
                 </asp:Button>
             </div>
@@ -39,11 +43,37 @@
         });
     });
 
+
     document.addEventListener("DOMContentLoaded", function () {
+        // Verificamos si venimos de un deselectAll
+        if (sessionStorage.getItem('shouldCloseDropdown') === 'true') {
+            document.querySelectorAll(".checkbox-list").forEach(list => {
+                var dropdown = document.getElementById(list.id + '_dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                    // Importante: limpiar cualquier script del servidor que intente abrir el dropdown
+                    clearTimeout(window['dropdownTimeout_' + list.id]);
+                }
+            });
+            sessionStorage.removeItem('shouldCloseDropdown');
+        }
+
+        // Actualizamos los títulos
         document.querySelectorAll(".checkbox-list").forEach(list => {
             updateDropdownTitle(list.id);
         });
     });
+
+    function clearDropdownTimeout(listId) {
+        if (window['dropdownTimeout_' + listId]) {
+            clearTimeout(window['dropdownTimeout_' + listId]);
+            window['dropdownTimeout_' + listId] = null;
+        }
+    }
+
+
+
+
 
     document.querySelectorAll(".checkbox-list input[type='checkbox']").forEach(cb => {
         cb.addEventListener('change', function () {
@@ -57,7 +87,6 @@
         dropdown.style.display = isVisible ? 'none' : 'block';
 
         if (!isVisible) {
-            // Get the listId from the dropdownId by removing '_dropdown' suffix
             var listId = dropdownId.replace('_dropdown', '');
             var searchInput = document.getElementById(listId + "_txtSearch");
             if (searchInput) {

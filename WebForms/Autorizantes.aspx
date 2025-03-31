@@ -26,8 +26,8 @@
 				border: none;
 			}
 	</style>
-
-	<div id="section1" style="display: none;">
+	<%--COMENTADO POR CIERRE PLANIFICACION--%>
+	<%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
@@ -86,7 +86,7 @@
 				</table>
 			</div>
 		</div>
-	</div>
+	</div>--%>
 
 
 
@@ -138,11 +138,12 @@
 
 					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
+						<%--COMENTADO POR CIERRE PLANIFICACION
 						<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Autorizante</strong>
 							</button>
-						</div>
+						</div>--%>
 
 						<div class="form-group  d-flex align-items-end">
 							<%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
@@ -195,7 +196,8 @@
 							<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
 						</ItemTemplate>
 					</asp:TemplateField>
-                    <asp:TemplateField HeaderText="Acciones">
+					<%--COMENTADO POR CIERRE PLANIFICACION--%>
+                    <%--<asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">
                                 <asp:LinkButton ID="btnModificar" runat="server"
@@ -213,7 +215,7 @@
                                 </asp:LinkButton>
                             </div>
                         </ItemTemplate>
-                    </asp:TemplateField>
+                    </asp:TemplateField>--%>
 				</Columns>
 			</asp:GridView>
 

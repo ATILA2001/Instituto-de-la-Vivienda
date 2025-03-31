@@ -27,6 +27,7 @@
 			border: none;
 		}
 </style>
+	<%--COMENTADO POR CIERRE PLANIFICACION--%>
 	<%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
@@ -85,8 +86,7 @@
 		</div>
 	</div>--%>
     
-	<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-		<ContentTemplate>
+
 
 
 	<div class="row mt-4">
@@ -186,6 +186,7 @@
 					<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio"  DataFormatString="{0:dd-MM-yyyy}" />
 					<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
+					<%--COMENTADO POR CIERRE PLANIFICACION
 					                    <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">
@@ -197,7 +198,7 @@
                                 </asp:LinkButton>
                             </div>
                         </ItemTemplate>
-                    </asp:TemplateField>
+                    </asp:TemplateField>--%>
 					
 				</Columns>
 			</asp:GridView>
@@ -209,8 +210,7 @@
 	</div>
 	
 		
-		</ContentTemplate>
-	</asp:UpdatePanel>
+
 
 	<script type="text/javascript">
 		function soloNumeros(e) {

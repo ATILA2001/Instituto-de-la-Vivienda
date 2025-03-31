@@ -123,9 +123,12 @@ namespace WebForms.CustomControls
             SelectedIndexChanged?.Invoke(this, e);
             UpdateDeselectAllButtonState();
             UpdateDropdownTitle();
-            ScriptManager.RegisterStartupScript(this, GetType(), "keepDropdown",
-    $"setTimeout(function() {{ document.getElementById('{chkList.ClientID}_dropdown').style.display = 'block'; }}, 0);", true);
 
+            ScriptManager.RegisterStartupScript(this, 
+                GetType(), 
+                "keepDropdown", 
+            $"setTimeout(function() {{ document.getElementById('{chkList.ClientID}_dropdown').style.display = 'block'; }}, 0);", 
+            true);
         }
 
         private void UpdateDeselectAllButtonState()
@@ -138,11 +141,7 @@ namespace WebForms.CustomControls
         protected void BtnDeselectAll_Click(object sender, EventArgs e)
         {
             ClearSelection();
-            //ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle", $"updateDropdownTitle('{chkList.ClientID}');", true);
             ChkList_SelectedIndexChanged(this,e);
-            ScriptManager.RegisterStartupScript(this, GetType(), "updateDropdownTitle",
-    $"updateDropdownTitle('{chkList.ClientID}'); document.getElementById('{chkList.ClientID}_dropdown').style.display = 'block';", true);
-            ChkList_SelectedIndexChanged(this, e);
         }
     }
 }
