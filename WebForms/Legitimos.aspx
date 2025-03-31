@@ -27,7 +27,8 @@
                 border: none;
             }
     </style>
-    <div id="section1" style="display: none;">
+    <%--COMENTADO POR CIERRE PLANIFICACION--%>
+    <%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table-3d">
@@ -78,7 +79,7 @@
 				</table>
 			</div>
 		</div>
-	</div>
+	</div>--%>
     
     <div class="row mt-4">
         <div class="col-md-12">
@@ -137,11 +138,14 @@
 
                     <div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
 
+                        <%--COMENTADO POR CIERRE PLANIFICACION
                         <div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Legitimo</strong>
 							</button>
-						</div>
+						</div>--%>
+
+
                         <div class="form-group  d-flex align-items-end">
                             <%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
                             <asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
@@ -176,6 +180,8 @@
                     <asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
                     <asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
                     <asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+                    
+                    <%--COMENTADO POR CIERRE PLANIFICACION
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">
@@ -193,8 +199,9 @@
                                     <i class="bi bi-trash"></i>
                                 </asp:LinkButton>
                             </div>
-                        </ItemTemplate>
-                    </asp:TemplateField>
+                        </ItemTemplate>               
+                    </asp:TemplateField>--%>
+
                 </Columns>
             </asp:GridView>
             <div class="text-center p-4">
