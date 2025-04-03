@@ -188,6 +188,12 @@
 						</asp:DropDownList>--%>
 						<CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
 					</div>
+                    <div class="form-group ">
+                        <label class="form-label lbl-left" style="margin-left: 10PX;" for="cblLinea">Linea:</label>
+                        <div class="dropdown">
+                            <CustomControls:CheckBoxListSearch ID="cblLinea" runat="server" />
+                        </div>
+                    </div>
 
                     <div class="form-group text-left" style="flex: 1; max-width: 300px;">
                         <label class="form-label lbl-left" for="txtBuscar">Buscar:</label>

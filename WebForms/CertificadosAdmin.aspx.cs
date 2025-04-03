@@ -24,6 +24,7 @@ namespace WebForms
             cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
             cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
         }
 
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
@@ -104,11 +105,12 @@ namespace WebForms
                 var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 //string filtroExpediente = ddlExpediente.SelectedValue;
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -284,6 +286,11 @@ namespace WebForms
             cblEstadoExpediente.DataValueField = "Id";
             cblEstadoExpediente.DataBind();
 
+            cblLinea.DataSource = ObtenerLineasGestion();
+            cblLinea.DataTextField = "Nombre";
+            cblLinea.DataValueField = "Id";
+            cblLinea.DataBind();
+
             var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
             .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
             .Select(fecha => new
@@ -302,6 +309,13 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
+
+        private DataTable ObtenerLineasGestion()
+        {
+            LineaGestionNegocio lineaGestionNegocio = new LineaGestionNegocio();
+            return lineaGestionNegocio.listarddl();
+        }
+
         private DataRow CrearFilaTodos(DataTable table)
         {
             DataRow row = table.NewRow();
@@ -374,6 +388,7 @@ namespace WebForms
             cblTipo.ClearSelection();
             cblFecha.ClearSelection();
             cblEstadoExpediente.ClearSelection();
+            cblLinea.ClearSelection();
             CargarListaCertificados();
         }
 
