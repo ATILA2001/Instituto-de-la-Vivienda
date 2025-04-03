@@ -85,24 +85,5 @@
 
 
     </div>
-    <style>
-	.btn {
-		background-color: #153244;
-		text-align: center;
-		transition: all 0.3s ease-in-out;
-		color: #ecf0f1;
-		border: none;
-		padding: 8px 12px;
-		font-size: 14px;
-		cursor: pointer;
-		border-radius: 4px;
-		display: inline-block;
-		font-weight: bold;
-	}
-
-		.btn:hover {
-			background-color: #8DE2D6;
-			color: #153244;
-		}
-</style>
+   
 </asp:Content>
