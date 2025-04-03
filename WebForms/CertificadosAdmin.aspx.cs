@@ -367,7 +367,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                var cellValue = row.Cells[10].Text;
+                var cellValue = row.Cells[11].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
