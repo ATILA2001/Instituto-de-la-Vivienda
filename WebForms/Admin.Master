@@ -12,27 +12,8 @@
 	<link href="Content/bootstrap.min.css" rel="stylesheet">
 	<script src="Scripts/bootstrap.bundle.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<link rel="stylesheet" href="/css/custom.css" />
+	<link rel="stylesheet" href="/Styles/site.css" />
 
- <style>
-        @font-face {
-            font-family: 'Archivo';
-            src: url('<%= ResolveUrl("~/Fonts/Archivo-VariableFont_wdth,wght.ttf") %>') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'Archivo';
-            src: url('<%= ResolveUrl("~/Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") %>') format('truetype');
-            font-weight: normal;
-            font-style: italic;
-        }
-
-        body {
-            font-family: 'Archivo', Arial, sans-serif;
-        }
-    </style>
 
 	<script>
         document.addEventListener('DOMContentLoaded', function () {
