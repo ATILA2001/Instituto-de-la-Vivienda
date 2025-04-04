@@ -78,7 +78,7 @@
 							<li class="nav-item"><a class="nav-link" href="AbmlUsuarios.aspx"  style="font-size: 20px;"><strong>Usuarios</strong></a></li>
 						</ul>
 
-						<asp:Button ID="btnCerrarSesion" CssClass="btn btn-outline-dark ms-3" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" />
+						<asp:Button ID="btnCerrarSesion" CssClass="btn btn-primary" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" />
 					</div>
 				</div>
 			</nav>

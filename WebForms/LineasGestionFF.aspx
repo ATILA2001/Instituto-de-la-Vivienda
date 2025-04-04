@@ -58,7 +58,7 @@
 
 							<div class="mb-2 text-center p-2">
 								<asp:Button Text="Agregar" ID="btnAgregarFF" OnClick="btnAgregarFF_Click"
-									CssClass="btn btn-outline-success" runat="server" />
+									CssClass="btn btn-primary" runat="server" />
 							</div>
 						</div>
 					</div>

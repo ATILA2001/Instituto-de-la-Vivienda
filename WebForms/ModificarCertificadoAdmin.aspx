@@ -43,7 +43,7 @@
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 									</td>
 									<td class="text-right">
-										<asp:Button Text="Modificar" ID="btnModificar" OnClick="btnModificar_Click" CssClass="btn btn-outline-success" runat="server" />
+										<asp:Button Text="Modificar" ID="btnModificar" OnClick="btnModificar_Click" CssClass="btn btn-primary" runat="server" />
 									</td>
 								</tr>
 							</tbody>

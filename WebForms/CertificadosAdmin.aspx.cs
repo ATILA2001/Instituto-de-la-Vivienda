@@ -16,14 +16,14 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e) 
         {
-            cblArea.AcceptChanges += OnAcceptChanges;
-            cblBarrio.AcceptChanges += OnAcceptChanges;
-            cblProyecto.AcceptChanges += OnAcceptChanges;
-            cblEmpresa.AcceptChanges += OnAcceptChanges;
-            cblAutorizante.AcceptChanges += OnAcceptChanges;
-            cblTipo.AcceptChanges += OnAcceptChanges;
-            cblFecha.AcceptChanges += OnAcceptChanges;
-            cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
+            //cblArea.AcceptChanges += OnAcceptChanges;
+            //cblBarrio.AcceptChanges += OnAcceptChanges;
+            //cblProyecto.AcceptChanges += OnAcceptChanges;
+            //cblEmpresa.AcceptChanges += OnAcceptChanges;
+            //cblAutorizante.AcceptChanges += OnAcceptChanges;
+            //cblTipo.AcceptChanges += OnAcceptChanges;
+            //cblFecha.AcceptChanges += OnAcceptChanges;
+            //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
         }
 
         private void OnAcceptChanges(object sender, EventArgs e)

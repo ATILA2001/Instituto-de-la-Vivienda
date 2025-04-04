@@ -20,7 +20,7 @@
 					</div>
 					<div class="d-flex justify-content-between">
 						<div class="ms-auto">
-							<asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-outline-dark" Text="Iniciar" runat="server" />
+							<asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-primary" Text="Iniciar" runat="server" />
 						</div>
 					</div>
 				</div>

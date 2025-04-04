@@ -138,16 +138,16 @@
 
 
 						<div class="form-group d-flex align-items-end">
-							<button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
+							<button class="btn btn-sm btn-primary" id="visibilityMessage">
 								<strong id="visibilityText">Agregar Redet</strong>
 							</button>
 						</div>
 
 						<div class="form-group  d-flex align-items-end">
-							<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
+							<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />
 						</div>
 						<div class="form-group d-flex align-items-end">
-							<asp:Button CssClass="btn btn-sm btn-outline-dark" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+							<asp:Button CssClass="btn btn-sm btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
 						</div>
 
 					</div>

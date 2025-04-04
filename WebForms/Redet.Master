@@ -43,7 +43,7 @@
 
 						<% if (Session["usuario"] != null)
 							{ %>
-						<asp:LinkButton ID="btnCerrarSession" CssClass="btn btn-outline-dark ms-3" OnClick="btnCerrarSession_Click" runat="server">
+						<asp:LinkButton ID="btnCerrarSession" CssClass="btn btn-primary ms-3" OnClick="btnCerrarSession_Click" runat="server">
                             Cerrar Sesión
 						</asp:LinkButton>
 						<% } %>

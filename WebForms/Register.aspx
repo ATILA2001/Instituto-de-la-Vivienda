@@ -72,8 +72,8 @@
         </div>
 
         <div class="text-end m-2">
-            <asp:Button Text="Volver" ID="Button1" class="btn btn-outline-dark m-1" OnClick="btnVolver_Click" runat="server" />
-            <asp:Button ID="Button2"  Text="Registrar" runat="server" OnClick="btnRegistrar_Click" class="btn btn-outline-dark mx-3"/>
+            <asp:Button Text="Volver" ID="Button1" class="btn btn-primary m-1" OnClick="btnVolver_Click" runat="server" />
+            <asp:Button ID="Button2"  Text="Registrar" runat="server" OnClick="btnRegistrar_Click" class="btn btn-primary mx-3"/>
         </div>
 
                         </ContentTemplate>

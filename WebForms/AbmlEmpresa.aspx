@@ -13,7 +13,7 @@
                             <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"  />
                         </div>
                         <div class="form-group d-flex align-items-end">
-                            <asp:Button CssClass="btn" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" 
+                            <asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" 
                                          />
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                         </div>
                         <div class="mb-2 text-center p-2">
                             <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" 
-                                        CssClass="btn" runat="server" 
+                                        CssClass="btn btn-primary" runat="server" 
                                         />
                         </div>
                     </div>

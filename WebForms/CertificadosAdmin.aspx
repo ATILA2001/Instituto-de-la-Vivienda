@@ -45,11 +45,11 @@
                                 <asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
                             </td>
                             <td class="text-right">
-                                <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
+                                <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" />
                             </td>
                             <td class="text-right">
                                 <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-                                    CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
+                                    CssClass="btn btn-primary" runat="server" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -193,17 +193,17 @@
 
 
                         <div class="form-group d-flex align-items-end">
-                            <button class="btn btn-sm btn-outline-dark" id="visibilityMessage">
+                            <button class="btn btn-sm btn-primary" id="visibilityMessage">
                                 <strong id="visibilityText">Agregar Certificado</strong>
                             </button>
                         </div>
 
                         <div class="form-group  d-flex align-items-end">
-                            <%--<asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
-                            <asp:Button CssClass="btn btn-sm btn-outline-dark " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
+                            <%--<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
+                            <asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
                         </div>
                         <div class="form-group d-flex align-items-end">
-                            <asp:Button CssClass="btn btn-sm btn-outline-dark" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+                            <asp:Button CssClass="btn btn-sm btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
                         </div>
 
 					</div>
