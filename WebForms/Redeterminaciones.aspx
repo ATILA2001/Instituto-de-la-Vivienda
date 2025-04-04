@@ -190,8 +190,8 @@
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"  />
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
 
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-outline-warning"  />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-outline-danger" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-warning"  />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-danger" />
 				</Columns>
 			</asp:GridView>
 

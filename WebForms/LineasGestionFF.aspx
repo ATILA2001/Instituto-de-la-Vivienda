@@ -25,11 +25,11 @@
 						<asp:BoundField HeaderText="Fuente" DataField="Fuente"  />
 
 						<asp:CommandField ShowSelectButton="true" SelectText="Modificar"
-							ControlStyle-CssClass="btn btn-outline-warning"
+							ControlStyle-CssClass="btn btn-warning"
 							 />
 
 						<asp:CommandField ShowDeleteButton="true"
-							ControlStyle-CssClass="btn btn-outline-danger"
+							ControlStyle-CssClass="btn btn-danger"
 							 />
 
 					</Columns>

@@ -174,7 +174,7 @@
                             <div class="d-flex justify-content-center gap-2">
                                 <asp:LinkButton ID="btnModificar" runat="server"
                                     CommandName="Select"
-                                    CssClass="btn btn-sm btn-outline-warning"
+                                    CssClass="btn btn-sm btn-warning"
                                     ToolTip="Modificar">
                                     <i class="bi bi-pencil-square"></i>
                                 </asp:LinkButton>

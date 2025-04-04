@@ -18,9 +18,9 @@
 						<asp:BoundField HeaderText="Grupo" DataField="Grupo"  />
 						<asp:BoundField HeaderText="Repartición" DataField="Reparticion"/>
 						<asp:CommandField ShowSelectButton="true" SelectText="Modificar"
-							ControlStyle-CssClass="btn btn-outline-warning"  />
+							ControlStyle-CssClass="btn btn-warning"  />
 						<asp:CommandField ShowDeleteButton="true"
-							ControlStyle-CssClass="btn btn-outline-danger" />
+							ControlStyle-CssClass="btn btn-danger" />
 					</Columns>
 				</asp:GridView>
 			</div>

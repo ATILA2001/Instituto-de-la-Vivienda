@@ -27,8 +27,8 @@
 						<%# Convert.ToBoolean(Eval("ESTADO")) ? "Habilitado" : "Bloqueado" %>
 					</ItemTemplate>
 				</asp:TemplateField>
-				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-outline-warning" HeaderText="Modificar"  />
-				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-outline-danger" HeaderText="Eliminar" />
+				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-warning" HeaderText="Modificar"  />
+				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-danger" HeaderText="Eliminar" />
 
 			</Columns>
 

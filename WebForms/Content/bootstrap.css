@@ -3257,7 +3257,7 @@ textarea.form-control-lg {
   --bs-gradient: none;
 }
 
-.btn-outline-warning {
+.btn-warning {
   --bs-btn-color: #ffc107;
   --bs-btn-border-color: #ffc107;
   --bs-btn-hover-color: #000;
@@ -3274,7 +3274,7 @@ textarea.form-control-lg {
   --bs-gradient: none;
 }
 
-.btn-outline-danger {
+.btn-danger {
   --bs-btn-color: #dc3545;
   --bs-btn-border-color: #dc3545;
   --bs-btn-hover-color: #fff;
