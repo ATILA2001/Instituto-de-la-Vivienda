@@ -1,10 +1,21 @@
-{
-  "exclude": [
-    "**/bin",
-    "**/bower_components",
-    "**/jspm_packages",
-    "**/node_modules",
-    "**/obj",
-    "**/platforms"
-  ]
+.btn-primary {
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-color: var(--inst-white); /* Color del texto */
+    --bs-btn-hover-bg: var(--bs-secondary); /* Color al pasar el mouse */
+    --bs-btn-hover-border-color: var(--bs-secondary);
+    --bs-btn-hover-color: var(--bs-primary); /* Color del texto al pasar el mouse */
+    --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
+    --bs-btn-active-border-color: #0f2430;
+}
+
+.btn-secondary {
+    --bs-btn-bg: var(--bs-secondary);
+    --bs-btn-border-color: var(--bs-secondary);
+    --bs-btn-color: var(--bs-primary); /* Color del texto */
+    --bs-btn-hover-bg: var(--bs-primary); /* Color al pasar el mouse */
+    --bs-btn-hover-border-color: var(--bs-primary);
+    --bs-btn-hover-color: var(--inst-white); /* Color del texto al pasar el mouse */
+    --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
+    --bs-btn-active-border-color: #0f2430;
 }

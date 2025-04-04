@@ -1,21 +1,29 @@
+:root {
+/*	colores de botones de bootstrap*/
+    --bs-primary: #153244;
+	--bs-secondary: #8DE2D6;
+	
+/*	colores institucionales*/
+	--inst-white: #FCFCFC;
+	--inst-yellow: #FFCC00;
+	--inst-gray: #3C3C3B;
+}
 
-	@font-face {
-		font-family: 'Archivo';
-		src: url('<%= ResolveUrl("~/Fonts/Archivo-VariableFont_wdth,wght.ttf") %>') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-	}
+@font-face {
+	font-family: 'Archivo';
+	src: url('<%= ResolveUrl("~/Fonts/Archivo-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
 
-	@font-face {
-		font-family: 'Archivo';
-		src: url('<%= ResolveUrl("~/Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") %>') format('truetype');
-		font-weight: normal;
-		font-style: italic;
-	}
+@font-face {
+	font-family: 'Archivo';
+	src: url('<%= ResolveUrl("~/Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	font-weight: normal;
+	font-style: italic;
+}
 
-	body
-
-{
+body{
 	font-family: 'Archivo', Arial, sans-serif;
 }
 
