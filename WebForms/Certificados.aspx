@@ -190,7 +190,7 @@
 					<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre"  />
 					<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}"/>
 					<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" />
+					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}"/>
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"/>
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"/>
