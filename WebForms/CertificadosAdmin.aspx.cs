@@ -16,18 +16,31 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e) 
         {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+
+            cblArea.AcceptChanges += OnAcceptChanges;
+            cblBarrio.AcceptChanges += OnAcceptChanges;
+            cblProyecto.AcceptChanges += OnAcceptChanges;
+            cblEmpresa.AcceptChanges += OnAcceptChanges;
+            cblAutorizante.AcceptChanges += OnAcceptChanges;
+            cblTipo.AcceptChanges += OnAcceptChanges;
+            cblFecha.AcceptChanges += OnAcceptChanges;
+            cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        //private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    CargarListaCertificados();
+        //}
+
+        private void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaCertificados();
         }
