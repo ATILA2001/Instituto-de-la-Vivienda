@@ -21,6 +21,11 @@
     --bs-btn-active-border-color: #0f2430;
     font-weight:bold;
 }
+.navbar-3d {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 -2px 1px rgba(255, 255, 255, 0.2) inset;
+    background-color: var(--bs-primary);
+}
+
 
 /*PARA TENER GUARDADO / MODIFICAR / MEJORAR */
 
