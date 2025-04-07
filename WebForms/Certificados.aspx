@@ -129,7 +129,7 @@
 
                         <%--COMENTADO POR CIERRE PLANIFICACION
                         <div class="form-group d-flex align-items-end">
-							<button class="btn btn-sm btn-primary" id="visibilityMessage">
+							<button class="btn btn-sm btn-secondary" id="visibilityMessage">
 								<span id="visibilityText">Agregar Certificado</span>
 							</button>
 						</div>--%>
