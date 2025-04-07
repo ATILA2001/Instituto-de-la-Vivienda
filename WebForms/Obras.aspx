@@ -13,7 +13,7 @@
 	<%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
-				<table class="table  table-3d">
+				<table class="table  table1">
 					<thead class="thead-dark" >
 						<tr>
 							<th>Empresa</th>

@@ -29,24 +29,7 @@
 
 /*PARA TENER GUARDADO / MODIFICAR / MEJORAR */
 
-.table, .table-3d, .table-3d thead, .table-3d tbody, .table-3d tr, .table-3d th, .table-3d td {
-    color: #ecf0f1 !important;
-}
 
-.table-3d {
-    border-radius: 10px;
-    overflow: hidden;
-    border-collapse: collapse;
-}
-
-    .table-3d thead th {
-        background-color: #153244;
-        color: #ecf0f1;
-        font-weight: bold;
-        text-align: center;
-        text-transform: uppercase;
-        border: none;
-    }
 .form-group label {
     font-size: 14px;
     color: #212529;
@@ -124,7 +107,7 @@
 }
 
 .table1 {
-    border-radius: 10px;
+   
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 

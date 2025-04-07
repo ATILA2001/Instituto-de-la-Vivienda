@@ -9,7 +9,7 @@
             <h2 class="text-center p-2">OBRAS</h2>
             <div class="mx-auto p-2">
                 <div class="card-body">
-                    <table class="table table-3d">
+                    <table class="table table1">
                         <thead class="thead-dark">
                             <tr>
                                 <th>Empresa</th>

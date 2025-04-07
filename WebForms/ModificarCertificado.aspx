@@ -9,7 +9,7 @@
             <div class="col-md-12  rounded-3 p-3">
                 <div class="mx-auto p-2">
                     <div class="card-body">
-                        <table class="table  table-3d">
+                        <table class="table  table1">
                             <thead class="thead-dark">
                                 <tr>
 
