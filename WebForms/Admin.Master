@@ -34,7 +34,7 @@
 			<asp:ScriptManager ID="ScriptManager1" runat="server" />
 
 		<header>
-			<nav class="navbar navbar-expand-lg navbar-light" style="background-color: var(--color-principal);">
+			<nav class="navbar navbar-expand-lg navbar-dark m-2 rounded-3" style="background-color: var(--inst-blue); color:var(--inst-white);">
 				<div class="container-fluid">
 					<a class="navbar-brand d-flex align-items-center">
 						<img src="Images/IVC-Azul.png" class="me-2" width="50" height="50" style="margin-right: 0!important; margin-top: 0!important; margin-left: 0.5rem!important;" />
@@ -46,11 +46,11 @@
 						<ul class="navbar-nav me-auto">
 
 
-							<li class="nav-item"><a class="nav-link" href="BdProyectos.aspx"  style="font-size: 20px;"><strong>Proyectos</strong></a></li>
-							<li class="nav-item"><a class="nav-link" href="MovimientosGestion.aspx"  style="font-size: 20px;"><strong>Movimientos</strong></a></li>
+							<li class="nav-item"><a class="nav-link" href="BdProyectos.aspx"  style="font-size: 20px;"><span>Proyectos</span></a></li>
+							<li class="nav-item"><a class="nav-link" href="MovimientosGestion.aspx"  style="font-size: 20px;"><span>Movimientos</span></a></li>
 
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><strong>Consolidado</strong></a>
+								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Consolidado</span></a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 									<li><a class="dropdown-item" href="ObrasAdmin.aspx">Obras</a></li>
 									<li><a class="dropdown-item" href="AutorizantesAdmin.aspx">Autorizantes</a></li>
@@ -59,7 +59,7 @@
 								</ul>
 							</li>
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><strong>Listados</strong></a>
+								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Listados</span></a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 									<li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
 									<li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
@@ -68,17 +68,19 @@
 
 
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><strong>Líneas de Gestión</strong></a>
+								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  style="font-size: 20px;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Líneas de Gestión</span></a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 									<li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
 									<li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
 								</ul>
 							</li>
 
-							<li class="nav-item"><a class="nav-link" href="AbmlUsuarios.aspx"  style="font-size: 20px;"><strong>Usuarios</strong></a></li>
+							<li class="nav-item"><a class="nav-link" href="AbmlUsuarios.aspx"  style="font-size: 20px;"><span>Usuarios</span></a></li>
 						</ul>
 
-						<asp:Button ID="btnCerrarSesion" CssClass="btn btn-primary" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" />
+						<asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary " OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
+							<i class="bi bi-box-arrow-right"></i>
+						</asp:LinkButton>
 					</div>
 				</div>
 			</nav>

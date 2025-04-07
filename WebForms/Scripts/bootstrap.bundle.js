@@ -4788,7 +4788,7 @@
     span: [],
     sub: [],
     sup: [],
-    strong: [],
+    span: [],
     u: [],
     ul: []
   };

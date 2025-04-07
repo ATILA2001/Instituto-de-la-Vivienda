@@ -122,7 +122,7 @@
 						<%--COMENTADO POR CIERRE PLANIFICACION
 						<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-primary" id="visibilityMessage">
-								<strong id="visibilityText">Agregar Autorizante</strong>
+								<span id="visibilityText">Agregar Autorizante</span>
 							</button>
 						</div>--%>
 
@@ -183,13 +183,13 @@
                             <div class="d-flex justify-content-center gap-2">
                                 <asp:LinkButton ID="btnModificar" runat="server"
                                     CommandName="Select"
-                                    CssClass="btn btn-sm btn-warning"
+                                    CssClass="btn btn-sm btn-warning text-dark"
                                     ToolTip="Modificar">
                                     <i class="bi bi-pencil-square"></i>
                                 </asp:LinkButton>
                                 <asp:LinkButton ID="btnEliminar" runat="server"
                                     CommandName="Delete"
-                                    CssClass="btn btn-sm btn-danger"
+                                    CssClass="btn btn-sm btn-danger text-light"
                                     ToolTip="Eliminar"
                                     OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
                                     <i class="bi bi-trash"></i>

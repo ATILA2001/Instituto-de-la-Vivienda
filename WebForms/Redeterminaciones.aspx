@@ -139,7 +139,7 @@
 
 						<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-primary" id="visibilityMessage">
-								<strong id="visibilityText">Agregar Redet</strong>
+								<span id="visibilityText">Agregar Redet</span>
 							</button>
 						</div>
 
@@ -190,8 +190,8 @@
 					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"  />
 					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
 
-					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-warning"  />
-					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-danger" />
+					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-warning text-dark"  />
+					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-danger text-light" />
 				</Columns>
 			</asp:GridView>
 

@@ -31,13 +31,13 @@
 					<div class="collapse navbar-collapse" id="navbarMenu">
 						<ul class="navbar-nav me-auto">
 							<li class="nav-item">
-								<a class="nav-link" href="ObrasRedet.aspx"  style="font-size: 20px;"><strong>Obras</strong></a>
+								<a class="nav-link" href="ObrasRedet.aspx"  style="font-size: 20px;"><span>Obras</span></a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="AutorizantesRedet.aspx"  style="font-size: 20px;"><strong>Autorizantes</strong></a>
+								<a class="nav-link" href="AutorizantesRedet.aspx"  style="font-size: 20px;"><span>Autorizantes</span></a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="Redeterminaciones.aspx"  style="font-size: 20px;"><strong>Redeterminaciones</strong></a>
+								<a class="nav-link" href="Redeterminaciones.aspx"  style="font-size: 20px;"><span>Redeterminaciones</span></a>
 							</li>
 						</ul>
 

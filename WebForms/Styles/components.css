@@ -1,23 +1,25 @@
 .btn-primary {
-    --bs-btn-bg: var(--bs-primary);
-    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-bg: var(--bs-primary); /*Color del relleno*/
+    --bs-btn-border-color: var(--bs-primary); /*Color del bordea*/
     --bs-btn-color: var(--inst-white); /* Color del texto */
     --bs-btn-hover-bg: var(--bs-secondary); /* Color al pasar el mouse */
-    --bs-btn-hover-border-color: var(--bs-secondary);
+    --bs-btn-hover-border-color: var(--bs-primary);
     --bs-btn-hover-color: var(--bs-primary); /* Color del texto al pasar el mouse */
     --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
     --bs-btn-active-border-color: #0f2430;
+    font-weight: bold;
 }
 
 .btn-secondary {
-    --bs-btn-bg: var(--bs-secondary);
-    --bs-btn-border-color: var(--bs-secondary);
+    --bs-btn-bg: var(--bs-secondary); 
+    --bs-btn-border-color: var(--bs-primary);
     --bs-btn-color: var(--bs-primary); /* Color del texto */
     --bs-btn-hover-bg: var(--bs-primary); /* Color al pasar el mouse */
     --bs-btn-hover-border-color: var(--bs-primary);
     --bs-btn-hover-color: var(--inst-white); /* Color del texto al pasar el mouse */
     --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
     --bs-btn-active-border-color: #0f2430;
+    font-weight:bold;
 }
 
 /*PARA TENER GUARDADO / MODIFICAR / MEJORAR */
@@ -148,34 +150,10 @@
     font-weight: bold;
 }
 
-/*  PUEDE NO ESTAR, Y SOLO USAR EL BTN SECONDARY. VERIFICAR
-    --- ME GUSTA EL BORDE AZUL.
-    
-    #visibilityMessage {
-    background-color: #8DE2D6;
-    text-align: center;
-    transition: all 0.3s ease-in-out;
-    color: #153244;
-}
-
-#visibilityText {
-    cursor: pointer;
-    display: inline-block;
-    transition: color 0.3s ease-in-out;
-}
-
-#visibilityMessage:hover {
-    background-color: #153244;
-}
-
-    #visibilityMessage:hover #visibilityText {
-        color: white;
-    }
 .oculto {
     display: none;
 }
 .section-divider {
     margin: 2rem 0;
     border-top: 2px solid #ccc;
-        
-}*/
+}

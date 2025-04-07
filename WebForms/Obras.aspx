@@ -124,7 +124,7 @@
 
 						<%--<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-primary" id="visibilityMessage">
-								<strong id="visibilityText">Agregar Obra</strong>
+								<span id="visibilityText">Agregar Obra</span>
 							</button>
 						</div>--%>
 
@@ -174,7 +174,7 @@
                             <div class="d-flex justify-content-center gap-2">
                                 <asp:LinkButton ID="btnModificar" runat="server"
                                     CommandName="Select"
-                                    CssClass="btn btn-sm btn-warning"
+                                    CssClass="btn btn-sm btn-warning text-dark"
                                     ToolTip="Modificar">
                                     <i class="bi bi-pencil-square"></i>
                                 </asp:LinkButton>
