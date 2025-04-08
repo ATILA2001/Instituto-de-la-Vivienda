@@ -16,17 +16,17 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e) 
         {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            //cblArea.AcceptChanges += OnAcceptChanges;
+            //cblBarrio.AcceptChanges += OnAcceptChanges;
+            //cblProyecto.AcceptChanges += OnAcceptChanges;
+            //cblEmpresa.AcceptChanges += OnAcceptChanges;
+            //cblAutorizante.AcceptChanges += OnAcceptChanges;
+            //cblTipo.AcceptChanges += OnAcceptChanges;
+            //cblFecha.AcceptChanges += OnAcceptChanges;
+            //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        private void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaCertificados();
         }
@@ -104,11 +104,12 @@ namespace WebForms
                 var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 //string filtroExpediente = ddlExpediente.SelectedValue;
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
+                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
@@ -284,6 +285,11 @@ namespace WebForms
             cblEstadoExpediente.DataValueField = "Id";
             cblEstadoExpediente.DataBind();
 
+            cblLinea.DataSource = ObtenerLineasGestion();
+            cblLinea.DataTextField = "Nombre";
+            cblLinea.DataValueField = "Id";
+            cblLinea.DataBind();
+
             var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
             .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
             .Select(fecha => new
@@ -302,6 +308,13 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
+
+        private DataTable ObtenerLineasGestion()
+        {
+            LineaGestionNegocio lineaGestionNegocio = new LineaGestionNegocio();
+            return lineaGestionNegocio.listarddl();
+        }
+
         private DataRow CrearFilaTodos(DataTable table)
         {
             DataRow row = table.NewRow();
@@ -353,7 +366,7 @@ namespace WebForms
 
             foreach (GridViewRow row in dgvCertificado.Rows)
             {
-                var cellValue = row.Cells[10].Text;
+                var cellValue = row.Cells[11].Text;
                 if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
                 {
                     subtotal += monto;
@@ -374,6 +387,7 @@ namespace WebForms
             cblTipo.ClearSelection();
             cblFecha.ClearSelection();
             cblEstadoExpediente.ClearSelection();
+            cblLinea.ClearSelection();
             CargarListaCertificados();
         }
 

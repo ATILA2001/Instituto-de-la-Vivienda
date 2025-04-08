@@ -10,7 +10,7 @@
 <br />
         <br />
         <br />
-<a href="Login.aspx" class="btn btn-outline-dark" Style="background-color: #99bbc2;" >Volver al inicio</a>
+<a href="Login.aspx" class="btn btn-primary" Style="background-color: #99bbc2;" >Volver al inicio</a>
 </figure>
 
 </asp:Content>

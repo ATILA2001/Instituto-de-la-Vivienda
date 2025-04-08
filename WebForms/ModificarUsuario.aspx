@@ -5,7 +5,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <h1 class="text-center p-2">Modificar Usuario</h1>
 
-    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
 
     <div class="container-fluid" style="max-width: 50%;">

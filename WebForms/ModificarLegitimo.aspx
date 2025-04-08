@@ -2,27 +2,14 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
- <style>
-        .table-3d {
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 10px; 
-            overflow: hidden; 
-        }
-
-        .table-3d:hover {
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3), 0 8px 10px rgba(0, 0, 0, 0.2);
-            transform: translateY(-10px);
-        }
-    </style>
+ 
 
     <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-md-12 rounded-3 p-3">
                 <div class="mx-auto p-2">
                     <div class="card-body">
-                        <table class="table table-3d">
+                        <table class="table table1">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Código Autorizante</th>

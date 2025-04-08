@@ -73,7 +73,6 @@
     <Content Include="AbmlUsuarios.aspx" />
     <Content Include="Autorizantes.aspx" />
     <Content Include="AutorizantesAdmin.aspx" />
-    <Content Include="AutorizantesPendientes.aspx" />
     <Content Include="AutorizantesRedet.aspx" />
     <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
@@ -94,9 +93,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Custom.css" />
     <Content Include="CustomControls\CheckBoxListSearch.ascx" />
-    <Content Include="Devengados.aspx" />
     <Content Include="Error.aspx" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
@@ -131,7 +128,11 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="UsuariosPendientes.aspx" />
+    <Content Include="Styles\base.css" />
+    <Content Include="Styles\components.css" />
+    <Content Include="Styles\layout.css" />
+    <Content Include="Styles\site.css" />
+    <Content Include="Styles\utilities.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -177,13 +178,6 @@
     <Compile Include="AutorizantesAdmin.aspx.designer.cs">
       <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="AutorizantesPendientes.aspx.cs">
-      <DependentUpon>AutorizantesPendientes.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AutorizantesPendientes.aspx.designer.cs">
-      <DependentUpon>AutorizantesPendientes.aspx</DependentUpon>
-    </Compile>
     <Compile Include="AutorizantesRedet.aspx.cs">
       <DependentUpon>AutorizantesRedet.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -215,13 +209,6 @@
     <Compile Include="CustomControls\CheckBoxListSearch.ascx.cs">
       <DependentUpon>CheckBoxListSearch.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Devengados.aspx.cs">
-      <DependentUpon>Devengados.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Devengados.aspx.designer.cs">
-      <DependentUpon>Devengados.aspx</DependentUpon>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>
@@ -418,13 +405,6 @@
     <Compile Include="User.Master.designer.cs">
       <DependentUpon>User.Master</DependentUpon>
     </Compile>
-    <Compile Include="UsuariosPendientes.aspx.cs">
-      <DependentUpon>UsuariosPendientes.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="UsuariosPendientes.aspx.designer.cs">
-      <DependentUpon>UsuariosPendientes.aspx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin.Master" />
@@ -432,22 +412,6 @@
     <None Include=".editorconfig" />
     <Content Include="libman.json" />
     <Content Include="connectionStrings.config" />
-    <Content Include="Content\bootstrap.rtl.min.css.map" />
-    <Content Include="Content\bootstrap.rtl.css.map" />
-    <Content Include="Content\bootstrap.min.css.map" />
-    <Content Include="Content\bootstrap.css.map" />
-    <Content Include="Content\bootstrap-utilities.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-utilities.rtl.css.map" />
-    <Content Include="Content\bootstrap-utilities.min.css.map" />
-    <Content Include="Content\bootstrap-utilities.css.map" />
-    <Content Include="Content\bootstrap-reboot.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-reboot.rtl.css.map" />
-    <Content Include="Content\bootstrap-reboot.min.css.map" />
-    <Content Include="Content\bootstrap-reboot.css.map" />
-    <Content Include="Content\bootstrap-grid.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-grid.rtl.css.map" />
-    <Content Include="Content\bootstrap-grid.min.css.map" />
-    <Content Include="Content\bootstrap-grid.css.map" />
     <Content Include="Fonts\Archivo-Italic-VariableFont_wdth,wght.ttf" />
     <Content Include="Fonts\Archivo-VariableFont_wdth,wght.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -560,9 +524,26 @@
     <Content Include="Fonts\static\Archivo_SemiExpanded-SemiBoldItalic.ttf" />
     <Content Include="Fonts\static\Archivo_SemiExpanded-Thin.ttf" />
     <Content Include="Fonts\static\Archivo_SemiExpanded-ThinItalic.ttf" />
+    <Content Include="Content\bootstrap.rtl.min.css.map" />
+    <Content Include="Content\bootstrap.rtl.css.map" />
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.css.map" />
+    <Content Include="Content\bootstrap-utilities.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.css.map" />
+    <Content Include="Content\bootstrap-reboot.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.css.map" />
+    <Content Include="Content\bootstrap-grid.min.css.map" />
+    <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
     <Content Include="User.Master" />
     <Content Include="Redet.Master" />
+    <Content Include="Styles\readme.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
     <Content Include="Scripts\bootstrap.js.map" />
     <Content Include="Scripts\bootstrap.esm.min.js.map" />
@@ -591,6 +572,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Styles\Pages\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

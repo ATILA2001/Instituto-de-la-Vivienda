@@ -1,0 +1,32 @@
+:root {
+/*	colores institucionales*/
+	--inst-blue: #153244;
+	--inst-cyan: #8DE2D6;
+	--inst-white: #FCFCFC;
+	--inst-yellow: #FFCC00;
+	--inst-gray: #3C3C3B;
+
+/*	colores de botones de bootstrap*/
+    --bs-primary: var(--inst-blue);
+	--bs-secondary: var(--inst-cyan);
+}
+
+@font-face {
+	font-family: 'Archivo';
+	src: url('<%= ResolveUrl("~/Fonts/Archivo-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Archivo';
+	src: url('<%= ResolveUrl("~/Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	font-weight: normal;
+	font-style: italic;
+}
+
+body{
+	font-family: 'Archivo', Arial, sans-serif;
+}
+
+

@@ -72,8 +72,8 @@
         </div>
 
         <div class="text-end m-2">
-            <asp:Button Text="Volver" ID="Button1" class="btn btn-outline-dark m-1" OnClick="btnVolver_Click" runat="server" />
-            <asp:Button ID="Button2"  Text="Registrar" runat="server" OnClick="btnRegistrar_Click" class="btn btn-outline-dark mx-3"/>
+            <asp:Button Text="Volver" ID="Button1" class="btn btn-primary m-1" OnClick="btnVolver_Click" runat="server" />
+            <asp:Button ID="Button2"  Text="Registrar" runat="server" OnClick="btnRegistrar_Click" class="btn btn-primary mx-3"/>
         </div>
 
                         </ContentTemplate>
@@ -85,24 +85,5 @@
 
 
     </div>
-    <style>
-	.btn {
-		background-color: #153244;
-		text-align: center;
-		transition: all 0.3s ease-in-out;
-		color: #ecf0f1;
-		border: none;
-		padding: 8px 12px;
-		font-size: 14px;
-		cursor: pointer;
-		border-radius: 4px;
-		display: inline-block;
-		font-weight: bold;
-	}
-
-		.btn:hover {
-			background-color: #8DE2D6;
-			color: #153244;
-		}
-</style>
+   
 </asp:Content>
