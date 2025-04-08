@@ -149,7 +149,7 @@ namespace Negocio
                 }
 
 
-
+                query += " ORDER BY O.DESCRIPCION,C.CODIGO_AUTORIZANTE, C.MES_APROBACION";
                 datos.setearConsulta(query);
 
                 datos.agregarParametro("@area", usuario.Area.Id);
@@ -415,7 +415,7 @@ WHERE 1=1";
                     query += " AND (A.DETALLE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro  OR EM.NOMBRE LIKE @filtro OR C.CODIGO_AUTORIZANTE LIKE @filtro OR C.EXPEDIENTE_PAGO LIKE @filtro OR T.NOMBRE LIKE @filtro OR C.MONTO_TOTAL LIKE @filtro OR C.MES_APROBACION LIKE @filtro OR A.MONTO_AUTORIZADO LIKE @filtro OR E.NOMBRE LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
-
+                query += " ORDER BY O.DESCRIPCION,C.CODIGO_AUTORIZANTE, C.MES_APROBACION";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 
