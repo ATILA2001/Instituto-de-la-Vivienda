@@ -13,23 +13,39 @@ namespace WebForms
     public partial class CertificadosAdmin : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
-
-        protected void Page_Init(object sender, EventArgs e) 
+        protected void Page_Init(object sender, EventArgs e)
         {
-            //cblArea.AcceptChanges += OnAcceptChanges;
-            //cblBarrio.AcceptChanges += OnAcceptChanges;
-            //cblProyecto.AcceptChanges += OnAcceptChanges;
-            //cblEmpresa.AcceptChanges += OnAcceptChanges;
-            //cblAutorizante.AcceptChanges += OnAcceptChanges;
-            //cblTipo.AcceptChanges += OnAcceptChanges;
-            //cblFecha.AcceptChanges += OnAcceptChanges;
-            //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
+            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
         }
 
-        private void OnAcceptChanges(object sender, EventArgs e)
+        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaCertificados();
         }
+        //protected void Page_Init(object sender, EventArgs e) 
+        //{
+        //    //cblArea.AcceptChanges += OnAcceptChanges;
+        //    //cblBarrio.AcceptChanges += OnAcceptChanges;
+        //    //cblProyecto.AcceptChanges += OnAcceptChanges;
+        //    //cblEmpresa.AcceptChanges += OnAcceptChanges;
+        //    //cblAutorizante.AcceptChanges += OnAcceptChanges;
+        //    //cblTipo.AcceptChanges += OnAcceptChanges;
+        //    //cblFecha.AcceptChanges += OnAcceptChanges;
+        //    //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
+        //}
+
+        //private void OnAcceptChanges(object sender, EventArgs e)
+        //{
+        //    CargarListaCertificados();
+        //}
 
         protected void Page_Load(object sender, EventArgs e)
         {
