@@ -13,7 +13,7 @@
         <div class="search-container">
             <div class="search-row">
                 <input type="text" id="<%= chkList.ClientID %>_txtSearch" placeholder="Buscar..." onkeyup="filterCheckboxes('<%= chkList.ClientID %>')" class="form-control" />
-                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-primary"
+                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-primary fs-5"
                     OnClick="BtnDeselectAll_Click"
                     OnClientClick="sessionStorage.setItem('shouldCloseDropdown', 'true'); return true;"
                     ToolTip="Deseleccionar todo"
@@ -148,13 +148,6 @@
         z-index: 10;
         border-bottom: 1px solid #ccc;
     }
-
-    .material-symbols-rounded.btn {
-        height: 2.5em;
-        width: 3em;
-        padding: 0;
-    }
-
 
     /* Contenido desplegable */
     .dropdown-content {
