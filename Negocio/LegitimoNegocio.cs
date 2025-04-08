@@ -299,6 +299,8 @@ namespace Negocio
                 }
 
 
+                query += " ORDER BY O.DESCRIPCION,L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
+
                 datos.setearConsulta(query);
 
                 datos.agregarParametro("@area", usuario.Area.Id);
@@ -497,6 +499,7 @@ END AS ESTADO,
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
 
+                query += " ORDER BY O.DESCRIPCION,L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
                 datos.setearConsulta(query);
 
 

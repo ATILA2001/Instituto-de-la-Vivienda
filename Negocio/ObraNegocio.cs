@@ -46,7 +46,7 @@ namespace Negocio
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
 
-
+                query += " ORDER BY DESCRIPCION";
                 datos.setearConsulta(query);
                 datos.agregarParametro("@area", usuario.Area.Id);
                 datos.ejecutarLectura();
