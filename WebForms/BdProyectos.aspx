@@ -22,7 +22,7 @@
                             <div class="row">
                                     <div class="mb-3">
                                         <label for="ddlObra" class="form-label">Obra</label>
-                                        <asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
+                                        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server"></asp:DropDownList>
                                     </div>
                                 <div class="col-6">
 
@@ -48,7 +48,7 @@
 
                                     <div class="mb-3">
                                         <label for="ddlLineaGestion" class="form-label">Linea de Gestión</label>
-                                        <asp:DropDownList ID="ddlLineaGestion" CssClass="form-control" runat="server" />
+                                        <asp:DropDownList ID="ddlLineaGestion" CssClass="form-select" runat="server" />
                                     </div>
 
                                 </div>
