@@ -10,7 +10,7 @@
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table1">
-					<thead class="thead-dark" >
+					<thead class="thead-dark">
 						<tr>
 							<th>Area</th>
 							<th>Empresa</th>
@@ -69,148 +69,137 @@
 		</div>
 	</div>
 
-	<div class="row mt-4">
-		<div class="col-md-12">
-			<div class="text-end">
+	<div class="row mt-4 mb-3">
+		<div class="col-12">
+			<div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+				<!-- Contenedor de Filtros alineados a la izquierda -->
 
-				<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
+				<div class="d-flex flex-wrap gap-3">
 
 
-					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblArea">Area:</label>
-						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownArea" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-               
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownArea" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblArea" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
+					<div class="form-group mb-2">
+						<label class="form-label ms-2 mb-0" for="cblArea">Area:</label>
+						<div>
+
 							<CustomControls:CheckBoxListSearch ID="cblArea" runat="server" />
 						</div>
 					</div>
 
-					<div class="form-group ">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
-						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
-								Todas
-               
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
+					<div class="form-group mb-2">
+						<label class="form-label ms-2 mb-0" for="cblEmpresa">Empresa:</label>
+						<div>
+
 							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
 
-					<div class="form-group">
-						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblBarrio">Barrio:</label>
-						<div class="dropdown">
-							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownBarrio" data-bs-toggle="dropdown" aria-expanded="false">
-								Todos
-               
-							</button>
-							<ul class="dropdown-menu p-2" aria-labelledby="dropdownBarrio" style="max-height: 200px; overflow-y: auto;">
-								<!-- Rendimos la CheckBoxList aquí -->
-								<asp:CheckBoxList ID="cblBarrio" runat="server" CssClass="dropdown-item form-check" />
-							</ul>--%>
-                            <CustomControls:CheckBoxListSearch ID="cblBarrio" runat="server" />
-						</div>
-					</div>
 
-					<div class="form-group text-left" style="flex: 1; max-width: 300px;">
-						<label class="form-label lbl-left" for="txtBuscar">Buscar:</label>
-						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control form-control-uniform"></asp:TextBox>
-					</div>
+					<div class="form-group mb-2">
+						<label class="form-label ms-2 mb-0" for="cblBarrio">Barrio:</label>
+						<div>
 
-					<div class="d-flex flex-wrap justify-content-end gap-3" style="flex: 3;">
-
-
-
-
-
-						<div class="form-group d-flex align-items-end">
-							<button class="btn btn-sm btn-secondary" id="visibilityMessage">
-								<span id="visibilityText">Agregar Obra</span>
-							</button>
-						</div>
-
-
-						<div class="form-group  d-flex align-items-end">
-							<%--<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
-							<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
-						</div>
-						<div class="form-group d-flex align-items-end">
-							<asp:Button CssClass="btn btn-sm btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />
+							<CustomControls:CheckBoxListSearch ID="cblBarrio" runat="server" />
 						</div>
 					</div>
 				</div>
-			</div>
 
-			<hr />
+				<!-- Contenedor de Botones alineados a la derecha -->
+				<div class="d-flex gap-3">
+
+					<div class="form-group mb-2">
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
+					</div>
+					<div class="form-group mb-2">
+						<%--<asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />--%>
+						<asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
+							data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
+					<i class="bi bi-search"></i>
+						</asp:LinkButton>
+					</div>
 
 
-			<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover"
-				OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
-				OnRowDeleting="dgvObra_RowDeleting"
-				AutoGenerateColumns="false" runat="server"
-				Style="display: block; overflow-x: auto;">
+					<%-- logica que aparezca o desaparezca. copiar de david --%>
+					<div class="form-group mb-2">
+						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
+					<i class="bi bi-funnel"></i>
+						</asp:LinkButton>
+					</div>
 
-				<Columns>
-					<asp:BoundField HeaderText="ID" DataField="Id" />
-					<asp:BoundField HeaderText="Área" DataField="Area"  />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa"/>
-					<asp:TemplateField HeaderText="Contrata" >
-						<ItemTemplate>
-							<%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Año") %>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:BoundField HeaderText="Barrio" DataField="Barrio" />
-					<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
-					<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea"  />
-					<asp:BoundField HeaderText="Proyecto" DataField="Proyecto"  />
 
-					<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado"  DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+					<%-- no hace falta logica script, abriria un modal --%>
+					<div class="form-group mb-2">
+						<%--<button class="btn btn-secondary" id="visibilityMessage">
+					<span id="visibilityText">Agregar Obra</span>
+				</button>--%>
+						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+					<i class="bi bi-plus-lg" ></i> Agregar
+						</asp:LinkButton>
+					</div>
 
-					<asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial"  DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante"  DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin"  DataFormatString="{0:dd-MM-yyyy}" />
-
-                    <asp:TemplateField HeaderText="Acciones">
-                        <ItemTemplate>
-                            <div class="d-flex justify-content-center gap-2">
-                                <asp:LinkButton ID="btnModificar" runat="server"
-                                    CommandName="Select"
-                                    CssClass="btn btn-sm btn-warning text-dark"
-                                    ToolTip="Modificar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnEliminar" runat="server"
-                                    CommandName="Delete"
-                                    CssClass="btn btn-sm btn-danger text-light"
-                                    ToolTip="Eliminar"
-                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                                    <i class="bi bi-trash"></i>
-                                </asp:LinkButton>
-                            </div>
-                        </ItemTemplate>
-                    </asp:TemplateField>
-				</Columns>
-			</asp:GridView>
-
-			<div class="text-center p-4">
-				<asp:Label ID="lblMensaje" Text="" runat="server" />
+				</div>
 			</div>
 		</div>
+		<hr class="mb-3" />
+
+
+		<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+			OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
+			OnRowDeleting="dgvObra_RowDeleting"
+			AutoGenerateColumns="false" runat="server">
+
+			<Columns>
+				<asp:BoundField HeaderText="ID" DataField="Id" />
+				<asp:BoundField HeaderText="Área" DataField="Area" />
+				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+				<asp:TemplateField HeaderText="Contrata">
+					<ItemTemplate>
+						<%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Año") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />
+				<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
+				<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
+				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
+
+				<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+
+				<asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
+				<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
+
+				<asp:TemplateField HeaderText="Acciones">
+					<ItemTemplate>
+						<div class="d-flex justify-content-center gap-2">
+							<asp:LinkButton ID="btnModificar" runat="server"
+								CommandName="Select"
+								CssClass="btn btn-sm btn-warning "
+								ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+							</asp:LinkButton>
+							<asp:LinkButton ID="btnEliminar" runat="server"
+								CommandName="Delete"
+								CssClass="btn btn-sm btn-danger "
+								ToolTip="Eliminar"
+								OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+							</asp:LinkButton>
+						</div>
+					</ItemTemplate>
+				</asp:TemplateField>
+			</Columns>
+		</asp:GridView>
+
+		<div class="text-center p-4">
+			<asp:Label ID="lblMensaje" Text="" runat="server" />
+		</div>
 	</div>
-	<script type="text/javascript">
+
+
+	<%--<script type="text/javascript">
 		function soloNumeros(e) {
 			var tecla = (document) ? e.keyCode : e.which;
 			if (tecla == 8 || tecla == 46) {
@@ -249,9 +238,7 @@
 			});
 		});
 		
-	</script>
-	
-
+	</script>--%>
 </asp:Content>
 
 
