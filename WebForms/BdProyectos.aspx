@@ -29,6 +29,21 @@
                                 <div class="col-6">
 
                                     <div class="mb-3">
+                                        <label for="txtProyecto" class="form-label">Proyecto</label>
+                                        <asp:TextBox ID="txtProyecto" CssClass="form-control" runat="server" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="ddlLineaGestion" class="form-label">Linea de Gestión</label>
+                                        <asp:DropDownList ID="ddlLineaGestion" CssClass="form-select" runat="server" />
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-6">
+
+                                    <div class="mb-3">
                                         <label for="txtSubProyecto" class="form-label">SubProyecto</label>
                                         <asp:TextBox ID="txtSubProyecto" CssClass="form-control" runat="server" />
                                     </div>
@@ -38,19 +53,6 @@
                                         <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" />
                                     </div>
 
-                                </div>
-
-                                <div class="col-6">
-
-                                    <div class="mb-3">
-                                        <label for="txtProyecto" class="form-label">Proyecto</label>
-                                        <asp:TextBox ID="txtProyecto" CssClass="form-control" runat="server" />
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="ddlLineaGestion" class="form-label">Linea de Gestión</label>
-                                        <asp:DropDownList ID="ddlLineaGestion" CssClass="form-select" runat="server" />
-                                    </div>
 
                                 </div>
                             </div>
