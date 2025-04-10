@@ -17,15 +17,16 @@
                 </div>
                 <div class="modal-body">
 
-                    <form>
+                    <div class="form-group">
                         <div class="container">
                             <div class="row">
+                                <div class="col-12">
                                     <div class="mb-3">
                                         <label for="ddlObra" class="form-label">Obra</label>
                                         <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server"></asp:DropDownList>
                                     </div>
+                                </div>
                                 <div class="col-6">
-
 
                                     <div class="mb-3">
                                         <label for="txtSubProyecto" class="form-label">SubProyecto</label>
@@ -55,7 +56,7 @@
                             </div>
                         </div>
 
-                    </form>
+                    </div>
 
 
                 </div>
