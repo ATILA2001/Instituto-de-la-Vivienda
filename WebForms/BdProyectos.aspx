@@ -48,10 +48,27 @@
 										<asp:TextBox ID="txtSubProyecto" CssClass="form-control" runat="server" />
 									</div>
 
-									<div class="mb-3">
-										<label for="txtMontoAutorizadoInicial" class="form-label">Monto Autorizado</label>
-										<asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" />
-									</div>
+                                    <div class="mb-3">
+                                        <label for="txtMontoAutorizadoInicial" class="form-label">Monto Autorizado</label>
+                                        <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" />
+                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
+                                            ControlToValidate="txtMontoAutorizadoInicial"
+                                            ValidationGroup="AgregarProyecto"
+                                            runat="server"
+                                            ErrorMessage="El monto es requerido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger" 
+                                            EnableClientScript="true"/>
+                                        <asp:RegularExpressionValidator ID="revMontoAutorizado"
+                                            ControlToValidate="txtMontoAutorizadoInicial"
+                                            ValidationGroup="AgregarProyecto"
+                                            runat="server"
+											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
+                                            ErrorMessage="Solo números positivos con hasta 2 decimales"
+                                            Display="Dynamic"
+                                            CssClass="text-danger" 
+                                            EnableClientScript="true"/>
+                                    </div>
 
 
 								</div>
@@ -61,61 +78,20 @@
 					</div>
 
 
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-					<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" />
+                </div>
+                <div class="modal-footer d-flex justify-content-between px-4">
 
+					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+					<div class="d-flex gap-4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarProyecto" OnClientClick="if(!Page_ClientValidate('AgregarProyecto')) return false;" UseSubmitBehavior="false"/>
+					</div>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	
 	<!-- /Modal -->
-
-
-	<%--    <div id="section12" class="modal modal-fade">
-        <div class="modal-body">
-            <div class="col-md-12">
-                <table class="table table1">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Obra</th>
-                            <th>Proyecto</th>
-                            <th>SubProyecto</th>
-                            <th>Linea de Gestión</th>
-                            <th>Monto Autorizado Inicial</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
-                            </td>
-                            <td>
-                                <asp:TextBox ID="txtProyecto" CssClass="form-control" runat="server" />
-                            </td>
-                            <td>
-                                <asp:TextBox ID="txtSubProyecto" CssClass="form-control" runat="server" />
-                            </td>
-                            <td>
-                                <asp:DropDownList ID="ddlLineaGestion" CssClass="form-control" runat="server"></asp:DropDownList>
-                            </td>
-                            <td>
-                                <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" />
-                            </td>
-
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="modal-footer">
-                    <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" />
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-
-            </div>
-        </div>
-    </div>--%>
 
 
 	<div class="row mt-4 mb-3">
@@ -230,42 +206,48 @@
 		</div>
 	</div>
 
-	<%--<script type="text/javascript">
-		$(document).ready(function () {
-			// Inicializamos la visibilidad según el valor almacenado en localStorage
-			var sectionVisible = localStorage.getItem("sectionVisible");
+    <script type="text/javascript">
+        
+        const myModal = document.getElementById('myModal')
+        const myInput = document.getElementById('myInput')
 
-			if (sectionVisible === "true") {
-				$('#section1').show();
-				$('#visibilityText').text("Ocultar sección");
-			} else {
-				$('#section1').hide();
-				$('#visibilityText').text("Agregar Proyecto");
-			}
+        myModal.addEventListener('shown.bs.modal', () => {
+            myInput.focus()
+        })
 
-			// Manejar clic en el botón para alternar la visibilidad
-			$('#visibilityMessage').on('click', function () {
-				var currentStatus = $('#visibilityText').text();
 
-				if (currentStatus === "Agregar Proyecto") {
-					localStorage.setItem("sectionVisible", "true");
-					$('#section1').show();
-					$('#visibilityText').text("Ocultar sección");
-				} else {
-					localStorage.setItem("sectionVisible", "false");
-					$('#section1').hide();
-					$('#visibilityText').text("Agregar Proyecto");
-				}
-			});
-		});
-	</script>--%>
 
-	<script type="text/javascript">
-		const myModal = document.getElementById('myModal')
-		const myInput = document.getElementById('myInput')
+        $(document).ready(function () {
+            var modalAgregar = new bootstrap.Modal(document.getElementById('modalAgregar'));
 
-		myModal.addEventListener('shown.bs.modal', () => {
-			myInput.focus()
-		})
-	</script>
+            // Prevenir cierre del modal si hay errores de validación
+            $('#modalAgregar').on('hide.bs.modal', function (e) {
+                if (!Page_IsValid) {
+                    e.preventDefault();
+                }
+            });
+
+            // Validación en tiempo real
+            $('#<%= txtMontoAutorizadoInicial.ClientID %>').on('change keyup', function () {
+                if (typeof Page_ClientValidate === 'function') {
+                    ValidatorValidate(document.getElementById('<%= rfvMontoAutorizado.ClientID %>'));
+                    ValidatorValidate(document.getElementById('<%= revMontoAutorizado.ClientID %>'));
+                }
+            });
+
+            // Si hay errores después de un postback, mostrar el modal
+            if (!Page_IsValid) {
+                modalAgregar.show();
+            }
+        });
+		
+		function limpiarFormulario() {
+			document.getElementById('<%= txtProyecto.ClientID %>').value = '';
+			document.getElementById('<%= txtSubProyecto.ClientID %>').value = '';
+			document.getElementById('<%= txtMontoAutorizadoInicial.ClientID %>').value = '';
+			document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlLineaGestion.ClientID %>').selectedIndex = 0;
+		}
+
+    </script>
 </asp:Content>

@@ -95,6 +95,7 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="CustomControls\CheckBoxListSearch.ascx" />
     <Content Include="Error.aspx" />
+    <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
     <Content Include="Images\IVC-Blanco.png" />
@@ -128,6 +129,11 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <None Include="Scripts\jquery-3.6.0.intellisense.js" />
+    <Content Include="Scripts\jquery-3.6.0.js" />
+    <Content Include="Scripts\jquery-3.6.0.min.js" />
+    <Content Include="Scripts\jquery-3.6.0.slim.js" />
+    <Content Include="Scripts\jquery-3.6.0.slim.min.js" />
     <Content Include="Styles\base.css" />
     <Content Include="Styles\components.css" />
     <Content Include="Styles\layout.css" />
@@ -217,6 +223,7 @@
     <Compile Include="Error.aspx.designer.cs">
       <DependentUpon>Error.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Global.cs" />
     <Compile Include="Legitimos.aspx.cs">
       <DependentUpon>Legitimos.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -550,6 +557,8 @@
     <Content Include="Scripts\bootstrap.esm.js.map" />
     <Content Include="Scripts\bootstrap.bundle.min.js.map" />
     <Content Include="Scripts\bootstrap.bundle.js.map" />
+    <Content Include="Scripts\jquery-3.6.0.slim.min.map" />
+    <Content Include="Scripts\jquery-3.6.0.min.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

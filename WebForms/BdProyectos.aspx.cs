@@ -126,6 +126,8 @@ namespace WebForms
          }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!Page.IsValid) return;
+
             try
             {
                 BdProyecto nuevoProyecto = new BdProyecto();
