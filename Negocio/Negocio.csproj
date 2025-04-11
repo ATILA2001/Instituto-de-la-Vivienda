@@ -48,6 +48,7 @@
     <Compile Include="AutorizanteNegocio.cs" />
     <Compile Include="BarrioNegocio.cs" />
     <Compile Include="BdProyectoNegocio.cs" />
+    <Compile Include="CalculoRedeterminacionNegocio.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ContrataNegocio.cs" />
