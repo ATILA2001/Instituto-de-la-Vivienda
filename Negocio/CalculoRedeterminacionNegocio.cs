@@ -68,18 +68,10 @@ namespace Negocio
                         decimal montoCalculado = ((autorizante.MontoAutorizado * redet.Porcentaje.Value) / 100) * (faltante / 100);
 
                         // Agregar el monto calculado a la redeterminación
-                        var redetCalculada = new Redeterminacion(); // Asumiendo que hay un constructor de copia o crear uno nuevo
+                        var redetCalculada = new Redeterminacion(); 
                         redetCalculada = redet;
                         redetCalculada.MontoRedet = montoCalculado;
-                        // Asignar el valor calculado a un nuevo campo, por ejemplo MontoCalculado
-                        // Como no existe este campo en la clase, habría que extenderla o usar un Dictionary
-
-                        // Por ahora lo guardamos en una propiedad anónima para devolver
-                        var resultado = new
-                        {
-                            Redeterminacion = redet,
-                            MontoCalculado = montoCalculado
-                        };
+                                           
 
                         redeterminacionesCalculadas.Add(redet); // Agregar a la lista de resultados
                     }
