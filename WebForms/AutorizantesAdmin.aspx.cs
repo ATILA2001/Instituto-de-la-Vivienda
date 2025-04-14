@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using Negocio;
+using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,7 @@ namespace WebForms
     public partial class AutorizantesAdmin : System.Web.UI.Page
     {
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
+        private CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
         protected void Page_Init(object sender, EventArgs e)
         {
@@ -25,7 +27,7 @@ namespace WebForms
 
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CargarListaAutorizantes();
+            //CargarListaAutorizantes();
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -33,8 +35,10 @@ namespace WebForms
             if (!IsPostBack)
             {
                 BindDropDownList();
-                CargarListaAutorizantes();
+                //CargarListaAutorizantes();
+                CargarListaAutorizantesRedet();
                 CalcularSubtotal();
+
             }
         }
         
@@ -59,7 +63,7 @@ namespace WebForms
         {
             string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
 
-            CargarListaAutorizantes(filtro);
+            //CargarListaAutorizantes(filtro);
         }
 
           protected void btnAgregar_Click(object sender, EventArgs e)
@@ -81,7 +85,7 @@ namespace WebForms
                 autorizanteNegocio.agregar(nuevoAutorizante);
 
                 lblMensaje.Text = "Autorizante agregado con éxito.";
-                CargarListaAutorizantes();
+                //CargarListaAutorizantes();
                 CalcularSubtotal();
             }
           
@@ -103,6 +107,22 @@ namespace WebForms
                 dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        private void CargarListaAutorizantesRedet(string filtro = null)
+        {
+            try
+            {
+                Session["listaAutorizanteAdmin"] = calculoRedeterminacionNegocio.listarAutRedet();
+                dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
+                dgvAutorizante.DataBind();
+                //CalcularSubtotal();
             }
             catch (Exception ex)
             {
@@ -141,7 +161,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Barrio eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaAutorizantes();
+                    //CargarListaAutorizantes();
                     CalcularSubtotal();
                 }
             }
@@ -227,7 +247,7 @@ namespace WebForms
 
                 // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaAutorizantes();
+                //CargarListaAutorizantes();
                 CalcularSubtotal();
 
             }
@@ -267,7 +287,7 @@ namespace WebForms
                 autorizante.Estado.Id = int.Parse(ddlEstadoAutorizante.SelectedValue);
                 AutorizanteNegocio negocio = new AutorizanteNegocio();
                 negocio.ActualizarEstado(autorizante);
-                CargarListaAutorizantes();
+                //CargarListaAutorizantes();
 
                 lblMensaje.Text = "Estado actualizado correctamente.";
                 lblMensaje.CssClass = "alert alert-success";
@@ -301,7 +321,7 @@ namespace WebForms
             cblConcepto.ClearSelection();
             cblEstado.ClearSelection();
             cblObra.ClearSelection();
-            CargarListaAutorizantes();
+            //CargarListaAutorizantes();
         }
 
     }

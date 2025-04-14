@@ -189,6 +189,92 @@ namespace Negocio
             }
         }
 
+
+        public List<Redeterminacion> listar()
+        {
+            List<Redeterminacion> lista = new List<Redeterminacion>();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string query = @"SELECT 
+                            R.ID,
+							O.DESCRIPCION,
+                            R.CODIGO_AUTORIZANTE,
+                            R.EXPEDIENTE,
+                            R.SALTO,
+                            R.NRO,
+                            R.TIPO,
+                            R.ETAPA,
+                            R.OBSERVACIONES,
+							EM.NOMBRE AS EMPRESA,
+							AR.NOMBRE AS AREA,
+                            R.CODIGO_REDET,
+                            E.ID AS ETAPA_ID,
+                            E.NOMBRE AS ETAPA_NOMBRE,
+                            R.PORCENTAJE_PONDERACION AS PORCENTAJE,
+							PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE]
+                        FROM 
+                            REDETERMINACIONES AS R
+                        INNER JOIN 
+                            ESTADOS_REDET AS E ON R.ETAPA = E.ID
+							inner join AUTORIZANTES A ON R.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE
+							inner join OBRAS O on A.OBRA = O.ID
+							INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID
+							INNER JOIN AREAS AS AR ON O.AREA = AR.ID
+							LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
+                        WHERE 1=1";
+datos.setearConsulta(query);
+                datos.ejecutarLectura();
+
+                while (datos.Lector.Read())
+                {
+                    Redeterminacion aux = new Redeterminacion
+                    {
+                        Id = (int)datos.Lector["ID"],
+                        Autorizante = new Autorizante
+                        {
+                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string
+                        },
+                        Expediente = datos.Lector["EXPEDIENTE"] as string,
+                        Salto = datos.Lector["SALTO"] != DBNull.Value ? (DateTime)datos.Lector["SALTO"] : (DateTime?)null,
+                        Nro = datos.Lector["NRO"] != DBNull.Value ? (int)datos.Lector["NRO"] : (int?)null,
+                        Tipo = datos.Lector["TIPO"] as string,
+                        Observaciones = datos.Lector["OBSERVACIONES"] as string,
+                        CodigoRedet = datos.Lector["CODIGO_REDET"] as string,
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null,
+                        Obra = datos.Lector["DESCRIPCION"] as string,
+                        FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
+                        BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
+
+                        Empresa = datos.Lector["EMPRESA"] as string,
+
+
+                        Area = datos.Lector["AREA"] as string
+
+                        ,
+                        Etapa = new EstadoRedet
+                        {
+                            Id = (int)datos.Lector["ETAPA_ID"],
+                            Nombre = datos.Lector["ETAPA_NOMBRE"] as string
+                        }
+                    };
+
+                    lista.Add(aux);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
         public bool ActualizarEstado(Redeterminacion autorizante)
         {
             var datos = new AccesoDatos();

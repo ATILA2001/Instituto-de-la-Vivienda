@@ -162,7 +162,8 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Autorizante> listar(List<string> areas, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra,string filtro = null)
+
+        public List<Autorizante> listar(List<string> areas, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra, string filtro = null)
         {
             List<Autorizante> lista = new List<Autorizante>();
             AccesoDatos datos = new AccesoDatos();
@@ -280,6 +281,75 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+
+
+        public List<Autorizante> listar()
+        {
+            List<Autorizante> lista = new List<Autorizante>();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,A.MES_BASE,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
+                query += " ORDER BY O.DESCRIPCION,A.CODIGO_AUTORIZANTE";
+                datos.setearConsulta(query);
+                datos.ejecutarLectura();
+                while (datos.Lector.Read())
+                {
+
+                    Autorizante aux = new Autorizante();
+                    aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
+                    aux.Detalle = datos.Lector["DETALLE"] as string;
+                    aux.Concepto = new Concepto
+                    {
+                        Nombre = datos.Lector["CONCEPTO"] as string,
+                        Id = (int)datos.Lector["CONCEPTO_ID"]
+                    };
+                    aux.Empresa = datos.Lector["EMPRESA"] as string;
+                    aux.Estado = new EstadoAutorizante
+                    {
+                        Nombre = datos.Lector["ESTADO"] as string,
+                        Id = (int)datos.Lector["ESTADO_ID"]
+                    };
+
+                    aux.Expediente = datos.Lector["EXPEDIENTE"] as string;
+                    aux.MontoAutorizado = datos.Lector["MONTO_AUTORIZADO"] != DBNull.Value ? (decimal)datos.Lector["MONTO_AUTORIZADO"] : 0M;
+                    aux.AutorizacionGG = (bool)datos.Lector["AUTORIZACION_GG"];
+                    aux.Fecha = datos.Lector["MES"] != DBNull.Value ? (DateTime)datos.Lector["MES"] : (DateTime?)null;
+                    aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ? (DateTime)datos.Lector["MES_BASE"] : (DateTime?)null;
+                    aux.Obra = new Obra
+                    {
+                        Id = (int)datos.Lector["OBRA_ID"],
+                        Descripcion = datos.Lector["OBRA"] as string,
+                        Contrata = new Contrata
+                        {
+                            Id = (int)datos.Lector["CONTRATA_ID"],
+                            Nombre = datos.Lector["CONTRATA"] as string
+                        },
+
+                        Area = new Area
+                        {
+                            Id = (int)datos.Lector["AREA_ID"],
+                            Nombre = datos.Lector["AREA"] as string
+                        }
+                    };
+                    lista.Add(aux);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+
+
         public List<Autorizante> listarPendientes(string estado, string empresa, int obra, string area)
         {
             List<Autorizante> lista = new List<Autorizante>();

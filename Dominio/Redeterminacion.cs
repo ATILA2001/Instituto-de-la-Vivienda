@@ -24,6 +24,8 @@ namespace Dominio
         public DateTime? FechaSade { get; set; }
         public string BuzonSade { get; set; }
 
+        public decimal? MontoRedet { get; set; }
+
         public Redeterminacion() { }
     }
 }
