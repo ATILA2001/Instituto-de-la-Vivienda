@@ -72,6 +72,7 @@ namespace Negocio
             {
                 string query = @"SELECT 
                             R.ID,
+                            O.ID AS OBRA_ID,
 							O.DESCRIPCION,
                             R.CODIGO_AUTORIZANTE,
                             R.EXPEDIENTE,
@@ -97,7 +98,7 @@ namespace Negocio
 							INNER JOIN AREAS AS AR ON O.AREA = AR.ID
 							LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
                         WHERE 1=1";
-
+                query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
                 if (etapa != null && etapa.Count > 0)
                 {
                     string etapaParam = string.Join(",", etapa.Select((e, i) => $"@etapa{i}"));
@@ -157,7 +158,7 @@ namespace Negocio
                         Observaciones = datos.Lector["OBSERVACIONES"] as string,
                         CodigoRedet = datos.Lector["CODIGO_REDET"] as string,
                         Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null,
-                        Obra = datos.Lector["DESCRIPCION"] as string,
+                        Obra = new Obra {Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
 
@@ -199,7 +200,8 @@ namespace Negocio
             {
                 string query = @"SELECT 
                             R.ID,
-							O.DESCRIPCION,
+                            O.ID AS OBRA_ID,
+							O.DESCRIPCION, 
                             R.CODIGO_AUTORIZANTE,
                             R.EXPEDIENTE,
                             R.SALTO,
@@ -223,8 +225,9 @@ namespace Negocio
 							INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID
 							INNER JOIN AREAS AS AR ON O.AREA = AR.ID
 							LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
-                        WHERE 1=1";
-datos.setearConsulta(query);
+                        WHERE 1=1 ";
+                query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
+                datos.setearConsulta(query);
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
@@ -243,7 +246,7 @@ datos.setearConsulta(query);
                         Observaciones = datos.Lector["OBSERVACIONES"] as string,
                         CodigoRedet = datos.Lector["CODIGO_REDET"] as string,
                         Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null,
-                        Obra = datos.Lector["DESCRIPCION"] as string,
+                        Obra = new Obra { Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
 

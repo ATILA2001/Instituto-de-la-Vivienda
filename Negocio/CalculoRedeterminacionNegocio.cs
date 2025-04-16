@@ -18,7 +18,9 @@ namespace Negocio
     {
         public class CalculoRedeterminacionNegocio
         {
-            public List<Redeterminacion> listarAutRedet()
+            public List<Autorizante> listarAutRedet()
+
+
             {
                 List<Autorizante> listaAut = new List<Autorizante>();
                 List<Certificado> listaCert = new List<Certificado>();
@@ -64,21 +66,76 @@ namespace Negocio
                         // Asegurar que el faltante no sea negativo
                         faltante = Math.Max(0, faltante);
 
-                        // Calcular monto según la fórmula: ((montoAutorizado * porcentaje) / 100) * faltante / 100
-                        decimal montoCalculado = ((autorizante.MontoAutorizado * redet.Porcentaje.Value) / 100) * (faltante / 100);
+                        decimal montoCalculado = 0;
+
+                        if (redet.Nro == 1)
+                        {
+                            // Calcular monto según la fórmula: ((montoAutorizado * porcentaje) / 100) * faltante / 100
+                            montoCalculado = ((autorizante.MontoAutorizado * redet.Porcentaje.Value) / 100) * (faltante / 100);
+                        }
+                        else
+                        {
+                            // Obtener redeterminaciones anteriores para este mismo autorizante
+                            var redeterminacionesAnteriores = redeterminacionesCalculadas
+                                .Where(r => r.Autorizante.CodigoAutorizante == redet.Autorizante.CodigoAutorizante
+                                       && r.Nro.HasValue
+                                       && r.Nro.Value < redet.Nro.Value
+                                       && r.MontoRedet.HasValue)
+                                .ToList();
+
+
+                            // Sumar los montos de redeterminaciones anteriores
+                            decimal sumaMontosRedet = redeterminacionesAnteriores.Sum(r => r.MontoRedet.Value);
+
+                            // Calcular monto según la fórmula: ((montoAutorizado * porcentaje) / 100) * faltante / 100 + sumaMontosRedet
+                            montoCalculado = (((autorizante.MontoAutorizado + sumaMontosRedet) * redet.Porcentaje.Value) / 100) * (faltante / 100);
+                        }
+
+
 
                         // Agregar el monto calculado a la redeterminación
-                        var redetCalculada = new Redeterminacion(); 
+                        var redetCalculada = new Redeterminacion();
                         redetCalculada = redet;
                         redetCalculada.MontoRedet = montoCalculado;
-                                           
 
                         redeterminacionesCalculadas.Add(redet); // Agregar a la lista de resultados
+
                     }
                 }
 
-                return redeterminacionesCalculadas;
+                // En lugar de listaAut.AddRange(redeterminacionesCalculadas)
+                foreach (var redet in redeterminacionesCalculadas)
+                {
+                    // Crear un nuevo autorizante con los campos necesarios de la redeterminación
+                    var nuevoAutorizante = new Autorizante
+                    {
+                        Obra = new Obra
+                        {
+                            Descripcion = redet.Autorizante.Obra.Descripcion,
+                            Id = redet.Autorizante.Obra.Id,
+                            Area = new Area { Nombre = redet.Autorizante.Obra.Area.Nombre },
+                            Contrata = new Contrata {Nombre = redet.Autorizante.Obra.Contrata.Nombre }
+                        },
+                        CodigoAutorizante = redet.CodigoRedet,
+                        Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Asigna un concepto por defecto
+                        Detalle = redet.Observaciones,
+                        Expediente = redet.Expediente,
+                        Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
+                        MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
+                        Fecha = redet.Salto,
+                        Empresa = redet.Empresa,
+                        FechaSade = redet.FechaSade,
+                        BuzonSade = redet.BuzonSade,
+                        AutorizacionGG = true
+                    };
+                
+
+                listaAut.Add(nuevoAutorizante);
+                }
+
+                return listaAut;
             }
+
         }
     }
 
