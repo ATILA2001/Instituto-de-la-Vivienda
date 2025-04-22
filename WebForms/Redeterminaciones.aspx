@@ -162,7 +162,7 @@
 				AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
-					<asp:BoundField HeaderText="Obra" DataField="Obra" />
+					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 					<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" />
 					<asp:BoundField HeaderText="Etapa" DataField="Etapa.Nombre" />
 					<asp:TemplateField HeaderText="Etapa" >
@@ -181,14 +181,12 @@
 					</asp:TemplateField>
 					<asp:BoundField HeaderText="Tipo" DataField="Tipo"  />
 					<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}"  />
-					<asp:BoundField HeaderText="Buzón SADE" DataField="BuzonSade"  />
-					<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
 					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje"  />
 					<asp:BoundField HeaderText="Observaciones" DataField="Observaciones"  />
 					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 					<asp:BoundField HeaderText="Área" DataField="Area"  />
-					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade"  />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
+					<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade"  />
+					<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}"  />
 
 					<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-sm btn-warning text-dark"  />
 					<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-sm btn-danger text-light" />

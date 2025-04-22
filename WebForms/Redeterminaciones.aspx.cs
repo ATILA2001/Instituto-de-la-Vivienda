@@ -38,17 +38,17 @@ namespace WebForms
         {
             try
             {
-             
+
                 var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedEtapas = cblEtapa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 //var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaRedeterminacion"] = negocio.listar(selectedEtapas,selectedAutorizantes, selectedObras, filtro);
+                Session["listaRedeterminacion"] = negocio.listar(selectedEtapas, selectedAutorizantes, selectedObras, filtro);
                 dgvRedeterminacion.DataSource = Session["listaRedeterminacion"];
                 dgvRedeterminacion.DataBind();
-        
+
             }
             catch (Exception ex)
             {
@@ -166,7 +166,7 @@ namespace WebForms
             ddlEtapa.DataTextField = "Nombre";
             ddlEtapa.DataValueField = "Id";
             ddlEtapa.DataBind();
-        
+
 
             cblEtapa.DataSource = ObtenerTipos();
             cblEtapa.DataTextField = "Nombre";
@@ -205,7 +205,7 @@ namespace WebForms
         }
         private DataTable ObtenerObras()
         {
-           ObraNegocio empresaNegocio = new ObraNegocio();
+            ObraNegocio empresaNegocio = new ObraNegocio();
             return empresaNegocio.listarddl();
         }
         private DataRow CrearFilaTodos(DataTable table)
