@@ -158,7 +158,7 @@ namespace Negocio
                         Observaciones = datos.Lector["OBSERVACIONES"] as string,
                         CodigoRedet = datos.Lector["CODIGO_REDET"] as string,
                         Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null,
-                        Obra = new Obra {Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
+                        Obra = new Obra { Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
 
@@ -199,33 +199,38 @@ namespace Negocio
             try
             {
                 string query = @"SELECT 
-                            R.ID,
-                            O.ID AS OBRA_ID,
-							O.DESCRIPCION, 
-                            R.CODIGO_AUTORIZANTE,
-                            R.EXPEDIENTE,
-                            R.SALTO,
-                            R.NRO,
-                            R.TIPO,
-                            R.ETAPA,
-                            R.OBSERVACIONES,
-							EM.NOMBRE AS EMPRESA,
-							AR.NOMBRE AS AREA,
-                            R.CODIGO_REDET,
-                            E.ID AS ETAPA_ID,
-                            E.NOMBRE AS ETAPA_NOMBRE,
-                            R.PORCENTAJE_PONDERACION AS PORCENTAJE,
-							PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE]
-                        FROM 
-                            REDETERMINACIONES AS R
-                        INNER JOIN 
-                            ESTADOS_REDET AS E ON R.ETAPA = E.ID
-							inner join AUTORIZANTES A ON R.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE
-							inner join OBRAS O on A.OBRA = O.ID
-							INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID
-							INNER JOIN AREAS AS AR ON O.AREA = AR.ID
-							LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
-                        WHERE 1=1 ";
+                    R.ID,
+                    O.ID AS OBRA_ID,
+                    O.DESCRIPCION, 
+                    R.CODIGO_AUTORIZANTE,
+                    R.EXPEDIENTE,
+                    R.SALTO,
+                    R.NRO,
+                    R.TIPO,
+                    R.ETAPA,
+                    R.OBSERVACIONES,
+                    EM.NOMBRE AS EMPRESA,
+                    AR.ID AS AREA_ID,
+                    AR.NOMBRE AS AREA,
+                    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA_NOMBRE,
+                    C.ID AS CONTRATA_ID,
+                    R.CODIGO_REDET,
+                    E.ID AS ETAPA_ID,
+                    E.NOMBRE AS ETAPA_NOMBRE,
+                    R.PORCENTAJE_PONDERACION AS PORCENTAJE,
+                    PS.[BUZON DESTINO], 
+                    PS.[FECHA ULTIMO PASE]
+                FROM 
+                    REDETERMINACIONES AS R
+                INNER JOIN 
+                    ESTADOS_REDET AS E ON R.ETAPA = E.ID
+                inner join AUTORIZANTES A ON R.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE
+                inner join OBRAS O on A.OBRA = O.ID
+                INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID
+                INNER JOIN AREAS AS AR ON O.AREA = AR.ID
+                LEFT JOIN CONTRATA AS C ON O.CONTRATA = C.ID
+                LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
+                WHERE 1=1 ";
                 query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
@@ -237,7 +242,19 @@ namespace Negocio
                         Id = (int)datos.Lector["ID"],
                         Autorizante = new Autorizante
                         {
-                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string
+                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string,
+                            Obra = new Obra
+                            {
+                                Descripcion = datos.Lector["DESCRIPCION"] as string,
+                                Id = (int)datos.Lector["OBRA_ID"],
+                                Area = new Area { Id = (int)datos.Lector["AREA_ID"], Nombre = datos.Lector["AREA"] as string },
+                                Contrata = datos.Lector["CONTRATA_ID"] != DBNull.Value ?
+                                new Contrata
+                                {
+                                    Id = (int)datos.Lector["CONTRATA_ID"],
+                                    Nombre = datos.Lector["CONTRATA_NOMBRE"] as string
+                                } : null
+                            }
                         },
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
                         Salto = datos.Lector["SALTO"] != DBNull.Value ? (DateTime)datos.Lector["SALTO"] : (DateTime?)null,
@@ -246,16 +263,11 @@ namespace Negocio
                         Observaciones = datos.Lector["OBSERVACIONES"] as string,
                         CodigoRedet = datos.Lector["CODIGO_REDET"] as string,
                         Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? (decimal)datos.Lector["PORCENTAJE"] : (decimal?)null,
-                        Obra = new Obra { Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
+
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
-
                         Empresa = datos.Lector["EMPRESA"] as string,
-
-
-                        Area = datos.Lector["AREA"] as string
-
-                        ,
+                        Area = datos.Lector["AREA"] as string,
                         Etapa = new EstadoRedet
                         {
                             Id = (int)datos.Lector["ETAPA_ID"],
@@ -295,7 +307,7 @@ namespace Negocio
 
                 datos.ejecutarAccion();
                 return true;
-            }  
+            }
             catch (Exception ex)
             {
                 throw new Exception("Error al modificar la redeterminacion.", ex);

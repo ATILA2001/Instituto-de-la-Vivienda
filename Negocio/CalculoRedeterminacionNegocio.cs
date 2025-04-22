@@ -103,35 +103,40 @@ namespace Negocio
                     }
                 }
 
-                // En lugar de listaAut.AddRange(redeterminacionesCalculadas)
+
+
                 foreach (var redet in redeterminacionesCalculadas)
                 {
-                    // Crear un nuevo autorizante con los campos necesarios de la redeterminación
-                    var nuevoAutorizante = new Autorizante
+                    // Check if redet.Autorizante and redet.Autorizante.Obra are not null
+                    if (redet.Autorizante != null && redet.Autorizante.Obra != null)
                     {
-                        Obra = new Obra
+                        // Create a new autorizante with the fields from the redeterminación
+                        var nuevoAutorizante = new Autorizante
                         {
-                            Descripcion = redet.Autorizante.Obra.Descripcion,
-                            Id = redet.Autorizante.Obra.Id,
-                            Area = new Area { Nombre = redet.Autorizante.Obra.Area.Nombre },
-                            Contrata = new Contrata {Nombre = redet.Autorizante.Obra.Contrata.Nombre }
-                        },
-                        CodigoAutorizante = redet.CodigoRedet,
-                        Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Asigna un concepto por defecto
-                        Detalle = redet.Observaciones,
-                        Expediente = redet.Expediente,
-                        Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
-                        MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
-                        Fecha = redet.Salto,
-                        Empresa = redet.Empresa,
-                        FechaSade = redet.FechaSade,
-                        BuzonSade = redet.BuzonSade,
-                        AutorizacionGG = true
-                    };
-                
+                            Obra = new Obra
+                            {
+                                Descripcion = redet.Autorizante.Obra.Descripcion,
+                                Id = redet.Autorizante.Obra.Id,
+                                Area = redet.Autorizante.Obra.Area != null ? new Area { Nombre = redet.Autorizante.Obra.Area.Nombre } : null,
+                                Contrata = redet.Autorizante.Obra.Contrata != null ? new Contrata { Nombre = redet.Autorizante.Obra.Contrata.Nombre } : null
+                            },
+                            CodigoAutorizante = redet.CodigoRedet,
+                            Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Assign a default concept
+                            Detalle = redet.Observaciones,
+                            Expediente = redet.Expediente,
+                            Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
+                            MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
+                            Fecha = redet.Salto,
+                            Empresa = redet.Empresa,
+                            FechaSade = redet.FechaSade,
+                            BuzonSade = redet.BuzonSade,
+                            AutorizacionGG = true
+                        };
 
-                listaAut.Add(nuevoAutorizante);
+                        listaAut.Add(nuevoAutorizante);
+                    }
                 }
+
 
                 return listaAut;
             }
