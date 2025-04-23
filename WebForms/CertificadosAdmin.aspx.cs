@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using Negocio;
+using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,7 @@ namespace WebForms
     public partial class CertificadosAdmin : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
         protected void Page_Init(object sender, EventArgs e)
         {
             cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
@@ -29,6 +31,7 @@ namespace WebForms
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaCertificados();
+
         }
         //protected void Page_Init(object sender, EventArgs e) 
         //{
@@ -125,7 +128,8 @@ namespace WebForms
                 //string filtroExpediente = ddlExpediente.SelectedValue;
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
+                //Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
+                Session["listaCertificado"] = calculoRedeterminacionNegocio.listarCertReliq();
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
                 CalcularSubtotal();

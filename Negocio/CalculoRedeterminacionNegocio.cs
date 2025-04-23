@@ -98,7 +98,7 @@ namespace Negocio
                         redetCalculada = redet;
                         redetCalculada.MontoRedet = montoCalculado;
 
-                        redeterminacionesCalculadas.Add(redet); // Agregar a la lista de resultados
+                        redeterminacionesCalculadas.Add(redetCalculada); // Agregar a la lista de resultados
 
                     }
                 }
@@ -141,7 +141,160 @@ namespace Negocio
                 return listaAut;
             }
 
+
+            public List<Certificado> listarCertReliq()
+            {
+                List<Autorizante> listaAut = new List<Autorizante>();
+                List<Certificado> listaCert = new List<Certificado>();
+                List<Redeterminacion> listaRedet = new List<Redeterminacion>();
+                List<Certificado> listaCertificadosResultado = new List<Certificado>();
+
+                AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+                CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
+                RedeterminacionNegocio redeterminacionNegocio = new RedeterminacionNegocio();
+
+                listaAut = autorizanteNegocio.listar();
+                listaCert = certificadoNegocio.listarFiltroAdmin();
+                listaRedet = redeterminacionNegocio.listar();
+
+                // Primero agregamos los certificados originales a la lista resultado
+                listaCertificadosResultado.AddRange(listaCert);
+
+                // Agrupamos los certificados por autorizante para facilitar el procesamiento
+                var certificadosPorAutorizante = listaCert
+                    .GroupBy(c => c.Autorizante.CodigoAutorizante)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // Para cada redeterminación
+                foreach (var redet in listaRedet)
+                {
+                    // Buscar el autorizante correspondiente
+                    var autorizante = listaAut.FirstOrDefault(a => a.CodigoAutorizante == redet.Autorizante.CodigoAutorizante);
+
+                    if (autorizante != null && redet.Salto.HasValue && redet.Porcentaje.HasValue)
+                    {
+                        // Lista para almacenar certificados procesados de esta redeterminación
+                        List<Certificado> certificadosRedeterminacion = new List<Certificado>();
+
+                        // Verificar si existen certificados para este autorizante
+                        if (certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosAutorizante))
+                        {
+                            // Filtrar certificados por código autorizante y fecha <= a salto (para cálculos)
+                            var certificadosHastaSalto = certificadosAutorizante
+                                .Where(c => c.MesAprobacion.HasValue && c.MesAprobacion <= redet.Salto)
+                                .ToList();
+
+                            // Para calcular el porcentaje de ejecución actual y acumulado
+                            // Sumar montos totales de los certificados hasta el salto
+                            decimal sumaMontosTotal = certificadosHastaSalto.Sum(c => c.MontoTotal);
+
+                            // Calcular el porcentaje de ejecución acumulado
+                            decimal porcentajeEjecucionAcumulado = 0;
+                            if (autorizante.MontoAutorizado > 0)
+                            {
+                                porcentajeEjecucionAcumulado = (sumaMontosTotal / autorizante.MontoAutorizado) * 100;
+                            }
+
+                            decimal faltante = 100 - porcentajeEjecucionAcumulado;
+                            faltante = Math.Max(0, faltante);
+
+                            // Calcular monto de redeterminación
+                            decimal montoCalculado = 0;
+
+                            if (redet.Nro == 1)
+                            {
+                                montoCalculado = ((autorizante.MontoAutorizado * redet.Porcentaje.Value) / 100) * (faltante / 100);
+                            }
+                            else
+                            {
+                                // Obtener monto de redeterminaciones anteriores (simplificado para evitar dependencia circular)
+                                decimal sumaMontosRedet = 0;
+                                foreach (var redAnterior in listaRedet.Where(r =>
+                                    r.Autorizante.CodigoAutorizante == redet.Autorizante.CodigoAutorizante &&
+                                    r.Nro.HasValue &&
+                                    r.Nro.Value < redet.Nro.Value &&
+                                    r.MontoRedet.HasValue))
+                                {
+                                    sumaMontosRedet += redAnterior.MontoRedet.Value;
+                                }
+
+                                montoCalculado = (((autorizante.MontoAutorizado + sumaMontosRedet) * redet.Porcentaje.Value) / 100) * (faltante / 100);
+                            }
+
+                            // Ahora generamos certificados para esta redeterminación desde el mes del salto en adelante
+                            var certificadosDesdeElSalto = certificadosAutorizante
+                                .Where(c => c.MesAprobacion.HasValue && c.MesAprobacion >= redet.Salto)
+                                .OrderBy(c => c.MesAprobacion)
+                                .ToList();
+
+                            // Para cada certificado desde el mes del salto, generar un certificado de redeterminación
+                            foreach (var certificadoOriginal in certificadosDesdeElSalto)
+                            {
+                                // Calcular el porcentaje de ejecución del certificado original respecto al monto autorizado
+                                decimal porcentajeEjecucionCertificado = 0;
+
+
+
+                                if (autorizante.MontoAutorizado > 0)
+                                {
+                                    porcentajeEjecucionCertificado = (certificadoOriginal.MontoTotal / autorizante.MontoAutorizado) * 100;
+                                }
+
+                                decimal montoCertificadoRedet = 0;
+                                if (certificadoOriginal.MesAprobacion != redet.Salto) 
+                                { 
+                                    // Calcular el monto del certificado de redeterminación según ese mismo porcentaje
+                                    montoCertificadoRedet = montoCalculado * (porcentajeEjecucionCertificado / 100);
+                                }
+                                else
+                                { 
+                                    montoCertificadoRedet = montoCalculado * (porcentajeEjecucionAcumulado / 100); 
+                                }
+
+
+
+                                // Crear el certificado de redeterminación
+                                Certificado certificadoRedet = new Certificado
+                                    {
+                                        Autorizante = new Autorizante
+                                        {
+                                            CodigoAutorizante = redet.CodigoRedet,
+                                            Obra = redet.Autorizante?.Obra != null ? new Obra
+                                            {
+                                                Descripcion = redet.Autorizante.Obra.Descripcion,
+                                                Id = redet.Autorizante.Obra.Id,
+                                                Area = redet.Autorizante.Obra.Area,
+                                                Contrata = redet.Autorizante.Obra.Contrata
+                                            } : null,
+                                            MontoAutorizado = montoCalculado
+                                        },
+                                        ExpedientePago = redet.Expediente + " - Cert " + certificadoOriginal.MesAprobacion?.ToString("MM/yyyy"),
+                                        MontoTotal = montoCertificadoRedet,
+                                        MesAprobacion = certificadoOriginal.MesAprobacion,
+                                        Tipo = new TipoPago { Id = 2, Nombre = "REDETERMINACION" },
+                                        Empresa = redet.Empresa,
+                                        Estado = "REDETERMINADO",
+                                        Porcentaje = porcentajeEjecucionCertificado.ToString("0.00") + "%",
+                                        FechaSade = redet.FechaSade,
+                                        BuzonSade = redet.BuzonSade
+                                    };
+
+                                certificadosRedeterminacion.Add(certificadoRedet);
+                            }
+                        }
+
+                        // Agregar todos los certificados de redeterminación a la lista de resultados
+                        listaCertificadosResultado.AddRange(certificadosRedeterminacion);
+                    }
+                }
+
+                return listaCertificadosResultado;
+            }
+
+
+
         }
+
     }
 
 }
