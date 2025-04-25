@@ -241,14 +241,17 @@ namespace Negocio
                                 }
 
                                 decimal montoCertificadoRedet = 0;
+                                string porcentajeCalculado = string.Empty;
                                 if (certificadoOriginal.MesAprobacion != redet.Salto) 
                                 { 
                                     // Calcular el monto del certificado de redeterminación según ese mismo porcentaje
                                     montoCertificadoRedet = montoCalculado * (porcentajeEjecucionCertificado / 100);
+                                    porcentajeCalculado = porcentajeEjecucionCertificado.ToString();
                                 }
                                 else
                                 { 
-                                    montoCertificadoRedet = montoCalculado * (porcentajeEjecucionAcumulado / 100); 
+                                    montoCertificadoRedet = montoCalculado * (porcentajeEjecucionAcumulado / 100);
+                                    porcentajeCalculado = porcentajeEjecucionAcumulado.ToString();
                                 }
 
 
@@ -268,13 +271,13 @@ namespace Negocio
                                             } : null,
                                             MontoAutorizado = montoCalculado
                                         },
-                                        ExpedientePago = redet.Expediente + " - Cert " + certificadoOriginal.MesAprobacion?.ToString("MM/yyyy"),
+                                        ExpedientePago = string.Empty,
                                         MontoTotal = montoCertificadoRedet,
                                         MesAprobacion = certificadoOriginal.MesAprobacion,
                                         Tipo = new TipoPago { Id = 2, Nombre = "REDETERMINACION" },
                                         Empresa = redet.Empresa,
                                         Estado = "REDETERMINADO",
-                                        Porcentaje = porcentajeEjecucionCertificado.ToString("0.00") + "%",
+                                        Porcentaje = porcentajeCalculado.ToString(),
                                         FechaSade = redet.FechaSade,
                                         BuzonSade = redet.BuzonSade
                                     };
