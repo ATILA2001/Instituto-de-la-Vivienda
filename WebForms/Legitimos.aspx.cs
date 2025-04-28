@@ -41,7 +41,7 @@ namespace WebForms
             var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
             Response.Redirect("ModificarLegitimo.aspx?codM=" + idSeleccionado);
         }
-        
+
         //COMENTADO POR CIERRE PLANIFICACION
         //protected void btnLimpiar_Click(object sender, EventArgs e)
         //{
@@ -65,7 +65,7 @@ namespace WebForms
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes,selectedEstadoExpedientes,filtro);
+                Session["listaLegitimos"] = negocio.listarFiltro(usuarioLogueado, selectedFechas, selectedEmpresas, selectedAutorizantes, selectedEstadoExpedientes, filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
@@ -81,7 +81,7 @@ namespace WebForms
 
 
 
-      
+
 
         protected void dgvLegitimos_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
@@ -255,7 +255,7 @@ namespace WebForms
             .Select(fecha => new
             {
                 Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
-                Valor = fecha.ToString("yyyy-MM-dd") 
+                Valor = fecha.ToString("yyyy-MM-dd")
             });
 
             cblFecha.DataSource = meses;

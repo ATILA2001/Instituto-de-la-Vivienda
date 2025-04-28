@@ -114,7 +114,7 @@
 					</div>
 
 					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblFecha">Mes Certificado:</label>
+						<label class="form-label ms-2 mb-0" for="cblFecha">Mes:</label>
 						<div>
 
 							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />

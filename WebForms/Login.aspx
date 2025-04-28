@@ -44,5 +44,5 @@
 		document.getElementById('<%= txtEmail.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
 		document.getElementById('<%= txtPass.ClientID %>').addEventListener('keypress', detectEnterKeyPress);
 	</script>
-	
+
 </asp:Content>

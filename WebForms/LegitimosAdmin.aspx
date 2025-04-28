@@ -59,7 +59,7 @@
 		</div>
 	</div>
 
-		<div class="row mt-4 mb-3">
+	<div class="row mt-4 mb-3">
 		<div class="col-12">
 			<div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
 				<!-- Contenedor de Filtros alineados a la izquierda -->
@@ -86,7 +86,7 @@
 					</div>
 
 					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblFecha">Mes aprobación:</label>
+						<label class="form-label ms-2 mb-0" for="cblFecha">Mes:</label>
 						<div>
 							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
 						</div>
@@ -95,8 +95,8 @@
 					<div class="form-group mb-2">
 						<label class="form-label ms-2 mb-0" for="cblEstadoExpediente">Estado:</label>
 						<div>
-						<CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
-							</div>
+							<CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
+						</div>
 					</div>
 
 					<div class="form-group mb-2">
@@ -142,7 +142,7 @@
 		<hr class="mb-3" />
 
 		<asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1 table-bordered table-hover mb-4"
-			OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged" 
+			OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
 			AutoGenerateColumns="false" runat="server">
 			<Columns>
 				<asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre" />
@@ -191,4 +191,4 @@
 			<asp:Label ID="lblMensaje" Text="" runat="server" />
 		</div>
 	</div>
-	</asp:Content>
+</asp:Content>
