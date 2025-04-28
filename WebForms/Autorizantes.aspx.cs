@@ -143,16 +143,16 @@ namespace WebForms
             Autorizante nuevoAutorizante = new Autorizante();
 
             nuevoAutorizante.Obra = new Obra();
-            //nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue); COMENTADO POR CIERRE PLANIFICACION
+            nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
             nuevoAutorizante.Concepto = new Concepto();
-            //nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue); COMENTADO POR CIERRE PLANIFICACION
-            //nuevoAutorizante.Detalle = txtDetalle.Text; COMENTADO POR CIERRE PLANIFICACION
-            //nuevoAutorizante.Expediente = txtExpediente.Text; COMENTADO POR CIERRE PLANIFICACION
+            nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
+            nuevoAutorizante.Detalle = txtDetalle.Text;
+            nuevoAutorizante.Expediente = txtExpediente.Text;
             nuevoAutorizante.Estado = new EstadoAutorizante();
-            //nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue); COMENTADO POR CIERRE PLANIFICACION
-            //nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text); COMENTADO POR CIERRE PLANIFICACION
-            //nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text); COMENTADO POR CIERRE PLANIFICACION
-            //nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text); COMENTADO POR CIERRE PLANIFICACION
+            nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
+            nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+            nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
+            nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
             autorizanteNegocio.agregar(nuevoAutorizante);
 
             lblMensaje.Text = "Autorizante agregado con éxito.";
@@ -161,21 +161,20 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            //COMENTADO POR CIERRE PLANIFICACION
-            //ddlEstado.DataSource = ObtenerEstado();
-            //ddlEstado.DataTextField = "Nombre";
-            //ddlEstado.DataValueField = "Id";
-            //ddlEstado.DataBind();
+            ddlEstado.DataSource = ObtenerEstado();
+            ddlEstado.DataTextField = "Nombre";
+            ddlEstado.DataValueField = "Id";
+            ddlEstado.DataBind();
 
-            //ddlConcepto.DataSource = ObtenerConcepto();
-            //ddlConcepto.DataTextField = "Nombre";
-            //ddlConcepto.DataValueField = "Id";
-            //ddlConcepto.DataBind();
+            ddlConcepto.DataSource = ObtenerConcepto();
+            ddlConcepto.DataTextField = "Nombre";
+            ddlConcepto.DataValueField = "Id";
+            ddlConcepto.DataBind();
 
-            //ddlObra.DataSource = ObtenerObras();
-            //ddlObra.DataTextField = "Nombre";
-            //ddlObra.DataValueField = "Id";
-            //ddlObra.DataBind();
+            ddlObra.DataSource = ObtenerObras();
+            ddlObra.DataTextField = "Nombre";
+            ddlObra.DataValueField = "Id";
+            ddlObra.DataBind();
 
             cblEstado.DataSource = ObtenerEstado();
             cblEstado.DataTextField = "Nombre";

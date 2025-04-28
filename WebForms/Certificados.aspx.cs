@@ -132,43 +132,42 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        //COMENTADO POR CIERRE PLANIFICACION
-        //protected void btnAgregar_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
-        //        Certificado nuevoCertificado = new Certificado
-        //        {
-        //            Autorizante = new Autorizante
-        //            {
-        //                CodigoAutorizante = ddlAutorizante.SelectedItem.Text
-        //            },
-        //            ExpedientePago = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
-        //            Tipo = new TipoPago
-        //            {
-        //                Id = int.Parse(ddlTipo.SelectedValue)
-        //            },
-        //            MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
-        //            MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
-        //                ? null
-        //                : (DateTime?)DateTime.Parse(txtFecha.Text)
-        //        };
+        protected void btnAgregar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
+                Certificado nuevoCertificado = new Certificado
+                {
+                    Autorizante = new Autorizante
+                    {
+                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                    },
+                    ExpedientePago = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
+                    Tipo = new TipoPago
+                    {
+                        Id = int.Parse(ddlTipo.SelectedValue)
+                    },
+                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
+                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
+                        ? null
+                        : (DateTime?)DateTime.Parse(txtFecha.Text)
+                };
 
-        //        certificadoNegocio.agregar(nuevoCertificado);
+                certificadoNegocio.agregar(nuevoCertificado);
 
-        //        lblMensaje.Text = "Certificado agregado con éxito.";
-        //        lblMensaje.ForeColor = System.Drawing.Color.Green;
+                lblMensaje.Text = "Certificado agregado con éxito.";
+                lblMensaje.ForeColor = System.Drawing.Color.Green;
 
-        //        CargarListaCertificados();
-        //        CalcularSubtotal();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
-        //        lblMensaje.ForeColor = System.Drawing.Color.Red;
-        //    }
-        //}
+                CargarListaCertificados();
+                CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
+                lblMensaje.ForeColor = System.Drawing.Color.Red;
+            }
+        }
 
 
         private DataTable ObtenerTipos()
@@ -211,11 +210,10 @@ namespace WebForms
 
         private void BindDropDownList()
         {
-            //COMENTADO POR CIERRE PLANIFICACION
-            //ddlTipo.DataSource = ObtenerTipos();
-            //ddlTipo.DataTextField = "Nombre";
-            //ddlTipo.DataValueField = "Id";
-            //ddlTipo.DataBind();
+            ddlTipo.DataSource = ObtenerTipos();
+            ddlTipo.DataTextField = "Nombre";
+            ddlTipo.DataValueField = "Id";
+            ddlTipo.DataBind();
 
             cblTipo.DataSource = ObtenerTipos();
             cblTipo.DataTextField = "Nombre";
@@ -227,11 +225,10 @@ namespace WebForms
             cblEmpresa.DataValueField = "Id";
             cblEmpresa.DataBind();
 
-            //COMENTADO POR CIERRE PLANIFICACION
-            //ddlAutorizante.DataSource = ObtenerAutorizantes();
-            //ddlAutorizante.DataTextField = "Nombre";
-            //ddlAutorizante.DataValueField = "Id";
-            //ddlAutorizante.DataBind();
+            ddlAutorizante.DataSource = ObtenerAutorizantes();
+            ddlAutorizante.DataTextField = "Nombre";
+            ddlAutorizante.DataValueField = "Id";
+            ddlAutorizante.DataBind();
 
             cblAutorizante.DataSource = ObtenerAutorizantes();
             cblAutorizante.DataTextField = "Nombre";

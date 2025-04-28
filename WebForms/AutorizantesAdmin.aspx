@@ -79,16 +79,10 @@
 									</div>
 
 
-
-
 									<div class="mb-3">
 										<label for="txtFecha" class="form-label">Mes Base</label>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 									</div>
-
-
-
-
 
 
 								</div>
@@ -103,11 +97,6 @@
 										<label for="ddlEstado" class="form-label">Estado</label>
 										<asp:DropDownList ID="ddlEstado" CssClass="form-select" runat="server"></asp:DropDownList>
 									</div>
-
-
-
-
-
 
 								</div>
 							</div>
@@ -130,8 +119,6 @@
 	</div>
 
 	<!-- /Modal -->
-
-
 
 
 	<div class="row mt-4 mb-3">

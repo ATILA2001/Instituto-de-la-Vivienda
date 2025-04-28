@@ -8,68 +8,84 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<%--COMENTADO POR CIERRE PLANIFICACION--%>
-	<%--<div id="section1" style="display: none;">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<table class="table  table1">
-					<thead class="thead-dark" >
-						<tr>
-							<th>Empresa</th>
-							<th>Contrata</th>
-							<th>Número</th>
-							<th>Año</th>
-							<th>Etapa</th>
-							<th>Obra N°</th>
-							<th>Barrio</th>
-							<th>Nombre de Obra</th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-								<asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlBarrio" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
-									CssClass="btn btn-primary" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-									CssClass="btn btn-primary" runat="server" /></td>
-						</tr>
-					</tbody>
-				</table>
+	<!-- Modal -->
+	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Obra</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<div class="container">
+							<div class="row">
+								<div class="col-12">
+									<div class="mb-3">
+										<label for="txtDescripcion" class="form-label">Nombre de Obra</label>
+										<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
+									</div>
+								</div>
+
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlBarrio" class="form-label">Barrio</label>
+										<asp:DropDownList ID="ddlBarrio" CssClass="form-select" runat="server"></asp:DropDownList>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlEmpresa" class="form-label">Empresa</label>
+										<asp:DropDownList ID="ddlEmpresa" CssClass="form-select" runat="server"></asp:DropDownList>
+									</div>
+								</div>
+								
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlContrata" class="form-label">Contrata</label>
+										<asp:DropDownList ID="ddlContrata" CssClass="form-select" runat="server"></asp:DropDownList>
+									</div>
+								</div>
+
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtNumero" class="form-label">Número</label>
+										<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtAño" class="form-label">Año</label>
+										<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtEtapa" class="form-label">Etapa</label>
+										<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtObra" class="form-label">Obra N°</label>
+										<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer d-flex justify-content-between px-4">
+					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+					<div class="d-flex gap-4">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarObra" />
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>--%>
-
-
-
-
+	</div>
+	<!-- /Modal -->
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -118,15 +134,12 @@
 		<i class="bi bi-funnel"></i>
 						</asp:LinkButton>
 					</div>
+					<div class="form-group mb-2">
 
-
-
-
-					<%--<div class="form-group d-flex align-items-end">
-							<button class="btn btn-sm btn-secondary" id="visibilityMessage">
-								<span id="visibilityText">Agregar Obra</span>
-							</button>
-						</div>--%>
+						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+<i class="bi bi-plus-lg" ></i> Agregar
+						</asp:LinkButton>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -159,20 +172,20 @@
 				<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
 				<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
-				<%--COMENTADO POR CIERRE PLANIFICACION
-					                    <asp:TemplateField HeaderText="Acciones">
-				<ItemTemplate>
-					<div class="d-flex justify-content-center gap-2">
-						<asp:LinkButton ID="btnModificar" runat="server"
-							CommandName="Select"
-							CssClass="btn btn-sm btn-warning "
-							ToolTip="Modificar">
+
+				<asp:TemplateField HeaderText="Acciones">
+					<ItemTemplate>
+						<div class="d-flex justify-content-center gap-2">
+							<asp:LinkButton ID="btnModificar" runat="server"
+								CommandName="Select"
+								CssClass="btn btn-sm btn-warning "
+								ToolTip="Modificar">
                     <i class="bi bi-pencil-square"></i>
-						</asp:LinkButton>
-						
-					</div>
-				</ItemTemplate>
-</asp:TemplateField>--%>
+							</asp:LinkButton>
+
+						</div>
+					</ItemTemplate>
+				</asp:TemplateField>
 			</Columns>
 		</asp:GridView>
 
@@ -180,10 +193,6 @@
 			<asp:Label ID="lblMensaje" Text="" runat="server" />
 		</div>
 	</div>
-
-
-
-
 	<script type="text/javascript">
 		function soloNumeros(e) {
 			var tecla = (document) ? e.keyCode : e.which;
@@ -195,35 +204,17 @@
 			return patron.test(te);
 		}
 
-		$(document).ready(function () {
-			// Inicializamos la visibilidad según el valor almacenado en localStorage
-			var sectionVisible = localStorage.getItem("sectionVisible");
-
-			if (sectionVisible === "true") {
-				$('#section1').show();
-				$('#visibilityText').text("Ocultar sección");
-			} else {
-				$('#section1').hide();
-				$('#visibilityText').text("Agregar Obra");
-			}
-
-			// Manejar clic en el botón para alternar la visibilidad
-			$('#visibilityMessage').on('click', function () {
-				var currentStatus = $('#visibilityText').text();
-
-				if (currentStatus === "Agregar Obra") {
-					localStorage.setItem("sectionVisible", "true");
-					$('#section1').show();
-					$('#visibilityText').text("Ocultar sección");
-				} else {
-					localStorage.setItem("sectionVisible", "false");
-					$('#section1').hide();
-					$('#visibilityText').text("Agregar Obra");
-				}
-			});
-		});
-
-	</script>
+		function limpiarFormulario() {
+			document.getElementById('<%= txtNumero.ClientID %>').value = '';
+			document.getElementById('<%= txtAño.ClientID %>').value = '';
+			document.getElementById('<%= txtEtapa.ClientID %>').value = '';
+			document.getElementById('<%= txtObra.ClientID %>').value = '';
+			document.getElementById('<%= txtDescripcion.ClientID %>').value = '';
+			document.getElementById('<%= ddlEmpresa.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlContrata.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlBarrio.ClientID %>').selectedIndex = 0;
+		}
+</script>
 
 
 </asp:Content>
