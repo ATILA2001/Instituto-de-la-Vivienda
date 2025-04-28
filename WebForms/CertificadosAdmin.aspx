@@ -6,56 +6,80 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<div id="section1" style="display: none;">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<table class="table  table1">
-					<thead class="thead-dark">
-						<tr>
-
-							<th>Código Autorizante</th>
-							<th>Expediente</th>
-							<th>Tipo</th>
-							<th>Monto Autorizado</th>
-							<th>Mes Aprobacion</th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-
-
-							<td>
-								<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-							</td>
-
-							<td>
-								<asp:DropDownList ID="ddlTipo" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-									CssClass="btn btn-primary" runat="server" /></td>
-						</tr>
-					</tbody>
-				</table>
+	<!-- Modal -->
+	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Certificado</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<div class="container">
+							<div class="row">
+								<div class="col-12">
+									<div class="mb-3">
+										<label for="ddlAutorizante" class="form-label">Código Autorizante</label>
+										<asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server"></asp:DropDownList>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtExpediente" class="form-label">Expediente</label>
+										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlTipo" class="form-label">Tipo</label>
+										<asp:DropDownList ID="ddlTipo" CssClass="form-select" runat="server"></asp:DropDownList>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
+										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
+										<asp:RequiredFieldValidator ID="rfvMontoAutorizado"
+											ControlToValidate="txtMontoAutorizado"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="El monto es requerido"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+										<asp:RegularExpressionValidator ID="revMontoAutorizado"
+											ControlToValidate="txtMontoAutorizado"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
+											ErrorMessage="Solo números positivos con hasta 2 decimales"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtFecha" class="form-label">Mes Aprobacion</label>
+										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer d-flex justify-content-between px-4">
+					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+					<div class="d-flex gap-4">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarCertificado" />
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+	<!-- /Modal -->
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -165,11 +189,8 @@
 			</div>
 
 
-			<%-- no hace falta logica script, abriria un modal --%>
 			<div class="form-group mb-2">
-				<%--<button class="btn btn-secondary" id="visibilityMessage">
-					<span id="visibilityText">Agregar Obra</span>
-				</button>--%>
+			
 				<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
 					<i class="bi bi-plus-lg" ></i> Agregar
 				</asp:LinkButton>
@@ -240,40 +261,14 @@
 		</div>
 
 
-<%--	<script type="text/javascript">
-
-		$(document).ready(function () {
-			// Inicializamos la visibilidad según el valor de localStorage
-			var sectionVisible = localStorage.getItem("sectionVisible");
-
-			// Si está marcado como 'true', mostramos la sección
-			if (sectionVisible === "true") {
-				$('#section1').show(); // Mostramos la sección
-				$('#visibilityText').text("Ocultar sección"); // Texto cuando la sección es visible
-			} else {
-				$('#section1').hide(); // Ocultamos la sección
-				$('#visibilityText').text("Agregar Certificado"); // Texto cuando la sección está oculta
-			}
-
-			// Manejar clic en el mensaje para alternar el estado de visibilidad
-			$(document).on('click', '#visibilityMessage', function () {
-				// Cambiamos el valor de visibilidad
-				var currentStatus = $('#visibilityText').text();
-
-				if (currentStatus === "Agregar Certificado") {
-					// Si está oculto, lo mostramos
-					localStorage.setItem("sectionVisible", "true");
-					$('#section1').show(); // Mostramos la sección
-					$('#visibilityText').text("Ocultar sección"); // Cambiar el texto
-				} else {
-					// Si está visible, lo ocultamos
-					localStorage.setItem("sectionVisible", "false");
-					$('#section1').hide(); // Ocultamos la sección
-					$('#visibilityText').text("Agregar Certificado"); // Cambiar el texto
-				}
-			});
-		});
-
-	</script>--%>
+<script type="text/javascript">
+	function limpiarFormulario() {
+		document.getElementById('<%= txtExpediente.ClientID %>').value = '';
+		document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
+		document.getElementById('<%= txtFecha.ClientID %>').value = '';
+		document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
+		document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;
+	}
+</script>
 
 </asp:Content>

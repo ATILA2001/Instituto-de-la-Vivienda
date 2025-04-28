@@ -51,6 +51,24 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtMontoAutorizado;
 
         /// <summary>
+        /// rfvMontoAutorizado control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMontoAutorizado;
+
+        /// <summary>
+        /// revMontoAutorizado control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMontoAutorizado;
+
+        /// <summary>
         /// txtFecha control.
         /// </summary>
         /// <remarks>
@@ -67,15 +85,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnAgregar;
-
-        /// <summary>
-        /// btnLimpiar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiar;
 
         /// <summary>
         /// cblArea control.
