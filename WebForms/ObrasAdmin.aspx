@@ -6,68 +6,89 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<div id="section1" style="display: none;">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<table class="table  table1">
-					<thead class="thead-dark">
-						<tr>
-							<th>Area</th>
-							<th>Empresa</th>
-							<th>Contrata</th>
-							<th>Número</th>
-							<th>Año</th>
-							<th>Etapa</th>
-							<th>Obra N°</th>
-							<th>Barrio</th>
-							<th>Nombre de Obra</th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-								<asp:DropDownList ID="ddlArea" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-
-							<td>
-								<asp:DropDownList ID="ddlEmpresa" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlContrata" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlBarrio" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click"
-									CssClass="btn btn-primary" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-									CssClass="btn btn-primary" runat="server" /></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
+<!-- Modal -->
+<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Obra</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="container">
+                        <div class="row">
+							<div class="col-12">
+    <div class="mb-3">
+        <label for="txtDescripcion" class="form-label">Nombre de Obra</label>
+        <asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
+    </div>
+</div>
+                            
+							<div class="col-6">
+    <div class="mb-3">
+        <label for="ddlBarrio" class="form-label">Barrio</label>
+        <asp:DropDownList ID="ddlBarrio" CssClass="form-select" runat="server"></asp:DropDownList>
+    </div>
+</div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="ddlEmpresa" class="form-label">Empresa</label>
+                                    <asp:DropDownList ID="ddlEmpresa" CssClass="form-select" runat="server"></asp:DropDownList>
+                                </div>
+                            </div>
+                            <div class="col-6">
+    <div class="mb-3">
+        <label for="ddlArea" class="form-label">Area</label>
+        <asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server"></asp:DropDownList>
+    </div>
+</div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="ddlContrata" class="form-label">Contrata</label>
+                                    <asp:DropDownList ID="ddlContrata" CssClass="form-select" runat="server"></asp:DropDownList>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtNumero" class="form-label">Número</label>
+                                    <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtAño" class="form-label">Año</label>
+                                    <asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtEtapa" class="form-label">Etapa</label>
+                                    <asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtObra" class="form-label">Obra N°</label>
+                                    <asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between px-4">
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                <div class="d-flex gap-4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarObra" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Modal -->
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -126,11 +147,8 @@
 					</div>
 
 
-					<%-- no hace falta logica script, abriria un modal --%>
 					<div class="form-group mb-2">
-						<%--<button class="btn btn-secondary" id="visibilityMessage">
-					<span id="visibilityText">Agregar Obra</span>
-				</button>--%>
+				
 						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
 					<i class="bi bi-plus-lg" ></i> Agregar
 						</asp:LinkButton>

@@ -35,10 +35,10 @@
 										<label for="ddlConcepto" class="form-label">Concepto</label>
 										<asp:DropDownList ID="ddlConcepto" CssClass="form-select" runat="server"></asp:DropDownList>
 									</div>
-																	</div>
+								</div>
 
 
-<div class="col-6">
+								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
 										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
@@ -132,67 +132,7 @@
 	<!-- /Modal -->
 
 
-	<%--	<div id="section1" style="display: none;">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<table class="table  table1">
-					<thead class="thead-dark">
-						<tr>
-							<th>Obra</th>
-							<th>Concepto</th>
-							<th>Detalle</th>
-							<th>Expediente</th>
-							<th>Estado</th>
-							<th>Monto Autorizado</th>
-							<th>Mes Aprobacion</th>
-							<th>Mes Base</th>
-
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-								<td>
-								<asp:DropDownList ID="ddlObra" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-
-
-							<td>
-								<asp:DropDownList ID="ddlConcepto" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlEstado" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtMes" CssClass="form-control" runat="server" TextMode="Date" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-									CssClass="btn btn-primary" runat="server" />
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>--%>
-
+	
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -265,11 +205,7 @@
 					</div>
 
 
-					<%-- no hace falta logica script, abriria un modal --%>
 					<div class="form-group mb-2">
-						<%--<button class="btn btn-secondary" id="visibilityMessage">
-					<span id="visibilityText">Agregar Obra</span>
-				</button>--%>
 						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
 					<i class="bi bi-plus-lg" ></i> Agregar
 						</asp:LinkButton>
@@ -351,41 +287,4 @@
 		</div>
 	</div>
 
-
-	<%--	<script type="text/javascript">
-	
-		$(document).ready(function () {
-			// Inicializamos la visibilidad según el valor de localStorage
-			var sectionVisible = localStorage.getItem("sectionVisible");
-
-			// Si está marcado como 'true', mostramos la sección
-			if (sectionVisible === "true") {
-				$('#section1').show(); // Mostramos la sección
-				$('#visibilityText').text("Ocultar sección"); // Texto cuando la sección es visible
-			} else {
-				$('#section1').hide(); // Ocultamos la sección
-				$('#visibilityText').text("Agregar Autorizante"); // Texto cuando la sección está oculta
-			}
-
-			// Manejar clic en el mensaje para alternar el estado de visibilidad
-			$(document).on('click', '#visibilityMessage', function () {
-				// Cambiamos el valor de visibilidad
-				var currentStatus = $('#visibilityText').text();
-
-				if (currentStatus === "Agregar Autorizante") {
-					// Si está oculto, lo mostramos
-					localStorage.setItem("sectionVisible", "true");
-					$('#section1').show(); // Mostramos la sección
-					$('#visibilityText').text("Ocultar sección"); // Cambiar el texto
-				} else {
-					// Si está visible, lo ocultamos
-					localStorage.setItem("sectionVisible", "false");
-					$('#section1').hide(); // Ocultamos la sección
-					$('#visibilityText').text("Agregar Autorizante"); // Cambiar el texto
-				}
-			});
-		});
-
-
-	</script>--%>
 </asp:Content>
