@@ -22,8 +22,15 @@ namespace WebForms
                 CargarListaObras();
             }
         }
-      
-      
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.ClearSelection();
+            cblBarrio.ClearSelection();
+            cblEmpresa.ClearSelection();
+            CargarListaObras();
+        }
+
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();

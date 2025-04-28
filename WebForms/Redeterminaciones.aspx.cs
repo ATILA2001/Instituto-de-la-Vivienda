@@ -33,7 +33,14 @@ namespace WebForms
             //ddlAutorizante.SelectedIndex = -1;
             //ddlTipo.SelectedIndex = -1;
         }
-
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblObra.ClearSelection();
+            cblEtapa.ClearSelection();
+            cblAutorizante.ClearSelection();
+            CargarListaRedeterminacion();
+        }
         private void CargarListaRedeterminacion(string filtro = null)
         {
             try
@@ -96,56 +103,56 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void btnAgregar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                RedeterminacionNegocio redeterminacionNegocio = new RedeterminacionNegocio();
-                Redeterminacion nuevaRedet = new Redeterminacion
-                {
-                    Autorizante = new Autorizante
-                    {
-                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
-                    },
-                    Expediente = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
-                    Salto = string.IsNullOrWhiteSpace(txtSalto.Text)
-                        ? (DateTime?)null
-                        : DateTime.Parse(txtSalto.Text),
-                    Nro = string.IsNullOrWhiteSpace(txtNro.Text)
-                        ? (int?)null
-                        : int.Parse(txtNro.Text),
-                    Tipo = string.IsNullOrWhiteSpace(txtTipo.Text) ? null : txtTipo.Text,
-                    Etapa = new EstadoRedet
-                    {
-                        Id = int.Parse(ddlEtapa.SelectedValue)
-                    },
-                    Observaciones = string.IsNullOrWhiteSpace(txtObservacion.Text) ? null : txtObservacion.Text,
-                    Porcentaje = string.IsNullOrWhiteSpace(txtPorcentaje.Text)
-                        ? (int?)null
-                        : int.Parse(txtPorcentaje.Text)
-                };
+        //protected void btnAgregar_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        RedeterminacionNegocio redeterminacionNegocio = new RedeterminacionNegocio();
+        //        Redeterminacion nuevaRedet = new Redeterminacion
+        //        {
+        //            Autorizante = new Autorizante
+        //            {
+        //                CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+        //            },
+        //            Expediente = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
+        //            Salto = string.IsNullOrWhiteSpace(txtSalto.Text)
+        //                ? (DateTime?)null
+        //                : DateTime.Parse(txtSalto.Text),
+        //            Nro = string.IsNullOrWhiteSpace(txtNro.Text)
+        //                ? (int?)null
+        //                : int.Parse(txtNro.Text),
+        //            Tipo = string.IsNullOrWhiteSpace(txtTipo.Text) ? null : txtTipo.Text,
+        //            Etapa = new EstadoRedet
+        //            {
+        //                Id = int.Parse(ddlEtapa.SelectedValue)
+        //            },
+        //            Observaciones = string.IsNullOrWhiteSpace(txtObservacion.Text) ? null : txtObservacion.Text,
+        //            Porcentaje = string.IsNullOrWhiteSpace(txtPorcentaje.Text)
+        //                ? (int?)null
+        //                : int.Parse(txtPorcentaje.Text)
+        //        };
 
-                if (redeterminacionNegocio.agregar(nuevaRedet))
-                {
-                    lblMensaje.Text = "Redeterminación agregada con éxito.";
-                    lblMensaje.ForeColor = System.Drawing.Color.Green;
+        //        if (redeterminacionNegocio.agregar(nuevaRedet))
+        //        {
+        //            lblMensaje.Text = "Redeterminación agregada con éxito.";
+        //            lblMensaje.ForeColor = System.Drawing.Color.Green;
 
-                    // Aquí puedes recargar la lista o limpiar los campos si es necesario
-                    CargarListaRedeterminacion();
-                    // LimpiarCampos();
-                }
-                else
-                {
-                    lblMensaje.Text = "Hubo un problema al agregar la redeterminación.";
-                    lblMensaje.ForeColor = System.Drawing.Color.Red;
-                }
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al agregar la redeterminación: {ex.Message}";
-                lblMensaje.ForeColor = System.Drawing.Color.Red;
-            }
-        }
+        //            // Aquí puedes recargar la lista o limpiar los campos si es necesario
+        //            CargarListaRedeterminacion();
+        //            // LimpiarCampos();
+        //        }
+        //        else
+        //        {
+        //            lblMensaje.Text = "Hubo un problema al agregar la redeterminación.";
+        //            lblMensaje.ForeColor = System.Drawing.Color.Red;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        lblMensaje.Text = $"Error al agregar la redeterminación: {ex.Message}";
+        //        lblMensaje.ForeColor = System.Drawing.Color.Red;
+        //    }
+        //}
 
 
 
@@ -162,10 +169,10 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            ddlEtapa.DataSource = ObtenerTipos();
-            ddlEtapa.DataTextField = "Nombre";
-            ddlEtapa.DataValueField = "Id";
-            ddlEtapa.DataBind();
+            //ddlEtapa.DataSource = ObtenerTipos();
+            //ddlEtapa.DataTextField = "Nombre";
+            //ddlEtapa.DataValueField = "Id";
+            //ddlEtapa.DataBind();
 
 
             cblEtapa.DataSource = ObtenerTipos();
@@ -179,10 +186,10 @@ namespace WebForms
             cblObra.DataBind();
 
 
-            ddlAutorizante.DataSource = ObtenerAutorizantes();
-            ddlAutorizante.DataTextField = "Nombre";
-            ddlAutorizante.DataValueField = "Id";
-            ddlAutorizante.DataBind();
+            //ddlAutorizante.DataSource = ObtenerAutorizantes();
+            //ddlAutorizante.DataTextField = "Nombre";
+            //ddlAutorizante.DataValueField = "Id";
+            //ddlAutorizante.DataBind();
 
             cblAutorizante.DataSource = ObtenerAutorizantes();
             cblAutorizante.DataTextField = "Nombre";

@@ -31,8 +31,17 @@ namespace WebForms
             CargarListaAutorizantes(filtro);
         }
 
-    
 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            cblArea.ClearSelection();
+            cblEmpresa.ClearSelection();
+            cblConcepto.ClearSelection();
+            cblEstado.ClearSelection();
+            cblObra.ClearSelection();
+            CargarListaAutorizantes();
+        }
         private void CargarListaAutorizantes(string filtro = null)
         {
             try
