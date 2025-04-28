@@ -31,8 +31,16 @@ namespace WebForms
                     }
                     else
                     {
-                        if(((Dominio.Usuario)Session["Usuario"]).Estado == true) { 
-                        Response.Redirect("Obras.aspx", false);
+                        if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
+                        {
+                            if (((Dominio.Usuario)Session["Usuario"]).Area != null && ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
+                            {
+                                Response.Redirect("Redeterminaciones.aspx", false);
+                            }
+                            else
+                            {
+                                Response.Redirect("Obras.aspx", false);
+                            }
                         }
                         else
                         {
@@ -55,6 +63,6 @@ namespace WebForms
                 Response.Redirect("Error.aspx");
             }
         }
-       
+
     }
 }
