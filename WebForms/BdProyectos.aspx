@@ -149,12 +149,8 @@
 						</asp:LinkButton>
 					</div>
 
-
-					<%-- no hace falta logica script, abriria un modal --%>
 					<div class="form-group mb-2">
-						<%--<button class="btn btn-secondary" id="visibilityMessage">
-							<span id="visibilityText">Agregar Obra</span>
-						</button>--%>
+
 						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
 							<i class="bi bi-plus-lg" ></i> Agregar
 						</asp:LinkButton>
