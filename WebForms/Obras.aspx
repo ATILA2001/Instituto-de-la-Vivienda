@@ -8,8 +8,9 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 	
-
-	<div id="section1" style="display: none;">
+</style>
+	<%--COMENTADO POR CIERRE PLANIFICACION--%>
+	<%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table1">
@@ -65,7 +66,7 @@
 				</table>
 			</div>
 		</div>
-	</div>
+	</div>--%>
     
 
 
@@ -80,7 +81,15 @@
 					<div class="form-group ">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblEmpresa">Empresa:</label>
 						<div class="dropdown">
-
+							<%--<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
+								Todas
+                   
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownEmpresa" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblEmpresa" runat="server" CssClass="dropdown-item form-check" />
+							</ul>
+							--%>
 							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
 						</div>
 					</div>
@@ -88,6 +97,15 @@
 					<div class="form-group">
 						<label class="form-label lbl-left" style="margin-left: 10PX;" for="cblBarrio">Barrio:</label>
 						<div class="dropdown">
+
+<%--							<button class="btn btn-sm dropdown-toggle" type="button" id="dropdownBarrio" data-bs-toggle="dropdown" aria-expanded="false">
+								Todos
+                   
+							</button>
+							<ul class="dropdown-menu p-2" aria-labelledby="dropdownBarrio" style="max-height: 200px; overflow-y: auto;">
+								<!-- Rendimos la CheckBoxList aquí -->
+								<asp:CheckBoxList ID="cblBarrio" runat="server" CssClass="dropdown-item form-check" />
+							</ul>--%>
 
                                 <CustomControls:CheckBoxListSearch ID="cblBarrio" runat="server" />
 						</div>
@@ -104,14 +122,15 @@
 
 
 
-						<div class="form-group d-flex align-items-end">
+						<%--<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-secondary" id="visibilityMessage">
 								<span id="visibilityText">Agregar Obra</span>
 							</button>
-						</div>
+						</div>--%>
 
 
 						<div class="form-group  d-flex align-items-end">
+							<%--<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClientClick="limpiarFiltros();" />--%>
 							<asp:Button CssClass="btn btn-sm btn-primary " ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click" />
 						</div>
 						<div class="form-group d-flex align-items-end">
@@ -149,6 +168,7 @@
 					<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio"  DataFormatString="{0:dd-MM-yyyy}" />
 					<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
+					<%--COMENTADO POR CIERRE PLANIFICACION
 					                    <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">
@@ -160,7 +180,7 @@
                                 </asp:LinkButton>
                             </div>
                         </ItemTemplate>
-                    </asp:TemplateField>
+                    </asp:TemplateField>--%>
 					
 				</Columns>
 			</asp:GridView>

@@ -41,17 +41,18 @@ namespace WebForms
             var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
             Response.Redirect("ModificarLegitimo.aspx?codM=" + idSeleccionado);
         }
-
-        protected void btnLimpiar_Click(object sender, EventArgs e)
-        {
-            txtAutorizante.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtInicioEjecucion.Text = string.Empty;
-            txtFinEjecucion.Text = string.Empty;
-            txtCertificado.Text = string.Empty;
-            txtMesAprobacion.Text = string.Empty;
-            ddlObra.SelectedIndex = -1;
-        }
+        
+        //COMENTADO POR CIERRE PLANIFICACION
+        //protected void btnLimpiar_Click(object sender, EventArgs e)
+        //{
+        //    txtAutorizante.Text = string.Empty;
+        //    txtExpediente.Text = string.Empty;
+        //    txtInicioEjecucion.Text = string.Empty;
+        //    txtFinEjecucion.Text = string.Empty;
+        //    txtCertificado.Text = string.Empty;
+        //    txtMesAprobacion.Text = string.Empty;
+        //    ddlObra.SelectedIndex = -1;
+        //}
 
         private void CargarListaLegitimos(string filtro = null)
         {
@@ -119,39 +120,40 @@ namespace WebForms
             }
         }
 
-        protected void btnAgregar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Legitimo nuevoLegitimo = new Legitimo
-                {
-                    CodigoAutorizante = txtAutorizante.Text,
-                    Expediente = txtExpediente.Text,
-                    InicioEjecucion = DateTime.Parse(txtInicioEjecucion.Text),
-                    FinEjecucion = DateTime.Parse(txtFinEjecucion.Text),
-                    Certificado = decimal.Parse(txtCertificado.Text),
-                    MesAprobacion = DateTime.Parse(txtMesAprobacion.Text)
-                };
-                nuevoLegitimo.Obra = new Obra
-                {
-                    Id = int.Parse(ddlObra.SelectedValue)
-                };
+        //COMENTADO POR CIERRE PLANIFICACION
+        //protected void btnAgregar_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        Legitimo nuevoLegitimo = new Legitimo
+        //        {
+        //            CodigoAutorizante = txtAutorizante.Text,
+        //            Expediente = txtExpediente.Text,
+        //            InicioEjecucion = DateTime.Parse(txtInicioEjecucion.Text),
+        //            FinEjecucion = DateTime.Parse(txtFinEjecucion.Text),
+        //            Certificado = decimal.Parse(txtCertificado.Text),
+        //            MesAprobacion = DateTime.Parse(txtMesAprobacion.Text)
+        //        };
+        //        nuevoLegitimo.Obra = new Obra
+        //        {
+        //            Id = int.Parse(ddlObra.SelectedValue)
+        //        };
 
-                if (negocio.agregar(nuevoLegitimo))
-                {
-                    lblMensaje.Text = "Legítimo agregado con éxito.";
-                    lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos();
-                    CalcularSubtotal();
+        //        if (negocio.agregar(nuevoLegitimo))
+        //        {
+        //            lblMensaje.Text = "Legítimo agregado con éxito.";
+        //            lblMensaje.CssClass = "alert alert-success";
+        //            CargarListaLegitimos();
+        //            CalcularSubtotal();
 
-                }
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al agregar el legítimo: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        lblMensaje.Text = $"Error al agregar el legítimo: {ex.Message}";
+        //        lblMensaje.CssClass = "alert alert-danger";
+        //    }
+        //}
 
         private DataTable ObtenerObras()
         {
@@ -232,10 +234,11 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            ddlObra.DataSource = ObtenerObras();
-            ddlObra.DataTextField = "Nombre";
-            ddlObra.DataValueField = "Id";
-            ddlObra.DataBind();
+            //COMENTADO POR CIERRE PLANIFICACION
+            //ddlObra.DataSource = ObtenerObras();
+            //ddlObra.DataTextField = "Nombre";
+            //ddlObra.DataValueField = "Id";
+            //ddlObra.DataBind();
 
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
