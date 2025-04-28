@@ -69,6 +69,24 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtCertificado;
 
         /// <summary>
+        /// rfvCertificado control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCertificado;
+
+        /// <summary>
+        /// revCertificado control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revCertificado;
+
+        /// <summary>
         /// txtMesAprobacion control.
         /// </summary>
         /// <remarks>
@@ -85,15 +103,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnAgregar;
-
-        /// <summary>
-        /// btnLimpiar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiar;
 
         /// <summary>
         /// cblArea control.
