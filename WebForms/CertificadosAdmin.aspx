@@ -161,114 +161,114 @@
 
 
 					<div class="form-group mb-2">
-				<label class="form-label ms-2 mb-0" for="txtSubtotal">Subtotal:</label>
-				<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
-</div>
-</div>
+						<label class="form-label ms-2 mb-0" for="txtSubtotal">Subtotal:</label>
+						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
+					</div>
+				</div>
 
-							<!-- Contenedor de Botones alineados a la derecha -->
-		<div class="d-flex gap-3">
+				<!-- Contenedor de Botones alineados a la derecha -->
+				<div class="d-flex gap-3">
 
-			<div class="form-group mb-2">
-				<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
-			</div>
-			<div class="form-group mb-2">
-				<%--<asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />--%>
-				<asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
-					data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
+					<div class="form-group mb-2">
+						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
+					</div>
+					<div class="form-group mb-2">
+						<%--<asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />--%>
+						<asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
+							data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
 					<i class="bi bi-search"></i>
-				</asp:LinkButton>
-			</div>
+						</asp:LinkButton>
+					</div>
 
 
-			<%-- logica que aparezca o desaparezca. copiar de david --%>
-			<div class="form-group mb-2">
-				<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
+					<%-- logica que aparezca o desaparezca. copiar de david --%>
+					<div class="form-group mb-2">
+						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
 					<i class="bi bi-funnel"></i>
-				</asp:LinkButton>
-			</div>
+						</asp:LinkButton>
+					</div>
 
 
-			<div class="form-group mb-2">
-			
-				<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+					<div class="form-group mb-2">
+
+						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
 					<i class="bi bi-plus-lg" ></i> Agregar
-				</asp:LinkButton>
-			</div>
+						</asp:LinkButton>
+					</div>
 
+				</div>
+			</div>
+		</div>
+
+		<hr class="mb-3" />
+
+		<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  mb-4 "
+			OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
+			OnRowDeleting="dgvCertificado_RowDeleting"
+			AutoGenerateColumns="false" runat="server">
+			<Columns>
+				<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
+
+				<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" />
+				<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
+				<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
+				<asp:BoundField HeaderText="Barrio" DataField="Autorizante.Obra.Barrio.Nombre" />
+				<asp:BoundField HeaderText="Proyecto" DataField="Autorizante.Obra.Proyecto" />
+				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
+				<asp:TemplateField HeaderText="Expediente">
+					<ItemTemplate>
+						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("ExpedientePago") %>' AutoPostBack="true"
+							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+					</ItemTemplate>
+				</asp:TemplateField>
+				<asp:BoundField HeaderText="Estado" DataField="Estado" />
+
+				<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />
+				<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" />
+				<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
+				<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
+				<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+
+				<asp:TemplateField HeaderText="Acciones">
+					<ItemTemplate>
+						<div class="d-flex justify-content-center gap-2">
+							<asp:LinkButton ID="btnModificar" runat="server"
+								CommandName="Select"
+								CssClass="btn btn-sm btn-warning "
+								ToolTip="Modificar">
+                                    <i class="bi bi-pencil-square"></i>
+							</asp:LinkButton>
+							<asp:LinkButton ID="btnEliminar" runat="server"
+								CommandName="Delete"
+								CssClass="btn btn-sm btn-danger "
+								ToolTip="Eliminar"
+								OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                    <i class="bi bi-trash"></i>
+							</asp:LinkButton>
+						</div>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+			</Columns>
+		</asp:GridView>
+
+		<div class="text-center p-4">
+			<asp:Label ID="lblMensaje" Text="" runat="server" />
 		</div>
 	</div>
-</div>
-
-<hr class="mb-3" />
-
-			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  mb-4 "
-				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
-				OnRowDeleting="dgvCertificado_RowDeleting"
-				AutoGenerateColumns="false" runat="server">
-				<Columns>
-					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
-
-					<asp:BoundField HeaderText="Area" DataField="Autorizante.Obra.Area.Nombre" />
-					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
-					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
-					<asp:BoundField HeaderText="Barrio" DataField="Autorizante.Obra.Barrio.Nombre" />
-					<asp:BoundField HeaderText="Proyecto" DataField="Autorizante.Obra.Proyecto" />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-					<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
-					<asp:TemplateField HeaderText="Expediente">
-						<ItemTemplate>
-							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("ExpedientePago") %>' AutoPostBack="true"
-								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:BoundField HeaderText="Estado" DataField="Estado" />
-
-					<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />
-					<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" />
-					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
-
-					<asp:TemplateField HeaderText="Acciones">
-						<ItemTemplate>
-							<div class="d-flex justify-content-center gap-2">
-								<asp:LinkButton ID="btnModificar" runat="server"
-									CommandName="Select"
-									CssClass="btn btn-sm btn-warning "
-									ToolTip="Modificar">
-                                    <i class="bi bi-pencil-square"></i>
-								</asp:LinkButton>
-								<asp:LinkButton ID="btnEliminar" runat="server"
-									CommandName="Delete"
-									CssClass="btn btn-sm btn-danger "
-									ToolTip="Eliminar"
-									OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                                    <i class="bi bi-trash"></i>
-								</asp:LinkButton>
-							</div>
-						</ItemTemplate>
-					</asp:TemplateField>
-
-				</Columns>
-			</asp:GridView>
-
-			<div class="text-center p-4">
-				<asp:Label ID="lblMensaje" Text="" runat="server" />
-			</div>
-		</div>
 
 
-<script type="text/javascript">
-	function limpiarFormulario() {
-		document.getElementById('<%= txtExpediente.ClientID %>').value = '';
-		document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
-		document.getElementById('<%= txtFecha.ClientID %>').value = '';
-		document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
-		document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;
-	}
+	<script type="text/javascript">
+		function limpiarFormulario() {
+			document.getElementById('<%= txtExpediente.ClientID %>').value = '';
+			document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
+			document.getElementById('<%= txtFecha.ClientID %>').value = '';
+			document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;
+		}
 </script>
 
 </asp:Content>

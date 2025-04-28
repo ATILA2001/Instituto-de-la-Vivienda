@@ -132,7 +132,7 @@
 	<!-- /Modal -->
 
 
-	
+
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -287,4 +287,16 @@
 		</div>
 	</div>
 
+	<script type="text/javascript">
+		function limpiarFormulario() {
+			document.getElementById('<%= txtExpediente.ClientID %>').value = '';
+			document.getElementById('<%= txtDetalle.ClientID %>').value = '';
+			document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
+			document.getElementById('<%= txtFecha.ClientID %>').value = '';
+			document.getElementById('<%= txtMes.ClientID %>').value = '';
+			document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlConcepto.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlEstado.ClientID %>').selectedIndex = 0;
+		}
+</script>
 </asp:Content>
