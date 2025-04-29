@@ -27,7 +27,7 @@
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
 									</div>
 								</div>
 								<div class="col-6">
@@ -39,7 +39,7 @@
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" />
+										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00"/>
 										<asp:RequiredFieldValidator ID="rfvMontoAutorizado"
 											ControlToValidate="txtMontoAutorizado"
 											ValidationGroup="AgregarCertificado"
