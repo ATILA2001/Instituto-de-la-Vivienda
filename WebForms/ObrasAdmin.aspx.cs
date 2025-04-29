@@ -155,14 +155,18 @@ namespace WebForms
             {
                 // Validar que los campos no estén vacíos o nulos
                 if (txtDescripcion.Text.Trim() != string.Empty &&
-                    txtNumero.Text.Trim() != string.Empty &&
-                    txtAño.Text.Trim() != string.Empty &&
-                    txtEtapa.Text.Trim() != string.Empty &&
-                    txtObra.Text.Trim() != string.Empty &&
-                    ddlEmpresa.SelectedIndex != -1 &&
-                    ddlContrata.SelectedIndex != -1 &&
-                    ddlBarrio.SelectedIndex != -1 &&
-                    ddlArea.SelectedIndex != -1)
+            txtNumero.Text.Trim() != string.Empty &&
+            txtAño.Text.Trim() != string.Empty &&
+            txtEtapa.Text.Trim() != string.Empty &&
+            txtObra.Text.Trim() != string.Empty &&
+            !string.IsNullOrEmpty(ddlEmpresa.SelectedValue) &&
+            ddlEmpresa.SelectedIndex > 0 &&
+            !string.IsNullOrEmpty(ddlContrata.SelectedValue) &&
+            ddlContrata.SelectedIndex > 0 &&
+            !string.IsNullOrEmpty(ddlBarrio.SelectedValue) &&
+            ddlBarrio.SelectedIndex > 0 &&
+            !string.IsNullOrEmpty(ddlArea.SelectedValue) &&
+            ddlArea.SelectedIndex > 0)
                 {
                     // Asignar los valores a la nueva obra
                     nuevaObra.Numero = int.Parse(txtNumero.Text.Trim());
@@ -220,6 +224,22 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
+            ddlEmpresa.Items.Clear();
+            ddlArea.Items.Clear();
+            ddlContrata.Items.Clear();
+            ddlBarrio.Items.Clear();
+
+            // Add empty items to each dropdown
+            ddlEmpresa.Items.Add(new ListItem("Seleccione una empresa", ""));
+            ddlArea.Items.Add(new ListItem("Seleccione un área", ""));
+            ddlContrata.Items.Add(new ListItem("Seleccione una contrata", ""));
+            ddlBarrio.Items.Add(new ListItem("Seleccione un barrio", ""));
+
+            // Set AppendDataBoundItems property to true for all dropdowns
+            ddlEmpresa.AppendDataBoundItems = true;
+            ddlArea.AppendDataBoundItems = true;
+            ddlContrata.AppendDataBoundItems = true;
+            ddlBarrio.AppendDataBoundItems = true;
 
             ddlEmpresa.DataSource = ObtenerEmpresas();
             ddlEmpresa.DataTextField = "Nombre";
