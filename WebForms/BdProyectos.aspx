@@ -50,7 +50,7 @@
 
                                     <div class="mb-3">
                                         <label for="txtMontoAutorizadoInicial" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" />
+                                        <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" placeHolder="0,00" />
                                         <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
                                             ControlToValidate="txtMontoAutorizadoInicial"
                                             ValidationGroup="AgregarProyecto"

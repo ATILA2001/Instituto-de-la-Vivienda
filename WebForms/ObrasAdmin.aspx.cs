@@ -148,60 +148,40 @@ namespace WebForms
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            ObraNegocio negocio = new ObraNegocio();
-            Obra nuevaObra = new Obra();
-
-            try
+            // If page is valid (all validators passed), proceed with creating the new object
+            if (Page.IsValid)
             {
-                // Validar que los campos no estén vacíos o nulos
-                if (txtDescripcion.Text.Trim() != string.Empty &&
-            txtNumero.Text.Trim() != string.Empty &&
-            txtAño.Text.Trim() != string.Empty &&
-            txtEtapa.Text.Trim() != string.Empty &&
-            txtObra.Text.Trim() != string.Empty &&
-            !string.IsNullOrEmpty(ddlEmpresa.SelectedValue) &&
-            ddlEmpresa.SelectedIndex > 0 &&
-            !string.IsNullOrEmpty(ddlContrata.SelectedValue) &&
-            ddlContrata.SelectedIndex > 0 &&
-            !string.IsNullOrEmpty(ddlBarrio.SelectedValue) &&
-            ddlBarrio.SelectedIndex > 0 &&
-            !string.IsNullOrEmpty(ddlArea.SelectedValue) &&
-            ddlArea.SelectedIndex > 0)
+                ObraNegocio negocio = new ObraNegocio();
+                Obra nuevaObra = new Obra();
+
+                try
                 {
-                    // Asignar los valores a la nueva obra
+                    // Assign values to the new obra
                     nuevaObra.Numero = int.Parse(txtNumero.Text.Trim());
                     nuevaObra.Año = int.Parse(txtAño.Text.Trim());
                     nuevaObra.Etapa = int.Parse(txtEtapa.Text.Trim());
                     nuevaObra.ObraNumero = int.Parse(txtObra.Text.Trim());
                     nuevaObra.Descripcion = txtDescripcion.Text.Trim();
 
-                    // Asignar los objetos de relaciones
+                    // Assign relationship objects
                     nuevaObra.Empresa = new Empresa { Id = int.Parse(ddlEmpresa.SelectedValue) };
                     nuevaObra.Contrata = new Contrata { Id = int.Parse(ddlContrata.SelectedValue) };
                     nuevaObra.Barrio = new Barrio { Id = int.Parse(ddlBarrio.SelectedValue) };
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     nuevaObra.Area = new Area();
                     nuevaObra.Area.Id = int.Parse(ddlArea.SelectedValue);
-
                     nuevaObra.Area.Nombre = ddlArea.SelectedItem.Text;
 
-                    // Llamar al método agregar de ObraNegocio
+                    // Call the add method from ObraNegocio
                     if (negocio.agregar(nuevaObra))
                     {
                         lblMensaje.Text = "Obra agregada exitosamente!";
                         lblMensaje.CssClass = "alert alert-success";
 
-                        // Limpiar los campos
-                        txtNumero.Text = string.Empty;
-                        txtAño.Text = string.Empty;
-                        txtEtapa.Text = string.Empty;
-                        txtObra.Text = string.Empty;
-                        txtDescripcion.Text = string.Empty;
-                        ddlEmpresa.SelectedIndex = -1;
-                        ddlContrata.SelectedIndex = -1;
-                        ddlBarrio.SelectedIndex = -1;
+                        // Clear fields
+                        ClearFormFields();
 
-                        // Refrescar la lista de obras
+                        // Refresh the works list
                         CargarListaObras();
                     }
                     else
@@ -210,17 +190,25 @@ namespace WebForms
                         lblMensaje.CssClass = "alert alert-danger";
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    lblMensaje.Text = "Debe llenar todos los campos correctamente.";
+                    lblMensaje.Text = $"Error al agregar la obra: {ex.Message}";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al agregar la obra: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
+        }
+
+        private void ClearFormFields()
+        {
+            txtNumero.Text = string.Empty;
+            txtAño.Text = string.Empty;
+            txtEtapa.Text = string.Empty;
+            txtObra.Text = string.Empty;
+            txtDescripcion.Text = string.Empty;
+            ddlEmpresa.SelectedIndex = 0;
+            ddlContrata.SelectedIndex = 0;
+            ddlBarrio.SelectedIndex = 0;
+            ddlArea.SelectedIndex = 0;
         }
         private void BindDropDownList()
         {
