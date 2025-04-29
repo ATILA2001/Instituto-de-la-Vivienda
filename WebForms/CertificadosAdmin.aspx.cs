@@ -69,39 +69,54 @@ namespace WebForms
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-          try
+            if (Page.IsValid) // Check if all validators passed
             {
-                CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
-                Certificado nuevoCertificado = new Certificado
+                try
                 {
-                    Autorizante = new Autorizante
+                    CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
+                    Certificado nuevoCertificado = new Certificado
                     {
-                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
-                    },
-                    ExpedientePago = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
-                    Tipo = new TipoPago
-                    {
-                        Id = int.Parse(ddlTipo.SelectedValue)
-                    },
-                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
-                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
-                        ? null
-                        : (DateTime?)DateTime.Parse(txtFecha.Text)
-                };
+                        Autorizante = new Autorizante
+                        {
+                            CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                        },
+                        ExpedientePago = txtExpediente.Text,
+                        Tipo = new TipoPago
+                        {
+                            Id = int.Parse(ddlTipo.SelectedValue)
+                        },
+                        MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
+                        MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
+                            ? null
+                            : (DateTime?)DateTime.Parse(txtFecha.Text)
+                    };
 
-                certificadoNegocio.agregar(nuevoCertificado);
+                    certificadoNegocio.agregar(nuevoCertificado);
 
-                lblMensaje.Text = "Certificado agregado con éxito.";
-                lblMensaje.ForeColor = System.Drawing.Color.Green;
+                    lblMensaje.Text = "Certificado agregado con éxito.";
+                    lblMensaje.CssClass = "alert alert-success";
 
-                CargarListaCertificados();
-                CalcularSubtotal();
+                    // Clear the form after successful add
+                    LimpiarFormulario();
+
+                    CargarListaCertificados();
+                    CalcularSubtotal();
+                }
+                catch (Exception ex)
+                {
+                    lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
             }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
-                lblMensaje.ForeColor = System.Drawing.Color.Red;
-            }
+        }
+
+        private void LimpiarFormulario()
+        {
+            txtExpediente.Text = string.Empty;
+            txtMontoAutorizado.Text = string.Empty;
+            txtFecha.Text = string.Empty;
+            ddlAutorizante.SelectedIndex = 0;
+            ddlTipo.SelectedIndex = 0;
         }
 
 
@@ -258,7 +273,19 @@ namespace WebForms
             return dt;
         }
         private void BindDropDownList()
-        {
+        {// Clear existing items first
+            ddlTipo.Items.Clear();
+            ddlAutorizante.Items.Clear();
+
+            // Set AppendDataBoundItems to true
+            ddlTipo.AppendDataBoundItems = true;
+            ddlAutorizante.AppendDataBoundItems = true;
+
+            // Add empty items
+            ddlTipo.Items.Add(new ListItem("Seleccione un tipo", ""));
+            ddlAutorizante.Items.Add(new ListItem("Seleccione un autorizante", ""));
+
+            // Bind data sources
             ddlTipo.DataSource = ObtenerTipos();
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";

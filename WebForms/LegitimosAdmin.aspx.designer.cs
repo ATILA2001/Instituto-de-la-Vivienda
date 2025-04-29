@@ -24,6 +24,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.DropDownList ddlObra;
 
         /// <summary>
+        /// rfvObra control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObra;
+
+        /// <summary>
         /// txtAutorizante control.
         /// </summary>
         /// <remarks>
@@ -31,6 +40,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtAutorizante;
+
+        /// <summary>
+        /// rfvAutorizante control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAutorizante;
 
         /// <summary>
         /// txtExpediente control.
@@ -42,6 +60,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtExpediente;
 
         /// <summary>
+        /// rfvExpediente control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvExpediente;
+
+        /// <summary>
         /// txtInicioEjecucion control.
         /// </summary>
         /// <remarks>
@@ -51,6 +78,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtInicioEjecucion;
 
         /// <summary>
+        /// rfvInicioEjecucion control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvInicioEjecucion;
+
+        /// <summary>
         /// txtFinEjecucion control.
         /// </summary>
         /// <remarks>
@@ -58,6 +94,24 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtFinEjecucion;
+
+        /// <summary>
+        /// rfvFinEjecucion control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvFinEjecucion;
+
+        /// <summary>
+        /// cvFinEjecucion control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CompareValidator cvFinEjecucion;
 
         /// <summary>
         /// txtCertificado control.
@@ -94,6 +148,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtMesAprobacion;
+
+        /// <summary>
+        /// rfvMesAprobacion control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMesAprobacion;
 
         /// <summary>
         /// btnAgregar control.
