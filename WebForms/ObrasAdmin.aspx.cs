@@ -85,7 +85,7 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro= null)
+        private void CargarListaObras(string filtro = null)
         {
             try
             {

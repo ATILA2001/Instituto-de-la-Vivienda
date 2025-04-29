@@ -24,6 +24,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.DropDownList ddlAutorizante;
 
         /// <summary>
+        /// rfvAutorizante control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAutorizante;
+
+        /// <summary>
         /// txtExpediente control.
         /// </summary>
         /// <remarks>
@@ -33,6 +42,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtExpediente;
 
         /// <summary>
+        /// rfvExpediente control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvExpediente;
+
+        /// <summary>
         /// ddlTipo control.
         /// </summary>
         /// <remarks>
@@ -40,6 +58,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlTipo;
+
+        /// <summary>
+        /// rfvTipo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTipo;
 
         /// <summary>
         /// txtMontoAutorizado control.
@@ -76,6 +103,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtFecha;
+
+        /// <summary>
+        /// rfvFecha control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvFecha;
 
         /// <summary>
         /// btnAgregar control.

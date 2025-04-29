@@ -8,7 +8,7 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<!-- Modal -->
+		<!-- Modal -->
 	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
@@ -23,19 +23,49 @@
 								<div class="col-12">
 									<div class="mb-3">
 										<label for="ddlAutorizante" class="form-label">Código Autorizante</label>
-										<asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server"></asp:DropDownList>
+										<asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un autorizante" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvAutorizante"
+											ControlToValidate="ddlAutorizante"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="Seleccione un autorizante"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+                                            InitialValue="" />
 									</div>
 								</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25"/>
+										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
+                                        <asp:RequiredFieldValidator ID="rfvExpediente"
+											ControlToValidate="txtExpediente"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="El expediente es requerido"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
 									</div>
 								</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="ddlTipo" class="form-label">Tipo</label>
-										<asp:DropDownList ID="ddlTipo" CssClass="form-select" runat="server"></asp:DropDownList>
+										<asp:DropDownList ID="ddlTipo" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un tipo" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvTipo"
+											ControlToValidate="ddlTipo"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="Seleccione un tipo"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+                                            InitialValue="" />
 									</div>
 								</div>
 								<div class="col-6">
@@ -65,6 +95,14 @@
 									<div class="mb-3">
 										<label for="txtFecha" class="form-label">Mes Aprobacion</label>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <asp:RequiredFieldValidator ID="rfvFecha"
+											ControlToValidate="txtFecha"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="El mes de aprobación es requerido"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
 									</div>
 								</div>
 							</div>

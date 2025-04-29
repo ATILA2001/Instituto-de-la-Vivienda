@@ -19,145 +19,145 @@
 						<div class="container">
 							<div class="row">
 								<div class="col-12">
-    <div class="mb-3">
-        <label for="txtDescripcion" class="form-label">Nombre de Obra</label>
-        <asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
-        <asp:RequiredFieldValidator ID="rfvDescripcion"
-            ControlToValidate="txtDescripcion"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Ingrese el nombre de la obra"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="txtDescripcion" class="form-label">Nombre de Obra</label>
+										<asp:TextBox ID="txtDescripcion" CssClass="form-control" runat="server" />
+										<asp:RequiredFieldValidator ID="rfvDescripcion"
+											ControlToValidate="txtDescripcion"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Ingrese el nombre de la obra"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
 
 								<div class="col-6">
-    <div class="mb-3">
-        <label for="ddlBarrio" class="form-label">Barrio</label>
-        <asp:DropDownList ID="ddlBarrio" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione un barrio" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvBarrio"
-            ControlToValidate="ddlBarrio"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Seleccione un barrio"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="ddlEmpresa" class="form-label">Empresa</label>
-        <asp:DropDownList ID="ddlEmpresa" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione una empresa" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvEmpresa"
-            ControlToValidate="ddlEmpresa"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Seleccione una empresa"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="ddlArea" class="form-label">Area</label>
-        <asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvArea"
-            ControlToValidate="ddlArea"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Seleccione un área"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="ddlContrata" class="form-label">Contrata</label>
-        <asp:DropDownList ID="ddlContrata" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione una contrata" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvContrata"
-            ControlToValidate="ddlContrata"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Seleccione una contrata"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="ddlBarrio" class="form-label">Barrio</label>
+										<asp:DropDownList ID="ddlBarrio" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione un barrio" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvBarrio"
+											ControlToValidate="ddlBarrio"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Seleccione un barrio"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlEmpresa" class="form-label">Empresa</label>
+										<asp:DropDownList ID="ddlEmpresa" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione una empresa" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvEmpresa"
+											ControlToValidate="ddlEmpresa"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Seleccione una empresa"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlArea" class="form-label">Area</label>
+										<asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvArea"
+											ControlToValidate="ddlArea"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Seleccione un área"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="ddlContrata" class="form-label">Contrata</label>
+										<asp:DropDownList ID="ddlContrata" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione una contrata" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvContrata"
+											ControlToValidate="ddlContrata"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Seleccione una contrata"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
 
 								<div class="col-6">
-    <div class="mb-3">
-        <label for="txtNumero" class="form-label">Número</label>
-        <asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-        <asp:RequiredFieldValidator ID="rfvNumero"
-            ControlToValidate="txtNumero"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Ingrese un número"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="txtAño" class="form-label">Año</label>
-        <asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-        <asp:RequiredFieldValidator ID="rfvAño"
-            ControlToValidate="txtAño"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Ingrese un año"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="txtEtapa" class="form-label">Etapa</label>
-        <asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-        <asp:RequiredFieldValidator ID="rfvEtapa"
-            ControlToValidate="txtEtapa"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Ingrese una etapa"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true" />
-    </div>
-</div>
-<div class="col-6">
-    <div class="mb-3">
-        <label for="txtObra" class="form-label">Obra N°</label>
-        <asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-        <asp:RequiredFieldValidator ID="rfvObra"
-            ControlToValidate="txtObra"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Ingrese el número de obra"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="txtNumero" class="form-label">Número</label>
+										<asp:TextBox ID="txtNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+										<asp:RequiredFieldValidator ID="rfvNumero"
+											ControlToValidate="txtNumero"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Ingrese un número"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtAño" class="form-label">Año</label>
+										<asp:TextBox ID="txtAño" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+										<asp:RequiredFieldValidator ID="rfvAño"
+											ControlToValidate="txtAño"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Ingrese un año"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtEtapa" class="form-label">Etapa</label>
+										<asp:TextBox ID="txtEtapa" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+										<asp:RequiredFieldValidator ID="rfvEtapa"
+											ControlToValidate="txtEtapa"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Ingrese una etapa"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="mb-3">
+										<label for="txtObra" class="form-label">Obra N°</label>
+										<asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+										<asp:RequiredFieldValidator ID="rfvObra"
+											ControlToValidate="txtObra"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Ingrese el número de obra"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

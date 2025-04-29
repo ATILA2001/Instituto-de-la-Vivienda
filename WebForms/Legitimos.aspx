@@ -8,92 +8,154 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<!-- Modal -->
-	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Legitimo</h1>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<div class="container">
-							<div class="row">
-								<div class="col-12">
-									<div class="mb-3">
-										<label for="ddlObra" class="form-label">Obra</label>
-										<asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server"></asp:DropDownList>
-									</div>
+<!-- Modal -->
+<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Legitimo</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<div class="container">
+						<div class="row">
+							<div class="col-12">
+								<div class="mb-3">
+									<label for="ddlObra" class="form-label">Obra</label>
+									<asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                        <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
+                                    </asp:DropDownList>
+                                    <asp:RequiredFieldValidator ID="rfvObra"
+										ControlToValidate="ddlObra"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="Seleccione una obra"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true"
+                                        InitialValue="" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtAutorizante" class="form-label">Código Autorizante</label>
-										<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtAutorizante" class="form-label">Código Autorizante</label>
+									<asp:TextBox ID="txtAutorizante" CssClass="form-control" runat="server" />
+                                    <asp:RequiredFieldValidator ID="rfvAutorizante"
+										ControlToValidate="txtAutorizante"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="El código autorizante es requerido"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtExpediente" class="form-label">Expediente</label>
-										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtExpediente" class="form-label">Expediente</label>
+									<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
+                                    <asp:RequiredFieldValidator ID="rfvExpediente"
+										ControlToValidate="txtExpediente"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="El expediente es requerido"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtInicioEjecucion" class="form-label">Inicio Ejecución</label>
-										<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtInicioEjecucion" class="form-label">Inicio Ejecución</label>
+									<asp:TextBox ID="txtInicioEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+                                    <asp:RequiredFieldValidator ID="rfvInicioEjecucion"
+										ControlToValidate="txtInicioEjecucion"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="La fecha de inicio de ejecución es requerida"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtFinEjecucion" class="form-label">Fin Ejecución</label>
-										<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtFinEjecucion" class="form-label">Fin Ejecución</label>
+									<asp:TextBox ID="txtFinEjecucion" CssClass="form-control" runat="server" TextMode="Date" />
+                                    <asp:RequiredFieldValidator ID="rfvFinEjecucion"
+										ControlToValidate="txtFinEjecucion"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="La fecha de fin de ejecución es requerida"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
+                                    <asp:CompareValidator ID="cvFinEjecucion"
+                                        ControlToValidate="txtFinEjecucion"
+                                        ControlToCompare="txtInicioEjecucion"
+                                        ValidationGroup="AgregarLegitimo"
+                                        runat="server"
+                                        Operator="GreaterThanEqual"
+                                        Type="Date"
+                                        ErrorMessage="La fecha de fin debe ser mayor o igual a la fecha de inicio"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtCertificado" class="form-label">Monto Certificado</label>
-										<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" placeHolder="0,00"/>
-										<asp:RequiredFieldValidator ID="rfvCertificado"
-											ControlToValidate="txtCertificado"
-											ValidationGroup="AgregarLegitimo"
-											runat="server"
-											ErrorMessage="El monto es requerido"
-											Display="Dynamic"
-											CssClass="text-danger"
-											EnableClientScript="true" />
-										<asp:RegularExpressionValidator ID="revCertificado"
-											ControlToValidate="txtCertificado"
-											ValidationGroup="AgregarLegitimo"
-											runat="server"
-											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
-											ErrorMessage="Solo números positivos con hasta 2 decimales"
-											Display="Dynamic"
-											CssClass="text-danger"
-											EnableClientScript="true" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtCertificado" class="form-label">Monto Certificado</label>
+									<asp:TextBox ID="txtCertificado" CssClass="form-control" runat="server" placeHolder="0,00"/>
+									<asp:RequiredFieldValidator ID="rfvCertificado"
+										ControlToValidate="txtCertificado"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="El monto es requerido"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
+									<asp:RegularExpressionValidator ID="revCertificado"
+										ControlToValidate="txtCertificado"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
+										ErrorMessage="Solo números positivos con hasta 2 decimales"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="txtMesAprobacion" class="form-label">Mes Aprobación</label>
-										<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
-									</div>
+							</div>
+							<div class="col-6">
+								<div class="mb-3">
+									<label for="txtMesAprobacion" class="form-label">Mes Aprobación</label>
+									<asp:TextBox ID="txtMesAprobacion" CssClass="form-control" runat="server" TextMode="Date" />
+                                    <asp:RequiredFieldValidator ID="rfvMesAprobacion"
+										ControlToValidate="txtMesAprobacion"
+										ValidationGroup="AgregarLegitimo"
+										runat="server"
+										ErrorMessage="El mes de aprobación es requerido"
+										Display="Dynamic"
+										CssClass="text-danger"
+										EnableClientScript="true" />
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="modal-footer d-flex justify-content-between px-4">
-					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
-					<div class="d-flex gap-4">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarLegitimo" />
-					</div>
+			</div>
+			<div class="modal-footer d-flex justify-content-between px-4">
+				<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+				<div class="d-flex gap-4">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+					<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarLegitimo" />
 				</div>
 			</div>
 		</div>
 	</div>
-	<!-- /Modal -->
+</div>
+<!-- /Modal -->
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">

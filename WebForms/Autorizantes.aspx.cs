@@ -139,28 +139,72 @@ namespace WebForms
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
-            Autorizante nuevoAutorizante = new Autorizante();
+            // Check if page is valid (all validators passed)
+            if (Page.IsValid)
+            {
+                try
+                {
+                    AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
+                    Autorizante nuevoAutorizante = new Autorizante();
 
-            nuevoAutorizante.Obra = new Obra();
-            nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
-            nuevoAutorizante.Concepto = new Concepto();
-            nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
-            nuevoAutorizante.Detalle = txtDetalle.Text;
-            nuevoAutorizante.Expediente = txtExpediente.Text;
-            nuevoAutorizante.Estado = new EstadoAutorizante();
-            nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
-            nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
-            nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
-            nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
-            autorizanteNegocio.agregar(nuevoAutorizante);
+                    nuevoAutorizante.Obra = new Obra();
+                    nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
+                    nuevoAutorizante.Concepto = new Concepto();
+                    nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
+                    nuevoAutorizante.Detalle = txtDetalle.Text;
+                    nuevoAutorizante.Expediente = txtExpediente.Text;
+                    nuevoAutorizante.Estado = new EstadoAutorizante();
+                    nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
+                    nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+                    nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
+                    nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
 
-            lblMensaje.Text = "Autorizante agregado con éxito.";
-            CargarListaAutorizantes();
-            CalcularSubtotal();
+                    autorizanteNegocio.agregar(nuevoAutorizante);
+
+                    lblMensaje.Text = "Autorizante agregado con éxito.";
+                    lblMensaje.CssClass = "alert alert-success";
+                    //CargarListaAutorizantes();
+                    CalcularSubtotal();
+
+                    // Clear form after successful add
+                    LimpiarFormulario();
+                }
+                catch (Exception ex)
+                {
+                    lblMensaje.Text = $"Error al agregar el autorizante: {ex.Message}";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
+            }
         }
-        private void BindDropDownList()
+
+        private void LimpiarFormulario()
         {
+            txtExpediente.Text = string.Empty;
+            txtDetalle.Text = string.Empty;
+            txtMontoAutorizado.Text = string.Empty;
+            txtFecha.Text = string.Empty;
+            txtMes.Text = string.Empty;
+            ddlObra.SelectedIndex = 0;
+            ddlConcepto.SelectedIndex = 0;
+            ddlEstado.SelectedIndex = 0;
+        }
+
+        private void BindDropDownList()
+        {// Clear existing items first
+            ddlEstado.Items.Clear();
+            ddlConcepto.Items.Clear();
+            ddlObra.Items.Clear();
+
+            // Set AppendDataBoundItems to true
+            ddlEstado.AppendDataBoundItems = true;
+            ddlConcepto.AppendDataBoundItems = true;
+            ddlObra.AppendDataBoundItems = true;
+
+            // Add empty items
+            ddlEstado.Items.Add(new ListItem("Seleccione un estado", ""));
+            ddlConcepto.Items.Add(new ListItem("Seleccione un concepto", ""));
+            ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
+
             ddlEstado.DataSource = ObtenerEstado();
             ddlEstado.DataTextField = "Nombre";
             ddlEstado.DataValueField = "Id";

@@ -24,6 +24,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtDescripcion;
 
         /// <summary>
+        /// rfvDescripcion control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvDescripcion;
+
+        /// <summary>
         /// ddlBarrio control.
         /// </summary>
         /// <remarks>
@@ -31,6 +40,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlBarrio;
+
+        /// <summary>
+        /// rfvBarrio control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvBarrio;
 
         /// <summary>
         /// ddlEmpresa control.
@@ -42,6 +60,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.DropDownList ddlEmpresa;
 
         /// <summary>
+        /// rfvEmpresa control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEmpresa;
+
+        /// <summary>
         /// ddlContrata control.
         /// </summary>
         /// <remarks>
@@ -49,6 +76,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlContrata;
+
+        /// <summary>
+        /// rfvContrata control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvContrata;
 
         /// <summary>
         /// txtNumero control.
@@ -60,6 +96,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtNumero;
 
         /// <summary>
+        /// rfvNumero control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvNumero;
+
+        /// <summary>
         /// txtAño control.
         /// </summary>
         /// <remarks>
@@ -67,6 +112,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtAño;
+
+        /// <summary>
+        /// rfvAño control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAño;
 
         /// <summary>
         /// txtEtapa control.
@@ -78,6 +132,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtEtapa;
 
         /// <summary>
+        /// rfvEtapa control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEtapa;
+
+        /// <summary>
         /// txtObra control.
         /// </summary>
         /// <remarks>
@@ -85,6 +148,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtObra;
+
+        /// <summary>
+        /// rfvObra control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObra;
 
         /// <summary>
         /// btnAgregar control.
