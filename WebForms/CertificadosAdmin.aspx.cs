@@ -31,24 +31,7 @@ namespace WebForms
         private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
         {
             CargarListaCertificados();
-
         }
-        //protected void Page_Init(object sender, EventArgs e) 
-        //{
-        //    //cblArea.AcceptChanges += OnAcceptChanges;
-        //    //cblBarrio.AcceptChanges += OnAcceptChanges;
-        //    //cblProyecto.AcceptChanges += OnAcceptChanges;
-        //    //cblEmpresa.AcceptChanges += OnAcceptChanges;
-        //    //cblAutorizante.AcceptChanges += OnAcceptChanges;
-        //    //cblTipo.AcceptChanges += OnAcceptChanges;
-        //    //cblFecha.AcceptChanges += OnAcceptChanges;
-        //    //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
-        //}
-
-        //private void OnAcceptChanges(object sender, EventArgs e)
-        //{
-        //    CargarListaCertificados();
-        //}
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -58,53 +41,144 @@ namespace WebForms
                 CargarListaCertificados();
             }
         }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            // Configure validators if we're in editing mode
+            if (ViewState["EditingCertificadoId"] != null)
+            {
+                // Disable the Autorizante validator since the field is hidden
+                rfvAutorizante.Enabled = false;
+            }
+            else
+            {
+                // Enable validators in add mode
+                rfvAutorizante.Enabled = true;
+            }
+        }
+
+        protected void btnShowAddModal_Click(object sender, EventArgs e)
+        {
+            // Clear any existing data
+            LimpiarFormulario();
+
+            // Reset the modal title and button text to "Add" and show Autorizante field
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+        $(document).ready(function() {
+            $('#modalAgregar .modal-title').text('Agregar Certificado');
+            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
+            
+            // Show the Autorizante dropdown and its label
+            $('#autorizanteContainer').show();
+            
+            // Show the modal
+            $('#modalAgregar').modal('show');
+        });", true);
+
+            btnAgregar.Text = "Agregar";
+
+            // Clear any editing state
+            ViewState["EditingCertificadoId"] = null;
+            ViewState["EditingAutorizanteId"] = null;
+            ViewState["EditingCodigoAutorizante"] = null;
+        }
+
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            txtMontoAutorizado.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtFecha.Text = string.Empty;
-            ddlAutorizante.SelectedIndex = -1;
-            ddlTipo.SelectedIndex = -1;
+            LimpiarFormulario();
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            if (Page.IsValid) // Check if all validators passed
+            if (Page.IsValid)
             {
                 try
                 {
                     CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
-                    Certificado nuevoCertificado = new Certificado
+                    Certificado certificado = new Certificado();
+
+                    // Common data for both add and update operations
+                    certificado.ExpedientePago = txtExpediente.Text.Trim();
+                    certificado.MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim());
+
+                    certificado.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
+                        ? null
+                        : (DateTime?)DateTime.Parse(txtFecha.Text);
+
+                    certificado.Tipo = new TipoPago { Id = int.Parse(ddlTipo.SelectedValue) };
+
+                    // Check if we're editing an existing certificado or adding a new one
+                    if (ViewState["EditingCertificadoId"] != null)
                     {
-                        Autorizante = new Autorizante
+                        // We're updating an existing certificado
+                        certificado.Id = (int)ViewState["EditingCertificadoId"];
+
+                        // Use both the ID and CodigoAutorizante from ViewState for the update
+                        if (ViewState["EditingAutorizanteId"] != null && ViewState["EditingCodigoAutorizante"] != null)
+                        {
+                            certificado.Autorizante = new Autorizante
+                            {
+                                Id = (int)ViewState["EditingAutorizanteId"],
+                                CodigoAutorizante = ViewState["EditingCodigoAutorizante"].ToString()
+                            };
+                        }
+
+                        if (certificadoNegocio.modificar(certificado))
+                        {
+                            lblMensaje.Text = "Certificado modificado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+
+                            // Clear the editing state
+                            ViewState["EditingCertificadoId"] = null;
+                            ViewState["EditingAutorizanteId"] = null;
+                            ViewState["EditingCodigoAutorizante"] = null;
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al modificar el certificado.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
+                    else
+                    {
+                        // We're adding a new certificado
+                        // IMPORTANTE: Usamos CodigoAutorizante en lugar del Id, manteniendo el comportamiento original
+                        certificado.Autorizante = new Autorizante
                         {
                             CodigoAutorizante = ddlAutorizante.SelectedItem.Text
-                        },
-                        ExpedientePago = txtExpediente.Text,
-                        Tipo = new TipoPago
+                        };
+
+                        if (certificadoNegocio.agregar(certificado))
                         {
-                            Id = int.Parse(ddlTipo.SelectedValue)
-                        },
-                        MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
-                        MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
-                            ? null
-                            : (DateTime?)DateTime.Parse(txtFecha.Text)
-                    };
+                            lblMensaje.Text = "Certificado agregado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al agregar el certificado.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
 
-                    certificadoNegocio.agregar(nuevoCertificado);
-
-                    lblMensaje.Text = "Certificado agregado con éxito.";
-                    lblMensaje.CssClass = "alert alert-success";
-
-                    // Clear the form after successful add
+                    // Clear fields
                     LimpiarFormulario();
 
+                    // Reset the modal title and button text
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
+                        "$('#modalAgregar .modal-title').text('Agregar Certificado');", true);
+                    btnAgregar.Text = "Agregar";
+
+                    // Hide the modal
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                        "$('#modalAgregar').modal('hide');", true);
+
+                    // Refresh the certificados list
                     CargarListaCertificados();
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
                 {
-                    lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
+                    lblMensaje.Text = $"Error: {ex.Message}";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
@@ -119,12 +193,12 @@ namespace WebForms
             ddlTipo.SelectedIndex = 0;
         }
 
-
         private DataTable ObtenerAreas()
         {
             AreaNegocio areaNegocio = new AreaNegocio();
             return areaNegocio.listarddl();
         }
+
         private void CargarListaCertificados(string filtro = null)
         {
             try
@@ -132,18 +206,13 @@ namespace WebForms
                 var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
                 var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-
-                //string filtroExpediente = ddlExpediente.SelectedValue;
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-                //Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
                 Session["listaCertificado"] = calculoRedeterminacionNegocio.listarCertReliq();
                 dgvCertificado.DataSource = Session["listaCertificado"];
                 dgvCertificado.DataBind();
@@ -155,10 +224,80 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvCertificado.SelectedDataKey.Value.ToString();
-            Response.Redirect("ModificarCertificadoAdmin.aspx?codM=" + idSeleccionado);
+            try
+            {
+                // Get the ID of the selected row
+                int idCertificado = Convert.ToInt32(dgvCertificado.SelectedDataKey.Value);
+
+                // Get the list of certificados from session
+                List<Certificado> certificadosList = (List<Certificado>)Session["listaCertificado"];
+
+                // Find the selected certificado
+                Certificado certificadoSeleccionado = certificadosList.FirstOrDefault(c => c.Id == idCertificado);
+
+                if (certificadoSeleccionado != null)
+                {
+                    // Set button text to "Actualizar"
+                    btnAgregar.Text = "Actualizar";
+
+                    // Load the certificado data into the form fields
+                    txtExpediente.Text = certificadoSeleccionado.ExpedientePago;
+                    txtMontoAutorizado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+
+                    if (certificadoSeleccionado.MesAprobacion.HasValue)
+                        txtFecha.Text = certificadoSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+
+                    // Select the corresponding value in the Tipo dropdown
+                    if (certificadoSeleccionado.Tipo != null)
+                        SelectDropDownListByValue(ddlTipo, certificadoSeleccionado.Tipo.Id.ToString());
+
+                    // Store the ID of the certificado being edited in ViewState
+                    ViewState["EditingCertificadoId"] = idCertificado;
+
+                    // Also store both the Autorizante ID and CodigoAutorizante for the update
+                    if (certificadoSeleccionado.Autorizante != null)
+                    {
+                        ViewState["EditingAutorizanteId"] = certificadoSeleccionado.Autorizante.Id;
+                        ViewState["EditingCodigoAutorizante"] = certificadoSeleccionado.Autorizante.CodigoAutorizante;
+                    }
+
+                    // Update modal title and hide the Autorizante field
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                $(document).ready(function() {
+                    // Change title and button text
+                    $('#modalAgregar .modal-title').text('Modificar Certificado');
+                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+                    
+                    // Hide the Autorizante dropdown and its label
+                    $('#autorizanteContainer').hide();
+                    
+                    // Show the modal
+                    $('#modalAgregar').modal('show');
+                });", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        // Helper method to select dropdown item by value
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            // Clear any current selection
+            dropDown.ClearSelection();
+
+            // Try to find and select the item
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
+            }
         }
         protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {

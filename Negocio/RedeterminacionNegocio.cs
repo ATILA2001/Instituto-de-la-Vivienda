@@ -317,6 +317,48 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+        public bool modificar(Redeterminacion redeterminacion)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                string query = @"
+            UPDATE REDETERMINACIONES 
+            SET 
+                EXPEDIENTE = @EXPEDIENTE,
+                SALTO = @SALTO,
+                NRO = @NRO,
+                TIPO = @TIPO,
+                ETAPA = @ETAPA,
+                OBSERVACIONES = @OBSERVACIONES,
+                PORCENTAJE_PONDERACION = @PORCENTAJE
+            WHERE 
+                ID = @ID";
 
+                datos.setearConsulta(query);
+
+                // Agregamos los parámetros necesarios
+                datos.agregarParametro("@ID", redeterminacion.Id);
+                datos.agregarParametro("@EXPEDIENTE", redeterminacion.Expediente);
+                datos.agregarParametro("@SALTO", redeterminacion.Salto.HasValue ? (object)redeterminacion.Salto.Value : DBNull.Value);
+                datos.agregarParametro("@NRO", redeterminacion.Nro.HasValue ? (object)redeterminacion.Nro.Value : DBNull.Value);
+                datos.agregarParametro("@TIPO", redeterminacion.Tipo);
+                datos.agregarParametro("@ETAPA", redeterminacion.Etapa.Id);
+                datos.agregarParametro("@OBSERVACIONES", redeterminacion.Observaciones ?? (object)DBNull.Value);
+                datos.agregarParametro("@PORCENTAJE", redeterminacion.Porcentaje.HasValue ? (object)redeterminacion.Porcentaje.Value : DBNull.Value);
+
+                // Ejecutamos la acción
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Hubo un problema al intentar modificar la redeterminación.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

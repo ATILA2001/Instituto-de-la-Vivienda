@@ -8,69 +8,139 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-	<%--	<div id="section1" style="display: none;">
-		<div class="row mt-4">
-			<div class="col-md-12">
-				<table class="table  table1">
-					<thead class="thead-dark">
-						<tr>
-							<th>Código Autorizante</th>
-							<th>Expediente</th>
-							<th>Salto</th>
-							<th>Nro</th>
-							<th>Tipo</th>
-							<th>Etapa</th>
-							<th>Porcentaje</th>
-							<th>Observaciones</th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-
-
-
-							<td>
-								<asp:DropDownList ID="ddlAutorizante" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" />
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtNro" CssClass="form-control" runat="server" />
-							</td>
-
-							<td>
-								<asp:TextBox ID="txtTipo" CssClass="form-control" runat="server"></asp:TextBox>
-							</td>
-							<td>
-								<asp:DropDownList ID="ddlEtapa" CssClass="form-control" runat="server"></asp:DropDownList>
-							</td>
-							<td>
-								<asp:TextBox ID="txtPorcentaje" CssClass="form-control" runat="server" />
-							</td>
-							<td>
-								<asp:TextBox ID="txtObservacion" CssClass="form-control" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-outline-success" runat="server" />
-							</td>
-							<td class="text-right">
-								<asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click"
-									CssClass="btn btn-outline-secondary ml-2" runat="server" /></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>--%>
+	<!-- Modal -->
+<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Redeterminación</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="container">
+                        <div class="row">
+                           <div id="autorizanteContainer" class="col-12">
+    <div class="mb-3">
+        <label for="ddlAutorizante" class="form-label">Autorizante</label>
+        <asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server"></asp:DropDownList>
+        <asp:RequiredFieldValidator ID="rfvAutorizante"
+            ControlToValidate="ddlAutorizante"
+            ValidationGroup="AgregarRedeterminacion"
+            runat="server"
+            ErrorMessage="Seleccione un autorizante"
+            Display="Dynamic"
+            CssClass="text-danger"
+            EnableClientScript="true"
+            InitialValue="" />
+    </div>
+</div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtExpediente" class="form-label">Expediente</label>
+                                    <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" />
+                                    <asp:RequiredFieldValidator ID="rfvExpediente"
+                                        ControlToValidate="txtExpediente"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="El expediente es requerido"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtSalto" class="form-label">Salto</label>
+                                    <asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" />
+                                    <asp:RequiredFieldValidator ID="rfvSalto"
+                                        ControlToValidate="txtSalto"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="El salto es requerido"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtNro" class="form-label">Nro</label>
+                                    <asp:TextBox ID="txtNro" CssClass="form-control" runat="server" />
+                                    <asp:RequiredFieldValidator ID="rfvNro"
+                                        ControlToValidate="txtNro"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="El número es requerido"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtTipo" class="form-label">Tipo</label>
+                                    <asp:TextBox ID="txtTipo" CssClass="form-control" runat="server" />
+                                    <asp:RequiredFieldValidator ID="rfvTipo"
+                                        ControlToValidate="txtTipo"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="El tipo es requerido"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="ddlEtapa" class="form-label">Etapa</label>
+                                    <asp:DropDownList ID="ddlEtapa" CssClass="form-select" runat="server"></asp:DropDownList>
+                                    <asp:RequiredFieldValidator ID="rfvEtapa"
+                                        ControlToValidate="ddlEtapa"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="Seleccione una etapa"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true"
+                                        InitialValue="" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="txtPorcentaje" class="form-label">Porcentaje</label>
+                                    <asp:TextBox ID="txtPorcentaje" CssClass="form-control" runat="server" />
+                                    <asp:RequiredFieldValidator ID="rfvPorcentaje"
+                                        ControlToValidate="txtPorcentaje"
+                                        ValidationGroup="AgregarRedeterminacion"
+                                        runat="server"
+                                        ErrorMessage="El porcentaje es requerido"
+                                        Display="Dynamic"
+                                        CssClass="text-danger"
+                                        EnableClientScript="true" />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="txtObservacion" class="form-label">Observaciones</label>
+                                    <asp:TextBox ID="txtObservacion" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between px-4">
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                <div class="d-flex gap-4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarRedeterminacion" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Modal -->
 
 	<div class="row mt-4 mb-3">
 		<div class="col-12">
@@ -135,16 +205,11 @@
 						</asp:LinkButton>
 					</div>
 
-
-					<%-- no hace falta logica script, abriria un modal --%>
-					<div class="form-group mb-2">
-						<%--<button class="btn btn-secondary" id="visibilityMessage">
-			<span id="visibilityText">Agregar Obra</span>
-		</button>--%>
-						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-			<i class="bi bi-plus-lg" ></i> Agregar
-						</asp:LinkButton>
-					</div>
+<div class="form-group mb-2">
+    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+        <i class="bi bi-plus-lg"></i> Agregar
+    </asp:LinkButton>
+</div>
 
 				</div>
 			</div>
@@ -161,7 +226,6 @@
 				<asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
 				<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 				<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" />
-				<asp:BoundField HeaderText="Etapa" DataField="Etapa.Nombre" />
 				<asp:TemplateField HeaderText="Etapa">
 					<ItemTemplate>
 						<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
@@ -211,7 +275,18 @@
 			<asp:Label ID="lblMensaje" Text="" runat="server" />
 		</div>
 	</div>
-	</div>
+    <script type="text/javascript">
+    function limpiarFormulario() {
+        document.getElementById('<%= txtExpediente.ClientID %>').value = '';
+        document.getElementById('<%= txtSalto.ClientID %>').value = '';
+        document.getElementById('<%= txtNro.ClientID %>').value = '';
+        document.getElementById('<%= txtTipo.ClientID %>').value = '';
+        document.getElementById('<%= txtPorcentaje.ClientID %>').value = '';
+        document.getElementById('<%= txtObservacion.ClientID %>').value = '';
+        document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
+        document.getElementById('<%= ddlEtapa.ClientID %>').selectedIndex = 0;
+    }
+</script>
 
 
 </asp:Content>

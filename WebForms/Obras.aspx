@@ -208,11 +208,10 @@
 						</asp:LinkButton>
 					</div>
 					<div class="form-group mb-2">
-
-						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-<i class="bi bi-plus-lg" ></i> Agregar
-						</asp:LinkButton>
-					</div>
+    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+        <i class="bi bi-plus-lg"></i> Agregar
+    </asp:LinkButton>
+</div>
 				</div>
 			</div>
 		</div>

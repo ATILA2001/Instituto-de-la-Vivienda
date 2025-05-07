@@ -67,23 +67,23 @@
 											InitialValue="" />
 									</div>
 								</div>
-								<div class="col-6">
-									<div class="mb-3">
-										<label for="ddlArea" class="form-label">Area</label>
-										<asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-											<asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
-										</asp:DropDownList>
-										<asp:RequiredFieldValidator ID="rfvArea"
-											ControlToValidate="ddlArea"
-											ValidationGroup="AgregarObra"
-											runat="server"
-											ErrorMessage="Seleccione un área"
-											Display="Dynamic"
-											CssClass="text-danger"
-											EnableClientScript="true"
-											InitialValue="" />
-									</div>
-								</div>
+								<div id="areaContainer" class="col-6">
+    <div class="mb-3">
+        <label for="ddlArea" class="form-label">Area</label>
+        <asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+            <asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
+        </asp:DropDownList>
+        <asp:RequiredFieldValidator ID="rfvArea"
+            ControlToValidate="ddlArea"
+            ValidationGroup="AgregarObra"
+            runat="server"
+            ErrorMessage="Seleccione un área"
+            Display="Dynamic"
+            CssClass="text-danger"
+            EnableClientScript="true"
+            InitialValue="" />
+    </div>
+</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="ddlContrata" class="form-label">Contrata</label>
@@ -232,11 +232,10 @@
 
 
 					<div class="form-group mb-2">
-
-						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-					<i class="bi bi-plus-lg" ></i> Agregar
-						</asp:LinkButton>
-					</div>
+    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+        <i class="bi bi-plus-lg"></i> Agregar
+    </asp:LinkButton>
+</div>
 
 				</div>
 			</div>

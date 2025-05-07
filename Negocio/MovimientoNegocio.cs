@@ -131,49 +131,39 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        //public bool modificar(Obra obraModificada)
-        //{
-        //    AccesoDatos datos = new AccesoDatos();
-        //    try
-        //    {
-        //        // Consulta para actualizar una obra existente
-        //        datos.setearConsulta("UPDATE OBRAS SET " +
-        //                             "EMPRESA = @EMPRESA, " +
-        //                             "CONTRATA = @CONTRATA, " +
-        //                             "NUMERO = @NUMERO, " +
-        //                             "AÑO = @AÑO, " +
-        //                             "ETAPA = @ETAPA, " +
-        //                             "OBRA = @OBRA, " +
-        //                             "BARRIO = @BARRIO, " +
-        //                             "DESCRIPCION = @DESCRIPCION " +
-        //                             "WHERE ID = @ID");
+        public bool modificar(Movimiento movimientoModificado)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Consulta para actualizar un movimiento existente
+                datos.setearConsulta("UPDATE MOVIMIENTOS_GESTION SET " +
+                                     "ID_BASE = @OBRA, " +
+                                     "MOVIMIENTO = @MOVIMIENTO, " +
+                                     "FECHA = @FECHA " +
+                                     "WHERE ID = @ID");
 
-        //        // Asignar los parámetros
-        //        datos.agregarParametro("@EMPRESA", obraModificada.Empresa.Id);
-        //        datos.agregarParametro("@CONTRATA", obraModificada.Contrata.Id);
-        //        datos.agregarParametro("@NUMERO", obraModificada.Numero);
-        //        datos.agregarParametro("@AÑO", obraModificada.Año);
-        //        datos.agregarParametro("@ETAPA", obraModificada.Etapa);
-        //        datos.agregarParametro("@OBRA", obraModificada.ObraNumero);
-        //        datos.agregarParametro("@BARRIO", obraModificada.Barrio.Id);
-        //        datos.agregarParametro("@DESCRIPCION", obraModificada.Descripcion);
-        //        datos.agregarParametro("@ID", obraModificada.Id);
+                // Asignar los parámetros
+                datos.agregarParametro("@OBRA", movimientoModificado.Obra.Id);
+                datos.agregarParametro("@MOVIMIENTO", movimientoModificado.Monto);
+                datos.agregarParametro("@FECHA", movimientoModificado.Fecha);
+                datos.agregarParametro("@ID", movimientoModificado.Id);
 
-        //        // Ejecutar la actualización
-        //        datos.ejecutarAccion();
+                // Ejecutar la actualización
+                datos.ejecutarAccion();
 
-        //        // Si todo fue bien, devolvemos true
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-        //        throw ex;
-        //    }
-        //    finally
-        //    {
-        //        datos.cerrarConexion();
-        //    }
-        //}
+                // Si todo fue bien, devolvemos true
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

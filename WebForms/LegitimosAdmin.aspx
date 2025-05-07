@@ -18,23 +18,23 @@
 				<div class="form-group">
 					<div class="container">
 						<div class="row">
-							<div class="col-12">
-								<div class="mb-3">
-									<label for="ddlObra" class="form-label">Obra</label>
-									<asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                        <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
-                                    </asp:DropDownList>
-                                    <asp:RequiredFieldValidator ID="rfvObra"
-										ControlToValidate="ddlObra"
-										ValidationGroup="AgregarLegitimo"
-										runat="server"
-										ErrorMessage="Seleccione una obra"
-										Display="Dynamic"
-										CssClass="text-danger"
-										EnableClientScript="true"
-                                        InitialValue="" />
-								</div>
-							</div>
+							<div id="obraContainer" class="col-12">
+    <div class="mb-3">
+        <label for="ddlObra" class="form-label">Obra</label>
+        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
+        </asp:DropDownList>
+        <asp:RequiredFieldValidator ID="rfvObra"
+            ControlToValidate="ddlObra"
+            ValidationGroup="AgregarLegitimo"
+            runat="server"
+            ErrorMessage="Seleccione una obra"
+            Display="Dynamic"
+            CssClass="text-danger"
+            EnableClientScript="true"
+            InitialValue="" />
+    </div>
+</div>
 							<div class="col-6">
 								<div class="mb-3">
 									<label for="txtAutorizante" class="form-label">Código Autorizante</label>
@@ -227,10 +227,11 @@
 					</div>
 
 					<div class="form-group mb-2">
-						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-							<i class="bi bi-plus-lg"></i> Agregar
-						</asp:LinkButton>
-					</div>
+    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+        <i class="bi bi-plus-lg"></i> Agregar
+    </asp:LinkButton>
+</div>
+
 				</div>
 			</div>
 		</div>

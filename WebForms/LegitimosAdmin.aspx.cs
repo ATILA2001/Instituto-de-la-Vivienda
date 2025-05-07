@@ -28,64 +28,165 @@ namespace WebForms
         {
             CargarListaLegitimos();
         }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                BindDropDownList();
+                CargarListaLegitimos();
+            }
+            else
+            {
+                // If we're in edit mode and returning from a postback
+                if (ViewState["EditingLegitimoId"] != null && ViewState["EditingObraId"] != null)
+                {
+                    // Make sure the obra dropdown is correctly set
+                    int obraId = (int)ViewState["EditingObraId"];
+
+                    ddlObra.ClearSelection();
+                    ListItem item = ddlObra.Items.FindByValue(obraId.ToString());
+                    if (item != null)
+                    {
+                        item.Selected = true;
+                    }
+
+                    // Keep the dropdown disabled
+                    ddlObra.Enabled = false;
+                }
+            }
+        }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            // Configure validators if we're in editing mode
+            if (ViewState["EditingLegitimoId"] != null)
+            {
+                // Disable the Obra validator since the field is hidden
+                rfvObra.Enabled = false;
+            }
+            else
+            {
+                // Enable validators in add mode
+                rfvObra.Enabled = true;
+            }
+        }
+
+        protected void btnShowAddModal_Click(object sender, EventArgs e)
+        {
+            // Clear any existing data
+            LimpiarFormulario();
+
+            // Reset the modal title and button text to "Add" and show Obra field
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+        $(document).ready(function() {
+            $('#modalAgregar .modal-title').text('Agregar Legítimo');
+            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
+            
+            // Show the Obra dropdown and its label
+            $('#obraContainer').show();
+            
+            // Show the modal
+            $('#modalAgregar').modal('show');
+        });", true);
+
+            btnAgregar.Text = "Agregar";
+
+            // Clear any editing state
+            ViewState["EditingLegitimoId"] = null;
+            ViewState["EditingObraId"] = null;
+        }
+
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            txtAutorizante.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtInicioEjecucion.Text = string.Empty;
-            txtFinEjecucion.Text = string.Empty;
-            txtCertificado.Text = string.Empty;
-            txtMesAprobacion.Text = string.Empty;
-            ddlObra.SelectedIndex = -1;
+            LimpiarFormulario();
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            if (Page.IsValid) // Check if all validators passed
+            if (Page.IsValid)
             {
                 try
                 {
-                    Legitimo nuevoLegitimo = new Legitimo
+                    LegitimoNegocio negocio = new LegitimoNegocio();
+                    Legitimo legitimo = new Legitimo();
+
+                    // Common data for both add and update operations
+                    legitimo.CodigoAutorizante = txtAutorizante.Text.Trim();
+                    legitimo.Expediente = txtExpediente.Text.Trim();
+                    legitimo.InicioEjecucion = DateTime.Parse(txtInicioEjecucion.Text);
+                    legitimo.FinEjecucion = DateTime.Parse(txtFinEjecucion.Text);
+                    legitimo.Certificado = decimal.Parse(txtCertificado.Text);
+                    legitimo.MesAprobacion = DateTime.Parse(txtMesAprobacion.Text);
+
+                    // Check if we're editing an existing legitimo or adding a new one
+                    if (ViewState["EditingLegitimoId"] != null)
                     {
-                        CodigoAutorizante = txtAutorizante.Text.Trim(),
-                        Expediente = txtExpediente.Text.Trim(),
-                        InicioEjecucion = DateTime.Parse(txtInicioEjecucion.Text),
-                        FinEjecucion = DateTime.Parse(txtFinEjecucion.Text),
-                        Certificado = decimal.Parse(txtCertificado.Text),
-                        MesAprobacion = DateTime.Parse(txtMesAprobacion.Text)
-                    };
+                        // We're updating an existing legitimo
+                        legitimo.Id = (int)ViewState["EditingLegitimoId"];
 
-                    nuevoLegitimo.Obra = new Obra
-                    {
-                        Id = int.Parse(ddlObra.SelectedValue)
-                    };
+                        // Use the stored Obra ID from ViewState for the update
+                        if (ViewState["EditingObraId"] != null)
+                        {
+                            legitimo.Obra = new Obra { Id = (int)ViewState["EditingObraId"] };
+                        }
 
-                    if (negocio.agregar(nuevoLegitimo))
-                    {
-                        lblMensaje.Text = "Legítimo agregado con éxito.";
-                        lblMensaje.CssClass = "alert alert-success";
+                        if (negocio.modificar(legitimo))
+                        {
+                            lblMensaje.Text = "Legítimo modificado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
 
-                        // Clear form after successful add
-                        LimpiarFormulario();
-
-                        CargarListaLegitimos();
-                        CalcularSubtotal();
+                            // Clear the editing state
+                            ViewState["EditingLegitimoId"] = null;
+                            ViewState["EditingObraId"] = null;
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al modificar el legítimo.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar el legítimo.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        // We're adding a new legitimo - use the selected value from the dropdown
+                        legitimo.Obra = new Obra { Id = int.Parse(ddlObra.SelectedValue) };
+
+                        if (negocio.agregar(legitimo))
+                        {
+                            lblMensaje.Text = "Legítimo agregado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al agregar el legítimo.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
                     }
+
+                    // Clear fields
+                    LimpiarFormulario();
+
+                    // Reset the modal title and button text
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
+                        "$('#modalAgregar .modal-title').text('Agregar Legítimo');", true);
+                    btnAgregar.Text = "Agregar";
+
+                    // Hide the modal
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                        "$('#modalAgregar').modal('hide');", true);
+
+                    // Refresh the legitimos list
+                    CargarListaLegitimos();
+                    CalcularSubtotal();
                 }
                 catch (Exception ex)
                 {
-                    lblMensaje.Text = $"Error al agregar el legítimo: {ex.Message}";
+                    lblMensaje.Text = $"Error: {ex.Message}";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
         }
 
-        // Add a helper method for clearing the form
         private void LimpiarFormulario()
         {
             txtAutorizante.Text = string.Empty;
@@ -95,21 +196,17 @@ namespace WebForms
             txtCertificado.Text = string.Empty;
             txtMesAprobacion.Text = string.Empty;
             ddlObra.SelectedIndex = 0;
+
+            // Make sure the dropdown is enabled
+            ddlObra.Enabled = true;
         }
 
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            if (!IsPostBack)
-            {
-                BindDropDownList();
-                CargarListaLegitimos();
-            }
-        }
         private DataTable ObtenerAreas()
         {
             AreaNegocio areaNegocio = new AreaNegocio();
             return areaNegocio.listarddl();
         }
+
         private void CargarListaLegitimos(string filtro = null)
         {
             try
@@ -121,12 +218,11 @@ namespace WebForms
                 var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
                 var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-                Session["listaLegitimos"] = negocio.listarFiltro(selectedLineas, selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes,selectedEstadoExpedientes, filtro);
+                Session["listaLegitimos"] = negocio.listarFiltro(selectedLineas, selectedAreas, selectedFechas, selectedEmpresas, selectedAutorizantes, selectedEstadoExpedientes, filtro);
 
                 dgvLegitimos.DataSource = Session["listaLegitimos"];
                 dgvLegitimos.DataBind();
                 CalcularSubtotal();
-
             }
             catch (Exception ex)
             {
@@ -135,12 +231,80 @@ namespace WebForms
             }
         }
 
-
-
         protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvLegitimos.SelectedDataKey.Value.ToString();
-            Response.Redirect("ModificarLegitimoAdmin.aspx?codM=" + idSeleccionado);
+            try
+            {
+                // Get the ID of the selected row
+                int idLegitimo = Convert.ToInt32(dgvLegitimos.SelectedDataKey.Value);
+
+                // Get the list of legitimos from session
+                List<Legitimo> legitimosList = (List<Legitimo>)Session["listaLegitimos"];
+
+                // Find the selected legitimo
+                Legitimo legitimoSeleccionado = legitimosList.FirstOrDefault(l => l.Id == idLegitimo);
+
+                if (legitimoSeleccionado != null)
+                {
+                    // Set button text to "Actualizar"
+                    btnAgregar.Text = "Actualizar";
+
+                    // Fill form data
+                    txtAutorizante.Text = legitimoSeleccionado.CodigoAutorizante;
+                    txtExpediente.Text = legitimoSeleccionado.Expediente;
+
+                    if (legitimoSeleccionado.InicioEjecucion.HasValue)
+                        txtInicioEjecucion.Text = legitimoSeleccionado.InicioEjecucion.Value.ToString("yyyy-MM-dd");
+
+                    if (legitimoSeleccionado.FinEjecucion.HasValue)
+                        txtFinEjecucion.Text = legitimoSeleccionado.FinEjecucion.Value.ToString("yyyy-MM-dd");
+
+                    txtCertificado.Text = legitimoSeleccionado.Certificado.ToString();
+
+                    if (legitimoSeleccionado.MesAprobacion.HasValue)
+                        txtMesAprobacion.Text = legitimoSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+
+                    // Store the ID of the legitimo being edited in ViewState
+                    ViewState["EditingLegitimoId"] = idLegitimo;
+
+                    // Also store the Obra ID so we can use it later in the update process
+                    if (legitimoSeleccionado.Obra != null)
+                        ViewState["EditingObraId"] = legitimoSeleccionado.Obra.Id;
+
+                    // Update modal title and hide the Obra field
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                $(document).ready(function() {
+                    // Change title and button text
+                    $('#modalAgregar .modal-title').text('Modificar Legítimo');
+                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+                    
+                    // Hide the Obra dropdown and its label (assuming they're in the same div with class mb-3)
+                    $('#obraContainer').hide();
+                    
+                    // Show the modal
+                    $('#modalAgregar').modal('show');
+                });", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los datos del legítimo: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        // Helper method to select dropdown item by value
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            // Clear any current selection
+            dropDown.ClearSelection();
+
+            // Try to find and select the item
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
+            }
         }
 
         protected void dgvLegitimos_RowDeleting(object sender, GridViewDeleteEventArgs e)
@@ -223,8 +387,6 @@ namespace WebForms
                 lblMensaje.Text = "Expediente actualizado correctamente.";
                 CargarListaLegitimos();
                 CalcularSubtotal();
-
-
             }
             catch (Exception ex)
             {
@@ -248,9 +410,9 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
-
         private void BindDropDownList()
-        { // Clear existing items
+        {
+            // Clear existing items
             ddlObra.Items.Clear();
 
             // Set AppendDataBoundItems to true
@@ -268,6 +430,7 @@ namespace WebForms
             cblArea.DataTextField = "Nombre";
             cblArea.DataValueField = "Id";
             cblArea.DataBind();
+
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
             cblEmpresa.DataValueField = "Id";
@@ -301,24 +464,25 @@ namespace WebForms
             cblEstadoExpediente.DataValueField = "Id";
             cblEstadoExpediente.DataBind();
         }
+
         private DataTable ObtenerLegitimos()
         {
             LegitimoNegocio barrioNegocio = new LegitimoNegocio();
             return barrioNegocio.listarddl();
         }
 
-
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-
             string filtro = txtBuscar.Text.Trim();
             CargarListaLegitimos(filtro);
         }
+
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
+
         private DataTable ObtenerLineaGestion()
         {
             LineaGestionNegocio barrioNegocio = new LineaGestionNegocio();
@@ -336,6 +500,5 @@ namespace WebForms
             cblEstadoExpediente.ClearSelection();
             CargarListaLegitimos();
         }
-
     }
 }

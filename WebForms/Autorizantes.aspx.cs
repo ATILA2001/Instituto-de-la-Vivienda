@@ -36,18 +36,46 @@ namespace WebForms
             }
         }
 
-        protected void btnLimpiar_Click(object sender, EventArgs e)
+        protected void Page_PreRender(object sender, EventArgs e)
         {
-            //COMENTADO POR CIERRE PLANIFICACION
-            //ddlConcepto.SelectedIndex = -1;
-            //txtDetalle.Text = string.Empty;
-            //txtMontoAutorizado.Text = string.Empty;
-            //txtExpediente.Text = string.Empty;
-            //txtFecha.Text = string.Empty;
-            //ddlObra.SelectedIndex = -1;
-            //ddlEstado.SelectedIndex = -1;
-
+            // Configure validators if we're in editing mode
+            if (ViewState["EditingAutorizanteId"] != null)
+            {
+                // Disable the Obra validator since the field is hidden
+                rfvObra.Enabled = false;
+            }
+            else
+            {
+                // Enable validators in add mode
+                rfvObra.Enabled = true;
+            }
         }
+
+        protected void btnShowAddModal_Click(object sender, EventArgs e)
+        {
+            // Clear any existing data
+            LimpiarFormulario();
+
+            // Reset the modal title and button text to "Add" and show Obra field
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+                $(document).ready(function() {
+                    $('#modalAgregar .modal-title').text('Agregar Autorizante');
+                    document.getElementById('" + Button1.ClientID + @"').value = 'Agregar';
+                    
+                    // Show the Obra dropdown and its label
+                    $('#obraContainer').show();
+                    
+                    // Show the modal
+                    $('#modalAgregar').modal('show');
+                });", true);
+
+            Button1.Text = "Agregar";
+
+            // Clear any editing state
+            ViewState["EditingAutorizanteId"] = null;
+            ViewState["EditingCodigoAutorizante"] = null;
+        }
+
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
@@ -63,20 +91,19 @@ namespace WebForms
 
             txtSubtotal.Text = subtotal.ToString("C");
         }
+
         private void CargarListaAutorizantes(string filtro = null)
         {
             try
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
 
-
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
                 var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
 
-
-                Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras,filtro);
+                Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
                 dgvAutorizante.DataSource = Session["listaAutorizante"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
@@ -87,23 +114,93 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
-
+            string filtro = txtBuscar.Text.Trim();
             CargarListaAutorizantes(filtro);
         }
 
-
         protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvAutorizante.SelectedDataKey.Value.ToString();
-            Response.Redirect("ModificarAutorizante.aspx?codM=" + idSeleccionado);
+            try
+            {
+                // Get the ID of the selected row
+                string codigoAutorizante = dgvAutorizante.SelectedDataKey.Value.ToString();
+
+                // Get the list of autorizantes from session
+                List<Autorizante> autorizantesList = (List<Autorizante>)Session["listaAutorizante"];
+
+                // Find the selected autorizante
+                Autorizante autorizanteSeleccionado = autorizantesList.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
+
+                if (autorizanteSeleccionado != null)
+                {
+                    // Set button text to "Actualizar"
+                    Button1.Text = "Actualizar";
+
+                    // Load the autorizante data into the form fields
+                    txtDetalle.Text = autorizanteSeleccionado.Detalle ?? string.Empty;
+                    txtExpediente.Text = autorizanteSeleccionado.Expediente ?? string.Empty;
+                    txtMontoAutorizado.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
+
+                    if (autorizanteSeleccionado.Fecha.HasValue)
+                        txtMes.Text = autorizanteSeleccionado.Fecha.Value.ToString("yyyy-MM-dd");
+
+                    if (autorizanteSeleccionado.MesBase.HasValue)
+                        txtFecha.Text = autorizanteSeleccionado.MesBase.Value.ToString("yyyy-MM-dd");
+
+                    // Select the corresponding values in the dropdowns (except Obra which will be hidden)
+                    if (autorizanteSeleccionado.Concepto != null)
+                        SelectDropDownListByValue(ddlConcepto, autorizanteSeleccionado.Concepto.Id.ToString());
+
+                    if (autorizanteSeleccionado.Estado != null)
+                        SelectDropDownListByValue(ddlEstado, autorizanteSeleccionado.Estado.Id.ToString());
+
+                    // Store the ID for the obra and the codigo autorizante for update
+                    if (autorizanteSeleccionado.Obra != null)
+                        ViewState["EditingAutorizanteId"] = autorizanteSeleccionado.Obra.Id;
+
+                    ViewState["EditingCodigoAutorizante"] = autorizanteSeleccionado.CodigoAutorizante;
+
+                    // Update modal title and hide the Obra field
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                        $(document).ready(function() {
+                            // Change title and button text
+                            $('#modalAgregar .modal-title').text('Modificar Autorizante');
+                            document.getElementById('" + Button1.ClientID + @"').value = 'Actualizar';
+                            
+                            // Hide the Obra dropdown and its label
+                            $('#obraContainer').hide();
+                            
+                            // Show the modal
+                            $('#modalAgregar').modal('show');
+                        });", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los datos del autorizante: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
+
+        // Helper method to select dropdown item by value
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            // Clear any current selection
+            dropDown.ClearSelection();
+
+            // Try to find and select the item
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
+            }
+        }
+
         protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-
             try
             {
                 var id = dgvAutorizante.DataKeys[e.RowIndex].Value.ToString();
@@ -127,7 +224,6 @@ namespace WebForms
             try
             {
                 dgvAutorizante.PageIndex = e.NewPageIndex;
-
                 CargarListaAutorizantes();
                 CalcularSubtotal();
             }
@@ -137,41 +233,90 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            // Check if page is valid (all validators passed)
             if (Page.IsValid)
             {
                 try
                 {
                     AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
-                    Autorizante nuevoAutorizante = new Autorizante();
+                    Autorizante autorizante = new Autorizante();
 
-                    nuevoAutorizante.Obra = new Obra();
-                    nuevoAutorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
-                    nuevoAutorizante.Concepto = new Concepto();
-                    nuevoAutorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
-                    nuevoAutorizante.Detalle = txtDetalle.Text;
-                    nuevoAutorizante.Expediente = txtExpediente.Text;
-                    nuevoAutorizante.Estado = new EstadoAutorizante();
-                    nuevoAutorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
-                    nuevoAutorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
-                    nuevoAutorizante.Fecha = DateTime.Parse(txtFecha.Text);
-                    nuevoAutorizante.MesBase = string.IsNullOrWhiteSpace(txtMes.Text) ? (DateTime?)null : DateTime.Parse(txtMes.Text);
+                    // Common data for both add and update operations
+                    autorizante.Concepto = new Concepto();
+                    autorizante.Concepto.Id = int.Parse(ddlConcepto.SelectedValue);
+                    autorizante.Detalle = txtDetalle.Text;
+                    autorizante.Expediente = txtExpediente.Text;
+                    autorizante.Estado = new EstadoAutorizante();
+                    autorizante.Estado.Id = int.Parse(ddlEstado.SelectedValue);
+                    autorizante.MontoAutorizado = decimal.Parse(txtMontoAutorizado.Text);
+                    autorizante.Fecha = string.IsNullOrWhiteSpace(txtMes.Text)
+                        ? (DateTime?)null
+                        : DateTime.Parse(txtMes.Text);
+                    autorizante.MesBase = string.IsNullOrWhiteSpace(txtFecha.Text)
+                        ? (DateTime?)null
+                        : DateTime.Parse(txtFecha.Text);
 
-                    autorizanteNegocio.agregar(nuevoAutorizante);
+                    // Check if we're editing an existing autorizante or adding a new one
+                    if (ViewState["EditingAutorizanteId"] != null && ViewState["EditingCodigoAutorizante"] != null)
+                    {
+                        // We're updating an existing autorizante
+                        autorizante.CodigoAutorizante = ViewState["EditingCodigoAutorizante"].ToString();
+                        autorizante.Obra = new Obra { Id = Convert.ToInt32(ViewState["EditingAutorizanteId"]) };
 
-                    lblMensaje.Text = "Autorizante agregado con éxito.";
-                    lblMensaje.CssClass = "alert alert-success";
-                    //CargarListaAutorizantes();
-                    CalcularSubtotal();
+                        if (autorizanteNegocio.modificar(autorizante))
+                        {
+                            lblMensaje.Text = "Autorizante modificado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
 
-                    // Clear form after successful add
+                            // Clear the editing state
+                            ViewState["EditingAutorizanteId"] = null;
+                            ViewState["EditingCodigoAutorizante"] = null;
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al modificar el autorizante.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
+                    else
+                    {
+                        // We're adding a new autorizante
+                        autorizante.Obra = new Obra();
+                        autorizante.Obra.Id = int.Parse(ddlObra.SelectedValue);
+
+                        if (autorizanteNegocio.agregar(autorizante))
+                        {
+                            lblMensaje.Text = "Autorizante agregado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al agregar el autorizante.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
+
+                    // Clear fields
                     LimpiarFormulario();
+
+                    // Reset the modal title and button text
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
+                        "$('#modalAgregar .modal-title').text('Agregar Autorizante');", true);
+                    Button1.Text = "Agregar";
+
+                    // Hide the modal
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                        "$('#modalAgregar').modal('hide');", true);
+
+                    // Refresh the autorizantes list
+                    CargarListaAutorizantes();
+                    CalcularSubtotal();
                 }
                 catch (Exception ex)
                 {
-                    lblMensaje.Text = $"Error al agregar el autorizante: {ex.Message}";
+                    lblMensaje.Text = $"Error: {ex.Message}";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
@@ -245,13 +390,7 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-        private DataRow CrearFilaTodos(DataTable table)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = 0;
-            row["Nombre"] = "Todos";
-            return row;
-        }
+       
 
         private DataTable ObtenerEstado()
         {

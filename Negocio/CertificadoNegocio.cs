@@ -619,7 +619,7 @@ WHERE 1=1";
                 datos.cerrarConexion();
             }
         }
-        public void agregar(Certificado certificado)
+        public bool agregar(Certificado certificado)
         {
             var datos = new AccesoDatos();
 
@@ -636,6 +636,7 @@ WHERE 1=1";
                 datos.agregarParametro("@mesAprobacion", (object)certificado.MesAprobacion ?? DBNull.Value);
 
                 datos.ejecutarAccion();
+                return true;
             }
             catch (SqlException sqlEx)
             {

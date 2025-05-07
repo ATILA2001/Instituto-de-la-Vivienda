@@ -203,17 +203,17 @@ WHERE 1=1";
             }
         }
 
-        public void agregar(BdProyecto proyecto)
+        public bool agregar(BdProyecto proyecto)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
                 string query = @"
-            INSERT INTO BD_PROYECTOS 
-            (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO_INICIAL) 
-            VALUES 
-            (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO_INICIAL)";
+                    INSERT INTO BD_PROYECTOS 
+                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO_INICIAL) 
+                    VALUES 
+                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO_INICIAL)";
 
                 datos.setearConsulta(query);
 
@@ -224,10 +224,11 @@ WHERE 1=1";
                 datos.agregarParametro("@AUTORIZADO_INICIAL", proyecto.AutorizadoInicial);
 
                 datos.ejecutarAccion();
+                return true;
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("Error al agregar el proyecto.", ex);
             }
             finally
             {

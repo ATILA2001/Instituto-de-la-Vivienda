@@ -105,17 +105,8 @@
     <Content Include="LineasGestion.aspx" />
     <Content Include="LineasGestionFF.aspx" />
     <Content Include="Login.aspx" />
-    <Content Include="ModificarAutorizante.aspx" />
-    <Content Include="ModificarAutorizanteAdmin.aspx" />
     <Content Include="ModificarBarrio.aspx" />
-    <Content Include="ModificarCertificado.aspx" />
-    <Content Include="ModificarCertificadoAdmin.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
-    <Content Include="ModificarLegitimo.aspx" />
-    <Content Include="ModificarLegitimoAdmin.aspx" />
-    <Content Include="ModificarObra.aspx" />
-    <Content Include="ModificarObraUser.aspx" />
-    <Content Include="ModificarProyecto.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
     <Content Include="Obras.aspx" />
@@ -266,20 +257,6 @@
     <Compile Include="LoginRegister.Master.designer.cs">
       <DependentUpon>LoginRegister.Master</DependentUpon>
     </Compile>
-    <Compile Include="ModificarAutorizante.aspx.cs">
-      <DependentUpon>ModificarAutorizante.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarAutorizante.aspx.designer.cs">
-      <DependentUpon>ModificarAutorizante.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarAutorizanteAdmin.aspx.cs">
-      <DependentUpon>ModificarAutorizanteAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarAutorizanteAdmin.aspx.designer.cs">
-      <DependentUpon>ModificarAutorizanteAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ModificarBarrio.aspx.cs">
       <DependentUpon>ModificarBarrio.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -287,61 +264,12 @@
     <Compile Include="ModificarBarrio.aspx.designer.cs">
       <DependentUpon>ModificarBarrio.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ModificarCertificado.aspx.cs">
-      <DependentUpon>ModificarCertificado.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarCertificado.aspx.designer.cs">
-      <DependentUpon>ModificarCertificado.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarCertificadoAdmin.aspx.cs">
-      <DependentUpon>ModificarCertificadoAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarCertificadoAdmin.aspx.designer.cs">
-      <DependentUpon>ModificarCertificadoAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ModificarEmpresa.aspx.cs">
       <DependentUpon>ModificarEmpresa.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ModificarEmpresa.aspx.designer.cs">
       <DependentUpon>ModificarEmpresa.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarLegitimo.aspx.cs">
-      <DependentUpon>ModificarLegitimo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarLegitimo.aspx.designer.cs">
-      <DependentUpon>ModificarLegitimo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarLegitimoAdmin.aspx.cs">
-      <DependentUpon>ModificarLegitimoAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarLegitimoAdmin.aspx.designer.cs">
-      <DependentUpon>ModificarLegitimoAdmin.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarObra.aspx.cs">
-      <DependentUpon>ModificarObra.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarObra.aspx.designer.cs">
-      <DependentUpon>ModificarObra.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarObraUser.aspx.cs">
-      <DependentUpon>ModificarObraUser.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarObraUser.aspx.designer.cs">
-      <DependentUpon>ModificarObraUser.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarProyecto.aspx.cs">
-      <DependentUpon>ModificarProyecto.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarProyecto.aspx.designer.cs">
-      <DependentUpon>ModificarProyecto.aspx</DependentUpon>
     </Compile>
     <Compile Include="ModificarUsuario.aspx.cs">
       <DependentUpon>ModificarUsuario.aspx</DependentUpon>

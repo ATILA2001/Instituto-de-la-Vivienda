@@ -555,7 +555,9 @@ namespace Negocio
             MONTO_AUTORIZADO = @montoAutorizado, 
             MES = @mes,
 MES_BASE = @mesBASE,
-AUTORIZACION_GG = @aut
+AUTORIZACION_GG = @aut,
+EXPEDIENTE = @ee,
+ESTADO = @estado
         WHERE CODIGO_AUTORIZANTE = @codigoAutorizante");
 
                 datos.agregarParametro("@obra", autorizante.Obra.Id);
@@ -563,10 +565,11 @@ AUTORIZACION_GG = @aut
                 datos.agregarParametro("@detalle", autorizante.Detalle);
                 datos.agregarParametro("@montoAutorizado", autorizante.MontoAutorizado);
                 datos.agregarParametro("@mes", (object)autorizante.Fecha ?? DBNull.Value);
-
+                datos.agregarParametro("@ee", autorizante.Expediente);
                 datos.agregarParametro("@mesBASE", (object)autorizante.MesBase ?? DBNull.Value);
                 datos.agregarParametro("@codigoAutorizante", autorizante.CodigoAutorizante);
                 datos.agregarParametro("@aut", 1);
+                datos.agregarParametro("@estado", autorizante.Estado.Id);
 
                 datos.ejecutarAccion();
                 return true;

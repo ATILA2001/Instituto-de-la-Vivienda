@@ -29,23 +29,33 @@ namespace WebForms
             }
         }
 
-        //protected void btnLimpiar_Click(object sender, EventArgs e)
-        //{
-        //    // Limpiar todos los TextBox
-        //    txtNumero.Text = string.Empty;
-        //    txtAño.Text = string.Empty;
-        //    txtEtapa.Text = string.Empty;
-        //    txtObra.Text = string.Empty;
-        //    txtDescripcion.Text = string.Empty;
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            // No hay validadores específicos que necesiten manejarse de manera diferente
+            // Ya que en este caso el área siempre viene del usuario logueado
+        }
 
-        //    // Limpiar los DropDownLists si es necesario
-        //    ddlEmpresa.SelectedIndex = -1;
-        //    ddlContrata.SelectedIndex = -1;
-        //    ddlBarrio.SelectedIndex = -1;
-        //    cblBarrio.SelectedIndex = -1;
-        //    cblEmpresa.SelectedIndex = -1;
+        protected void btnShowAddModal_Click(object sender, EventArgs e)
+        {
+            // Clear any existing data
+            ClearFormFields();
 
-        //}
+            // Reset the modal title and button text to "Add" and show Obra field
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+                $(document).ready(function() {
+                    $('#modalAgregar .modal-title').text('Agregar Obra');
+                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
+                    
+                    // Show the modal
+                    $('#modalAgregar').modal('show');
+                });", true);
+
+            btnAgregar.Text = "Agregar";
+
+            // Clear any editing state
+            ViewState["EditingObraId"] = null;
+        }
+
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
@@ -63,13 +73,12 @@ namespace WebForms
             BarrioNegocio barrioNegocio = new BarrioNegocio();
             return barrioNegocio.listarddl();
         }
+
         private void CargarListaObras(string filtro = null)
         {
             try
             {
-
                 var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-
                 var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
 
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
@@ -90,48 +99,79 @@ namespace WebForms
             if (Page.IsValid)
             {
                 ObraNegocio negocio = new ObraNegocio();
-                Obra nuevaObra = new Obra();
+                Obra obra = new Obra();
 
                 try
                 {
-                    // Assign values to the new obra
-                    nuevaObra.Numero = int.Parse(txtNumero.Text.Trim());
-                    nuevaObra.Año = int.Parse(txtAño.Text.Trim());
-                    nuevaObra.Etapa = int.Parse(txtEtapa.Text.Trim());
-                    nuevaObra.ObraNumero = int.Parse(txtObra.Text.Trim());
-                    nuevaObra.Descripcion = txtDescripcion.Text.Trim();
+                    // Common data for both add and update operations
+                    obra.Numero = int.Parse(txtNumero.Text.Trim());
+                    obra.Año = int.Parse(txtAño.Text.Trim());
+                    obra.Etapa = int.Parse(txtEtapa.Text.Trim());
+                    obra.ObraNumero = int.Parse(txtObra.Text.Trim());
+                    obra.Descripcion = txtDescripcion.Text.Trim();
+                    obra.Empresa = new Empresa { Id = int.Parse(ddlEmpresa.SelectedValue) };
+                    obra.Contrata = new Contrata { Id = int.Parse(ddlContrata.SelectedValue) };
+                    obra.Barrio = new Barrio { Id = int.Parse(ddlBarrio.SelectedValue) };
 
-                    // Assign relationship objects
-                    nuevaObra.Empresa = new Empresa { Id = int.Parse(ddlEmpresa.SelectedValue) };
-                    nuevaObra.Contrata = new Contrata { Id = int.Parse(ddlContrata.SelectedValue) };
-                    nuevaObra.Barrio = new Barrio { Id = int.Parse(ddlBarrio.SelectedValue) };
+                    // Get area from user session
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    nuevaObra.Area = new Area();
-                    nuevaObra.Area.Id = usuarioLogueado.Area.Id;
+                    obra.Area = new Area();
+                    obra.Area.Id = usuarioLogueado.Area.Id;
+                    obra.Area.Nombre = usuarioLogueado.Area.Nombre;
 
-                    nuevaObra.Area.Nombre = usuarioLogueado.Area.Nombre;
-
-                    // Call the add method from ObraNegocio
-                    if (negocio.agregar(nuevaObra))
+                    // Check if we're editing or adding
+                    if (ViewState["EditingObraId"] != null)
                     {
-                        lblMensaje.Text = "Obra agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        // We're updating an existing obra
+                        obra.Id = (int)ViewState["EditingObraId"];
 
-                        // Clear fields
-                        ClearFormFields();
+                        if (negocio.modificar(obra))
+                        {
+                            lblMensaje.Text = "Obra modificada exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
 
-                        // Refresh the works list
-                        CargarListaObras();
+                            // Clear the editing state
+                            ViewState["EditingObraId"] = null;
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al modificar la obra.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar la obra.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        // We're adding a new obra
+                        if (negocio.agregar(obra))
+                        {
+                            lblMensaje.Text = "Obra agregada exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al agregar la obra.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
                     }
+
+                    // Clear fields
+                    ClearFormFields();
+
+                    // Reset the modal title and button text
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
+                        "$('#modalAgregar .modal-title').text('Agregar Obra');", true);
+                    btnAgregar.Text = "Agregar";
+
+                    // Hide the modal
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                        "$('#modalAgregar').modal('hide');", true);
+
+                    // Refresh the works list
+                    CargarListaObras();
                 }
                 catch (Exception ex)
                 {
-                    lblMensaje.Text = $"Error al agregar la obra: {ex.Message}";
+                    lblMensaje.Text = $"Error: {ex.Message}";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
@@ -151,12 +191,77 @@ namespace WebForms
 
         protected void dgvObra_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var idSeleccionado = dgvObra.SelectedDataKey.Value.ToString();
-            Response.Redirect("ModificarObraUser.aspx?codM=" + idSeleccionado);
+            try
+            {
+                // Get the ID of the selected row
+                int idObra = Convert.ToInt32(dgvObra.SelectedDataKey.Value);
+
+                // Get the list of obras from session
+                List<Obra> listaObras = (List<Obra>)Session["listaObra"];
+
+                // Find the selected obra
+                Obra obraSeleccionada = listaObras.FirstOrDefault(o => o.Id == idObra);
+
+                if (obraSeleccionada != null)
+                {
+                    // Set button text to "Actualizar"
+                    btnAgregar.Text = "Actualizar";
+
+                    // Load the obra data into the form fields
+                    txtNumero.Text = obraSeleccionada.Numero?.ToString();
+                    txtAño.Text = obraSeleccionada.Año.ToString();
+                    txtEtapa.Text = obraSeleccionada.Etapa.ToString();
+                    txtObra.Text = obraSeleccionada.ObraNumero.ToString();
+                    txtDescripcion.Text = obraSeleccionada.Descripcion;
+
+                    // Select the corresponding values in the dropdowns
+                    if (obraSeleccionada.Empresa != null)
+                        SelectDropDownListByValue(ddlEmpresa, obraSeleccionada.Empresa.Id.ToString());
+
+                    if (obraSeleccionada.Contrata != null)
+                        SelectDropDownListByValue(ddlContrata, obraSeleccionada.Contrata.Id.ToString());
+
+                    if (obraSeleccionada.Barrio != null)
+                        SelectDropDownListByValue(ddlBarrio, obraSeleccionada.Barrio.Id.ToString());
+
+                    // Store the ID of the obra being edited in ViewState
+                    ViewState["EditingObraId"] = idObra;
+
+                    // Update modal title and show it
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                        $(document).ready(function() {
+                            // Change title and button text
+                            $('#modalAgregar .modal-title').text('Modificar Obra');
+                            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+                            
+                            // Show the modal
+                            $('#modalAgregar').modal('show');
+                        });", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los datos de la obra: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
+
+        // Helper method to select dropdown item by value
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            // Clear any current selection
+            dropDown.ClearSelection();
+
+            // Try to find and select the item
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
+            }
+        }
+
         protected void dgvObra_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-
             try
             {
                 var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
@@ -170,6 +275,23 @@ namespace WebForms
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al eliminar la obra: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                // Cambiar el índice de la página
+                dgvObra.PageIndex = e.NewPageIndex;
+
+                // Refrescar el listado de empresas
+                CargarListaObras();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
@@ -219,22 +341,7 @@ namespace WebForms
         }
 
 
-        protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            try
-            {
-                // Cambiar el índice de la página
-                dgvObra.PageIndex = e.NewPageIndex;
-
-                // Refrescar el listado de empresas
-                CargarListaObras();
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
+      
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();

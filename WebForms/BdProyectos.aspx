@@ -20,7 +20,7 @@
 					<div class="form-group">
 						<div class="container">
 							<div class="row">
-								<div class="col-12">
+								<div id="obraContainer" class="col-12">
 									<div class="mb-3">
 										<label for="ddlObra" class="form-label">Obra</label>
 										<asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server"></asp:DropDownList>
@@ -48,27 +48,27 @@
 										<asp:TextBox ID="txtSubProyecto" CssClass="form-control" runat="server" />
 									</div>
 
-                                    <div class="mb-3">
-                                        <label for="txtMontoAutorizadoInicial" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" placeHolder="0,00" />
-                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizadoInicial"
-                                            ValidationGroup="AgregarProyecto"
-                                            runat="server"
-                                            ErrorMessage="El monto es requerido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger" 
-                                            EnableClientScript="true"/>
-                                        <asp:RegularExpressionValidator ID="revMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizadoInicial"
-                                            ValidationGroup="AgregarProyecto"
-                                            runat="server"
+									<div class="mb-3">
+										<label for="txtMontoAutorizadoInicial" class="form-label">Monto Autorizado</label>
+										<asp:TextBox ID="txtMontoAutorizadoInicial" CssClass="form-control" runat="server" placeHolder="0,00" />
+										<asp:RequiredFieldValidator ID="rfvMontoAutorizado"
+											ControlToValidate="txtMontoAutorizadoInicial"
+											ValidationGroup="AgregarProyecto"
+											runat="server"
+											ErrorMessage="El monto es requerido"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+										<asp:RegularExpressionValidator ID="revMontoAutorizado"
+											ControlToValidate="txtMontoAutorizadoInicial"
+											ValidationGroup="AgregarProyecto"
+											runat="server"
 											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
-                                            ErrorMessage="Solo números positivos con hasta 2 decimales"
-                                            Display="Dynamic"
-                                            CssClass="text-danger" 
-                                            EnableClientScript="true"/>
-                                    </div>
+											ErrorMessage="Solo números positivos con hasta 2 decimales"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true" />
+									</div>
 
 
 								</div>
@@ -78,19 +78,19 @@
 					</div>
 
 
-                </div>
-                <div class="modal-footer d-flex justify-content-between px-4">
+				</div>
+				<div class="modal-footer d-flex justify-content-between px-4">
 
 					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
 					<div class="d-flex gap-4">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarProyecto" OnClientClick="if(!Page_ClientValidate('AgregarProyecto')) return false;" UseSubmitBehavior="false"/>
-					</div>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarProyecto" OnClientClick="if(!Page_ClientValidate('AgregarProyecto')) return false;" UseSubmitBehavior="false" />
 					</div>
 				</div>
 			</div>
 		</div>
-	
+	</div>
+
 	<!-- /Modal -->
 
 
@@ -150,10 +150,9 @@
 					</div>
 
 					<div class="form-group mb-2">
-
-						<asp:LinkButton runat="server" CssClass="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-							<i class="bi bi-plus-lg" ></i> Agregar
-						</asp:LinkButton>
+						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+        <i class="bi bi-plus-lg"></i> Agregar
+    </asp:LinkButton>
 					</div>
 
 				</div>
@@ -202,41 +201,41 @@
 		</div>
 	</div>
 
-    <script type="text/javascript">
-        
-        const myModal = document.getElementById('myModal')
-        const myInput = document.getElementById('myInput')
+	<script type="text/javascript">
 
-        myModal.addEventListener('shown.bs.modal', () => {
-            myInput.focus()
-        })
+		const myModal = document.getElementById('myModal')
+		const myInput = document.getElementById('myInput')
+
+		myModal.addEventListener('shown.bs.modal', () => {
+			myInput.focus()
+		})
 
 
 
-        $(document).ready(function () {
-            var modalAgregar = new bootstrap.Modal(document.getElementById('modalAgregar'));
+		$(document).ready(function () {
+			var modalAgregar = new bootstrap.Modal(document.getElementById('modalAgregar'));
 
-            // Prevenir cierre del modal si hay errores de validación
-            $('#modalAgregar').on('hide.bs.modal', function (e) {
-                if (!Page_IsValid) {
-                    e.preventDefault();
-                }
-            });
+			// Prevenir cierre del modal si hay errores de validación
+			$('#modalAgregar').on('hide.bs.modal', function (e) {
+				if (!Page_IsValid) {
+					e.preventDefault();
+				}
+			});
 
-            // Validación en tiempo real
-            $('#<%= txtMontoAutorizadoInicial.ClientID %>').on('change keyup', function () {
-                if (typeof Page_ClientValidate === 'function') {
-                    ValidatorValidate(document.getElementById('<%= rfvMontoAutorizado.ClientID %>'));
-                    ValidatorValidate(document.getElementById('<%= revMontoAutorizado.ClientID %>'));
-                }
-            });
+			// Validación en tiempo real
+			$('#<%= txtMontoAutorizadoInicial.ClientID %>').on('change keyup', function () {
+				if (typeof Page_ClientValidate === 'function') {
+					ValidatorValidate(document.getElementById('<%= rfvMontoAutorizado.ClientID %>'));
+					ValidatorValidate(document.getElementById('<%= revMontoAutorizado.ClientID %>'));
+				}
+			});
 
-            // Si hay errores después de un postback, mostrar el modal
-            if (!Page_IsValid) {
-                modalAgregar.show();
-            }
-        });
-		
+			// Si hay errores después de un postback, mostrar el modal
+			if (!Page_IsValid) {
+				modalAgregar.show();
+			}
+		});
+
 		function limpiarFormulario() {
 			document.getElementById('<%= txtProyecto.ClientID %>').value = '';
 			document.getElementById('<%= txtSubProyecto.ClientID %>').value = '';
@@ -245,5 +244,5 @@
 			document.getElementById('<%= ddlLineaGestion.ClientID %>').selectedIndex = 0;
 		}
 
-    </script>
+	</script>
 </asp:Content>

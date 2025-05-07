@@ -22,6 +22,7 @@ namespace Negocio
                 datos.setearConsulta(@"
             UPDATE LEGITIMOS_ABONOS 
             SET 
+                CODIGO_AUTORIZANTE = @CODIGO,
                 EXPEDIENTE = @EXPEDIENTE,
                 INICIO_EJECUCION = @INICIO_EJECUCION,
                 FIN_EJECUCION = @FIN_EJECUCION,
@@ -29,7 +30,7 @@ namespace Negocio
                 MES_APROBACION = @MES_APROBACION
             WHERE 
                 ID = @ID");
-
+                datos.agregarParametro("@CODIGO", legitimoModificado.CodigoAutorizante);
                 datos.agregarParametro("@EXPEDIENTE", legitimoModificado.Expediente);
                 datos.agregarParametro("@INICIO_EJECUCION", legitimoModificado.InicioEjecucion);
                 datos.agregarParametro("@FIN_EJECUCION", legitimoModificado.FinEjecucion);
