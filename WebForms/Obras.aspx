@@ -9,9 +9,8 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 	
 </style>
-
 	<%--COMENTADO POR CIERRE PLANIFICACION--%>
-	<div id="section1" style="display: none;">
+	<%--<div id="section1" style="display: none;">
 		<div class="row mt-4">
 			<div class="col-md-12">
 				<table class="table  table1">
@@ -67,7 +66,7 @@
 				</table>
 			</div>
 		</div>
-	</div>
+	</div>--%>
     
 
 
@@ -123,11 +122,11 @@
 
 
 
-						<div class="form-group d-flex align-items-end">
+						<%--<div class="form-group d-flex align-items-end">
 							<button class="btn btn-sm btn-secondary" id="visibilityMessage">
 								<span id="visibilityText">Agregar Obra</span>
 							</button>
-						</div>
+						</div>--%>
 
 
 						<div class="form-group  d-flex align-items-end">
