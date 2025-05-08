@@ -16,12 +16,12 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblArea.AcceptChanges += CblFiltro_AcceptChanges;
+            cblLinea.AcceptChanges += CblFiltro_AcceptChanges;
+            cblProyecto.AcceptChanges += CblFiltro_AcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        private void CblFiltro_AcceptChanges(object sender, EventArgs e)
         {
             CargarListaProyectos();
         }
@@ -78,9 +78,17 @@ namespace WebForms
         {
             try
             {
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                System.Diagnostics.Debug.WriteLine("CargarListaProyectos EJECUTADO");
+                var selectedAreas = cblArea.SelectedValues;
+                var selectedLineas = cblLinea.SelectedValues;
+                var selectedProyectos = cblProyecto.SelectedValues;
+
+                // Imprimir los valores obtenidos para depuración
+                System.Diagnostics.Debug.WriteLine("Selected Areas: " + (selectedAreas.Any() ? string.Join(", ", selectedAreas) : "NINGUNA"));
+                System.Diagnostics.Debug.WriteLine("Selected Lineas: " + (selectedLineas.Any() ? string.Join(", ", selectedLineas) : "NINGUNA"));
+                System.Diagnostics.Debug.WriteLine("Selected Proyectos: " + (selectedProyectos.Any() ? string.Join(", ", selectedProyectos) : "NINGUNO"));
+
+
                 Session["listaProyectos"] = bdProyectoNegocio.Listar(selectedLineas, selectedProyectos, selectedAreas, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();

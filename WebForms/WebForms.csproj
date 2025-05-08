@@ -94,6 +94,10 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="CustomControls\CheckBoxListSearch.ascx" />
+    <Content Include="CustomControls\chevron-down.svg" />
+    <Content Include="CustomControls\chevron-right.svg" />
+    <Content Include="CustomControls\TreeViewSearch.css" />
+    <Content Include="CustomControls\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />

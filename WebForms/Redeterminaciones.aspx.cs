@@ -14,6 +14,18 @@ namespace WebForms
     {
         RedeterminacionNegocio negocio = new RedeterminacionNegocio();
 
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblObra.AcceptChanges += OnAcceptChanges;
+            cblAutorizante.AcceptChanges += OnAcceptChanges;
+            cblEtapa.AcceptChanges += OnAcceptChanges;
+        }
+
+        private void OnAcceptChanges(object sender, EventArgs e)
+        {
+            CargarListaRedeterminacion();
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -98,9 +110,9 @@ namespace WebForms
         {
             try
             {
-                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEtapas = cblEtapa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedObras = cblObra.SelectedValues;
+                var selectedAutorizantes = cblAutorizante.SelectedValues;
+                var selectedEtapas = cblEtapa.SelectedValues;
 
                 Session["listaRedeterminacion"] = negocio.listar(selectedEtapas, selectedAutorizantes, selectedObras, filtro);
                 dgvRedeterminacion.DataSource = Session["listaRedeterminacion"];

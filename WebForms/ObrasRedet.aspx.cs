@@ -13,6 +13,14 @@ namespace WebForms
     public partial class ObrasRedet : System.Web.UI.Page
     {
         private ObraNegocio negocio = new ObraNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblArea.AcceptChanges += OnAcceptChanges;
+            cblEmpresa.AcceptChanges += OnAcceptChanges;
+            cblBarrio.AcceptChanges += OnAcceptChanges;
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -22,6 +30,12 @@ namespace WebForms
                 CargarListaObras();
             }
         }
+
+        private void OnAcceptChanges(object sender, EventArgs e)
+        {
+            CargarListaObras();
+        }
+
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
@@ -58,10 +72,10 @@ namespace WebForms
         {
             try
             {
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedEmpresas = cblEmpresa.SelectedValues;
 
-                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedBarrios = cblBarrio.SelectedValues;
+                var selectedAreas = cblArea.SelectedValues;
 
                 Session["listaObra"] = negocio.listar(selectedBarrios, selectedEmpresas, selectedAreas, filtro);
                 dgvObra.DataSource = Session["listaObra"];

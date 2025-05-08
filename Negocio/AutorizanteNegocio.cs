@@ -43,20 +43,49 @@ namespace Negocio
 
             try
             {
-                string query = "select CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,    O.ID AS OBRA_ID,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,    " +
-                    "EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,    A.DETALLE,A.MES_BASE,    CO.NOMBRE AS CONCEPTO,    CO.ID AS CONCEPTO_ID,    E.NOMBRE AS ESTADO,    " +
-                    "E.ID AS ESTADO_ID,    A.EXPEDIENTE,    A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,    AR.NOMBRE AS AREA,    AR.ID AS AREA_ID,    C.ID AS CONTRATA_ID,   " +
-                    " PS.[BUZON DESTINO],    PS.[FECHA ULTIMO PASE] FROM    AUTORIZANTES AS A INNER JOIN    OBRAS AS O ON A.OBRA = O.ID INNER JOIN     " +
-                    "ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN  CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN    BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN    " +
-                    "AREAS AS AR ON O.AREA = AR.ID INNER JOIN    EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN    BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN    " +
-                    "CONCEPTOS AS CO ON A.CONCEPTO = CO.ID LEFT JOIN     PASES_SADE AS PS ON A.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE    O.AREA = @area";
+                string query = @"SELECT 
+                    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+                    O.ID AS OBRA_ID,
+                    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,    
+                    EM.NOMBRE AS EMPRESA,
+                    A.CODIGO_AUTORIZANTE,
+                    A.DETALLE,A.MES_BASE,
+                    CO.NOMBRE AS CONCEPTO,
+                    CO.ID AS CONCEPTO_ID,
+                    E.NOMBRE AS ESTADO, 
+                    E.ID AS ESTADO_ID,
+                    A.EXPEDIENTE,
+                    A.MONTO_AUTORIZADO, 
+                    A.MES,
+                    A.AUTORIZACION_GG,
+                    AR.NOMBRE AS AREA, 
+                    EM.ID AS EMPRESA_ID, 
+                    BA.ID AS BARRIO_ID, 
+                    BA.NOMBRE AS NOMBRE_BARRIO,
+                    AR.ID AS AREA_ID,
+                    C.ID AS CONTRATA_ID,
+                    PS.[BUZON DESTINO],
+                    PS.[FECHA ULTIMO PASE] 
+                    FROM AUTORIZANTES AS A 
+                    INNER JOIN OBRAS AS O ON A.OBRA = O.ID 
+                    INNER JOIN ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID 
+                    INNER JOIN  CONTRATA AS C ON O.CONTRATA = C.ID 
+                    LEFT JOIN BD_PROYECTOS AS B ON O.ID = B.ID_BASE 
+                    INNER JOIN AREAS AS AR ON O.AREA = AR.ID 
+                    INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID 
+                    INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID 
+                    INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID 
+                    LEFT JOIN PASES_SADE AS PS ON A.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS 
+                    WHERE O.AREA = @area";
 
                 if (empresa != null && empresa.Count > 0)
                 {
                     string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
-                    query += $" AND EM.NOMBRE IN ({empresasParam})";
+                    // Cambiar EM.NOMBRE por EM.ID
+                    query += $" AND EM.ID IN ({empresasParam})";
                     for (int i = 0; i < empresa.Count; i++)
                     {
+                        // Los valores en la lista 'empresa' ya son los IDs (como string)
                         datos.setearParametros($"@empresa{i}", empresa[i]);
                     }
                 }
@@ -65,9 +94,11 @@ namespace Negocio
                 if (estado != null && estado.Count > 0)
                 {
                     string estadoParam = string.Join(",", estado.Select((e, i) => $"@estado{i}"));
-                    query += $" AND E.NOMBRE IN ({estadoParam})";
+                    // Cambiar E.NOMBRE por E.ID
+                    query += $" AND E.ID IN ({estadoParam})";
                     for (int i = 0; i < estado.Count; i++)
                     {
+                        // Los valores en la lista 'estado' ya son los IDs (como string)
                         datos.setearParametros($"@estado{i}", estado[i]);
                     }
                 }
@@ -75,9 +106,11 @@ namespace Negocio
                 if (concepto != null && concepto.Count > 0)
                 {
                     string conceptoParam = string.Join(",", concepto.Select((e, i) => $"@concepto{i}"));
-                    query += $" AND CO.NOMBRE IN ({conceptoParam})";
+                    // Cambiar CO.NOMBRE por CO.ID
+                    query += $" AND CO.ID IN ({conceptoParam})";
                     for (int i = 0; i < concepto.Count; i++)
                     {
+                        // Los valores en la lista 'concepto' ya son los IDs (como string)
                         datos.setearParametros($"@concepto{i}", concepto[i]);
                     }
                 }
@@ -91,6 +124,7 @@ namespace Negocio
                         datos.setearParametros($"@obra{i}", obra[i]);
                     }
                 }
+
                 query += " ORDER BY O.DESCRIPCION,A.CODIGO_AUTORIZANTE";
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -137,6 +171,8 @@ namespace Negocio
                         Id = (int)datos.Lector["OBRA_ID"],
 
                         Descripcion = datos.Lector["OBRA"] as string,
+                        Empresa = new Empresa { Id = (int)datos.Lector["EMPRESA_ID"], Nombre = datos.Lector["EMPRESA"] as string }, // Necesitarías añadir EM.ID a la query
+                        Barrio = new Barrio { Id = (int)datos.Lector["BARRIO_ID"], Nombre = datos.Lector["NOMBRE_BARRIO"] as string }, // Necesitarías añadir BA.ID y BA.NOMBRE a la query,
                         Contrata = new Contrata
                         {
                             Id = (int)datos.Lector["CONTRATA_ID"],
@@ -170,11 +206,45 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,A.MES_BASE,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
+                string query = @"SELECT
+                    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+                    A.MES_BASE,
+                    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
+                    O.ID AS OBRA_ID,
+                    EM.NOMBRE AS EMPRESA,
+                    A.CODIGO_AUTORIZANTE,
+                    A.DETALLE, 
+                    CO.NOMBRE AS CONCEPTO,
+                    CO.ID AS CONCEPTO_ID,
+                    E.NOMBRE AS ESTADO,
+                    E.ID AS ESTADO_ID,
+                    A.EXPEDIENTE,
+                    A.MONTO_AUTORIZADO,
+                    A.MES,
+                    A.AUTORIZACION_GG,
+                    AR.NOMBRE AS AREA,
+                    AR.ID AS AREA_ID,
+                    C.ID AS CONTRATA_ID ,
+                    EM.ID AS EMPRESA_ID,
+                    BA.ID AS BARRIO_ID,
+                    BA.NOMBRE AS NOMBRE_BARRIO
+                    FROM AUTORIZANTES AS A
+                    INNER JOIN OBRAS AS O ON A.OBRA = O.ID 
+                    INNER JOIN ESTADOS_AUTORIZANTES AS E
+                    ON A.ESTADO = E.ID 
+                    INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID 
+                    LEFT JOIN BD_PROYECTOS AS B ON O.ID = B.ID_BASE 
+                    INNER JOIN AREAS AS AR ON O.AREA = AR.ID 
+                    INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID 
+                    INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID 
+                    INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
+
+
                 if (empresa != null && empresa.Count > 0)
                 {
                     string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
-                    query += $" AND EM.NOMBRE IN ({empresasParam})";
+                    // Cambiar EM.NOMBRE por EM.ID
+                    query += $" AND EM.ID IN ({empresasParam})";
                     for (int i = 0; i < empresa.Count; i++)
                     {
                         datos.setearParametros($"@empresa{i}", empresa[i]);
@@ -184,16 +254,19 @@ namespace Negocio
                 if (estado != null && estado.Count > 0)
                 {
                     string estadoParam = string.Join(",", estado.Select((e, i) => $"@estado{i}"));
-                    query += $" AND E.NOMBRE IN ({estadoParam})";
+                    // Cambiar E.NOMBRE por E.ID
+                    query += $" AND E.ID IN ({estadoParam})";
                     for (int i = 0; i < estado.Count; i++)
                     {
                         datos.setearParametros($"@estado{i}", estado[i]);
                     }
                 }
+
                 if (areas != null && areas.Count > 0)
                 {
                     string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
-                    query += $" AND AR.NOMBRE IN ({areaParam})";
+                    // Cambiar AR.NOMBRE por AR.ID
+                    query += $" AND AR.ID IN ({areaParam})";
                     for (int i = 0; i < areas.Count; i++)
                     {
                         datos.setearParametros($"@area{i}", areas[i]);
@@ -203,7 +276,8 @@ namespace Negocio
                 if (concepto != null && concepto.Count > 0)
                 {
                     string conceptoParam = string.Join(",", concepto.Select((e, i) => $"@concepto{i}"));
-                    query += $" AND CO.NOMBRE IN ({conceptoParam})";
+                    // Cambiar CO.NOMBRE por CO.ID
+                    query += $" AND CO.ID IN ({conceptoParam})";
                     for (int i = 0; i < concepto.Count; i++)
                     {
                         datos.setearParametros($"@concepto{i}", concepto[i]);
@@ -220,6 +294,7 @@ namespace Negocio
                     }
                 }
 
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (C.NOMBRE LIKE @filtro OR O.NUMERO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR EM.NOMBRE LIKE @filtro OR CO.NOMBRE LIKE @filtro OR E.NOMBRE LIKE @filtro OR AR.NOMBRE LIKE @filtro OR A.EXPEDIENTE LIKE @filtro OR A.DETALLE LIKE @filtro OR A.CODIGO_AUTORIZANTE LIKE @filtro) ";
@@ -232,6 +307,8 @@ namespace Negocio
                 {
 
                     Autorizante aux = new Autorizante();
+
+                    aux.Empresa = datos.Lector["EMPRESA"] as string;
                     aux.CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string;
                     aux.Detalle = datos.Lector["DETALLE"] as string;
                     aux.Concepto = new Concepto
@@ -265,6 +342,17 @@ namespace Negocio
                         {
                             Id = (int)datos.Lector["AREA_ID"],
                             Nombre = datos.Lector["AREA"] as string
+                        },
+
+                        Empresa = new Empresa
+                        {
+                            Id = (int)datos.Lector["EMPRESA_ID"],
+                            Nombre = datos.Lector["EMPRESA"] as string
+                        },
+                        Barrio = new Barrio
+                        {
+                            Id = (int)datos.Lector["BARRIO_ID"],
+                            Nombre = datos.Lector["NOMBRE_BARRIO"] as string
                         }
                     };
                     lista.Add(aux);
@@ -290,7 +378,35 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,A.MES_BASE,    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, O.ID AS OBRA_ID,   EM.NOMBRE AS EMPRESA,    A.CODIGO_AUTORIZANTE,     A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,     E.NOMBRE AS ESTADO,     E.ID AS ESTADO_ID,     A.EXPEDIENTE,     A.MONTO_AUTORIZADO,    A.MES,    A.AUTORIZACION_GG,     AR.NOMBRE AS AREA,     AR.ID AS AREA_ID,     C.ID AS CONTRATA_ID FROM     AUTORIZANTES AS A  INNER JOIN     OBRAS AS O ON A.OBRA = O.ID INNER JOIN     ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID INNER JOIN     CONTRATA AS C ON O.CONTRATA = C.ID LEFT JOIN     BD_PROYECTOS AS B ON O.ID = B.ID_BASE INNER JOIN     AREAS AS AR ON O.AREA = AR.ID     INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
+                string query = @"SELECT
+                                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+                                A.MES_BASE,
+                                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA,
+                                O.ID AS OBRA_ID,   
+                                EM.NOMBRE AS EMPRESA,
+                                EM.ID AS EMPRESA_ID,
+                                A.CODIGO_AUTORIZANTE,
+                                A.DETALLE, CO.NOMBRE AS CONCEPTO,CO.ID AS CONCEPTO_ID,
+                                E.NOMBRE AS ESTADO,
+                                E.ID AS ESTADO_ID,
+                                A.EXPEDIENTE,
+                                A.MONTO_AUTORIZADO,
+                                A.MES,
+                                A.AUTORIZACION_GG,
+                                AR.NOMBRE AS AREA,
+                                AR.ID AS AREA_ID,
+                                C.ID AS CONTRATA_ID,
+                                BA.ID AS BARRIO_ID,
+                                BA.NOMBRE AS NOMBRE_BARRIO
+                                FROM AUTORIZANTES AS A
+                                INNER JOIN OBRAS AS O ON A.OBRA = O.ID 
+                                INNER JOIN ESTADOS_AUTORIZANTES AS E ON A.ESTADO = E.ID
+                                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID 
+                                LEFT JOIN BD_PROYECTOS AS B ON O.ID = B.ID_BASE
+                                INNER JOIN  AREAS AS AR ON O.AREA = AR.ID
+                                INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
+                                INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+                                INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID ";
                 query += " ORDER BY O.DESCRIPCION,A.CODIGO_AUTORIZANTE";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
@@ -326,11 +442,20 @@ namespace Negocio
                             Id = (int)datos.Lector["CONTRATA_ID"],
                             Nombre = datos.Lector["CONTRATA"] as string
                         },
-
                         Area = new Area
                         {
                             Id = (int)datos.Lector["AREA_ID"],
                             Nombre = datos.Lector["AREA"] as string
+                        },
+                        Empresa = new Empresa
+                        {
+                            Id = datos.Lector["EMPRESA_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["EMPRESA_ID"]) : 0,
+                            Nombre = datos.Lector["EMPRESA"] as string // El nombre ya se obtiene como EM.NOMBRE
+                        },
+                        Barrio = new Barrio
+                        {
+                            Id = datos.Lector["BARRIO_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["BARRIO_ID"]) : 0,
+                            Nombre = datos.Lector["NOMBRE_BARRIO"] as string
                         }
                     };
                     lista.Add(aux);

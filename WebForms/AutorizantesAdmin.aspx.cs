@@ -18,16 +18,16 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblConcepto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstado.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblObra.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblArea.AcceptChanges += OnAcceptChanges;
+            cblEmpresa.AcceptChanges += OnAcceptChanges;
+            cblConcepto.AcceptChanges += OnAcceptChanges;
+            cblEstado.AcceptChanges += OnAcceptChanges;
+            cblObra.AcceptChanges += OnAcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        private void OnAcceptChanges(object sender, EventArgs e)
         {
-            //CargarListaAutorizantes();
+            CargarListaAutorizantesRedet();
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -35,7 +35,6 @@ namespace WebForms
             if (!IsPostBack)
             {
                 BindDropDownList();
-                //CargarListaAutorizantes();
                 CargarListaAutorizantesRedet();
                 CalcularSubtotal();
             }
@@ -95,6 +94,7 @@ namespace WebForms
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
+            
             //CargarListaAutorizantes(filtro);
         }
 
@@ -134,6 +134,10 @@ namespace WebForms
                         {
                             lblMensaje.Text = "Autorizante modificado exitosamente!";
                             lblMensaje.CssClass = "alert alert-success";
+
+                            //CargarListaAutorizantes();
+                            CargarListaAutorizantesRedet();
+                            CalcularSubtotal();
 
                             // Clear the editing state
                             ViewState["EditingAutorizanteId"] = null;
@@ -225,15 +229,72 @@ namespace WebForms
         {
             try
             {
-                Session["listaAutorizanteAdmin"] = calculoRedeterminacionNegocio.listarAutRedet();
-                dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
+                // 1. Obtener la lista completa
+                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                IEnumerable<Autorizante> listaFiltrada = listaCompleta;
+
+                // 2. Obtener IDs seleccionados desde SelectedValues
+                var selectedAreas = cblArea.SelectedValues;
+                var selectedEmpresas = cblEmpresa.SelectedValues;
+                var selectedConceptos = cblConcepto.SelectedValues;
+                var selectedEstados = cblEstado.SelectedValues;
+                var selectedObras = cblObra.SelectedValues;
+
+                // 3. Aplicar filtro de texto general
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    listaFiltrada = listaFiltrada.Where(a =>
+                        (a.CodigoAutorizante?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (a.Obra?.Descripcion?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (a.Empresa?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) || 
+                        (a.Concepto?.Nombre?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (a.Estado?.Nombre?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (a.Expediente?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0)
+                    );
+                }
+
+                // 4. Aplicar filtros específicos LINQ
+                if (selectedAreas != null && selectedAreas.Any())
+                {
+                    var areaIdsInt = selectedAreas.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Area != null && areaIdsInt.Contains(a.Obra.Area.Id));
+                }
+                if (selectedEmpresas != null && selectedEmpresas.Any())
+                {
+                    var empresaIdsInt = selectedEmpresas.Select(int.Parse).ToList();
+                    // Asegúrate que Obra.Empresa.Id esté cargado en listarAutRedet
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Empresa != null && empresaIdsInt.Contains(a.Obra.Empresa.Id));
+                }
+                if (selectedConceptos != null && selectedConceptos.Any())
+                {
+                    var conceptoIdsInt = selectedConceptos.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(a => a.Concepto != null && conceptoIdsInt.Contains(a.Concepto.Id));
+                }
+                if (selectedEstados != null && selectedEstados.Any())
+                {
+                    var estadoIdsInt = selectedEstados.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(a => a.Estado != null && estadoIdsInt.Contains(a.Estado.Id));
+                }
+                if (selectedObras != null && selectedObras.Any())
+                {
+                    var obraIdsInt = selectedObras.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra != null && obraIdsInt.Contains(a.Obra.Id));
+                }
+
+                // 5. Guardar y enlazar la lista filtrada
+                List<Autorizante> resultadoFinal = listaFiltrada.ToList();
+                Session["listaAutorizanteAdmin"] = resultadoFinal;
+                dgvAutorizante.DataSource = resultadoFinal;
                 dgvAutorizante.DataBind();
-                //CalcularSubtotal();
+                CalcularSubtotal(); // Calcular después de filtrar y enlazar
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar/filtrar los Autorizantes: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+                dgvAutorizante.DataSource = null;
+                dgvAutorizante.DataBind();
+                // txtSubtotal.Text = 0.ToString("C"); // Considera limpiar subtotal en error
             }
         }
 
@@ -340,6 +401,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Autorizante eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
+                    //CargarListaAutorizantes();
                     CargarListaAutorizantesRedet();
                     CalcularSubtotal();
                 }
@@ -381,7 +443,7 @@ namespace WebForms
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
-            
+
             cblArea.DataSource = ObtenerAreas();
             cblArea.DataTextField = "Nombre";
             cblArea.DataValueField = "Id";
@@ -434,6 +496,7 @@ namespace WebForms
                 // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
                 //CargarListaAutorizantes();
+                CargarListaAutorizantesRedet();
                 CalcularSubtotal();
 
             }
@@ -474,6 +537,7 @@ namespace WebForms
                 AutorizanteNegocio negocio = new AutorizanteNegocio();
                 negocio.ActualizarEstado(autorizante);
                 //CargarListaAutorizantes();
+                CargarListaAutorizantesRedet();
 
                 lblMensaje.Text = "Estado actualizado correctamente.";
                 lblMensaje.CssClass = "alert alert-success";
@@ -499,7 +563,7 @@ namespace WebForms
             }
         }
 
-        protected void BtnClearFilters_Click(object sender, EventArgs e) 
+        protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
             cblArea.ClearSelection();
@@ -508,6 +572,7 @@ namespace WebForms
             cblEstado.ClearSelection();
             cblObra.ClearSelection();
             //CargarListaAutorizantes();
+            CargarListaAutorizantesRedet();
         }
 
     }

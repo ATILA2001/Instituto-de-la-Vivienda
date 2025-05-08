@@ -107,19 +107,22 @@ namespace Negocio
 
                 foreach (var redet in redeterminacionesCalculadas)
                 {
+
+                    var autorizanteOriginal = listaAut.FirstOrDefault(a => a.CodigoAutorizante == redet.Autorizante.CodigoAutorizante);
                     // Check if redet.Autorizante and redet.Autorizante.Obra are not null
                     if (redet.Autorizante != null && redet.Autorizante.Obra != null)
                     {
                         // Create a new autorizante with the fields from the redeterminación
                         var nuevoAutorizante = new Autorizante
                         {
-                            Obra = new Obra
-                            {
-                                Descripcion = redet.Autorizante.Obra.Descripcion,
-                                Id = redet.Autorizante.Obra.Id,
-                                Area = redet.Autorizante.Obra.Area != null ? new Area { Nombre = redet.Autorizante.Obra.Area.Nombre } : null,
-                                Contrata = redet.Autorizante.Obra.Contrata != null ? new Contrata { Nombre = redet.Autorizante.Obra.Contrata.Nombre } : null
-                            },
+                            //Obra = new Obra
+                            //{
+                            //    Descripcion = redet.Autorizante.Obra.Descripcion,
+                            //    Id = redet.Autorizante.Obra.Id,
+                            //    Area = redet.Autorizante.Obra.Area != null ? new Area { Nombre = redet.Autorizante.Obra.Area.Nombre } : null,
+                            //    Contrata = redet.Autorizante.Obra.Contrata != null ? new Contrata { Nombre = redet.Autorizante.Obra.Contrata.Nombre } : null
+                            //},
+                            Obra = autorizanteOriginal.Obra,
                             CodigoAutorizante = redet.CodigoRedet,
                             Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Assign a default concept
                             Detalle = redet.Observaciones,
@@ -135,6 +138,7 @@ namespace Negocio
 
                         listaAut.Add(nuevoAutorizante);
                     }
+
                 }
 
 
@@ -257,30 +261,43 @@ namespace Negocio
 
 
                                 // Crear el certificado de redeterminación
+                                //Certificado certificadoRedet = new Certificado
+                                //    {
+                                //        Autorizante = new Autorizante
+                                //        {
+                                //            CodigoAutorizante = redet.CodigoRedet,
+                                //            Obra = redet.Autorizante?.Obra != null ? new Obra
+                                //            {
+                                //                Descripcion = redet.Autorizante.Obra.Descripcion,
+                                //                Id = redet.Autorizante.Obra.Id,
+                                //                Area = redet.Autorizante.Obra.Area,
+                                //                Contrata = redet.Autorizante.Obra.Contrata
+                                //            } : null,
+                                //            MontoAutorizado = montoCalculado
+                                //        },
+                                //        ExpedientePago = string.Empty,
+                                //        MontoTotal = montoCertificadoRedet,
+                                //        MesAprobacion = certificadoOriginal.MesAprobacion,
+                                //        Tipo = new TipoPago { Id = 2, Nombre = "REDETERMINACION" },
+                                //        Empresa = redet.Empresa,
+                                //        Estado = "REDETERMINADO",
+                                //        Porcentaje = porcentajeCalculado.ToString(),
+                                //        FechaSade = redet.FechaSade,
+                                //        BuzonSade = redet.BuzonSade
+                                //    };
                                 Certificado certificadoRedet = new Certificado
-                                    {
-                                        Autorizante = new Autorizante
-                                        {
-                                            CodigoAutorizante = redet.CodigoRedet,
-                                            Obra = redet.Autorizante?.Obra != null ? new Obra
-                                            {
-                                                Descripcion = redet.Autorizante.Obra.Descripcion,
-                                                Id = redet.Autorizante.Obra.Id,
-                                                Area = redet.Autorizante.Obra.Area,
-                                                Contrata = redet.Autorizante.Obra.Contrata
-                                            } : null,
-                                            MontoAutorizado = montoCalculado
-                                        },
-                                        ExpedientePago = string.Empty,
-                                        MontoTotal = montoCertificadoRedet,
-                                        MesAprobacion = certificadoOriginal.MesAprobacion,
-                                        Tipo = new TipoPago { Id = 2, Nombre = "REDETERMINACION" },
-                                        Empresa = redet.Empresa,
-                                        Estado = "REDETERMINADO",
-                                        Porcentaje = porcentajeCalculado.ToString(),
-                                        FechaSade = redet.FechaSade,
-                                        BuzonSade = redet.BuzonSade
-                                    };
+                                {
+                                    Autorizante = certificadoOriginal.Autorizante,
+                                    ExpedientePago = string.Empty,
+                                    MontoTotal = montoCertificadoRedet,
+                                    MesAprobacion = certificadoOriginal.MesAprobacion,
+                                    Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
+                                    Empresa = redet.Empresa,
+                                    Estado = redet.Etapa.Nombre,
+                                    Porcentaje = porcentajeCalculado.ToString(),
+                                    FechaSade = redet.FechaSade,
+                                    BuzonSade = redet.BuzonSade
+                                };
 
                                 certificadosRedeterminacion.Add(certificadoRedet);
                             }

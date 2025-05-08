@@ -1,0 +1,193 @@
+﻿
+
+
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+    .search-row input[type='text'] {
+        flex: 1;
+    }
+
+/* Contenedor del dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Botón de apertura */
+.dropdown-button {
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+    .dropdown-button:hover {
+        background-color: #e2e6ea;
+    }
+
+/* Contenedor fijo para el input */
+.search-container {
+    padding: 5px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Contenido desplegable */
+.dropdown-content {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    width: auto;
+    min-width: 250px;
+    max-width: none;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
+    /*        padding: 0px 5px;*/
+    display: none;
+    text-align: left;
+}
+
+
+    /* Cuadro de búsqueda */
+    .dropdown-content input[type='text'] {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        margin: 5px 0px;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        border: 1px, solid black;
+        border-radius: 5px;
+    }
+
+/* Contenedor con scroll solo para los checkboxes */
+.checkbox-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    white-space: nowrap;
+}
+
+.checkbox-list {
+    margin: 0;
+    padding: 0;
+}
+
+    .checkbox-list span {
+        display: block; /* Cada ítem en su propia línea */
+        white-space: nowrap;
+        margin: 3px 0;
+    }
+
+    /* Alineamos el checkbox y su texto en la misma fila */
+    .checkbox-list input[type='checkbox'] {
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
+
+    .checkbox-list label {
+        vertical-align: middle;
+        white-space: nowrap; /* Evita que el texto salte de línea */
+    }
+
+
+
+
+
+
+
+/* Estilos base del TreeView */
+.date-tree-view {
+    padding: 0;
+    width: 100%;
+}
+
+    .date-tree-view table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .date-tree-view tr {
+        display: table-row;
+        height: 1em; /* Altura fija para cada fila */
+        vertical-align: middle;
+    }
+
+    .date-tree-view td {
+        display: inline-flex;
+        vertical-align: middle;
+        align-items: center;
+        /*  width: 100%;*/
+        padding: 0;
+        margin: 0;
+    }
+
+        /* Icono (botón de expandir/colapsar) */
+        .date-tree-view td img {
+            margin-right: 4px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* Checkbox */
+        .date-tree-view td input[type="checkbox"] {
+            margin: 0 4px 0;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+
+    /* Sangría para nodos anidados */
+    .date-tree-view table table td {
+        padding-left: 2px;
+    }
+
+    /* Separador especial para "Seleccionar todos" */
+    .date-tree-view > table:first-child {
+        border-bottom: 10px solid red;
+        margin: 5px 0;
+        /*  padding-bottom: 5px;*/
+    }
+
+
+
+
+/*.action-buttons {
+    padding: 10px 5px;
+    text-align: right;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;*/
+/*    margin: 0 -5px;*/
+/*padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.action-buttons .btn {
+    margin-left: 5px;
+
+}*/
+
+.action-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #ccc;
+}

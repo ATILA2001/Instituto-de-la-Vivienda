@@ -98,34 +98,39 @@ namespace Negocio
 							INNER JOIN AREAS AS AR ON O.AREA = AR.ID
 							LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
                         WHERE 1=1";
-                query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
+
+
                 if (etapa != null && etapa.Count > 0)
                 {
-                    string etapaParam = string.Join(",", etapa.Select((e, i) => $"@etapa{i}"));
-                    query += $" AND E.NOMBRE IN ({etapaParam})";
+                    // E.ID es la columna correcta para el ID de la etapa en la tabla ESTADOS_REDET
+                    string etapaParam = string.Join(",", etapa.Select((id, i) => $"@etapaId{i}"));
+                    query += $" AND E.ID IN ({etapaParam})";
                     for (int i = 0; i < etapa.Count; i++)
                     {
-                        datos.agregarParametro($"@etapa{i}", etapa[i]);
+                        // Los IDs ya son strings, la BD los convertirá si la columna es numérica.
+                        datos.agregarParametro($"@etapaId{i}", etapa[i]);
                     }
                 }
 
                 if (codigoAutorizante != null && codigoAutorizante.Count > 0)
                 {
-                    string autorizanteParam = string.Join(",", codigoAutorizante.Select((e, i) => $"@autorizante{i}"));
-                    query += $" AND R.CODIGO_AUTORIZANTE IN ({autorizanteParam})";
+                    // A.ID es la columna correcta para el ID del autorizante en la tabla AUTORIZANTES
+                    string autorizanteParam = string.Join(",", codigoAutorizante.Select((id, i) => $"@autorizanteId{i}"));
+                    query += $" AND A.ID IN ({autorizanteParam})";
                     for (int i = 0; i < codigoAutorizante.Count; i++)
                     {
-                        datos.agregarParametro($"@autorizante{i}", codigoAutorizante[i]);
+                        datos.agregarParametro($"@autorizanteId{i}", codigoAutorizante[i]);
                     }
                 }
 
                 if (obra != null && obra.Count > 0)
                 {
-                    string obraParam = string.Join(",", obra.Select((e, i) => $"@obra{i}"));
-                    query += $" AND O.DESCRIPCION IN ({obraParam})";
+                    // O.ID es la columna correcta para el ID de la obra en la tabla OBRAS
+                    string obraParam = string.Join(",", obra.Select((id, i) => $"@obraId{i}"));
+                    query += $" AND O.ID IN ({obraParam})";
                     for (int i = 0; i < obra.Count; i++)
                     {
-                        datos.agregarParametro($"@obra{i}", obra[i]);
+                        datos.agregarParametro($"@obraId{i}", obra[i]);
                     }
                 }
 
@@ -138,6 +143,8 @@ namespace Negocio
                         OR EM.NOMBRE LIKE @filtro)";
                     datos.agregarParametro("@filtro", $"%{filtro}%");
                 }
+
+                query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
 
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
@@ -232,7 +239,9 @@ namespace Negocio
                 LEFT JOIN CONTRATA AS C ON O.CONTRATA = C.ID
                 LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
                 WHERE 1=1 ";
+
                 query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
+                
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 

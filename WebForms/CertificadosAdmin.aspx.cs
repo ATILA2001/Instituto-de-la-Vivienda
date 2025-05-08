@@ -4,6 +4,7 @@ using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -15,29 +16,30 @@ namespace WebForms
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
         CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
-        protected void Page_Init(object sender, EventArgs e)
+
+        protected void Page_Init(object sender, EventArgs e) 
         {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+           cblArea.AcceptChanges += OnAcceptChanges;
+           cblBarrio.AcceptChanges += OnAcceptChanges;
+           cblProyecto.AcceptChanges += OnAcceptChanges;
+           cblEmpresa.AcceptChanges += OnAcceptChanges;
+           cblAutorizante.AcceptChanges += OnAcceptChanges;
+           cblTipo.AcceptChanges += OnAcceptChanges;
+           cblFecha.AcceptChanges += OnAcceptChanges;
+           cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        private void OnAcceptChanges(object sender, EventArgs e)
         {
-            CargarListaCertificados();
+           CargarListaCertificados();
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                BindDropDownList();
+                List<Certificado> listaCertificados = negocio.listarFiltroAdmin();
+                BindDropDownList(listaCertificados);
                 CargarListaCertificados();
             }
         }
@@ -203,28 +205,129 @@ namespace WebForms
         {
             try
             {
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                var selectedAreas = cblArea.SelectedValues;
+                var selectedBarrios = cblBarrio.SelectedValues;
+                var selectedProyectos = cblProyecto.SelectedValues;
+                var selectedEmpresas = cblEmpresa.SelectedValues;
+                var selectedAutorizantes = cblAutorizante.SelectedValues;
+                var selectedTipos = cblTipo.SelectedValues;
+                var selectedFechas = cblFecha.SelectedValues;
+                var selectedLineas = cblLinea.SelectedValues;
+                var selectedEstadoExpedientes = cblEstadoExpediente.SelectedValues;
 
-                Session["listaCertificado"] = calculoRedeterminacionNegocio.listarCertReliq();
-                dgvCertificado.DataSource = Session["listaCertificado"];
+
+                // Obtenemos la lista completa.
+                List<Certificado> listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+
+                // Creamos lista secundaria para filtrar con LINQ.
+                IEnumerable<Certificado> listaFiltrada = listaCompleta;
+
+                // Filtro de texto general
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    string filtroLower = filtro.ToLower();
+                    listaFiltrada = listaFiltrada.Where(c =>
+                        (c.Autorizante?.CodigoAutorizante?.ToLower().Contains(filtroLower) ?? false) ||
+                        (c.Autorizante?.Obra?.Descripcion?.ToLower().Contains(filtroLower) ?? false) ||
+                        (c.ExpedientePago?.ToLower().Contains(filtroLower) ?? false) ||
+                        (c.Autorizante?.Obra?.Empresa?.Nombre?.ToLower().Contains(filtroLower) ?? false) ||
+                        (c.Tipo?.Nombre?.ToLower().Contains(filtroLower) ?? false)
+                    );
+                }
+
+                // Filtros de CheckBoxListSearch.
+                if (selectedAreas != null && selectedAreas.Any())
+                {
+                    // Convertir IDs de string a int
+                    var areaIdsInt = selectedAreas.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Area != null && areaIdsInt.Contains(c.Autorizante.Obra.Area.Id));
+                }
+
+                if (selectedBarrios != null && selectedBarrios.Any())
+                {
+                    // Convertir IDs de string a int
+                    var barrioIdsInt = selectedBarrios.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && barrioIdsInt.Contains(c.Autorizante.Obra.Barrio.Id));
+                }
+
+                if (selectedProyectos != null && selectedProyectos.Any())
+                {
+                    var proyectoIdsInt = selectedProyectos.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && proyectoIdsInt.Contains(c.Autorizante.Obra.Proyecto.Id));
+                }
+
+                if (selectedEmpresas != null && selectedEmpresas.Any())
+                {
+                    // Convertir IDs de string a int
+                    var empresaIdsInt = selectedEmpresas.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Empresa != null && empresaIdsInt.Contains(c.Autorizante.Obra.Empresa.Id));
+                }
+
+                if (selectedAutorizantes != null && selectedAutorizantes.Any())
+                {
+                    // Convertir IDs seleccionados (string) a int
+                    var autorizanteIdsInt = selectedAutorizantes.Select(int.Parse).ToList();
+                    // Comparar Autorizante.Id (int)
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante != null && autorizanteIdsInt.Contains(c.Autorizante.Id));
+                }
+
+
+                if (selectedTipos != null && selectedTipos.Any())
+                {
+                    // Convertir IDs de string a int
+                    var tipoIdsInt = selectedTipos.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Tipo != null && tipoIdsInt.Contains(c.Tipo.Id));
+                }
+
+                if (selectedFechas != null && selectedFechas.Any())
+                {
+                    // Convertir strings "yyyy-MM-dd" a DateTime.Date
+                    var fechasDate = selectedFechas
+                        .Select(fs => DateTime.ParseExact(fs, "yyyy-MM-dd", CultureInfo.InvariantCulture).Date)
+                        .ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.MesAprobacion.HasValue && fechasDate.Contains(c.MesAprobacion.Value.Date));
+                }
+
+                if (selectedLineas != null && selectedLineas.Any())
+                {
+                    var lineaIdsInt = selectedLineas.Select(int.Parse).ToList();
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.LineaGestion != null && lineaIdsInt.Contains(c.Autorizante.Obra.LineaGestion.Id));
+                }
+
+                if (selectedEstadoExpedientes != null && selectedEstadoExpedientes.Any())
+                {
+                    // Mapear los IDs ("0", "1", "2") a nombres
+                    var selectedEstadoNombres = new List<string>();
+                    if (selectedEstadoExpedientes.Contains("0")) selectedEstadoNombres.Add("NO INICIADO");
+                    if (selectedEstadoExpedientes.Contains("1")) selectedEstadoNombres.Add("EN TRAMITE");
+                    if (selectedEstadoExpedientes.Contains("2")) selectedEstadoNombres.Add("DEVENGADO");
+                    selectedEstadoNombres.Add("REDETERMINADO"); // Incluir siempre
+
+                    // Comparar Certificado.Estado (string) con nombres mapeados (insensible a mayúsculas)
+                    listaFiltrada = listaFiltrada.Where(c => !string.IsNullOrEmpty(c.Estado) &&
+                                                             selectedEstadoNombres.Contains(c.Estado.ToUpper()));
+                }
+
+
+                // Guardamos y enlazamos la lista filtrada.
+                List<Certificado> resultadoFinal = listaFiltrada.ToList();
+                Session["listaCertificado"] = resultadoFinal;
+
+                dgvCertificado.DataSource = resultadoFinal;
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los Certificados: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar/filtrar los Certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+                dgvCertificado.DataSource = null;
+                dgvCertificado.DataBind();
+                txtSubtotal.Text = 0.ToString("C");
             }
         }
 
+        
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -411,30 +514,33 @@ namespace WebForms
 
             return dt;
         }
-        private void BindDropDownList()
-        {// Clear existing items first
-            ddlTipo.Items.Clear();
-            ddlAutorizante.Items.Clear();
 
-            // Set AppendDataBoundItems to true
-            ddlTipo.AppendDataBoundItems = true;
-            ddlAutorizante.AppendDataBoundItems = true;
-
-            // Add empty items
-            ddlTipo.Items.Add(new ListItem("Seleccione un tipo", ""));
-            ddlAutorizante.Items.Add(new ListItem("Seleccione un autorizante", ""));
-
-            // Bind data sources
+        /// <summary>
+        /// Populates dropdown lists and CheckBoxListSearch controls used for filtering.
+        /// The date filter (cblFecha) is populated based on the distinct MesAprobacion
+        /// values found in the provided list of certificates.
+        /// </summary>
+        /// <param name="certificados">A list of Certificado objects used to extract distinct dates for the date filter.</param>
+        private void BindDropDownList(List<Certificado> certificados)
+        {
+            // --- Binding para DropDownLists del modal (si aplica) ---
+            // Asegúrate que estos controles existan en tu .aspx si los necesitas aquí.
+            // Si ddlTipo y ddlAutorizante son del modal, su binding está bien aquí.
+            // Si son filtros, considera si deben poblarse aquí o en otro lado.
             ddlTipo.DataSource = ObtenerTipos();
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-            
+            // ddlTipo.Items.Insert(0, new ListItem("Seleccione Tipo", "")); // Opcional: Añadir item por defecto
+
             ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
+            // ddlAutorizante.Items.Insert(0, new ListItem("Seleccione Autorizante", "")); // Opcional: Añadir item por defecto
 
+
+            // --- Binding para Controles CheckBoxListSearch de Filtros ---
             cblTipo.DataSource = ObtenerTipos();
             cblTipo.DataTextField = "Nombre";
             cblTipo.DataValueField = "Id";
@@ -450,12 +556,11 @@ namespace WebForms
             cblProyecto.DataValueField = "Id";
             cblProyecto.DataBind();
 
-
             cblEmpresa.DataSource = ObtenerEmpresas();
             cblEmpresa.DataTextField = "Nombre";
             cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind(); 
-            
+            cblEmpresa.DataBind();
+
             cblArea.DataSource = ObtenerAreas();
             cblArea.DataTextField = "Nombre";
             cblArea.DataValueField = "Id";
@@ -476,19 +581,33 @@ namespace WebForms
             cblLinea.DataValueField = "Id";
             cblLinea.DataBind();
 
-            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
-            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
-            .Select(fecha => new
-            {
-                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
-                Valor = fecha.ToString("yyyy-MM-dd")
-            });
+            // Ahora se extraen las fechas distintas de la lista de certificados proporcionada.
 
-            cblFecha.DataSource = meses;
+            // Obtener fechas distintas (solo la parte Date) y no nulas de los certificados cargados.
+            var fechasDisponibles = certificados
+                .Where(c => c.MesAprobacion.HasValue) // Filtrar certificados que sí tienen fecha de aprobación.
+                .Select(c => c.MesAprobacion.Value.Date) // Seleccionar solo la parte de la fecha (ignorar hora).
+                .Distinct() // Obtener solo las fechas únicas.
+                .OrderBy(d => d) // Ordenar las fechas ascendentemente.
+                .Select(fecha => new // Proyectar a un tipo anónimo que el control pueda usar.
+                {
+                    // Usar el formato yyyy-MM-dd tanto para el texto como para el valor.
+                    // El control CheckBoxListSearch usará este formato para construir la jerarquía Año/Mes/Día.
+                    Texto = fecha.ToString("yyyy-MM-dd"),
+                    Valor = fecha.ToString("yyyy-MM-dd")
+                })
+                .ToList(); // Convertir el resultado a una lista.
+
+            // Asignar la lista de fechas reales como DataSource.
+            cblFecha.DataSource = fechasDisponibles;
+            // Especificar los campos del tipo anónimo para Texto y Valor.
             cblFecha.DataTextField = "Texto";
             cblFecha.DataValueField = "Valor";
+            // Realizar el DataBinding.
             cblFecha.DataBind();
+
         }
+
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();

@@ -67,7 +67,7 @@ namespace Negocio
                     aux.MontoActual = datos.Lector["MONTO_ACTUAL"] as decimal?;
                     aux.MontoFaltante = datos.Lector["MONTO_DE_OBRA_FALTANTE"] as decimal?;
                     aux.Porcentaje = datos.Lector["PORCENTAJE"] as decimal?;
-                    aux.Linea = datos.Lector["LINEA_GESTION"] as string;
+                    aux.LineaGestion = datos.Lector["LINEA_GESTION"] as string;
                     aux.FechaInicio = datos.Lector["FECHA_INICIO"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_INICIO"] : (DateTime?)null;
                     aux.FechaFin = datos.Lector["FECHA_FIN"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_FIN"] : (DateTime?)null;
 
@@ -117,37 +117,92 @@ namespace Negocio
 
             try
             {
-                string query = "SELECT BD.PROYECTO as PROYECTO, O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, E.ID AS EMPRESA_ID, NUMERO, C.NOMBRE AS CONTRATA, C.ID AS CONTRATA_ID, AÑO, ETAPA, OBRA, B.NOMBRE AS BARRIO, B.ID AS BARRIO_ID, DESCRIPCION, LG.NOMBRE AS LINEA_GESTION, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, (SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025) AS MONTO_CERTIFICADO, ((SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID AND A.CONCEPTO = 4) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID)) AS MONTO_DE_OBRA_INICIAL, (SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS MONTO_ACTUAL, (((SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID)) - ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID))) AS MONTO_DE_OBRA_FALTANTE, (SELECT MIN(FECHA_INICIO) FROM (SELECT MIN(C.MES_APROBACION) AS FECHA_INICIO FROM CERTIFICADOS C INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID UNION ALL SELECT MIN(L.MES_APROBACION) AS FECHA_INICIO FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_INICIO, (SELECT MAX(FECHA_FIN) FROM (SELECT MAX(C.MES_APROBACION) AS FECHA_FIN FROM CERTIFICADOS C INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID UNION ALL SELECT MAX(L.MES_APROBACION) AS FECHA_FIN FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_FIN, CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO_NUEVO * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID WHERE 1=1";
+                string query = @"SELECT 
+                                BD.PROYECTO as PROYECTO,
+                                O.ID, A.NOMBRE AS AREA,
+                                A.ID AS AREA_ID,
+                                E.NOMBRE AS EMPRESA,
+                                E.ID AS EMPRESA_ID,
+                                NUMERO, 
+                                C.NOMBRE AS CONTRATA,
+                                C.ID AS CONTRATA_ID, 
+                                AÑO,
+                                ETAPA,
+                                OBRA,
+                                B.NOMBRE AS BARRIO,
+                                B.ID AS BARRIO_ID,
+                                DESCRIPCION,
+                                LG.NOMBRE AS LINEA_GESTION,
+                                BD.AUTORIZADO_INICIAL,
+                                BD.AUTORIZADO_NUEVO,
+                                (SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
+                                FROM CERTIFICADOS AS C
+                                INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante 
+                                WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) 
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025) AS MONTO_CERTIFICADO,
+                                ((SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) 
+                                FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID AND A.CONCEPTO = 4) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) 
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID)) AS MONTO_DE_OBRA_INICIAL,
+                                (SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0)
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS MONTO_ACTUAL,
+                                (((SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) 
+                                FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0)
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID)) - ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0)
+                                FROM CERTIFICADOS AS C 
+                                INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0)
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID))) AS MONTO_DE_OBRA_FALTANTE,
+                                (SELECT MIN(FECHA_INICIO) 
+                                FROM (SELECT MIN(C.MES_APROBACION) AS FECHA_INICIO 
+                                FROM CERTIFICADOS C
+                                INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID 
+                                UNION ALL SELECT MIN(L.MES_APROBACION) AS FECHA_INICIO 
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_INICIO,
+                                (SELECT MAX(FECHA_FIN) FROM (SELECT MAX(C.MES_APROBACION) AS FECHA_FIN 
+                                FROM CERTIFICADOS C
+                                INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID 
+                                UNION ALL SELECT MAX(L.MES_APROBACION) AS FECHA_FIN FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_FIN,
+                                CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
+                                FROM CERTIFICADOS AS C
+                                INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0)
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO_NUEVO * 100 ELSE NULL END AS PORCENTAJE
+                                FROM OBRAS AS O 
+                                INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID 
+                                INNER JOIN AREAS AS A ON O.AREA = A.ID 
+                                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID 
+                                INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID 
+                                LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE
+                                LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
+                                WHERE 1=1";
+
                 if (empresas != null && empresas.Count > 0)
                 {
-                    string empresasParam = string.Join(",", empresas.Select((e, i) => $"@empresa{i}"));
-                    query += $" AND E.NOMBRE IN ({empresasParam})";
+                    string empresasParam = string.Join(",", empresas.Select((id, i) => $"@empresaId{i}"));
+                    query += $" AND E.ID IN ({empresasParam})"; // Cambiado de E.NOMBRE a E.ID
                     for (int i = 0; i < empresas.Count; i++)
                     {
-                        datos.setearParametros($"@empresa{i}", empresas[i]);
+                        datos.agregarParametro($"@empresaId{i}", empresas[i]);
                     }
                 }
 
                 if (barrios != null && barrios.Count > 0)
                 {
-                    string barriosParam = string.Join(",", barrios.Select((e, i) => $"@barrio{i}"));
-                    query += $" AND B.NOMBRE IN ({barriosParam})";
+                    string barriosParam = string.Join(",", barrios.Select((id, i) => $"@barrioId{i}"));
+                    query += $" AND B.ID IN ({barriosParam})"; // Cambiado de B.NOMBRE a B.ID
                     for (int i = 0; i < barrios.Count; i++)
                     {
-                        datos.setearParametros($"@barrio{i}", barrios[i]);
+                        datos.agregarParametro($"@barrioId{i}", barrios[i]);
                     }
                 }
 
                 if (areas != null && areas.Count > 0)
                 {
-                    string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
-                    query += $" AND A.NOMBRE IN ({areaParam})";
+                    string areaParam = string.Join(",", areas.Select((id, i) => $"@areaId{i}"));
+                    query += $" AND A.ID IN ({areaParam})"; // Cambiado de A.NOMBRE a A.ID
                     for (int i = 0; i < areas.Count; i++)
                     {
-                        datos.setearParametros($"@area{i}", areas[i]);
+                        datos.agregarParametro($"@areaId{i}", areas[i]);
                     }
                 }
-
 
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -175,7 +230,7 @@ namespace Negocio
                     aux.MontoActual = datos.Lector["MONTO_ACTUAL"] as decimal?;
                     aux.MontoFaltante = datos.Lector["MONTO_DE_OBRA_FALTANTE"] as decimal?;
                     aux.Porcentaje = datos.Lector["PORCENTAJE"] as decimal?;
-                    aux.Linea = datos.Lector["LINEA_GESTION"] as string;
+                    aux.LineaGestion = datos.Lector["LINEA_GESTION"] as string;
                     aux.FechaInicio = datos.Lector["FECHA_INICIO"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_INICIO"] : (DateTime?)null;
                     aux.FechaFin = datos.Lector["FECHA_FIN"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_FIN"] : (DateTime?)null;
                     aux.Proyecto = datos.Lector["PROYECTO"] as string;
@@ -187,7 +242,7 @@ namespace Negocio
 
                     aux.Area = new Area
                     {
-                        Id = (int)datos.Lector["ID"],
+                        Id = (int)datos.Lector["AREA_ID"],
                         Nombre = datos.Lector["AREA"] as string
                     };
 

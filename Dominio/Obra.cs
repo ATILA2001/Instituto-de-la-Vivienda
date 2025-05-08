@@ -25,8 +25,8 @@ namespace Dominio
         public decimal? MontoInicial { get; set; }
         public decimal? MontoActual { get; set; }
         public decimal? MontoFaltante { get; set; }
-        public string Linea {  get; set; }
-        public string Proyecto { get; set; }
+        public LineaGestion LineaGestion {  get; set; }
+        public BdProyecto Proyecto { get; set; }
 
 
         public DateTime? FechaInicio { get; set; }
@@ -36,37 +36,6 @@ namespace Dominio
         public decimal? Porcentaje { get; set; }
 
         public Obra() { }
-
-        public Obra(int id, Area area, Empresa empresa, int? numero = null, Contrata contrata = null,
-                    int? año = null, int? etapa = null, int? obraNumero = null, Barrio barrio = null,
-                    string descripcion = null, decimal? autorizadoInicial = null, decimal? autorizadoNuevo = null,
-                    decimal? montoInicial = null, decimal? montoActual = null, decimal? montoFaltante = null,
-                    string linea = null, string proyecto = null, DateTime? fechaInicio = null,
-                    DateTime? fechaFin = null, decimal? montoCertificado = null, decimal? porcentaje = null)
-        {
-            Id = id;
-            Area = area;
-            Empresa = empresa;
-            Numero = numero;
-            Contrata = contrata;
-            Año = año;
-            Etapa = etapa;
-            ObraNumero = obraNumero;
-            Barrio = barrio;
-            Descripcion = descripcion;
-            AutorizadoInicial = autorizadoInicial;
-            AutorizadoNuevo = autorizadoNuevo;
-            MontoInicial = montoInicial;
-            MontoActual = montoActual;
-            MontoFaltante = montoFaltante;
-            Linea = linea;
-            Proyecto = proyecto;
-            FechaInicio = fechaInicio;
-            FechaFin = fechaFin;
-            MontoCertificado = montoCertificado;
-            Porcentaje = porcentaje;
-        }
-
 
     }
 }

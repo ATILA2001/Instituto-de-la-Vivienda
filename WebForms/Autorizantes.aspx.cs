@@ -98,10 +98,11 @@ namespace WebForms
             {
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
 
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                var selectedEmpresas = cblEmpresa.SelectedValues;
+                var selectedConceptos = cblConcepto.SelectedValues;
+                var selectedEstados = cblEstado.SelectedValues;
+                var selectedObras = cblObra.SelectedValues;
+
 
                 Session["listaAutorizante"] = negocio.listar(usuarioLogueado, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
                 dgvAutorizante.DataSource = Session["listaAutorizante"];

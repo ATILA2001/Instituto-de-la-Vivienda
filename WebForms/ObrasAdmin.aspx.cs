@@ -16,12 +16,12 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
+            cblEmpresa.AcceptChanges += OnAcceptChanges;
+            cblBarrio.AcceptChanges += OnAcceptChanges;
+            cblArea.AcceptChanges += OnAcceptChanges;
         }
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        private void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaObras();
         }
@@ -124,9 +124,9 @@ namespace WebForms
         {
             try
             {
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedEmpresas = cblEmpresa.SelectedValues;
+                var selectedBarrios = cblBarrio.SelectedValues;
+                var selectedAreas = cblArea.SelectedValues;
 
                 Session["listaObraAdmin"] = negocio.listar(selectedBarrios, selectedEmpresas, selectedAreas, filtro);
                 dgvObra.DataSource = Session["listaObraAdmin"];

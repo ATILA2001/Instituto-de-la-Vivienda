@@ -189,6 +189,7 @@ namespace Negocio
                             Obra = new Obra
                             {
                                 Descripcion = datos.Lector["OBRA"]?.ToString(),
+                                LineaGestion = datos.Lector["LINEA_GESTION_NOMBRE"]?.ToString(),
                                 Area = new Area
                                 {
                                     Id = datos.Lector["AREAS_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AREAS_ID"]) : 0,
@@ -228,8 +229,11 @@ namespace Negocio
                 // Replace the query string initialization with:
                 string query = @"SELECT 
     A.ID as ID_AUTORIZANTE,
+    BA.ID AS BARRIO_ID,
     BA.NOMBRE as NOMBRE_BARRIO,
-    B.PROYECTO, 
+    B.PROYECTO AS NOMBRE_PROYECTO,
+    B.ID AS PROYECTO_ID,
+    EM.ID AS EMPRESA_ID, 
     C.ID, 
     CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, 
     CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
@@ -266,7 +270,8 @@ namespace Negocio
     END AS ESTADO, 
     PS.[BUZON DESTINO], 
     PS.[FECHA ULTIMO PASE],
-    ISNULL(LDG.NOMBRE, 'Sin Línea') AS LINEA_GESTION_NOMBRE
+    ISNULL(LDG.NOMBRE, 'Sin Línea') AS LINEA_GESTION_NOMBRE,
+    LDG.ID AS LINEA_GESTION_ID
 FROM CERTIFICADOS C 
 INNER JOIN TIPO_PAGO T ON C.TIPO_PAGO = T.ID 
 INNER JOIN AUTORIZANTES A ON C.CODIGO_AUTORIZANTE = A.CODIGO_AUTORIZANTE 
@@ -318,7 +323,18 @@ WHERE 1=1";
                             Obra = new Obra
                             {
                                 Descripcion = datos.Lector["DESCRIPCION"]?.ToString(),
-                                Proyecto = datos.Lector["PROYECTO"]?.ToString(),
+                                Proyecto = datos.Lector["PROYECTO_ID"] != DBNull.Value ?
+                                    new BdProyecto
+                                    {
+                                        Id = Convert.ToInt32(datos.Lector["PROYECTO_ID"]),
+                                        Proyecto = datos.Lector["NOMBRE_PROYECTO"]?.ToString()
+                                    } : null,
+                                LineaGestion = datos.Lector["LINEA_GESTION_ID"] != DBNull.Value ?
+                                    new LineaGestion
+                                    {
+                                        Id = Convert.ToInt32(datos.Lector["LINEA_GESTION_ID"]),
+                                        Nombre = datos.Lector["NOMBRE_LINEA_GESTION"]?.ToString()
+                                    } : null,
                                 Area = new Area
                                 {
                                     Id = datos.Lector["AREAS_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AREAS_ID"]) : 0,
@@ -330,7 +346,13 @@ WHERE 1=1";
                                 },
                                 Barrio = new Barrio
                                 {
+                                    Id = datos.Lector["BARRIO_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["BARRIO_ID"]) : 0,
                                     Nombre = datos.Lector["NOMBRE_BARRIO"]?.ToString()
+                                },
+                                Empresa = new Empresa
+                                {
+                                    Id = datos.Lector["EMPRESA_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["EMPRESA_ID"]) : 0,
+                                    Nombre = datos.Lector["EMPRESA"]?.ToString()
                                 }
                             }
                         }
@@ -361,7 +383,9 @@ WHERE 1=1";
                 // Replace the query string initialization with:
                 string query = @"SELECT 
     A.ID as ID_AUTORIZANTE,
+    BA.ID AS BARRIO_ID,
     BA.NOMBRE as NOMBRE_BARRIO,
+    EM.ID AS EMPRESA_ID,
     B.PROYECTO, 
     C.ID, 
     CONCAT(CO.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA, 
@@ -588,6 +612,7 @@ WHERE 1=1";
                             {
                                 Descripcion = datos.Lector["DESCRIPCION"]?.ToString(),
                                 Proyecto = datos.Lector["PROYECTO"]?.ToString(),
+                                LineaGestion = datos.Lector["LINEA_GESTION_NOMBRE"]?.ToString(),
                                 Area = new Area
                                 {
                                     Id = datos.Lector["AREAS_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AREAS_ID"]) : 0,
@@ -599,7 +624,13 @@ WHERE 1=1";
                                 },
                                 Barrio = new Barrio
                                 {
+                                    Id = datos.Lector["BARRIO_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["BARRIO_ID"]) : 0,
                                     Nombre = datos.Lector["NOMBRE_BARRIO"]?.ToString()
+                                },
+                                Empresa = new Empresa
+                                {
+                                    Id = datos.Lector["EMPRESA_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["EMPRESA_ID"]) : 0,
+                                    Nombre = datos.Lector["EMPRESA"]?.ToString()
                                 }
                             }
                         }

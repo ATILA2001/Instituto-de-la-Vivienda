@@ -14,6 +14,16 @@ namespace WebForms
     {
 
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
+
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            cblArea.AcceptChanges += OnAcceptChanges;
+            cblObra.AcceptChanges += OnAcceptChanges;
+            cblEmpresa.AcceptChanges += OnAcceptChanges;
+            cblConcepto.AcceptChanges += OnAcceptChanges;
+            cblEstado.AcceptChanges += OnAcceptChanges;
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -23,7 +33,12 @@ namespace WebForms
                 CalcularSubtotal();
             }
         }
-       
+
+        private void OnAcceptChanges(object sender, EventArgs e)
+        {
+            CargarListaAutorizantes();
+        }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
@@ -46,16 +61,16 @@ namespace WebForms
         {
             try
             {
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                var selectedAreas = cblArea.SelectedValues;
 
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                var selectedEmpresas = cblEmpresa.SelectedValues;
+                var selectedConceptos = cblConcepto.SelectedValues;
+                var selectedEstados = cblEstado.SelectedValues;
+                var selectedObras = cblObra.SelectedValues;
 
 
-                Session["listaAutorizanteAdmin"] = negocio.listar(selectedAreas, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
-                dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
+                Session["listaAutorizanteRedet"] = negocio.listar(selectedAreas, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
+                dgvAutorizante.DataSource = Session["listaAutorizanteRedet"];
                 dgvAutorizante.DataBind();
                 CalcularSubtotal();
             }
