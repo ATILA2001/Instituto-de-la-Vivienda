@@ -12,10 +12,10 @@ namespace Dominio
         public DateTime? Fecha { get; set; }
         public decimal Monto { get; set; }
         public Obra Obra { get; set; }
-        public string Proyecto { get; set; }
-        public string SubProyecto { get; set; }
-        public string Linea { get; set; }
-        public decimal AutorizadoNuevo { get; set; }
+        public string Proyecto { get; set; } = string.Empty;
+        public string SubProyecto { get; set; } = string.Empty;
+        public string Linea { get; set; } = string.Empty;
+        public decimal? AutorizadoNuevo { get; set; }
 
 
     }

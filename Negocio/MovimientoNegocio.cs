@@ -18,16 +18,19 @@ namespace Negocio
 
             try
             {
-                string query = "select M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA, M.MOVIMIENTO,M.FECHA," +
-                    "                    BD.AUTORIZADO_INICIAL + ISNULL(" +
-                    "    (SELECT SUM(M2.MOVIMIENTO)" +
-                    "       FROM MOVIMIENTOS_GESTION M2" +
-                    "      WHERE M2.ID_BASE = M.ID_BASE), 0" +
-                    ") AS AUTORIZADO_NUEVO" +
-                    "                     from MOVIMIENTOS_GESTION M" +
-                    "                    INNER JOIN OBRAS O ON M.ID_BASE = O.ID" +
-                    "                    inner join BD_PROYECTOS BD on O.ID = BD.ID_BASE" +
-                    "                    inner join BARRIOS BA on O.BARRIO = BA.ID                    inner join LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID WHERE 1 = 1 ";
+                string query = @"SELECT 
+                                M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+                                BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA,
+                                M.MOVIMIENTO,M.FECHA,
+                                BD.AUTORIZADO_INICIAL + ISNULL((SELECT SUM(M2.MOVIMIENTO)
+                                FROM MOVIMIENTOS_GESTION M2
+                                WHERE M2.ID_BASE = M.ID_BASE), 0) AS AUTORIZADO_NUEVO
+                                FROM MOVIMIENTOS_GESTION M 
+                                INNER JOIN OBRAS O ON M.ID_BASE = O.ID
+                                LEFT JOIN BD_PROYECTOS BD on O.ID = BD.ID_BASE
+                                INNER JOIN BARRIOS BA on O.BARRIO = BA.ID
+                                LEFT JOIN LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID
+                                WHERE 1 = 1 ";
 
                 if (obras != null && obras.Count > 0)
                 {
@@ -56,10 +59,12 @@ namespace Negocio
                     aux.Obra.Descripcion = datos.Lector["OBRA"] as string;
                     aux.Monto = (decimal)datos.Lector["MOVIMIENTO"];
                     aux.Fecha = (DateTime)datos.Lector["FECHA"];
-                    aux.AutorizadoNuevo = (decimal)datos.Lector["AUTORIZADO_NUEVO"];
-                    aux.Proyecto = datos.Lector["PROYECTO"] as string;
-                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] as string;
-                    aux.Linea = datos.Lector["LINEA"] as string;
+                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] != DBNull.Value
+                        ? (decimal?)datos.Lector["AUTORIZADO_NUEVO"]
+                        : null;
+                    aux.Proyecto = datos.Lector["PROYECTO"] != DBNull.Value ? datos.Lector["PROYECTO"] as string : null;
+                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] != DBNull.Value ? datos.Lector["SUBPROYECTO"] as string : null;
+                    aux.Linea = datos.Lector["LINEA"] != DBNull.Value ? datos.Lector["LINEA"] as string : null;
 
                     lista.Add(aux);
                 }
