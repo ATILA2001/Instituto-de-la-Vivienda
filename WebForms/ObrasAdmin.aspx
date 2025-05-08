@@ -68,22 +68,22 @@
 									</div>
 								</div>
 								<div id="areaContainer" class="col-6">
-    <div class="mb-3">
-        <label for="ddlArea" class="form-label">Area</label>
-        <asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvArea"
-            ControlToValidate="ddlArea"
-            ValidationGroup="AgregarObra"
-            runat="server"
-            ErrorMessage="Seleccione un área"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="ddlArea" class="form-label">Area</label>
+										<asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvArea"
+											ControlToValidate="ddlArea"
+											ValidationGroup="AgregarObra"
+											runat="server"
+											ErrorMessage="Seleccione un área"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="ddlContrata" class="form-label">Contrata</label>
@@ -232,10 +232,10 @@
 
 
 					<div class="form-group mb-2">
-    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
-    </asp:LinkButton>
-</div>
+						</asp:LinkButton>
+					</div>
 
 				</div>
 			</div>
@@ -249,7 +249,7 @@
 			AutoGenerateColumns="false" runat="server">
 
 			<Columns>
-				<asp:BoundField HeaderText="ID" DataField="Id" />
+				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 				<asp:BoundField HeaderText="Área" DataField="Area" />
 				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 				<asp:TemplateField HeaderText="Contrata">
@@ -259,8 +259,8 @@
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />
 				<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
-				<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
-				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
+				<asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestion.Nombre" />
+				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto.Proyecto" />
 
 				<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" DataFormatString="{0:C}" />

@@ -250,7 +250,7 @@
 				<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
 				<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
 				<asp:BoundField HeaderText="Barrio" DataField="Autorizante.Obra.Barrio.Nombre" />
-				<asp:BoundField HeaderText="Proyecto" DataField="Autorizante.Obra.Proyecto" />
+				<asp:BoundField HeaderText="Proyecto" DataField="Autorizante.Obra.Proyecto.Proyecto" />
 				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
 				<asp:TemplateField HeaderText="Expediente">
