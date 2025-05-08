@@ -149,7 +149,12 @@ namespace Negocio
                         Id = (int)datos.Lector["ID"],
                         Autorizante = new Autorizante
                         {
-                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string
+                            CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"] as string,
+                            Obra = new Obra
+                            {
+                                Descripcion = datos.Lector["DESCRIPCION"] as string,
+                                Id = (int)datos.Lector["OBRA_ID"]
+                            }
                         },
                         Expediente = datos.Lector["EXPEDIENTE"] as string,
                         Salto = datos.Lector["SALTO"] != DBNull.Value ? (DateTime)datos.Lector["SALTO"] : (DateTime?)null,
@@ -161,13 +166,8 @@ namespace Negocio
                         Obra = new Obra { Descripcion = datos.Lector["DESCRIPCION"] as string, Id = (int)datos.Lector["OBRA_ID"] },
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
-
                         Empresa = datos.Lector["EMPRESA"] as string,
-
-
-                        Area = datos.Lector["AREA"] as string
-
-                        ,
+                        Area = datos.Lector["AREA"] as string,
                         Etapa = new EstadoRedet
                         {
                             Id = (int)datos.Lector["ETAPA_ID"],
@@ -177,6 +177,7 @@ namespace Negocio
 
                     lista.Add(aux);
                 }
+
 
                 return lista;
             }
