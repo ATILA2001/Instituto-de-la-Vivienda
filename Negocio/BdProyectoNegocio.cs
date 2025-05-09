@@ -18,23 +18,26 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT DISTINCT proyecto FROM BD_PROYECTOS");
+                //datos.setearConsulta("SELECT DISTINCT proyecto FROM BD_PROYECTOS");
+                datos.setearConsulta("SELECT DISTINCT proyecto AS NOMBRE FROM BD_PROYECTOS WHERE proyecto IS NOT NULL AND LTRIM(RTRIM(proyecto)) <> '' ORDER BY proyecto");
 
                 datos.ejecutarLectura();
-                dt.Columns.Add("ID", typeof(int)); // Generar ID incremental
-                dt.Columns.Add("NOMBRE", typeof(string));
 
-                int id = 1; // Inicializamos el contador de ID
+                dt.Load(datos.Lector);
+                //dt.Columns.Add("ID", typeof(int)); // Generar ID incremental
+                //dt.Columns.Add("NOMBRE", typeof(string));
 
-                while (datos.Lector.Read())
-                {
-                    DataRow row = dt.NewRow();
-                    row["ID"] = id; // Generar ID único incremental
-                    row["NOMBRE"] = datos.Lector["proyecto"] as string;
+                //int id = 1; // Inicializamos el contador de ID
 
-                    dt.Rows.Add(row);
-                    id++; // Incrementar el ID para la siguiente fila
-                }
+                //while (datos.Lector.Read())
+                //{
+                //    DataRow row = dt.NewRow();
+                //    row["ID"] = id; // Generar ID único incremental
+                //    row["NOMBRE"] = datos.Lector["proyecto"] as string;
+
+                //    dt.Rows.Add(row);
+                //    id++; // Incrementar el ID para la siguiente fila
+                //}
 
                 return dt;
             }
@@ -150,17 +153,13 @@ namespace Negocio
                 }
                 if (proye != null && proye.Count > 0)
                 {
-                    try
+                    string proyeParamNombres = string.Join(",", proye.Select((nombre, i) => $"@proyeNombre{i}"));
+                    query += $" AND BD.PROYECTO IN ({proyeParamNombres})";
+
+                    for (int i = 0; i < proye.Count; i++)
                     {
-                        var proyeIds = proye.Select(int.Parse).ToList();
-                        if (proyeIds.Any())
-                        {
-                            string proyeParam = string.Join(",", proyeIds.Select((id, i) => $"@proye{i}"));
-                            query += $" AND BD.ID IN ({proyeParam})"; // *** CORRECCIÓN: Usa BD.ID ***
-                            setearParametrosInt(datos, proyeIds, "proye"); // Llama al helper de INT
-                        }
+                        datos.setearParametros($"@proyeNombre{i}", proye[i]); // Pasar los nombres como parámetros string.
                     }
-                    catch (FormatException ex) { Debug.WriteLine("Error al convertir IDs de proyecto a int: " + ex.Message); }
                 }
 
 

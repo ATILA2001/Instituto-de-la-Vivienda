@@ -333,7 +333,7 @@ namespace WebForms
         {
             cblProyecto.DataSource = ObtenerProyecto();
             cblProyecto.DataTextField = "Nombre";
-            cblProyecto.DataValueField = "Id";
+            cblProyecto.DataValueField = "Nombre";
             cblProyecto.DataBind();
 
             ddlObra.DataSource = ObtenerObras();
@@ -348,7 +348,7 @@ namespace WebForms
 
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";
-            ddlLineaGestion.DataValueField = "Id";
+            ddlLineaGestion.DataValueField = "Nombre";
             ddlLineaGestion.DataBind();
 
            

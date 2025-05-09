@@ -27,6 +27,7 @@ namespace WebForms
            cblTipo.AcceptChanges += OnAcceptChanges;
            cblFecha.AcceptChanges += OnAcceptChanges;
            cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
+            cblLinea.AcceptChanges += OnAcceptChanges;
         }
 
         private void OnAcceptChanges(object sender, EventArgs e)
@@ -250,11 +251,20 @@ namespace WebForms
                     listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && barrioIdsInt.Contains(c.Autorizante.Obra.Barrio.Id));
                 }
 
+                //if (selectedProyectos != null && selectedProyectos.Any())
+                //{
+                //    var proyectoIdsInt = selectedProyectos.Select(int.Parse).ToList();
+                //    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && proyectoIdsInt.Contains(c.Autorizante.Obra.Proyecto.Id));
+                //}
                 if (selectedProyectos != null && selectedProyectos.Any())
                 {
-                    var proyectoIdsInt = selectedProyectos.Select(int.Parse).ToList();
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && proyectoIdsInt.Contains(c.Autorizante.Obra.Proyecto.Id));
+                    listaFiltrada = listaFiltrada.Where(c =>
+                        c.Autorizante?.Obra?.Proyecto != null &&
+                        !string.IsNullOrEmpty(c.Autorizante.Obra.Proyecto.Proyecto) &&
+                        selectedProyectos.Contains(c.Autorizante.Obra.Proyecto.Proyecto)
+                    );
                 }
+
 
                 if (selectedEmpresas != null && selectedEmpresas.Any())
                 {
@@ -553,7 +563,7 @@ namespace WebForms
 
             cblProyecto.DataSource = ObtenerProyectos();
             cblProyecto.DataTextField = "Nombre";
-            cblProyecto.DataValueField = "Id";
+            cblProyecto.DataValueField = "Nombre";
             cblProyecto.DataBind();
 
             cblEmpresa.DataSource = ObtenerEmpresas();
