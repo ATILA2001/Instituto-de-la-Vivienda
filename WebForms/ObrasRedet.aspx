@@ -84,8 +84,8 @@
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />
 				<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
-				<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
-				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
+				<asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestion.Nombre" />
+				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto.Proyecto" />
 
 
 				<asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
