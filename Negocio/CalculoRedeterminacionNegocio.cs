@@ -287,7 +287,22 @@ namespace Negocio
                                 //    };
                                 Certificado certificadoRedet = new Certificado
                                 {
-                                    Autorizante = certificadoOriginal.Autorizante,
+                                    Autorizante= new Autorizante
+                                    {
+                                        CodigoAutorizante = redet.CodigoRedet,
+                                        Obra = certificadoOriginal.Autorizante.Obra,
+                                        Concepto = certificadoOriginal.Autorizante.Concepto,
+                                        Detalle = certificadoOriginal.Autorizante.Detalle,
+                                        Estado = certificadoOriginal.Autorizante.Estado,
+                                        Expediente = certificadoOriginal.Autorizante.Expediente,
+                                        MontoAutorizado = certificadoOriginal.Autorizante.MontoAutorizado,
+                                        AutorizacionGG = certificadoOriginal.Autorizante.AutorizacionGG,
+                                        Fecha = certificadoOriginal.Autorizante.Fecha,
+                                        Empresa = certificadoOriginal.Autorizante.Empresa,
+                                        FechaSade = certificadoOriginal.Autorizante.FechaSade,
+                                        BuzonSade = certificadoOriginal.Autorizante.BuzonSade
+                                    },
+                                  
                                     ExpedientePago = string.Empty,
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
