@@ -285,6 +285,7 @@ namespace Negocio
                                 //        FechaSade = redet.FechaSade,
                                 //        BuzonSade = redet.BuzonSade
                                 //    };
+
                                 Certificado certificadoRedet = new Certificado
                                 {
                                     Autorizante= new Autorizante
@@ -313,7 +314,19 @@ namespace Negocio
                                     FechaSade = redet.FechaSade,
                                     BuzonSade = redet.BuzonSade
                                 };
-
+                                // Determinar el estado basado en ExpedientePago y Sigaf
+                                if (string.IsNullOrEmpty(certificadoRedet.ExpedientePago))
+                                {
+                                    certificadoRedet.Estado = "NO INICIADO";
+                                }
+                                else if (!certificadoRedet.Sigaf.HasValue || certificadoRedet.Sigaf == 0)
+                                {
+                                    certificadoRedet.Estado = "EN TRAMITE";
+                                }
+                                else
+                                {
+                                    certificadoRedet.Estado = "DEVENGADO";
+                                }
                                 certificadosRedeterminacion.Add(certificadoRedet);
                             }
                         }
