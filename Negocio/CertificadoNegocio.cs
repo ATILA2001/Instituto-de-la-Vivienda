@@ -53,7 +53,7 @@ namespace Negocio
 CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, EM.NOMBRE AS EMPRESA, C.CODIGO_AUTORIZANTE, C.EXPEDIENTE_PAGO,
 T.ID AS TIPO_PAGO, T.NOMBRE AS TIPO_PAGO_NOMBRE, C.MONTO_TOTAL, C.MES_APROBACION, A.MONTO_AUTORIZADO, O.AREA AS AREAS_ID,
 AR.NOMBRE AS AREAS_NOMBRE, A.ESTADO AS ESTADO_ID, E.NOMBRE AS ESTADO_NOMBRE, FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100,
-'N2') + '%' AS PORCENTAJE, B.AUTORIZADO_NUEVO,
+'N2') AS PORCENTAJE, B.AUTORIZADO_NUEVO,
 CASE WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS
 D WHERE D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE
 D.EE_FINANCIERA = C.EXPEDIENTE_PAGO) * C.MONTO_TOTAL / (SELECT SUM(C2.MONTO_TOTAL) FROM CERTIFICADOS C2 WHERE
@@ -182,7 +182,7 @@ INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) :0,
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
@@ -268,7 +268,7 @@ INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID INNER JOIN BARRIOS AS BA ON O.BARRIO
     AR.NOMBRE AS AREAS_NOMBRE, 
     A.ESTADO AS ESTADO_ID, 
     E.NOMBRE AS ESTADO_NOMBRE, 
-    FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') + '%' AS PORCENTAJE, 
+    FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, 
     B.AUTORIZADO_NUEVO, 
     CASE 
         WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 
@@ -316,7 +316,7 @@ WHERE 1=1";
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) : 0,
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
@@ -422,7 +422,7 @@ WHERE 1=1";
     AR.NOMBRE AS AREAS_NOMBRE, 
     A.ESTADO AS ESTADO_ID, 
     E.NOMBRE AS ESTADO_NOMBRE, 
-    FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') + '%' AS PORCENTAJE, 
+    FORMAT((C.MONTO_TOTAL / A.MONTO_AUTORIZADO) * 100, 'N2') AS PORCENTAJE, 
     B.AUTORIZADO_NUEVO, 
     CASE 
         WHEN COUNT(C.ID) OVER (PARTITION BY C.EXPEDIENTE_PAGO) = 1 
@@ -601,7 +601,7 @@ WHERE 1=1";
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"]?.ToString(),
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) : 0,
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),

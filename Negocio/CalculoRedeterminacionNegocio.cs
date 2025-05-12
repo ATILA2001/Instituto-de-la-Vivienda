@@ -245,17 +245,17 @@ namespace Negocio
                                 }
 
                                 decimal montoCertificadoRedet = 0;
-                                string porcentajeCalculado = string.Empty;
+                                decimal porcentajeCalculado = 0;
                                 if (certificadoOriginal.MesAprobacion != redet.Salto) 
                                 { 
                                     // Calcular el monto del certificado de redeterminación según ese mismo porcentaje
                                     montoCertificadoRedet = montoCalculado * (porcentajeEjecucionCertificado / 100);
-                                    porcentajeCalculado = porcentajeEjecucionCertificado.ToString();
+                                    porcentajeCalculado = porcentajeEjecucionCertificado;
                                 }
                                 else
                                 { 
                                     montoCertificadoRedet = montoCalculado * (porcentajeEjecucionAcumulado / 100);
-                                    porcentajeCalculado = porcentajeEjecucionAcumulado.ToString();
+                                    porcentajeCalculado = porcentajeEjecucionAcumulado;
                                 }
 
 
@@ -309,7 +309,7 @@ namespace Negocio
                                     Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
                                     Estado = redet.Etapa.Nombre,
-                                    Porcentaje = porcentajeCalculado.ToString(),
+                                    Porcentaje = porcentajeCalculado,
                                     FechaSade = redet.FechaSade,
                                     BuzonSade = redet.BuzonSade
                                 };

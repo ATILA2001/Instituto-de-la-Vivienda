@@ -242,7 +242,7 @@
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Tipo" DataField="Tipo" />
 				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
-				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" />
+				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 				<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
 				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 				<asp:BoundField HeaderText="Área" DataField="Area" />
