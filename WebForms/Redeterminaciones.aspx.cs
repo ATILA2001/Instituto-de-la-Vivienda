@@ -247,9 +247,7 @@ namespace WebForms
                 redeterminacion.Tipo = txtTipo.Text.Trim();
                 redeterminacion.Etapa = new EstadoRedet { Id = int.Parse(ddlEtapa.SelectedValue) };
                 redeterminacion.Observaciones = txtObservacion.Text.Trim();
-                redeterminacion.Porcentaje = string.IsNullOrWhiteSpace(txtPorcentaje.Text)
-                    ? null
-                    : (int?)int.Parse(txtPorcentaje.Text);
+                redeterminacion.Porcentaje = decimal.Parse(txtPorcentaje.Text);
 
                 // Check if we're editing an existing redeterminacion or adding a new one
                 if (ViewState["EditingRedeterminacionId"] != null)

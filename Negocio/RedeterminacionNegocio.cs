@@ -49,7 +49,7 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("DELETE FROM REDETERMINACIONES WHERE CODIGO_REDET = @ID");
+                datos.setearConsulta("DELETE FROM REDETERMINACIONES WHERE ID = @ID");
                 datos.agregarParametro("@ID", codigo);
                 datos.ejecutarAccion();
                 return true;
@@ -355,7 +355,7 @@ namespace Negocio
                 datos.agregarParametro("@TIPO", redeterminacion.Tipo);
                 datos.agregarParametro("@ETAPA", redeterminacion.Etapa.Id);
                 datos.agregarParametro("@OBSERVACIONES", redeterminacion.Observaciones ?? (object)DBNull.Value);
-                datos.agregarParametro("@PORCENTAJE", redeterminacion.Porcentaje.HasValue ? (object)redeterminacion.Porcentaje.Value : DBNull.Value);
+                datos.agregarParametro("@PORCENTAJE", redeterminacion.Porcentaje.HasValue ? (decimal)redeterminacion.Porcentaje.Value : 0);
 
                 // Ejecutamos la acción
                 datos.ejecutarAccion();
