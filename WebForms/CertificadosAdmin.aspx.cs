@@ -533,24 +533,16 @@ namespace WebForms
         /// <param name="certificados">A list of Certificado objects used to extract distinct dates for the date filter.</param>
         private void BindDropDownList(List<Certificado> certificados)
         {
-            // --- Binding para DropDownLists del modal (si aplica) ---
-            // Asegúrate que estos controles existan en tu .aspx si los necesitas aquí.
-            // Si ddlTipo y ddlAutorizante son del modal, su binding está bien aquí.
-            // Si son filtros, considera si deben poblarse aquí o en otro lado.
             ddlTipo.DataSource = ObtenerTipos();
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-            // ddlTipo.Items.Insert(0, new ListItem("Seleccione Tipo", "")); // Opcional: Añadir item por defecto
 
             ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
-            // ddlAutorizante.Items.Insert(0, new ListItem("Seleccione Autorizante", "")); // Opcional: Añadir item por defecto
 
-
-            // --- Binding para Controles CheckBoxListSearch de Filtros ---
             cblTipo.DataSource = ObtenerTipos();
             cblTipo.DataTextField = "Nombre";
             cblTipo.DataValueField = "Id";
@@ -591,8 +583,6 @@ namespace WebForms
             cblLinea.DataValueField = "Id";
             cblLinea.DataBind();
 
-            // Ahora se extraen las fechas distintas de la lista de certificados proporcionada.
-
             // Obtener fechas distintas (solo la parte Date) y no nulas de los certificados cargados.
             var fechasDisponibles = certificados
                 .Where(c => c.MesAprobacion.HasValue) // Filtrar certificados que sí tienen fecha de aprobación.
@@ -613,7 +603,6 @@ namespace WebForms
             // Especificar los campos del tipo anónimo para Texto y Valor.
             cblFecha.DataTextField = "Texto";
             cblFecha.DataValueField = "Valor";
-            // Realizar el DataBinding.
             cblFecha.DataBind();
 
         }
