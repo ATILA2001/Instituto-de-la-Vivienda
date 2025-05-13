@@ -162,8 +162,28 @@ namespace Negocio
                 listaCert = certificadoNegocio.listarFiltroAdmin();
                 listaRedet = redeterminacionNegocio.listar();
 
-                // Primero agregamos los certificados originales a la lista resultado
-                listaCertificadosResultado.AddRange(listaCert);
+                // Primero agregamos los certificados originales a la lista resultado, pero sin SIGAF aún
+                // (lo recalcularemos más tarde para incluir las reliquidaciones)
+                foreach (var cert in listaCert)
+                {
+                    // Crear copia del certificado, pero sin el valor SIGAF
+                    var certificadoCopia = new Certificado
+                    {
+                        Id = cert.Id,
+                        Porcentaje = cert.Porcentaje,
+                        Autorizante = cert.Autorizante,
+                        ExpedientePago = cert.ExpedientePago,
+                        Tipo = cert.Tipo,
+                        MontoTotal = cert.MontoTotal,
+                        // No copiamos el Sigaf porque lo recalcularemos
+                        MesAprobacion = cert.MesAprobacion,
+                        FechaSade = cert.FechaSade,
+                        BuzonSade = cert.BuzonSade,
+                        Empresa = cert.Empresa,
+                        Estado = cert.Estado
+                    };
+                    listaCertificadosResultado.Add(certificadoCopia);
+                }
 
                 // Agrupamos los certificados por autorizante para facilitar el procesamiento
                 var certificadosPorAutorizante = listaCert
@@ -238,8 +258,6 @@ namespace Negocio
                                 // Calcular el porcentaje de ejecución del certificado original respecto al monto autorizado
                                 decimal porcentajeEjecucionCertificado = 0;
 
-
-
                                 if (autorizante.MontoAutorizado > 0)
                                 {
                                     porcentajeEjecucionCertificado = (certificadoOriginal.MontoTotal / autorizante.MontoAutorizado) * 100;
@@ -247,22 +265,21 @@ namespace Negocio
 
                                 decimal montoCertificadoRedet = 0;
                                 decimal porcentajeCalculado = 0;
-                                if (certificadoOriginal.MesAprobacion != redet.Salto) 
-                                { 
+                                if (certificadoOriginal.MesAprobacion != redet.Salto)
+                                {
                                     // Calcular el monto del certificado de redeterminación según ese mismo porcentaje
                                     montoCertificadoRedet = montoCalculado * (porcentajeEjecucionCertificado / 100);
                                     porcentajeCalculado = porcentajeEjecucionCertificado;
                                 }
                                 else
-                                { 
+                                {
                                     montoCertificadoRedet = montoCalculado * (porcentajeEjecucionAcumulado / 100);
                                     porcentajeCalculado = porcentajeEjecucionAcumulado;
                                 }
 
-
                                 Certificado certificadoRedet = new Certificado
                                 {
-                                    Autorizante= new Autorizante
+                                    Autorizante = new Autorizante
                                     {
                                         CodigoAutorizante = redet.CodigoRedet,
                                         Obra = certificadoOriginal.Autorizante.Obra,
@@ -281,7 +298,6 @@ namespace Negocio
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
                                     Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
-                                    Estado = redet.Etapa.Nombre,
                                     Porcentaje = porcentajeCalculado,
                                     FechaSade = redet.FechaSade,
                                     BuzonSade = redet.BuzonSade
@@ -297,10 +313,15 @@ namespace Negocio
                                             certificadoRedet.Autorizante.CodigoAutorizante,
                                             certificadoRedet.MesAprobacion.Value);
 
-                                        // Si existe, asignar el expediente y SIGAF
+                                        // Si existe, asignar el expediente
                                         if (expedienteReliq != null)
                                         {
                                             certificadoRedet.ExpedientePago = expedienteReliq.Expediente;
+
+                                            // Obtener información SADE
+                                            var sadeInfo = SADEHelper.ObtenerInfoSADE(certificadoRedet.ExpedientePago);
+                                            certificadoRedet.FechaSade = sadeInfo.FechaUltimoPase ?? redet.FechaSade;
+                                            certificadoRedet.BuzonSade = sadeInfo.BuzonDestino ?? redet.BuzonSade;
                                         }
                                     }
                                     catch (Exception ex)
@@ -310,19 +331,9 @@ namespace Negocio
                                     }
                                 }
 
-                                // Determinar el estado basado en ExpedientePago y Sigaf
-                                if (string.IsNullOrEmpty(certificadoRedet.ExpedientePago))
-                                {
-                                    certificadoRedet.Estado = "NO INICIADO";
-                                }
-                                else if (!certificadoRedet.Sigaf.HasValue || certificadoRedet.Sigaf == 0)
-                                {
-                                    certificadoRedet.Estado = "EN TRAMITE";
-                                }
-                                else
-                                {
-                                    certificadoRedet.Estado = "DEVENGADO";
-                                }
+                                // Determinar el estado del expediente utilizando el helper
+                                certificadoRedet.Estado = SIGAFHelper.DeterminarEstadoExpediente(certificadoRedet.ExpedientePago);
+
                                 certificadosRedeterminacion.Add(certificadoRedet);
                             }
                         }
@@ -332,13 +343,46 @@ namespace Negocio
                     }
                 }
 
+                // Agrupar certificados por expediente para calcular SIGAF
+                var certificadosPorExpediente = listaCertificadosResultado
+                    .Where(c => !string.IsNullOrEmpty(c.ExpedientePago))
+                    .GroupBy(c => c.ExpedientePago)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // Calcular el SIGAF para todos los certificados
+                foreach (var certificado in listaCertificadosResultado)
+                {
+                    // Si el certificado tiene un expediente, calcular su SIGAF
+                    if (!string.IsNullOrEmpty(certificado.ExpedientePago) &&
+                        certificadosPorExpediente.TryGetValue(certificado.ExpedientePago, out var certificadosMismoExpediente))
+                    {
+                        // Crear lista de montos de todos los certificados con el mismo expediente
+                        var montos = certificadosMismoExpediente.Select(c => c.MontoTotal).ToList();
+
+                        // Calcular SIGAF utilizando el helper
+                        certificado.Sigaf = SIGAFHelper.CalcularSIGAF(
+                            certificado.ExpedientePago,
+                            certificado.MontoTotal,
+                            montos);
+                    }
+
+                    // Reevaluar el estado basado en el SIGAF calculado
+                    if (string.IsNullOrEmpty(certificado.ExpedientePago))
+                    {
+                        certificado.Estado = "NO INICIADO";
+                    }
+                    else if (certificado.Sigaf.HasValue && certificado.Sigaf > 0)
+                    {
+                        certificado.Estado = "DEVENGADO";
+                    }
+                    else
+                    {
+                        certificado.Estado = "EN TRAMITE";
+                    }
+                }
+
                 return listaCertificadosResultado;
             }
-
-
-
         }
-
     }
-
 }

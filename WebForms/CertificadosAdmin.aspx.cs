@@ -713,14 +713,12 @@ namespace WebForms
 
                     // Actualizar la lista en Session para que los cambios persistan
                     Session["listaCertificado"] = certificados;
+                    CargarListaCertificados();
 
                     // Mensaje de éxito
                     lblMensaje.Text = "Expediente actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
 
-                    // Rebind the GridView to reflect changes
-                    dgvCertificado.DataSource = certificados;
-                    dgvCertificado.DataBind();
                     CalcularSubtotal();
                 }
                 else
