@@ -628,33 +628,113 @@ namespace WebForms
         }
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            // Identifica el TextBox modificado
-            TextBox txtExpediente = (TextBox)sender;
-            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
-
-            // Obtiene la clave del registro desde DataKeyNames
-            int id = int.Parse(dgvCertificado.DataKeys[row.RowIndex].Value.ToString());
-
-            // Nuevo valor del expediente
-            string nuevoExpediente = txtExpediente.Text;
-
-            // Actualiza en la base de datos
             try
             {
-                // Llama al método del negocio para actualizar el expediente
-                CertificadoNegocio negocio = new CertificadoNegocio();
-                negocio.ActualizarExpediente(id, nuevoExpediente);
+                // Identifica el TextBox modificado
+                TextBox txtExpediente = (TextBox)sender;
+                GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-                // Mensaje de éxito o retroalimentación opcional
-                lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaCertificados();
-                CalcularSubtotal();
+                // Obtiene el índice de la fila en la GridView - esto es crucial
+                int rowIndex = row.RowIndex;
 
+                // Obtiene la clave del registro desde DataKeyNames
+                int id = int.Parse(dgvCertificado.DataKeys[rowIndex].Value.ToString());
+
+                // Obtenemos directamente el certificado de la lista actual por índice de fila
+                // en lugar de buscar por ID
+                List<Certificado> certificados = (List<Certificado>)Session["listaCertificado"];
+
+                // Esto garantiza que obtenemos el certificado exacto que se muestra en la GridView
+                Certificado certificado = certificados[rowIndex];
+
+                // Nuevo valor del expediente
+                string nuevoExpediente = txtExpediente.Text;
+
+                if (certificado != null)
+                {
+                    // Verificamos si es una reliquidación
+                    bool esReliquidacion = certificado.Tipo != null &&
+                        (certificado.Tipo.Id == 2 ||
+                         certificado.Tipo.Nombre.ToUpper().Contains("RELIQUIDACION") ||
+                         certificado.Tipo.Nombre.ToUpper().Contains("REDETERMINACION"));
+
+                    // Actualiza el expediente en el certificado en memoria
+                    certificado.ExpedientePago = nuevoExpediente;
+
+                    // Si tiene ID válido en la base de datos, actualizar también allí
+                    if (certificado.Id > 0)
+                    {
+                        CertificadoNegocio negocio = new CertificadoNegocio();
+                        negocio.ActualizarExpediente(certificado.Id, nuevoExpediente);
+                    }
+
+                    // Actualizar el estado según la lógica requerida
+                    if (string.IsNullOrEmpty(nuevoExpediente))
+                    {
+                        certificado.Estado = "NO INICIADO";
+                    }
+                    else if (!certificado.Sigaf.HasValue || certificado.Sigaf == 0)
+                    {
+                        certificado.Estado = "EN TRAMITE";
+                    }
+                    else
+                    {
+                        certificado.Estado = "DEVENGADO";
+                    }
+
+                    // Si es un certificado de reliquidación, guardar en EXPEDIENTES_RELIQ
+                    if (esReliquidacion)
+                    {
+                        if (certificado.MesAprobacion.HasValue &&
+                            certificado.Autorizante != null &&
+                            !string.IsNullOrEmpty(certificado.Autorizante.CodigoAutorizante))
+                        {
+                            try
+                            {
+                                string codigoRedet = certificado.Autorizante.CodigoAutorizante;
+
+                                ExpedienteReliqNegocio expedienteReliqNegocio = new ExpedienteReliqNegocio();
+                                expedienteReliqNegocio.GuardarOActualizar(
+                                    codigoRedet,
+                                    certificado.MesAprobacion.Value,
+                                    nuevoExpediente);
+
+                                // Log para depuración
+                                System.Diagnostics.Debug.WriteLine($"Guardando expediente {nuevoExpediente} para redeterminación {codigoRedet}, mes {certificado.MesAprobacion.Value:MMM yyyy}");
+                            }
+                            catch (Exception exReliq)
+                            {
+                                // Mostrar error completo para depuración
+                                System.Diagnostics.Debug.WriteLine($"Error al actualizar expediente reliquidación: {exReliq.Message}");
+                                System.Diagnostics.Debug.WriteLine($"Stack Trace: {exReliq.StackTrace}");
+                            }
+                        }
+                    }
+
+                    // Actualizar la lista en Session para que los cambios persistan
+                    Session["listaCertificado"] = certificados;
+
+                    // Mensaje de éxito
+                    lblMensaje.Text = "Expediente actualizado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+
+                    // Rebind the GridView to reflect changes
+                    dgvCertificado.DataSource = certificados;
+                    dgvCertificado.DataBind();
+                    CalcularSubtotal();
+                }
+                else
+                {
+                    lblMensaje.Text = "No se pudo identificar el certificado. Por favor, inténtelo de nuevo.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
             }
             catch (Exception ex)
             {
-                // Manejo de errores
+                // Manejo de errores con más detalles
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+                System.Diagnostics.Debug.WriteLine($"Error completo: {ex}");
             }
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)

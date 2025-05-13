@@ -53,6 +53,7 @@
     <Compile Include="Enums\EstadoExpediente.cs" />
     <Compile Include="EstadoAutorizante.cs" />
     <Compile Include="EstadoRedet.cs" />
+    <Compile Include="ExpedienteReliq.cs" />
     <Compile Include="Legitimo.cs" />
     <Compile Include="LineaGestion.cs" />
     <Compile Include="LineaGestionFF.cs" />

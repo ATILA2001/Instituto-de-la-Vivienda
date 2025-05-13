@@ -56,6 +56,7 @@
     <Compile Include="EmpresaNegocio.cs" />
     <Compile Include="EstadoAutorizanteNegocio.cs" />
     <Compile Include="EstadoRedetNegocio.cs" />
+    <Compile Include="ExpedienteReliqNegocio.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />

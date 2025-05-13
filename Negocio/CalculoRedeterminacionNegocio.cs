@@ -152,6 +152,7 @@ namespace Negocio
                 List<Certificado> listaCert = new List<Certificado>();
                 List<Redeterminacion> listaRedet = new List<Redeterminacion>();
                 List<Certificado> listaCertificadosResultado = new List<Certificado>();
+                ExpedienteReliqNegocio expedienteReliqNegocio = new ExpedienteReliqNegocio();
 
                 AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
                 CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
@@ -259,33 +260,6 @@ namespace Negocio
                                 }
 
 
-
-                                // Crear el certificado de redeterminación
-                                //Certificado certificadoRedet = new Certificado
-                                //    {
-                                //        Autorizante = new Autorizante
-                                //        {
-                                //            CodigoAutorizante = redet.CodigoRedet,
-                                //            Obra = redet.Autorizante?.Obra != null ? new Obra
-                                //            {
-                                //                Descripcion = redet.Autorizante.Obra.Descripcion,
-                                //                Id = redet.Autorizante.Obra.Id,
-                                //                Area = redet.Autorizante.Obra.Area,
-                                //                Contrata = redet.Autorizante.Obra.Contrata
-                                //            } : null,
-                                //            MontoAutorizado = montoCalculado
-                                //        },
-                                //        ExpedientePago = string.Empty,
-                                //        MontoTotal = montoCertificadoRedet,
-                                //        MesAprobacion = certificadoOriginal.MesAprobacion,
-                                //        Tipo = new TipoPago { Id = 2, Nombre = "REDETERMINACION" },
-                                //        Empresa = redet.Empresa,
-                                //        Estado = "REDETERMINADO",
-                                //        Porcentaje = porcentajeCalculado.ToString(),
-                                //        FechaSade = redet.FechaSade,
-                                //        BuzonSade = redet.BuzonSade
-                                //    };
-
                                 Certificado certificadoRedet = new Certificado
                                 {
                                     Autorizante= new Autorizante
@@ -303,8 +277,6 @@ namespace Negocio
                                         FechaSade = certificadoOriginal.Autorizante.FechaSade,
                                         BuzonSade = certificadoOriginal.Autorizante.BuzonSade
                                     },
-                                  
-                                    ExpedientePago = string.Empty,
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
                                     Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
@@ -314,6 +286,30 @@ namespace Negocio
                                     FechaSade = redet.FechaSade,
                                     BuzonSade = redet.BuzonSade
                                 };
+
+                                // Buscar si existe un expediente en la tabla EXPEDIENTES_RELIQ
+                                if (certificadoRedet.MesAprobacion.HasValue)
+                                {
+                                    try
+                                    {
+                                        // Verificar si ya hay un expediente asignado en la tabla EXPEDIENTES_RELIQ
+                                        var expedienteReliq = expedienteReliqNegocio.ObtenerPorCodigoYMes(
+                                            certificadoRedet.Autorizante.CodigoAutorizante,
+                                            certificadoRedet.MesAprobacion.Value);
+
+                                        // Si existe, asignar el expediente y SIGAF
+                                        if (expedienteReliq != null)
+                                        {
+                                            certificadoRedet.ExpedientePago = expedienteReliq.Expediente;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // Capturar errores pero continuar el proceso
+                                        System.Diagnostics.Debug.WriteLine($"Error al buscar expediente reliquidación: {ex.Message}");
+                                    }
+                                }
+
                                 // Determinar el estado basado en ExpedientePago y Sigaf
                                 if (string.IsNullOrEmpty(certificadoRedet.ExpedientePago))
                                 {
