@@ -7,7 +7,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
 
-		<!-- Modal -->
+	<!-- Modal -->
 	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
@@ -21,22 +21,22 @@
 						<div class="container">
 							<div class="row">
 								<div id="obraContainer" class="col-12">
-    <div class="mb-3">
-        <label for="ddlObra" class="form-label">Obra</label>
-        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvObra"
-            ControlToValidate="ddlObra"
-            ValidationGroup="AgregarAutorizante"
-            runat="server"
-            ErrorMessage="Seleccione una obra"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="ddlObra" class="form-label">Obra</label>
+										<asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvObra"
+											ControlToValidate="ddlObra"
+											ValidationGroup="AgregarAutorizante"
+											runat="server"
+											ErrorMessage="Seleccione una obra"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
 
 
 								<div class="col-6">
@@ -44,9 +44,9 @@
 									<div class="mb-3">
 										<label for="ddlConcepto" class="form-label">Concepto</label>
 										<asp:DropDownList ID="ddlConcepto" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione un concepto" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvConcepto"
+											<asp:ListItem Value="" Text="Seleccione un concepto" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvConcepto"
 											ControlToValidate="ddlConcepto"
 											ValidationGroup="AgregarAutorizante"
 											runat="server"
@@ -54,7 +54,7 @@
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true"
-                                            InitialValue="" />
+											InitialValue="" />
 									</div>
 								</div>
 
@@ -63,7 +63,7 @@
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
 										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                        <asp:RequiredFieldValidator ID="rfvExpediente"
+										<asp:RequiredFieldValidator ID="rfvExpediente"
 											ControlToValidate="txtExpediente"
 											ValidationGroup="AgregarAutorizante"
 											runat="server"
@@ -78,7 +78,7 @@
 									<div class="mb-3">
 										<label for="txtDetalle" class="form-label">Detalle</label>
 										<asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" />
-                                        <asp:RequiredFieldValidator ID="rfvDetalle"
+										<asp:RequiredFieldValidator ID="rfvDetalle"
 											ControlToValidate="txtDetalle"
 											ValidationGroup="AgregarAutorizante"
 											runat="server"
@@ -118,7 +118,7 @@
 
 									<div class="mb-3">
 										<label for="txtFecha" class="form-label">Mes Base</label>
-										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />                                   
+										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 									</div>
 
 
@@ -128,7 +128,7 @@
 									<div class="mb-3">
 										<label for="txtMes" class="form-label">Mes Aprobacion</label>
 										<asp:TextBox ID="txtMes" CssClass="form-control" runat="server" TextMode="Date" />
-                                        <asp:RequiredFieldValidator ID="rfvMes"
+										<asp:RequiredFieldValidator ID="rfvMes"
 											ControlToValidate="txtMes"
 											ValidationGroup="AgregarAutorizante"
 											runat="server"
@@ -141,9 +141,9 @@
 									<div class="mb-3">
 										<label for="ddlEstado" class="form-label">Estado</label>
 										<asp:DropDownList ID="ddlEstado" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvEstado"
+											<asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvEstado"
 											ControlToValidate="ddlEstado"
 											ValidationGroup="AgregarAutorizante"
 											runat="server"
@@ -151,7 +151,7 @@
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true"
-                                            InitialValue="" />
+											InitialValue="" />
 									</div>
 
 								</div>
@@ -247,11 +247,11 @@
 						</asp:LinkButton>
 					</div>
 
-<div class="form-group mb-2">
-    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+					<div class="form-group mb-2">
+						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
-    </asp:LinkButton>
-</div>
+						</asp:LinkButton>
+					</div>
 
 				</div>
 			</div>
@@ -340,5 +340,5 @@
 			document.getElementById('<%= ddlConcepto.ClientID %>').selectedIndex = 0;
 			document.getElementById('<%= ddlEstado.ClientID %>').selectedIndex = 0;
 		}
-</script>
+	</script>
 </asp:Content>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dominio;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,80 @@ using System.Threading.Tasks;
 
 namespace Negocio
 {
+    /// <summary>
+    /// Clase estática para almacenar y compartir datos entre diferentes servicios
+    /// </summary>
+    public static class DatosCompartidosHelper
+    {
+        // Lista de certificados (incluyendo redeterminaciones) en memoria
+        private static List<Certificado> _certificadosEnMemoria = new List<Certificado>();
+
+        // Lista de legítimos abonos en memoria
+        private static List<Legitimo> _legitimosEnMemoria = new List<Legitimo>();
+
+        // Indica si los certificados ya fueron cargados
+        private static bool _certificadosCargados = false;
+
+        // Indica si los legítimos ya fueron cargados
+        private static bool _legitimosCargados = false;
+
+        /// <summary>
+        /// Establece la lista de certificados compartidos
+        /// </summary>
+        public static void SetCertificados(List<Certificado> certificados)
+        {
+            _certificadosEnMemoria = certificados ?? new List<Certificado>();
+            _certificadosCargados = true;
+        }
+
+        /// <summary>
+        /// Establece la lista de legítimos abonos compartidos
+        /// </summary>
+        public static void SetLegitimos(List<Legitimo> legitimos)
+        {
+            _legitimosEnMemoria = legitimos ?? new List<Legitimo>();
+            _legitimosCargados = true;
+        }
+
+        /// <summary>
+        /// Obtiene los certificados compartidos
+        /// </summary>
+        public static List<Certificado> GetCertificados()
+        {
+            return _certificadosEnMemoria;
+        }
+
+        /// <summary>
+        /// Obtiene los legítimos abonos compartidos
+        /// </summary>
+        public static List<Legitimo> GetLegitimos()
+        {
+            return _legitimosEnMemoria;
+        }
+
+        /// <summary>
+        /// Indica si los certificados están cargados
+        /// </summary>
+        public static bool CertificadosCargados => _certificadosCargados;
+
+        /// <summary>
+        /// Indica si los legítimos están cargados
+        /// </summary>
+        public static bool LegitimosCargados => _legitimosCargados;
+
+        /// <summary>
+        /// Limpia todos los datos compartidos
+        /// </summary>
+        public static void LimpiarDatos()
+        {
+            _certificadosEnMemoria.Clear();
+            _legitimosEnMemoria.Clear();
+            _certificadosCargados = false;
+            _legitimosCargados = false;
+        }
+    }
+
+
     /// <summary>
     /// Clase helper para cálculos relacionados con SIGAF
     /// </summary>
@@ -18,6 +93,71 @@ namespace Negocio
         /// <param name="montoActual">Monto del certificado actual</param>
         /// <param name="todosLosMontos">Lista de todos los montos asociados al mismo expediente</param>
         /// <returns>Valor SIGAF calculado o null si no es posible calcularlo</returns>
+        /// 
+        /// <summary>
+        /// Calcula el SIGAF considerando certificados y legítimos abonos de memoria
+        /// </summary>
+        public static decimal? CalcularSIGAFCompartido(string expediente, decimal montoActual, bool esCertificado)
+        {
+            if (string.IsNullOrEmpty(expediente))
+                return null;
+
+            try
+            {
+                // Obtener total de devengados para el expediente
+                decimal totalImporteDevengados = ObtenerTotalImporteDevengados(expediente);
+
+                if (totalImporteDevengados <= 0)
+                    return null;
+
+                // Listas para almacenar todos los montos
+                List<decimal> montosTotal = new List<decimal>();
+
+                // Agregar montos de los certificados si están disponibles
+                if (DatosCompartidosHelper.CertificadosCargados)
+                {
+                    var certificadosMismoExpediente = DatosCompartidosHelper.GetCertificados()
+                        .Where(c => c.ExpedientePago == expediente)
+                        .ToList();
+
+                    montosTotal.AddRange(certificadosMismoExpediente.Select(c => c.MontoTotal));
+                }
+
+                // Agregar montos de los legítimos si están disponibles
+                if (DatosCompartidosHelper.LegitimosCargados)
+                {
+                    var legitimosMismoExpediente = DatosCompartidosHelper.GetLegitimos()
+                        .Where(l => l.Expediente == expediente && l.Certificado.HasValue)
+                        .ToList();
+
+                    montosTotal.AddRange(legitimosMismoExpediente.Select(l => l.Certificado.Value));
+                }
+
+                // Si no hay montos en memoria, consultar la base de datos
+                if (montosTotal.Count == 0)
+                {
+                    return CalcularSIGAF(expediente, montoActual, new List<decimal> { montoActual });
+                }
+
+                // Si solo hay un monto (el actual), asignar todo el importe
+                if (montosTotal.Count == 1)
+                    return totalImporteDevengados;
+
+                // Calcular la suma de todos los montos
+                decimal sumaTotalMontos = montosTotal.Sum();
+
+                // Calcular la proporción
+                if (sumaTotalMontos > 0)
+                    return totalImporteDevengados * montoActual / sumaTotalMontos;
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al calcular SIGAF compartido: {ex.Message}");
+                return null;
+            }
+        }
         public static decimal? CalcularSIGAF(string expediente, decimal montoActual, List<decimal> todosLosMontos)
         {
             if (string.IsNullOrEmpty(expediente))
@@ -57,7 +197,7 @@ namespace Negocio
         /// </summary>
         /// <param name="expediente">Número de expediente</param>
         /// <returns>Total de importes devengados</returns>
-        private static decimal ObtenerTotalImporteDevengados(string expediente)
+        public static decimal ObtenerTotalImporteDevengados(string expediente)
         {
             AccesoDatos datos = new AccesoDatos();
             try
@@ -108,6 +248,7 @@ namespace Negocio
             }
         }
     }
+
 
     /// <summary>
     /// Clase helper para información relacionada con SADE (Sistema de Administración de Documentos Electrónicos)

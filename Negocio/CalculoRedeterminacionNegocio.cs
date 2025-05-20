@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 namespace Negocio
 {
     using Dominio;
+    using Dominio.Enums;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -125,7 +127,7 @@ namespace Negocio
                             Obra = autorizanteOriginal.Obra,
                             CodigoAutorizante = redet.CodigoRedet,
                             Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Assign a default concept
-                            Detalle = redet.Observaciones,
+                            Detalle = redet.Tipo + " - " + redet.Etapa,
                             Expediente = redet.Expediente,
                             Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
                             MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
@@ -157,6 +159,7 @@ namespace Negocio
                 AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
                 CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
                 RedeterminacionNegocio redeterminacionNegocio = new RedeterminacionNegocio();
+                LegitimoNegocio legitimoNegocio = new LegitimoNegocio();
 
                 listaAut = autorizanteNegocio.listar();
                 listaCert = certificadoNegocio.listarFiltroAdmin();
@@ -343,27 +346,96 @@ namespace Negocio
                     }
                 }
 
-                // Agrupar certificados por expediente para calcular SIGAF
+
+                // Obtener los legítimos abonos directamente de la base de datos
+                Dictionary<string, List<decimal>> legitimosPorExpediente = new Dictionary<string, List<decimal>>();
+                try
+                {
+                    // Consultamos directamente la tabla LEGITIMOS_ABONOS
+                    var datosLegitimos = new AccesoDatos();
+                    datosLegitimos.setearConsulta(@"
+            SELECT EXPEDIENTE, CERTIFICADO 
+            FROM LEGITIMOS_ABONOS 
+            WHERE EXPEDIENTE IS NOT NULL AND EXPEDIENTE <> '' AND CERTIFICADO IS NOT NULL");
+
+                    datosLegitimos.ejecutarLectura();
+
+                    while (datosLegitimos.Lector.Read())
+                    {
+                        string expediente = datosLegitimos.Lector["EXPEDIENTE"]?.ToString();
+                        if (!string.IsNullOrEmpty(expediente) && datosLegitimos.Lector["CERTIFICADO"] != DBNull.Value)
+                        {
+                            decimal certificado = Convert.ToDecimal(datosLegitimos.Lector["CERTIFICADO"]);
+
+                            if (!legitimosPorExpediente.ContainsKey(expediente))
+                                legitimosPorExpediente[expediente] = new List<decimal>();
+
+                            legitimosPorExpediente[expediente].Add(certificado);
+                        }
+                    }
+
+                    datosLegitimos.cerrarConexion();
+                }
+                catch (Exception ex)
+                {
+                    // Si hay error al obtener los legítimos, continuamos solo con los certificados
+                    System.Diagnostics.Debug.WriteLine($"Error al obtener legítimos abonos: {ex.Message}");
+                }
+
+                // Compartir los certificados resultantes para uso en otros servicios
+                DatosCompartidosHelper.SetCertificados(listaCertificadosResultado);
+
+                // Crear diccionario de certificados por expediente para el cálculo final
                 var certificadosPorExpediente = listaCertificadosResultado
                     .Where(c => !string.IsNullOrEmpty(c.ExpedientePago))
                     .GroupBy(c => c.ExpedientePago)
                     .ToDictionary(g => g.Key, g => g.ToList());
 
-                // Calcular el SIGAF para todos los certificados
+                // Combinar los montos de certificados y legítimos
+                Dictionary<string, List<decimal>> montosCombinados = new Dictionary<string, List<decimal>>();
+
+                // Primero agregamos los montos de certificados
+                foreach (var kvp in certificadosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    var certificados = kvp.Value;
+
+                    montosCombinados[expediente] = certificados.Select(c => c.MontoTotal).ToList();
+                }
+
+                // Luego agregamos los montos de legítimos
+                foreach (var kvp in legitimosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    List<decimal> montos = kvp.Value;
+
+                    if (!montosCombinados.ContainsKey(expediente))
+                        montosCombinados[expediente] = new List<decimal>();
+
+                    montosCombinados[expediente].AddRange(montos);
+                }
+
+                // Calcular el SIGAF para todos los certificados usando los montos combinados
                 foreach (var certificado in listaCertificadosResultado)
                 {
                     // Si el certificado tiene un expediente, calcular su SIGAF
                     if (!string.IsNullOrEmpty(certificado.ExpedientePago) &&
-                        certificadosPorExpediente.TryGetValue(certificado.ExpedientePago, out var certificadosMismoExpediente))
+                        montosCombinados.TryGetValue(certificado.ExpedientePago, out var montosExpediente))
                     {
-                        // Crear lista de montos de todos los certificados con el mismo expediente
-                        var montos = certificadosMismoExpediente.Select(c => c.MontoTotal).ToList();
+                        // Obtener total de devengados
+                        decimal totalDevengado = SIGAFHelper.ObtenerTotalImporteDevengados(certificado.ExpedientePago);
 
-                        // Calcular SIGAF utilizando el helper
-                        certificado.Sigaf = SIGAFHelper.CalcularSIGAF(
-                            certificado.ExpedientePago,
-                            certificado.MontoTotal,
-                            montos);
+                        if (totalDevengado > 0)
+                        {
+                            // Calcular la suma total de montos para este expediente
+                            decimal sumaTotalMontos = montosExpediente.Sum();
+
+                            // Calcular la proporción correspondiente al certificado actual
+                            if (sumaTotalMontos > 0)
+                            {
+                                certificado.Sigaf = totalDevengado * certificado.MontoTotal / sumaTotalMontos;
+                            }
+                        }
                     }
 
                     // Reevaluar el estado basado en el SIGAF calculado
