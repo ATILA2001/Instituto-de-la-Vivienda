@@ -296,11 +296,11 @@
 				<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" />
 				<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
 
-				<asp:TemplateField HeaderText="Autorización GG">
+				<%--<asp:TemplateField HeaderText="Autorización GG">
 					<ItemTemplate>
 						<%# Eval("AutorizacionGG") != null && (bool)Eval("AutorizacionGG") ? "AUTORIZADO" : "A AUTORIZAR" %>
 					</ItemTemplate>
-				</asp:TemplateField>
+				</asp:TemplateField>--%>
 				<asp:TemplateField HeaderText="Acciones">
 					<ItemTemplate>
 						<div class="d-flex justify-content-center gap-2">
