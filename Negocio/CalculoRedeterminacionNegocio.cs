@@ -301,9 +301,7 @@ namespace Negocio
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
                                     Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
-                                    Porcentaje = porcentajeCalculado,
-                                    FechaSade = redet.FechaSade,
-                                    BuzonSade = redet.BuzonSade
+                                    Porcentaje = porcentajeCalculado
                                 };
 
                                 // Buscar si existe un expediente en la tabla EXPEDIENTES_RELIQ
@@ -323,8 +321,8 @@ namespace Negocio
 
                                             // Obtener información SADE
                                             var sadeInfo = SADEHelper.ObtenerInfoSADE(certificadoRedet.ExpedientePago);
-                                            certificadoRedet.FechaSade = sadeInfo.FechaUltimoPase ?? redet.FechaSade;
-                                            certificadoRedet.BuzonSade = sadeInfo.BuzonDestino ?? redet.BuzonSade;
+                                            certificadoRedet.FechaSade = sadeInfo.FechaUltimoPase ?? null;
+                                            certificadoRedet.BuzonSade = sadeInfo.BuzonDestino ?? null;
                                         }
                                     }
                                     catch (Exception ex)

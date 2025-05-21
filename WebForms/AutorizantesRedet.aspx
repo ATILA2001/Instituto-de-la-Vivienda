@@ -104,9 +104,6 @@
 
 					<asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
 					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
-
-					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
-					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
 				</Columns>
 			</asp:GridView>
 
