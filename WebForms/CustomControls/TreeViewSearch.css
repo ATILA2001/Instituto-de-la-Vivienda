@@ -1,7 +1,5 @@
 ﻿
 
-
-
 .search-row {
     display: flex;
     align-items: center;
@@ -17,6 +15,13 @@
 .dropdown {
     position: relative;
     display: inline-block;
+
+
+    font-family: inherit; /* Hereda la fuente del elemento padre en la página contenedora */
+    color: inherit;       /* Hereda el color del elemento padre */
+    font-weight: inherit; /* Hereda el peso de la fuente del elemento padre */
+    font-size: inherit;   /* Asegura que también herede el tamaño de fuente */
+    line-height: inherit; /* Asegura que también herede la altura de línea */
 }
 
 /* Botón de apertura */
@@ -26,16 +31,25 @@
     border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
+
+
+    font-family: inherit;
+    color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-decoration: none; /* Evita la decoración de texto si la hubiera */
 }
 
     .dropdown-button:hover {
-        background-color: #e2e6ea;
+        /* background-color: var(--inst-blue); */
+        border:solid 1px var(--inst-white);
     }
 
 /* Contenedor fijo para el input */
 .search-container {
     padding: 5px;
-    background: white;
+    background: var(--inst-white);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -45,34 +59,34 @@
 /* Contenido desplegable */
 .dropdown-content {
     position: absolute;
-    background-color: #fff;
+    background-color: var(--inst-white);
+    color: var(--inst-gray);
     border: 1px solid #ccc;
     width: auto;
-    min-width: 250px;
-    max-width: none;
-    max-height: 500px;
-    overflow-y: auto;
+    min-width: 10vw;
+    max-width: 30vw;
+    max-height: 68vh;
+    overflow: auto;
     box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
     z-index: 1000;
-    /*        padding: 0px 5px;*/
     display: none;
     text-align: left;
+    font-weight: normal;
 }
 
 
-    /* Cuadro de búsqueda */
-    .dropdown-content input[type='text'] {
-        width: 100%;
-        padding: 5px;
-        box-sizing: border-box;
-        margin: 5px 0px;
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 10;
-        border: 1px, solid black;
-        border-radius: 5px;
-    }
+/* Cuadro de búsqueda */
+.dropdown-content input[type='text'] {
+width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    background: var(--inst-white);
+    z-index: 10;
+    border: 1px solid var(--inst-blue);
+    border-radius: 5px;
+ }
 
 /* Contenedor con scroll solo para los checkboxes */
 .checkbox-container {
@@ -106,13 +120,9 @@
 
 
 
-
-
-
-
 /* Estilos base del TreeView */
 .date-tree-view {
-    padding: 0;
+    padding: 5px;
     width: 100%;
 }
 
@@ -134,6 +144,7 @@
         /*  width: 100%;*/
         padding: 0;
         margin: 0;
+        border: none;
     }
 
         /* Icono (botón de expandir/colapsar) */
@@ -156,38 +167,23 @@
         padding-left: 2px;
     }
 
-    /* Separador especial para "Seleccionar todos" */
+    /* Margen especial para "Seleccionar todos" */
     .date-tree-view > table:first-child {
-        border-bottom: 10px solid red;
         margin: 5px 0;
-        /*  padding-bottom: 5px;*/
     }
 
-
-
-
-/*.action-buttons {
-    padding: 10px 5px;
-    text-align: right;
-    position: sticky;
-    bottom: 0;
-    background: white;
-    z-index: 10;*/
-/*    margin: 0 -5px;*/
-/*padding: 10px;
-    border-top: 1px solid #ccc;
-}
-
-.action-buttons .btn {
-    margin-left: 5px;
-
-}*/
 
 .action-buttons {
     position: sticky;
     bottom: 0;
     z-index: 10;
-    padding: 10px;
-    background: white;
+    padding: 5px;
+    background: var(--inst-white);
     border-top: 1px solid #ccc;
+}
+
+.action-buttons .btn i.material-symbols-rounded,
+.action-buttons .btn i.bi {
+    font-size: var(--bs-btn-font-size);
+    line-height: 1;  /* Asegura que la altura de línea del ícono no añada espacio extra. */
 }

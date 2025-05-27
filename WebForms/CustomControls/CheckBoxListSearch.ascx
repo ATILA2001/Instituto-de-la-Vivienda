@@ -2,35 +2,30 @@
 
 <!-- <link rel="stylesheet" href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" /> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0" />
 <link rel="stylesheet" href="<%= ResolveUrl("TreeViewSearch.css") %>" />
 
 <script src="<%= ResolveUrl("TreeViewSearch.js") %>"></script>
 
 <div class="dropdown">
-    <button type="button" class="dropdown-button" onclick="toggleDropdown('<%= chkList.ClientID %>_dropdown')" data-default-text="Todos">
-        <asp:Literal ID="litTitle" runat="server" Text='Todos <i class="bi bi-caret-down"></i>' />
+    <button type="button" id="dropdownButton" runat="server" class="dropdown-button">
+        <span id="litTitle" runat="server"></span>
+
     </button>
 
     <div id="<%= chkList.ClientID %>_dropdown" class="dropdown-content">
         <div class="search-container">
-
-            <%--            <button type="button" runat="server" id="PRUEBA"
-               class="btn btn-primary align-middle">
-                <i class="material-symbols-rounded ">filter_alt_off</i>
-                <span>Deseleccionar todo</span>
-            </button> --%>
 
             <div class="search-row">
                 <input type="text" id="<%= chkList.ClientID %>_txtSearch"
                     placeholder="Buscar..."
                     onkeyup='filterCheckboxes("<%= chkList.ClientID %>", "<%= chkList.ClientID %>_txtSearch")'
                     class="form-control" />
-                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-primary fs-5"
+<%--                <asp:Button ID="btnDeselectAll" runat="server" CssClass="material-symbols-rounded btn btn-primary fs-5"
                     OnClick="BtnDeselectAll_Click"
                     OnClientClick="sessionStorage.setItem('shouldCloseDropdown', 'true'); return true;"
                     ToolTip="Deseleccionar todo"
-                    Text="filter_alt_off"></asp:Button>
+                    Text="filter_alt_off"></asp:Button>--%>
             </div>
         </div>
 
@@ -50,13 +45,15 @@
         <div class="action-buttons d-flex justify-content-end align-items-center">
 
 
-<%--            <button type="button" runat="server" id="PRUEBA"
-                class="btn btn-primary fw-bold"
-                
+            <asp:linkbutton runat="server" id="chkList_btnDeselectAll"
+                OnClick="BtnDeselectAll_Click"
+                OnClientClick="sessionStorage.setItem('shouldCloseDropdown', 'true'); return true;"
+                Visible="false"
+                cssclass="btn btn-primary fw-bold"
                 data-bs-toggle="tooltip"
                 data-bs-title="Deseleccionar todo">
-                <i class="material-symbols-rounded ">filter_alt_off</i>
-            </button>--%>
+                <i class="material-symbols-rounded">filter_alt_off</i>
+            </asp:linkbutton>
 
 
 

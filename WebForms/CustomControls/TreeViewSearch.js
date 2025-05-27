@@ -13,6 +13,44 @@ document.addEventListener("click", function (event) {
     });
 });
 
+document.addEventListener("click", function (event) {
+    document.querySelectorAll(".dropdown-content.show").forEach(openDropdown => {
+        const dropdownButtonId = openDropdown.id ? openDropdown.id.replace('_dropdown', 'Button') : null;
+        const dropdownButton = dropdownButtonId ? document.getElementById(dropdownButtonId) : null;
+
+        // Si no se pudo encontrar el botón por ID, intentar encontrarlo por relación en el DOM
+        // Esto es un fallback, idealmente los IDs son consistentes.
+        const fallbackButton = openDropdown.previousElementSibling;
+
+        const clickedOnButton = dropdownButton && dropdownButton.contains(event.target);
+        const clickedOnFallbackButton = fallbackButton && fallbackButton.contains(event.target);
+
+        if (!openDropdown.contains(event.target) && !clickedOnButton && !clickedOnFallbackButton) {
+            const treeViewContainerInside = openDropdown.querySelector('.date-tree-view');
+
+            if (treeViewContainerInside) { 
+                if (typeof restoreState === 'function') {
+
+                    restoreState(treeViewContainerInside); 
+                } else {
+                    // Fallback si restoreState no está definida
+                    openDropdown.style.display = 'none';
+                    if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
+                         clearDropdownTimeout(openDropdown.id);
+                    }
+                    if (typeof updateDropdownIcon === 'function') {
+                         updateDropdownIcon(treeViewContainerInside);
+                    }
+                }
+            } else {
+                // Si no hay treeViewContainer, simplemente cerrar
+                openDropdown.style.display = 'none';
+                if (openDropdown.id) clearDropdownTimeout(openDropdown.id);
+            }
+        }
+    });
+});
+
 /**
  * Inicializa componentes, gestiona estado de dropdowns y añade listeners al cargar.
  */
@@ -21,100 +59,198 @@ document.addEventListener("DOMContentLoaded", function () {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
+
+    // Gestiona el cierre del dropdown si venimos de un postback que lo requiere.
     if (sessionStorage.getItem('shouldCloseDropdown') === 'true') {
         document.querySelectorAll(".date-tree-view").forEach(treeViewContainer => {
-            const dropdown = document.getElementById(treeViewContainer.id + '_dropdown');
-            if (dropdown) {
-                dropdown.style.display = 'none';
-                clearDropdownTimeout(treeViewContainer.id);
+            if (treeViewContainer && treeViewContainer.id) {
+                const dropdown = document.getElementById(treeViewContainer.id + '_dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                    if (typeof clearDropdownTimeout === 'function') {
+                        clearDropdownTimeout(treeViewContainer.id);
+                    }
+                }
             }
         });
         sessionStorage.removeItem('shouldCloseDropdown');
     }
 
+    // Manejo del flag filtersCleared
+    const filtersWereClearedOnServer = sessionStorage.getItem('filtersCleared') === 'true';
+    if (filtersWereClearedOnServer) {
+        console.log("[DOMContentLoaded] Flag 'filtersCleared' detectado. Se procederá a reinicializar la UI de los TreeViews para reflejar el estado limpio del servidor.");
+    }
+
     // Itera sobre cada TreeView y configura sus listeners y estado inicial.
     document.querySelectorAll(".date-tree-view").forEach(treeViewContainer => {
-        // Guarda el estado inicial para 'Cancelar'
-        saveInitialState(treeViewContainer);
+        if (!treeViewContainer || !treeViewContainer.id) {
+            return; // Saltar a la siguiente iteración
+        }
 
-        // Reconstruye estados indeterminate después del postback
-        // 1. Obtener todos los checkboxes
-        const allCheckboxes = treeViewContainer.querySelectorAll('input[type="checkbox"]');
-        // 2. Iterar sobre ellos para encontrar las hojas y iniciar la actualización de padres
-        allCheckboxes.forEach(cb => {
-            const parentTable = cb.closest('table');
-            if (!parentTable) return;
+        if (typeof initializeIndeterminateStatesForContainer === 'function') {
+            initializeIndeterminateStatesForContainer(treeViewContainer);
+        }
 
-            // Identificar si es un nodo hoja (no tiene un div '[id]Nodes' asociado)
-            const nodeId = parentTable.querySelector('a[id*="chkListn"]')?.id;
-            const childNodesDiv = nodeId ? document.getElementById(nodeId + 'Nodes') : null;
-            const isLeafNode = !childNodesDiv;
-            const isSelectAll = cb === treeViewContainer.querySelector(':scope > table input[type="checkbox"]'); // Evitar iniciar desde "Select All"
-
-            // Si es un nodo hoja, llamar a updateParentState para recalcular sus ancestros
-            if (isLeafNode && !isSelectAll) {
-                // Iniciar la actualización desde este nodo hoja hacia arriba
-                updateParentState(cb, treeViewContainer);
+        // Llama a updateDropdownIcon solo si data-title-id existe y no es la cadena "null"
+        const dataTitleId = treeViewContainer.getAttribute('data-title-id');
+        if (dataTitleId !== null && dataTitleId !== 'null') {
+            if (typeof updateDropdownIcon === 'function') {
+                updateDropdownIcon(treeViewContainer);
             }
-        });
-        // 3. Asegurarse de que el estado "Seleccionar todos" sea correcto después de actualizar los nodos intermedios.
-        //    Aunque updateParentState debería llegar hasta la raíz, una llamada explícita aquí garantiza el estado correcto.
-        updateSelectAllState(treeViewContainer);
-        
+        }
 
+        // saveInitialState podría ser para una funcionalidad de "Cancelar" que revierte cambios
+        // hechos en el cliente *antes* de un postback. Se mantiene por ahora.
+        if (typeof saveInitialState === 'function') {
+            saveInitialState(treeViewContainer);
+        }
 
-        // Configura el listener delegado para clics dentro del TreeView
+        // Configura el listener delegado para clics en la fila dentro del TreeView
         treeViewContainer.addEventListener('click', function(event) {
             const target = event.target;
             let checkbox = null;
             let label = null;
-
-            // Intenta encontrar el checkbox y la etiqueta asociados al clic
-            // Esto asume la estructura renderizada por asp:TreeView donde el checkbox
-            // y la etiqueta (<a>) están dentro del mismo contenedor de nodo (ej: <td> o <div>)
-            const nodeElement = target.closest('table tr > td') || target.closest('div > div'); // Ajusta este selector si la estructura es diferente
+            const nodeElement = target.closest('table tr > td') || target.closest('div[id$="Nodes"] > div');
 
             if (nodeElement) {
                 checkbox = nodeElement.querySelector('input[type="checkbox"]');
-                // La etiqueta suele ser un enlace <a> en TreeView
-                label = nodeElement.querySelector('a');
+                label = nodeElement.querySelector('a[id*="chkListn"]');
             }
 
-            // Si encontramos un checkbox válido y el clic NO fue directamente en él,
-            // pero sí en su etiqueta o en el contenedor del nodo.
-            if (checkbox && target !== checkbox && (target === label || nodeElement.contains(target))) {
-                event.preventDefault(); // Previene la acción por defecto del clic (ej: navegación del <a>)
-                checkbox.checked = !checkbox.checked; // Cambia el estado del checkbox manualmente
-
-                // Dispara manualmente el evento 'change' para que se ejecute la lógica de actualización
+            if (checkbox && target !== checkbox && (target === label || (nodeElement && nodeElement.contains(target)))) {
+                event.preventDefault();
+                checkbox.checked = !checkbox.checked;
                 const changeEvent = new Event('change', { bubbles: true });
                 checkbox.dispatchEvent(changeEvent);
             }
-            // Si el clic fue directamente en el checkbox, no hacemos nada aquí,
-            // dejaremos que el listener 'change' (definido abajo) maneje la lógica.
         });
 
-        // Listener para el evento 'change' de los checkboxes (se dispara cuando cambia el estado)
-        // Este manejará la lógica de actualización de padres/hijos y título.
+        // Listener para el evento 'change' de los checkboxes
         treeViewContainer.addEventListener('change', function(event) {
             const target = event.target;
             if (target.tagName === 'INPUT' && target.type === 'checkbox') {
-                // Llama a la función que maneja la lógica de actualización de jerarquía y título
-                handleTreeViewCheckboxChange(target, treeViewContainer);
+                if (typeof handleTreeViewCheckboxChange === 'function') {
+                    handleTreeViewCheckboxChange(target, treeViewContainer);
+                }
             }
         });
 
-        // Actualiza el título inicial basado en el estado cargado
-        updateDropdownTitle(treeViewContainer);
+        const dropdownContent = treeViewContainer.closest('.dropdown-content');
+        if (dropdownContent) {
+            const renderedAcceptButtonId = treeViewContainer.id + '_btnAccept';
+            const specificAcceptButton = document.getElementById(renderedAcceptButtonId);
+            if (specificAcceptButton && dropdownContent.contains(specificAcceptButton)) {
+                specificAcceptButton.addEventListener('click', function () {                    
+                    // --- INICIO DE MODIFICACIÓN: Lógica del botón Aceptar ---
+                    // 1. Guardar el estado actual como el nuevo "estado inicial" para este filtro.
+                    // Esto significa que "Cancelar" o una reapertura futura usarán este estado.
+                    if (typeof saveInitialState === 'function') {
+                        // Pasamos el elemento treeViewContainer directamente
+                        saveInitialState(treeViewContainer); 
+                    }
 
-        // Configura el listener para el campo de búsqueda (si existe)
+                    // 2. Cerrar el dropdown.
+                    if (dropdownContent) { // dropdownContent ya está definido en este scope
+                        dropdownContent.style.display = 'none';
+                        // Si usas una clase como 'show' para controlar la visibilidad, también quítala.
+                        // dropdownContent.classList.remove('show'); 
+                        
+                        // Limpiar timeouts si los hubiera (asumiendo que dropdownContent tiene un ID)
+                        if (dropdownContent.id && typeof clearDropdownTimeout === 'function') {
+                            clearDropdownTimeout(dropdownContent.id); 
+                        }
+                    }
+                    // 3. Actualizar el ícono del dropdown para reflejar el estado aceptado.
+                    if (typeof updateDropdownIcon === 'function') {
+                        updateDropdownIcon(treeViewContainer);
+                    }
+                });
+            }
+        }
+
         const searchInputId = treeViewContainer.id + '_txtSearch';
         const searchInput = document.getElementById(searchInputId);
         if (searchInput) {
-            searchInput.addEventListener('keyup', () => filterCheckboxes(treeViewContainer.id, searchInputId));
+            searchInput.addEventListener('keyup', () => {
+                if (typeof filterCheckboxes === 'function') {
+                    filterCheckboxes(treeViewContainer.id, searchInputId);
+                }
+            });
+        }
+        
+    });
+
+    // Limpia el flag para los filtros después de usarlo
+    if (filtersWereClearedOnServer) {
+        sessionStorage.removeItem('filtersCleared');
+        console.log("[DOMContentLoaded] Flag 'filtersCleared' procesado y eliminado de sessionStorage.");
+    }
+});
+
+/**
+ * Actualiza el ícono del botón dropdown basado en los nodos HOJA seleccionados.
+ * @param {HTMLElement} treeViewContainer - El elemento contenedor del TreeView (.date-tree-view).
+ */
+function updateDropdownIcon(treeViewContainer) {
+    if (!treeViewContainer) {
+        return;
+    }
+
+    const titleSpanId = treeViewContainer.getAttribute('data-title-id');
+    const titleSpan = document.getElementById(titleSpanId); // Este es el <span> renderizado por litTitle
+
+    if (!titleSpan) {
+        return;
+    }
+
+
+    let baseText = titleSpan.getAttribute('data-default-text');
+    if (baseText === null) { 
+        // Si data-default-text no existe (primera vez), tomar el textContent actual,
+        // limpiarle el ícono si existe, y guardarlo como data-default-text.
+        const currentContent = titleSpan.textContent || ""; // Usar textContent para obtener solo el texto
+        const iconTextRegex = / (bi-caret-down|bi-caret-down-fill)$/; // Asume que el ícono es texto al final
+        baseText = currentContent.replace(iconTextRegex, '').trim();
+        titleSpan.setAttribute('data-default-text', baseText);
+    }
+
+    const allCheckboxes = treeViewContainer.querySelectorAll(':scope input[type="checkbox"]');
+    let selectedLeafCount = 0;
+
+    allCheckboxes.forEach(cb => {
+        const parentTable = cb.closest('table');
+        if (!parentTable) return;
+
+        const isSelectAllCheckbox = cb.value === 'select-all';
+        const nodeId = parentTable.querySelector('a[id*="chkListn"]')?.id;
+        const childNodesDiv = nodeId ? document.getElementById(nodeId + 'Nodes') : null;
+        const isLeafNode = !childNodesDiv;
+
+        if (cb.checked && isLeafNode && !isSelectAllCheckbox) {
+            selectedLeafCount++;
+        } 
+        else if (isSelectAllCheckbox && cb.checked) {
+            // Considerar "select-all" como hoja seleccionada si no tiene hijos visibles/reales
+            const rootNodesDiv = treeViewContainer.querySelector(':scope > div[id$="Nodes"]');
+            let hasVisibleChildren = false;
+            if (rootNodesDiv) {
+                const childCheckboxes = rootNodesDiv.querySelectorAll(':scope > table input[type="checkbox"]');
+                if (childCheckboxes.length > 0) {
+                    hasVisibleChildren = true;
+                }
+            }
+            if (!hasVisibleChildren) { 
+                selectedLeafCount++;
+            }
         }
     });
-});
+    
+    let iconClass = (selectedLeafCount === 0) ? 'bi-caret-down' : 'bi-caret-down-fill';
+    
+    // Reconstruir el innerHTML del titleSpan con el baseText y el nuevo ícono
+    titleSpan.innerHTML = `${baseText} <i class="bi ${iconClass}"></i>`;
+}
 
 /**
  * Limpia los timeouts asociados a un dropdown específico.
@@ -267,8 +403,6 @@ function filterCheckboxes(treeId, searchInputId) {
  */
 function handleTreeViewCheckboxChange(checkbox, treeViewContainer) {
     // Determina si es el checkbox "Seleccionar todos" o un nodo hijo
-    // La identificación de "Seleccionar todos" puede necesitar ajustarse según cómo se renderice.
-    // Asumiremos que el primer checkbox dentro del contenedor es "Seleccionar todos" si existe.
     const isSelectAll = checkbox === treeViewContainer.querySelector('input[type="checkbox"]'); // Ajustar si es necesario
 
     if (isSelectAll) {
@@ -276,8 +410,13 @@ function handleTreeViewCheckboxChange(checkbox, treeViewContainer) {
     } else {
         handleChildCheckboxChange(checkbox, treeViewContainer);
     }
-    // Actualiza el título después de cualquier cambio
-    updateDropdownTitle(treeViewContainer);
+
+    if (typeof updateDropdownIcon === 'function') {
+        const dataTitleId = treeViewContainer.getAttribute('data-title-id');
+        if (dataTitleId !== null && dataTitleId !== 'null') {
+            updateDropdownIcon(treeViewContainer);
+        }
+    }       
 }
 
 /**
@@ -342,7 +481,8 @@ function handleChildCheckboxChange(checkbox, treeViewContainer) {
  * @param {HTMLInputElement} checkbox - Checkbox que inició la actualización.
  * @param {HTMLElement} treeViewContainer - El contenedor principal del TreeView.
  */
-function updateParentState(checkbox, treeViewContainer) {
+function updateParentState(checkbox, treeViewContainer) 
+{
     const currentTable = checkbox.closest('table');
     if (!currentTable) {
         return;
@@ -354,12 +494,21 @@ function updateParentState(checkbox, treeViewContainer) {
     }
 
     if (containingDiv === treeViewContainer) {
-        updateSelectAllState(treeViewContainer);
+        if (typeof updateSelectAllState === 'function') {
+            updateSelectAllState(treeViewContainer);
+        }
         return;
     }
 
     const parentTable = containingDiv.previousElementSibling;
     if (!parentTable || parentTable.tagName !== 'TABLE') {
+        // Si el parentElement de containingDiv es treeViewContainer, entonces containingDiv
+        // es el div de nodos hijos de "select-all".
+        if (containingDiv.parentElement === treeViewContainer) {
+            if (typeof updateSelectAllState === 'function') {
+                updateSelectAllState(treeViewContainer);
+            }
+        }
         return;
     }
 
@@ -380,23 +529,45 @@ function updateParentState(checkbox, treeViewContainer) {
         });
     }
 
-    let newChecked = false;
-    let newIndeterminate = false;
+    let newCheckedLogical = false; 
+    let newIndeterminateBasedOnChildren = false;
 
-    if (indeterminateSiblingsCount > 0) { newIndeterminate = true; newChecked = false; }
-    else if (checkedSiblingsCount === 0) { newChecked = false; newIndeterminate = false; }
-    else if (checkedSiblingsCount === totalSiblings) { newChecked = true; newIndeterminate = false; }
-    else { newChecked = false; newIndeterminate = true; }
+    if (totalSiblings === 0) {
+        newCheckedLogical = parentCheckbox.checked; 
+        newIndeterminateBasedOnChildren = false;
+    } else if (indeterminateSiblingsCount > 0) {
+        newIndeterminateBasedOnChildren = true;
+        newCheckedLogical = false; 
+    } else if (checkedSiblingsCount === 0) {
+        newCheckedLogical = false;
+        newIndeterminateBasedOnChildren = false;
+    } else if (checkedSiblingsCount === totalSiblings) {
+        newCheckedLogical = true;
+        newIndeterminateBasedOnChildren = false;
+    } else { 
+        newCheckedLogical = false;
+        newIndeterminateBasedOnChildren = true;
+    }
 
     let stateChanged = false;
-    if (parentCheckbox.checked !== newChecked) {
-        parentCheckbox.checked = newChecked;
-        stateChanged = true;
+    // Ahora siempre se intenta actualizar si el estado lógico es diferente.
+    if (parentCheckbox.checked !== newCheckedLogical) {
+        parentCheckbox.checked = newCheckedLogical;
+        stateChanged = true; 
     }
-    if (newChecked && parentCheckbox.indeterminate) {
-         parentCheckbox.indeterminate = false;
-    } else if (parentCheckbox.indeterminate !== newIndeterminate) {
-        parentCheckbox.indeterminate = newIndeterminate;
+    // El estado indeterminate final depende del estado 'checked' actual del DOM del padre
+    // y del newIndeterminateBasedOnChildren.
+    const currentParentCheckedStateInDOM = parentCheckbox.checked; // Leer el estado 'checked' actual del DOM
+    let finalIndeterminateValue;
+
+    if (newCheckedLogical) { // Usar el estado 'checked' que se acaba de determinar/aplicar
+        finalIndeterminateValue = false; 
+    } else {
+        finalIndeterminateValue = newIndeterminateBasedOnChildren;
+    }
+
+    if (parentCheckbox.indeterminate !== finalIndeterminateValue) {
+        parentCheckbox.indeterminate = finalIndeterminateValue;
         stateChanged = true;
     }
 
@@ -405,148 +576,173 @@ function updateParentState(checkbox, treeViewContainer) {
     } else {
         const grandParentDiv = parentTable.parentElement;
         if (grandParentDiv === treeViewContainer) {
-            updateSelectAllState(treeViewContainer);
+            if (typeof updateSelectAllState === 'function') {
+                updateSelectAllState(treeViewContainer);
+            }
         }
     }
 }
 
+
 /**
- * Actualiza el estado del checkbox "Seleccionar todos" basado en los nodos de año.
+ * Actualiza el estado del checkbox "Seleccionar todos" basado en los nodos de primer nivel.
  * Incluye lógica para el estado 'indeterminate'.
  * @param {HTMLElement} treeViewContainer - El elemento contenedor del TreeView.
  */
 function updateSelectAllState(treeViewContainer) {
     if (!treeViewContainer) return;
 
-    const rootTable = treeViewContainer.querySelector(':scope > table');
+    const rootTable = treeViewContainer.querySelector(':scope > table'); // Asume que "select-all" es la primera tabla.
     if (!rootTable) return;
     const selectAllCheckbox = rootTable.querySelector('td input[type="checkbox"]');
     if (!selectAllCheckbox) return;
 
-    const yearNodesDiv = rootTable.nextElementSibling;
-    if (!yearNodesDiv || !yearNodesDiv.id.endsWith('Nodes')) {
-        if (selectAllCheckbox.checked || selectAllCheckbox.indeterminate) {
-             selectAllCheckbox.checked = false;
-             selectAllCheckbox.indeterminate = false;
+    // Contenedor de los nodos hijos directos de "select-all".
+    const firstLevelNodesContainer = rootTable.nextElementSibling;
+
+    if (!firstLevelNodesContainer || !firstLevelNodesContainer.id || !firstLevelNodesContainer.id.endsWith('Nodes')) {
+        // Si no hay un contenedor de nodos hijos válido.
+        // Si 'selectAllCheckbox' estaba 'checked', se desmarca porque no hay hijos.
+        // Se elimina la condición de window.isInitializingTreeViewStates.
+        if (selectAllCheckbox.checked) {
+            selectAllCheckbox.checked = false;
+        }
+        if (selectAllCheckbox.indeterminate) {
+            selectAllCheckbox.indeterminate = false;
         }
         return;
     }
 
-    const yearCheckboxes = yearNodesDiv.querySelectorAll(':scope > table td input[type="checkbox"]');
-    const totalYears = yearCheckboxes.length;
-    let checkedYearsCount = 0;
-    let indeterminateYearsCount = 0;
+    const firstLevelCheckboxes = firstLevelNodesContainer.querySelectorAll(':scope > table td input[type="checkbox"]');
+    const totalFirstLevelNodes = firstLevelCheckboxes.length;
+    let checkedFirstLevelCount = 0;
+    let indeterminateFirstLevelCount = 0;
 
-    if (totalYears > 0) {
-        yearCheckboxes.forEach(yearCb => {
-            if (yearCb.checked) {
-                checkedYearsCount++;
-            } else if (yearCb.indeterminate) {
-                indeterminateYearsCount++;
+    if (totalFirstLevelNodes > 0) {
+        firstLevelCheckboxes.forEach(cb => {
+            if (cb.checked) {
+                checkedFirstLevelCount++;
+            } else if (cb.indeterminate) {
+                indeterminateFirstLevelCount++;
             }
         });
     }
 
-    let newChecked = false;
-    let newIndeterminate = false;
+    // Variables para el estado lógico calculado basado en los hijos.
+    let newCheckedLogical = false;
+    let newIndeterminateBasedOnChildren = false;
 
-    if (indeterminateYearsCount > 0) {
-        newIndeterminate = true;
-        newChecked = false;
-    } else if (checkedYearsCount === 0) {
-        newChecked = false;
-        newIndeterminate = false;
-    } else if (checkedYearsCount === totalYears) {
-        newChecked = true;
-        newIndeterminate = false;
+    if (totalFirstLevelNodes === 0) {
+        // Si no hay nodos hijos, el estado 'checked' lógico es el actual del checkbox.
+        // Esto es importante durante la inicialización para respetar el estado del servidor.
+        newCheckedLogical = selectAllCheckbox.checked;
+        newIndeterminateBasedOnChildren = false; // No puede ser indeterminado.
+    } else if (indeterminateFirstLevelCount > 0) {
+        newIndeterminateBasedOnChildren = true;
+        newCheckedLogical = false; // Si algún hijo es indeterminado, el padre no puede estar 'checked'.
+    } else if (checkedFirstLevelCount === 0) {
+        newCheckedLogical = false;
+        newIndeterminateBasedOnChildren = false;
+    } else if (checkedFirstLevelCount === totalFirstLevelNodes) {
+        newCheckedLogical = true;
+        newIndeterminateBasedOnChildren = false;
+    } else { // Algunos marcados, ninguno indeterminado.
+        newCheckedLogical = false;
+        newIndeterminateBasedOnChildren = true;
+    }
+
+    // Solo se modifica el estado 'checked' si no estamos en la fase de inicialización
+    // y si el estado lógico calculado es diferente al actual.
+    if (selectAllCheckbox.checked !== newCheckedLogical) {
+        selectAllCheckbox.checked = newCheckedLogical;
+    }
+
+    // El estado 'indeterminate' final depende del estado 'checked' actual del DOM del 'selectAllCheckbox'
+    // y del 'newIndeterminateBasedOnChildren' calculado.
+    const currentSelectAllCheckedStateInDOM = selectAllCheckbox.checked; // Leer el estado 'checked' actual del DOM.
+    let finalIndeterminateValue;
+
+    if (newCheckedLogical) { // Usar el estado 'checked' que se acaba de determinar/aplicar
+        finalIndeterminateValue = false;
     } else {
-        newChecked = false;
-        newIndeterminate = true;
+        finalIndeterminateValue = newIndeterminateBasedOnChildren;
     }
 
-    if (selectAllCheckbox.checked !== newChecked) {
-        selectAllCheckbox.checked = newChecked;
+    if (selectAllCheckbox.indeterminate !== finalIndeterminateValue) {
+        selectAllCheckbox.indeterminate = finalIndeterminateValue;
     }
-    if (selectAllCheckbox.indeterminate !== newIndeterminate) {
-        selectAllCheckbox.indeterminate = newIndeterminate;
-    }
+
 }
 
 /**
- * Actualiza el título del dropdown mostrando la cantidad de nodos HOJA seleccionados.
- * @param {HTMLElement} containerElement - El elemento contenedor del TreeView (.date-tree-view).
+ * Inicializa los estados 'indeterminate' de los checkboxes padres en un TreeView
+ * basándose en el estado 'checked' de sus hijos (que ya viene del servidor).
+ * NO MODIFICA el estado 'checked' de ningún checkbox.
+ * @param {HTMLElement} treeViewContainer - El contenedor principal del TreeView.
  */
-function updateDropdownTitle(containerElement) {
-    // Verificar si el contenedor existe primero
-    if (!containerElement) {
-        console.error(`Error en updateDropdownTitle: Se recibió un containerElement nulo o inválido.`);
-        return;
-    }
+function initializeIndeterminateStatesForContainer(treeViewContainer) {
+    const allCheckboxesInContainer = Array.from(treeViewContainer.querySelectorAll('input[type="checkbox"]'));
 
-    // --- Modificación: Búsqueda relativa del botón y el titleElement ---
-    // 1. Encontrar el div.dropdown-content que contiene el containerElement
-    const dropdownContent = containerElement.closest('.dropdown-content');
-    // 2. Encontrar el div.dropdown padre
-    const dropdownDiv = dropdownContent?.closest('.dropdown');
-    // 3. Encontrar el botón dentro del div.dropdown
-    const buttonElement = dropdownDiv?.querySelector('.dropdown-button');
-    // 4. Encontrar el span (renderizado por asp:Literal) dentro del botón
-    //    Asumimos que el Literal es el primer (o único) span dentro del botón.
-    const titleElement = buttonElement?.querySelector('span');
-    // --- Fin de la Modificación ---
+    const rootSelectAllCheckbox = treeViewContainer.querySelector(':scope > table td input[type="checkbox"]'); 
 
-    // Verificar si los elementos clave fueron encontrados
-    if (!buttonElement || !titleElement) {
-        console.error(`Error en updateDropdownTitle: No se encontró buttonElement o titleElement relativo a container (id=${containerElement.id}). Button:`, buttonElement, "Title:", titleElement);
-        return;
-    }
+    // Iteramos al revés (de los nodos más profundos/hojas hacia la raíz)
+    // para asegurar que el estado 'indeterminate' de un padre intermedio
+    // ya esté calculado cuando se evalúe su propio padre.
+    for (let i = allCheckboxesInContainer.length - 1; i >= 0; i--) {
+        const currentCheckbox = allCheckboxesInContainer[i];
+        const parentTable = currentCheckbox.closest('table');
+        if (!parentTable) continue;
 
-    // Obtener todos los checkboxes dentro del contenedor del TreeView.
-    const allCheckboxes = containerElement.querySelectorAll(':scope input[type="checkbox"]');
-    let selectedLeafCount = 0; // Inicializar contador para nodos hoja seleccionados.
-
-    // Iterar sobre cada checkbox para contar los nodos hoja seleccionados.
-    allCheckboxes.forEach(cb => {
-        // Encontrar la tabla que contiene el checkbox.
-        const parentTable = cb.closest('table');
-        if (!parentTable) return; // Saltar si no está en una tabla (inesperado).
-
-        // Identificar si es el checkbox "Seleccionar todos".
-        const isSelectAllCheckbox = parentTable === containerElement.querySelector(':scope > table');
-
-        // Identificar si es un nodo hoja.
-        // Un nodo es hoja si el div '[id]Nodes' asociado NO existe.
-        // Busca el enlace 'a' dentro de la tabla para obtener el ID base del nodo.
-        const nodeId = parentTable.querySelector('a[id*="chkListn"]')?.id;
-        // Busca el div de nodos hijos usando el ID del nodo + 'Nodes'.
-        const childNodesDiv = nodeId ? document.getElementById(nodeId + 'Nodes') : null;
-        // Es un nodo hoja si no se encontró el div de nodos hijos.
-        const isLeafNode = !childNodesDiv;
-
-        // Contar solo si es un nodo hoja, está marcado y no es "Seleccionar todos".
-        if (!isSelectAllCheckbox && isLeafNode && cb.checked) {
-            selectedLeafCount++;
+        let childNodesDiv;
+        // Determinar el div de nodos hijos para el currentCheckbox
+        if (currentCheckbox === rootSelectAllCheckbox) { 
+            childNodesDiv = parentTable.nextElementSibling;
+            // Validar que el nextElementSibling sea realmente un contenedor de nodos
+            if (childNodesDiv && (!childNodesDiv.id || !childNodesDiv.id.endsWith('Nodes'))) {
+                childNodesDiv = null; 
+            }
+        } else {
+            const nodeIdAttr = parentTable.querySelector('a[id*="chkListn"]')?.id;
+            childNodesDiv = nodeIdAttr ? document.getElementById(nodeIdAttr + 'Nodes') : null;
         }
-    });
 
-    // Preparar el texto del título.
-    let title = "";
-    // Obtener el texto base del atributo data-default-text del botón, o usar "Todos" como fallback.
-    const originalTitle = buttonElement.getAttribute('data-default-text') || "Todos";
+        if (childNodesDiv) { // Es un nodo padre (tiene un div de hijos)
+            const childCheckboxes = childNodesDiv.querySelectorAll(':scope > table td input[type="checkbox"]');
+            const totalChildren = childCheckboxes.length;
+            let checkedChildrenCount = 0;
+            let indeterminateChildrenCount = 0; // Para propagar el estado indeterminate
 
-    // Construir el HTML del título basado en el conteo.
-    if (selectedLeafCount === 0) {
-        // Si no hay seleccionados, usar el título original y el icono de flecha hacia abajo.
-        title = `${originalTitle} <i class="bi bi-caret-down"></i>`;
-    } else {
-        // Si hay seleccionados, mostrar el conteo y el icono de flecha hacia abajo rellena.
-        // Añadir 's' a "seleccionado" si el conteo es mayor que 1.
-        title = `${selectedLeafCount} seleccionado${selectedLeafCount > 1 ? "s" : ""} <i class="bi bi-caret-down-fill"></i>`;
+            if (totalChildren > 0) {
+                childCheckboxes.forEach(childCb => {
+                    if (childCb.checked) checkedChildrenCount++;
+                    // El 'indeterminate' del hijo ya debería estar establecido por esta misma función
+                    // en una iteración anterior (debido al bucle inverso).
+                    if (childCb.indeterminate) indeterminateChildrenCount++; 
+                });
+
+                // Establecer 'indeterminate' para currentCheckbox (el padre)
+                if (currentCheckbox.checked) { 
+                    currentCheckbox.indeterminate = false;
+                } else { 
+                    if (indeterminateChildrenCount > 0) {
+                        currentCheckbox.indeterminate = true;
+                    } else if (checkedChildrenCount > 0 && checkedChildrenCount < totalChildren) {
+                        currentCheckbox.indeterminate = true;
+                    } else {
+                        // Si todos los hijos están marcados pero el padre no (según el servidor),
+                        // o si ningún hijo está marcado, el padre no es indeterminado.
+                        currentCheckbox.indeterminate = false;
+                    }
+                }
+            } else { // No tiene nodos hijos (visibles en el DOM)
+                currentCheckbox.indeterminate = false;
+            }
+        } else { // Es un nodo hoja (no tiene childNodesDiv)
+            currentCheckbox.indeterminate = false;
+        }
     }
-
-    // Actualizar el contenido HTML del elemento Literal (dentro del botón).
-    titleElement.innerHTML = title;
 }
+
 
 /**
  * Cancela la selección actual y restaura el estado guardado previamente.
@@ -555,12 +751,9 @@ function updateDropdownTitle(containerElement) {
  * @param {string} titleElementId - ID del elemento del título.
  */
 function cancelSelection(treeId, dropdownId, titleElementId) {
-    // --- Modificación: Obtener el elemento contenedor y pasarlo a updateDropdownTitle ---
     const containerElement = document.getElementById(treeId);
     if (containerElement) {
-        updateDropdownTitle(containerElement);
-    } else {
-        console.error(`Error en cancelSelection: No se encontró el contenedor con id=${treeId}`);
+        // updateDropdownTitle(containerElement);
     }
 
     // Cerrar el dropdown.
@@ -568,6 +761,24 @@ function cancelSelection(treeId, dropdownId, titleElementId) {
     if (dropdown) {
         dropdown.style.display = 'none';
     }
+}
+
+// Guarda los valores seleccionados en el hidden asociado al TreeView
+function saveCheckedToHidden(treeViewContainerId, hiddenFieldId) {
+    const treeView = document.getElementById(treeViewContainerId);
+    const hidden = document.getElementById(hiddenFieldId);
+
+    if (!treeView || !hidden) {
+        return;
+    }
+    
+    const checkedValues = [];
+    treeView.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.checked && cb.value !== 'select-all') {
+            checkedValues.push(cb.value);    
+        }
+    });
+    hidden.value = checkedValues.join(',');
 }
 
 /**
@@ -596,10 +807,20 @@ function restoreState(treeViewContainer) {
         checkboxes.forEach(cb => {
             if (state[cb.id]) {
                 cb.checked = state[cb.id].checked;
-                cb.indeterminate = state[cb.id].indeterminate;
+                // NO restaurar cb.indeterminate directamente aquí.
+                // Se recalculará para asegurar consistencia.
+                // cb.indeterminate = state[cb.id].indeterminate; 
             }
         });
-        // Vuelve a ejecutar la lógica de actualización visual/título después de restaurar
-        updateDropdownTitle(treeViewContainer);
+
+        // Esto asegura que los estados indeterminate sean consistentes con los checked restaurados.
+        if (typeof initializeIndeterminateStatesForContainer === 'function') {
+            initializeIndeterminateStatesForContainer(treeViewContainer);
+        }
+
+        // Actualizar el ícono del dropdown después de restaurar y recalcular estados.
+        if (typeof updateDropdownIcon === 'function') {
+            updateDropdownIcon(treeViewContainer);
+        }
     }
 }
