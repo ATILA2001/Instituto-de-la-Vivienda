@@ -123,37 +123,53 @@ namespace WebForms.CustomControls
             try
             {
                 bool populateNodes = false;
-                //List<string> valuesToRestoreFromContext = null;
+                List<string> selectedValuesToRestore = null;
 
+                // Determine if nodes need to be (re)populated and load persisted selections
                 if (!IsPostBack)
                 {
-                    populateNodes = true;
+                    // Initial page load
+                    populateNodes = (_dataSource != null);
+                    // For initial display, load any previously saved selections from session
+                    selectedValuesToRestore = LoadSelectedValuesFromSession();
                 }
-                else // Es PostBack
+                else // Is PostBack
                 {
+                    string contextKey = $"CheckBoxListSearch_{this.ID}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey))
+                    {
+                        // This control's "Accept" button triggered the postback, use values from current request context
+                        selectedValuesToRestore = HttpContext.Current.Items[contextKey] as List<string>;
+                    }
+                    else
+                    {
+                        // Postback triggered by something else (another control, or this control's checkbox auto-postback)
+                        // Load this control's persisted selections from session
+                        selectedValuesToRestore = LoadSelectedValuesFromSession();
+                    }
 
+                    // If TreeView is empty on postback (e.g., ViewState might be off for TreeView or dynamic creation)
                     if (chkList.Nodes.Count == 0)
                     {
                         populateNodes = (_dataSource != null);
                     }
-
                 }
 
                 if (populateNodes)
                 {
                     chkList.Nodes.Clear();
-
                     TreeNode selectAllNode = new TreeNode("Seleccionar todos", "select-all")
                     {
                         SelectAction = TreeNodeSelectAction.None,
                         ShowCheckBox = true,
-                        Expanded = true
+                        Expanded = true // Consider managing expansion state if needed
                     };
                     chkList.Nodes.Add(selectAllNode);
 
                     if (_dataSource != null)
                     {
                         bool areDates = false;
+                        // Date detection logic (simplified for brevity, use your existing logic)
                         if (!string.IsNullOrEmpty(DataValueField) && _dataSource is IEnumerable<object> enumerableForDateCheck)
                         {
                             var firstItem = enumerableForDateCheck.FirstOrDefault();
@@ -175,18 +191,16 @@ namespace WebForms.CustomControls
                             }
                         }
 
-
                         if (areDates)
                         {
                             var dates = new List<DateTime>();
-                            // Poblar la lista 'dates' desde _dataSource
                             if (_dataSource is DataTable dtDateSource)
                             {
                                 if (!string.IsNullOrEmpty(DataValueField) && dtDateSource.Columns.Contains(DataValueField))
                                 {
                                     foreach (DataRow row in dtDateSource.Rows.Cast<DataRow>())
                                     {
-                                        string dateStr = row[DataValueField]?.ToString();
+                                        string dateStr = GetPropertyValue(row, DataValueField); // Use helper for DataRow
                                         if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
                                         {
                                             dates.Add(parsedDate);
@@ -206,128 +220,111 @@ namespace WebForms.CustomControls
                                 }
                             }
 
-                            dates = dates.Distinct().ToList(); // Asegurar fechas únicas
+                            dates = dates.Distinct().ToList();
 
                             var yearGroups = dates.GroupBy(d => d.Year).OrderByDescending(g => g.Key);
                             foreach (var yearGroup in yearGroups)
                             {
                                 var yearNode = new TreeNode($"{yearGroup.Key}", $"year_{yearGroup.Key}")
-                                { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false };
+                                { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false }; // Consider persisting/restoring Expanded state
                                 var monthGroups = yearGroup.GroupBy(d => d.Month).OrderBy(g => g.Key);
                                 foreach (var monthGroup in monthGroups)
                                 {
-                                    string monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key);
-                                    monthName = char.ToUpper(monthName[0]) + monthName.Substring(1);
-                                    var monthNode = new TreeNode(monthName, $"{yearGroup.Key}_{monthGroup.Key}")
-                                    { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false };
-                                    foreach (var dateItem in monthGroup.OrderBy(d => d.Day))
+                                    var monthNode = new TreeNode(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key), $"month_{yearGroup.Key}_{monthGroup.Key}")
+                                    { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false }; // Consider persisting/restoring Expanded state
+                                    foreach (var day in monthGroup.OrderBy(d => d.Day))
                                     {
-                                        var dayNode = new TreeNode(dateItem.Day.ToString("00"), dateItem.ToString("yyyy-MM-dd"))
-                                        { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None };
-                                        monthNode.ChildNodes.Add(dayNode);
+                                        monthNode.ChildNodes.Add(new TreeNode(day.ToString("dd"), day.ToString("yyyy-MM-dd"))
+                                        { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None });
                                     }
                                     if (monthNode.ChildNodes.Count > 0) yearNode.ChildNodes.Add(monthNode);
                                 }
                                 if (yearNode.ChildNodes.Count > 0) selectAllNode.ChildNodes.Add(yearNode);
                             }
                         }
-                        else // Construir lista plana
+                        else // Build flat list
                         {
-
-
-                                if (_dataSource is DataTable dtSource)
+                            if (_dataSource is DataTable dtSource)
+                            {
+                                foreach (DataRow row in dtSource.Rows.Cast<DataRow>())
                                 {
-                                    foreach (DataRow row in dtSource.Rows.Cast<DataRow>())
+                                    var text = GetPropertyValue(row, DataTextField) ?? string.Empty; // Use helper for DataRow
+                                    var value = (!string.IsNullOrEmpty(DataValueField) && dtSource.Columns.Contains(DataValueField))
+                                                ? GetPropertyValue(row, DataValueField) ?? text
+                                                : text;
+                                    if (!string.IsNullOrEmpty(text))
                                     {
-                                        var text = row[DataTextField]?.ToString() ?? string.Empty;
-                                        var value = (!string.IsNullOrEmpty(DataValueField) && dtSource.Columns.Contains(DataValueField))
-                                                    ? row[DataValueField]?.ToString() ?? text
-                                                    : text;
-                                        if (!string.IsNullOrEmpty(text))
+                                        selectAllNode.ChildNodes.Add(new TreeNode(text, value)
                                         {
-                                            selectAllNode.ChildNodes.Add(new TreeNode(text, value)
-                                            {
-                                                ShowCheckBox = true,
-                                                SelectAction = TreeNodeSelectAction.None
-                                            });
-                                        }
+                                            ShowCheckBox = true,
+                                            SelectAction = TreeNodeSelectAction.None
+                                        });
                                     }
                                 }
-                                else if (_dataSource is IEnumerable<object> enumerableDataSource)
+                            }
+                            else if (_dataSource is IEnumerable<object> enumerableDataSource)
+                            {
+                                foreach (var item in enumerableDataSource)
                                 {
-                                    foreach (var item in enumerableDataSource)
+                                    var text = GetPropertyValue(item, DataTextField) ?? string.Empty;
+                                    var value = !string.IsNullOrEmpty(DataValueField)
+                                                ? GetPropertyValue(item, DataValueField) ?? text
+                                                : text;
+                                    if (!string.IsNullOrEmpty(text))
                                     {
-                                        var text = GetPropertyValue(item, DataTextField) ?? string.Empty;
-                                        var value = !string.IsNullOrEmpty(DataValueField)
-                                                    ? GetPropertyValue(item, DataValueField) ?? text
-                                                    : text;
-                                        if (!string.IsNullOrEmpty(text))
+                                        selectAllNode.ChildNodes.Add(new TreeNode(text, value)
                                         {
-                                            selectAllNode.ChildNodes.Add(new TreeNode(text, value)
-                                            {
-                                                ShowCheckBox = true,
-                                                SelectAction = TreeNodeSelectAction.None
-                                            });
-                                        }
+                                            ShowCheckBox = true,
+                                            SelectAction = TreeNodeSelectAction.None
+                                        });
                                     }
                                 }
                             }
                         }
-                    
-
+                    }
                 }
 
-                if (IsPostBack)
+                // Apply selected states to the TreeView nodes
+                if (chkList.Nodes.Count > 0)
                 {
-                    List<string> valuesToRestore = null;
-                    string contextKey = $"CheckBoxListSearch_{this.ID}_ContextSelectedValues";
-
-                    if (HttpContext.Current.Items.Contains(contextKey))
+                    // First, reset all nodes to unchecked. This is important if nodes came from ViewState or were just repopulated.
+                    foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
                     {
-                        valuesToRestore = HttpContext.Current.Items[contextKey] as List<string>;
+                        node.Checked = false;
                     }
-                    
 
-                    if (chkList.Nodes.Count > 0)
+                    // Apply the restored selections
+                    if (selectedValuesToRestore != null && selectedValuesToRestore.Any())
                     {
-                        // Clear all current checked states before applying the restored state.
-                        // This ensures a clean application, especially if nodes were repopulated.
                         foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
                         {
-                            node.Checked = false;
-                        }
-
-                        if (valuesToRestore != null && valuesToRestore.Any())
-                        {
-                            foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
+                            if (selectedValuesToRestore.Contains(node.Value))
                             {
-                                node.Checked = valuesToRestore.Contains(node.Value);
+                                node.Checked = true;
                             }
                         }
+                    }
 
-                        if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
+                    // Update the "select-all" node's checked state based on its children's states
+                    if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
+                    {
+                        TreeNode selectAllServerNode = chkList.Nodes[0];
+                        var leafNodes = selectAllServerNode.ChildNodes
+                            .Cast<TreeNode>()
+                            .SelectMany(GetAllNodes)
+                            .Where(n => n.ChildNodes.Count == 0 && n.Value != "select-all")
+                            .ToList();
+
+                        if (leafNodes.Any())
                         {
-                            TreeNode selectAllServerNode = chkList.Nodes[0];
-                            bool allLeafNodesChecked = false;
-
-                            // Obtener todos los nodos hoja descendientes del nodo "select-all"
-                            // Un nodo hoja es aquel que no tiene más hijos (ChildNodes.Count == 0)
-                            // y no es el propio "select-all".
-                            var leafNodes = selectAllServerNode.ChildNodes
-                                .Cast<TreeNode>()
-                                .SelectMany(GetAllNodes) // Obtiene todos los descendientes de los hijos de "select-all"
-                                .Where(n => n.ChildNodes.Count == 0 && n.Value != "select-all")
-                                .ToList();
-
-                            if (leafNodes.Any())
-                            {
-                                allLeafNodesChecked = leafNodes.All(n => n.Checked);
-                            }
-
-                            if (selectAllServerNode.Checked != allLeafNodesChecked)
-                            {
-                                selectAllServerNode.Checked = allLeafNodesChecked;
-                            }
+                            selectAllServerNode.Checked = leafNodes.All(n => n.Checked);
+                        }
+                        else
+                        {
+                            // No actual items to select, so "select-all" should be unchecked
+                            // unless it was explicitly checked and there are no children (edge case, typically means "select all of nothing")
+                            // For consistency, if no leaf nodes, "select-all" is unchecked.
+                            selectAllServerNode.Checked = false;
                         }
                     }
                 }
@@ -342,7 +339,8 @@ namespace WebForms.CustomControls
                 UpdateDeselectAllButtonState();
             }
         }
-        
+
+
         // Helper method to get property value using reflection
         private string GetPropertyValue(object item, string propertyName)
         {
