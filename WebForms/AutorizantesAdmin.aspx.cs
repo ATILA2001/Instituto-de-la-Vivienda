@@ -16,16 +16,7 @@ namespace WebForms
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
         private CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblArea.AcceptChanges += OnAcceptChanges;
-            cblEmpresa.AcceptChanges += OnAcceptChanges;
-            cblConcepto.AcceptChanges += OnAcceptChanges;
-            cblEstado.AcceptChanges += OnAcceptChanges;
-            cblObra.AcceptChanges += OnAcceptChanges;
-        }
-
-        private void OnAcceptChanges(object sender, EventArgs e)
+        public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaAutorizantesRedet();
         }
@@ -94,7 +85,7 @@ namespace WebForms
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim(); // Obtener el texto del buscador
-            
+
             //CargarListaAutorizantes(filtro);
         }
 
@@ -203,82 +194,88 @@ namespace WebForms
             ddlEstado.SelectedIndex = 0;
         }
 
-        private void CargarListaAutorizantes(string filtro = null)
-        {
-            try
-            {
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedConceptos = cblConcepto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedEstados = cblEstado.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-
-                Session["listaAutorizanteAdmin"] = negocio.listar(selectedAreas, selectedEstados, selectedEmpresas, selectedConceptos, selectedObras, filtro);
-                dgvAutorizante.DataSource = Session["listaAutorizanteAdmin"];
-                dgvAutorizante.DataBind();
-                CalcularSubtotal();
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
-
         private void CargarListaAutorizantesRedet(string filtro = null)
         {
             try
             {
                 // 1. Obtener la lista completa
-                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                List<Autorizante> listaCompleta;
+                if (Session["autorizantesCompleto"] == null)
+                {
+                    listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                    Session["autorizantesCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    listaCompleta = (List<Autorizante>)Session["autorizantesCompleto"];
+                }
+
                 IEnumerable<Autorizante> listaFiltrada = listaCompleta;
 
-                // 2. Obtener IDs seleccionados desde SelectedValues
-                var selectedAreas = cblArea.SelectedValues;
-                var selectedEmpresas = cblEmpresa.SelectedValues;
-                var selectedConceptos = cblConcepto.SelectedValues;
-                var selectedEstados = cblEstado.SelectedValues;
-                var selectedObras = cblObra.SelectedValues;
+                // Obtener IDs seleccionados desde los controles de cabecera del GridView
+                List<string> selectedAreas = new List<string>();
+                List<string> selectedObras = new List<string>();
+                List<string> selectedEmpresas = new List<string>();
+                List<string> selectedConceptos = new List<string>();
+                List<string> selectedEstados = new List<string>();
+
+                if (dgvAutorizante.HeaderRow != null)
+                {
+                    var cblsHeaderAreaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderAreaControl != null) selectedAreas = cblsHeaderAreaControl.SelectedValues;
+
+                    var cblsHeaderObraControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderObraControl != null) selectedObras = cblsHeaderObraControl.SelectedValues;
+
+                    var cblsHeaderEmpresaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderEmpresaControl != null) selectedEmpresas = cblsHeaderEmpresaControl.SelectedValues;
+
+                    var cblsHeaderConceptoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderConceptoControl != null) selectedConceptos = cblsHeaderConceptoControl.SelectedValues;
+
+                    var cblsHeaderEstadoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderEstadoControl != null) selectedEstados = cblsHeaderEstadoControl.SelectedValues;
+                }
 
                 // 3. Aplicar filtro de texto general
-                if (!string.IsNullOrEmpty(filtro))
+                string filtroTextoGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+                if (!string.IsNullOrEmpty(filtroTextoGeneral))
                 {
                     listaFiltrada = listaFiltrada.Where(a =>
-                        (a.CodigoAutorizante?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (a.Obra?.Descripcion?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (a.Empresa?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) || 
-                        (a.Concepto?.Nombre?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (a.Estado?.Nombre?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (a.Expediente?.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0)
+                        (a.Obra?.Area?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Obra?.Descripcion?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Obra?.Contrata?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Empresa?.ToUpper().Contains(filtroTextoGeneral) ?? false) || // Autorizante.Empresa (string)
+                        (a.Obra?.Empresa?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) || // Autorizante.Obra.Empresa.Nombre
+                        (a.CodigoAutorizante?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Concepto?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Detalle?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Expediente?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.Estado?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (a.BuzonSade?.ToUpper().Contains(filtroTextoGeneral) ?? false)
                     );
                 }
 
                 // 4. Aplicar filtros específicos LINQ
                 if (selectedAreas != null && selectedAreas.Any())
                 {
-                    var areaIdsInt = selectedAreas.Select(int.Parse).ToList();
-                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Area != null && areaIdsInt.Contains(a.Obra.Area.Id));
-                }
-                if (selectedEmpresas != null && selectedEmpresas.Any())
-                {
-                    var empresaIdsInt = selectedEmpresas.Select(int.Parse).ToList();
-                    // Asegúrate que Obra.Empresa.Id esté cargado en listarAutRedet
-                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Empresa != null && empresaIdsInt.Contains(a.Obra.Empresa.Id));
-                }
-                if (selectedConceptos != null && selectedConceptos.Any())
-                {
-                    var conceptoIdsInt = selectedConceptos.Select(int.Parse).ToList();
-                    listaFiltrada = listaFiltrada.Where(a => a.Concepto != null && conceptoIdsInt.Contains(a.Concepto.Id));
-                }
-                if (selectedEstados != null && selectedEstados.Any())
-                {
-                    var estadoIdsInt = selectedEstados.Select(int.Parse).ToList();
-                    listaFiltrada = listaFiltrada.Where(a => a.Estado != null && estadoIdsInt.Contains(a.Estado.Id));
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Area != null && selectedAreas.Contains(a.Obra.Area.Id.ToString()));
                 }
                 if (selectedObras != null && selectedObras.Any())
                 {
-                    var obraIdsInt = selectedObras.Select(int.Parse).ToList();
-                    listaFiltrada = listaFiltrada.Where(a => a.Obra != null && obraIdsInt.Contains(a.Obra.Id));
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra != null && selectedObras.Contains(a.Obra.Id.ToString()));
+                }
+                if (selectedEmpresas != null && selectedEmpresas.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(a => a.Obra?.Empresa != null && selectedEmpresas.Contains(a.Obra.Empresa.Id.ToString()));
+                }
+                if (selectedConceptos != null && selectedConceptos.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(a => a.Concepto != null && selectedConceptos.Contains(a.Concepto.Id.ToString()));
+                }
+                if (selectedEstados != null && selectedEstados.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(a => a.Estado != null && selectedEstados.Contains(a.Estado.Id.ToString()));
                 }
 
                 // 5. Guardar y enlazar la lista filtrada
@@ -294,22 +291,25 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
                 dgvAutorizante.DataSource = null;
                 dgvAutorizante.DataBind();
-                // txtSubtotal.Text = 0.ToString("C"); // Considera limpiar subtotal en error
+                txtSubtotal.Text = 0.ToString("C");
             }
         }
 
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
+            List<Autorizante> dataSource = dgvAutorizante.DataSource as List<Autorizante>;
 
-            foreach (GridViewRow row in dgvAutorizante.Rows)
+            if (dataSource != null)
             {
-                var cellValue = row.Cells[10].Text;
-                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
-                {
-                    subtotal += monto;
-                }
+                subtotal = dataSource.Sum(a => a.MontoAutorizado);
             }
+            else if (Session["listaAutorizanteAdmin"] != null)
+            {
+                dataSource = (List<Autorizante>)Session["listaAutorizanteAdmin"];
+                subtotal = dataSource.Sum(a => a.MontoAutorizado);
+            }
+
 
             txtSubtotal.Text = subtotal.ToString("C");
         }
@@ -443,37 +443,13 @@ namespace WebForms
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
-
-            cblArea.DataSource = ObtenerAreas();
-            cblArea.DataTextField = "Nombre";
-            cblArea.DataValueField = "Id";
-            cblArea.DataBind();
-            cblEstado.DataSource = ObtenerEstado();
-            cblEstado.DataTextField = "Nombre";
-            cblEstado.DataValueField = "Id";
-            cblEstado.DataBind();
-
-            cblConcepto.DataSource = ObtenerConcepto();
-            cblConcepto.DataTextField = "Nombre";
-            cblConcepto.DataValueField = "Id";
-            cblConcepto.DataBind();
-
-            cblEmpresa.DataSource = ObtenerEmpresas();
-            cblEmpresa.DataTextField = "Nombre";
-            cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind();
-
-            cblObra.DataSource = ObtenerObras();
-            cblObra.DataTextField = "Nombre";
-            cblObra.DataValueField = "Id";
-            cblObra.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-      
+
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             // Identifica el TextBox modificado
@@ -548,17 +524,108 @@ namespace WebForms
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 DropDownList ddlEstadoAutorizante = (DropDownList)e.Row.FindControl("ddlEstadoAutorizante");
-
                 if (ddlEstadoAutorizante != null)
                 {
-                    DataTable estados = ObtenerEstado();
+                    DataTable estados = ObtenerEstado(); // Asume que esto obtiene todos los estados posibles
                     ddlEstadoAutorizante.DataSource = estados;
                     ddlEstadoAutorizante.DataTextField = "Nombre";
                     ddlEstadoAutorizante.DataValueField = "Id";
                     ddlEstadoAutorizante.DataBind();
 
-                    string estadoActual = DataBinder.Eval(e.Row.DataItem, "Estado.Id").ToString();
-                    ddlEstadoAutorizante.SelectedValue = estadoActual;
+                    // Establecer el valor seleccionado para el DropDownList en la fila
+                    Autorizante autorizante = (Autorizante)e.Row.DataItem;
+                    if (autorizante != null && autorizante.Estado != null)
+                    {
+                        ListItem item = ddlEstadoAutorizante.Items.FindByValue(autorizante.Estado.Id.ToString());
+                        if (item != null)
+                        {
+                            ddlEstadoAutorizante.SelectedValue = autorizante.Estado.Id.ToString();
+                        }
+                    }
+                }
+            }
+            else if (e.Row.RowType == DataControlRowType.Header)
+            {
+                List<Autorizante> autorizantesCompleto;
+                if (Session["autorizantesCompleto"] == null)
+                {
+                    autorizantesCompleto = calculoRedeterminacionNegocio.listarAutRedet();
+                    Session["autorizantesCompleto"] = autorizantesCompleto;
+                }
+                else
+                {
+                    autorizantesCompleto = (List<Autorizante>)Session["autorizantesCompleto"];
+                }
+
+                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderArea != null && autorizantesCompleto != null)
+                {
+                    var areasUnicas = autorizantesCompleto
+                        .Where(a => a.Obra?.Area != null && !string.IsNullOrEmpty(a.Obra.Area.Nombre))
+                        .Select(a => a.Obra.Area)
+                        .GroupBy(area => area.Id)
+                        .Select(g => g.First())
+                        .OrderBy(area => area.Nombre)
+                        .ToList();
+                    cblsHeaderArea.DataSource = areasUnicas;
+                    cblsHeaderArea.DataBind();
+                }
+
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderObra != null && autorizantesCompleto != null)
+                {
+                    var obrasUnicas = autorizantesCompleto
+                        .Where(a => a.Obra != null && !string.IsNullOrEmpty(a.Obra.Descripcion))
+                        .Select(a => new { Id = a.Obra.Id, Nombre = a.Obra.Descripcion }) // Nombre aquí es Descripcion
+                        .Distinct()
+                        .OrderBy(o => o.Nombre)
+                        .ToList();
+                    cblsHeaderObra.DataTextField = "Nombre"; // Corresponde al 'Nombre' del objeto anónimo
+                    cblsHeaderObra.DataValueField = "Id";
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+                }
+
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEmpresa != null && autorizantesCompleto != null)
+                {
+                    var empresasUnicas = autorizantesCompleto
+                        .Where(a => a.Obra?.Empresa != null && !string.IsNullOrEmpty(a.Obra.Empresa.Nombre))
+                        .Select(a => a.Obra.Empresa)
+                        .GroupBy(emp => emp.Id)
+                        .Select(g => g.First())
+                        .OrderBy(emp => emp.Nombre)
+                        .ToList();
+                    cblsHeaderEmpresa.DataSource = empresasUnicas;
+                    cblsHeaderEmpresa.DataBind();
+                }
+
+                var cblsHeaderConcepto = e.Row.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderConcepto != null && autorizantesCompleto != null)
+                {
+                    var conceptosUnicos = autorizantesCompleto
+                        .Where(a => a.Concepto != null && !string.IsNullOrEmpty(a.Concepto.Nombre))
+                        .Select(a => a.Concepto)
+                        .GroupBy(con => con.Id)
+                        .Select(g => g.First())
+                        .OrderBy(con => con.Nombre)
+                        .ToList();
+                    cblsHeaderConcepto.DataSource = conceptosUnicos;
+                    cblsHeaderConcepto.DataBind();
+                }
+
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEstado != null && autorizantesCompleto != null)
+                {
+                    var estadosUnicos = autorizantesCompleto
+                        .Where(a => a.Estado != null && !string.IsNullOrEmpty(a.Estado.Nombre))
+                        .Select(a => a.Estado)
+                        .GroupBy(est => est.Id)
+                        .Select(g => g.First())
+                        .OrderBy(est => est.Nombre)
+                        .ToList();
+                    cblsHeaderEstado.DataSource = estadosUnicos;
+                    cblsHeaderEstado.DataBind();
                 }
             }
         }
@@ -566,15 +633,43 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblArea.ClearSelection();
-            cblEmpresa.ClearSelection();
-            cblConcepto.ClearSelection();
-            cblEstado.ClearSelection();
-            cblObra.ClearSelection();
-            //CargarListaAutorizantes();
+
+            if (dgvAutorizante.HeaderRow != null)
+            {
+
+                ClearFilter("cblsHeaderArea");
+                ClearFilter("cblsHeaderObra");
+                ClearFilter("cblsHeaderEmpresa");
+                ClearFilter("cblsHeaderConcepto");
+                ClearFilter("cblsHeaderEstado");
+            }
+
             CargarListaAutorizantesRedet();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
+        }
+
+        private void ClearFilter(string controlId)
+        {
+            if (dgvAutorizante.HeaderRow != null)
+            {
+                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                control?.ClearSelection();
+
+                string controlInstanceId = control.ID; // Usar el ID del control para la clave de sesión/contexto.
+
+                string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                if (HttpContext.Current.Session[sessionKey] != null)
+                {
+                    HttpContext.Current.Session.Remove(sessionKey);
+                }
+
+                string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                if (HttpContext.Current.Items.Contains(contextKey))
+                {
+                    HttpContext.Current.Items.Remove(contextKey);
+                }
+            }
         }
 
     }
-
 }
