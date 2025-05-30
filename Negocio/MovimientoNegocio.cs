@@ -19,9 +19,13 @@ namespace Negocio
             try
             {
                 string query = @"SELECT 
-                                M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
-                                BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA,
-                                M.MOVIMIENTO,M.FECHA,
+                                M.ID,
+                                O.ID AS ObraId,
+                                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+                                BD.PROYECTO, 
+                                BD.SUBPROYECTO,LG.NOMBRE as LINEA,
+                                M.MOVIMIENTO,
+                                M.FECHA,
                                 BD.AUTORIZADO_INICIAL + ISNULL((SELECT SUM(M2.MOVIMIENTO)
                                 FROM MOVIMIENTOS_GESTION M2
                                 WHERE M2.ID_BASE = M.ID_BASE), 0) AS AUTORIZADO_NUEVO
@@ -44,11 +48,12 @@ namespace Negocio
 
                 if (!string.IsNullOrEmpty(filtro))
                 {
-                    query += " AND (E.NOMBRE LIKE @filtro OR NUMERO LIKE @filtro OR C.NOMBRE LIKE @filtro OR AÑO LIKE @filtro OR ETAPA LIKE @filtro OR OBRA LIKE @filtro OR B.NOMBRE LIKE @filtro OR DESCRIPCION LIKE @filtro) ";
+                    query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR BD.PROYECTO LIKE @filtro OR BD.SUBPROYECTO LIKE @filtro OR LG.NOMBRE LIKE @filtro OR M.MOVIMIENTO LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
+            
 
-                query += " ORDER BY ID";
+                query += " ORDER BY M.ID";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
@@ -56,6 +61,7 @@ namespace Negocio
                     Movimiento aux = new Movimiento();
                     aux.Id = (int)datos.Lector["ID"];
                     aux.Obra = new Obra(); // Initialize the Obra property
+                    aux.Obra.Id = (int)datos.Lector["ObraId"];
                     aux.Obra.Descripcion = datos.Lector["OBRA"] as string;
                     aux.Monto = (decimal)datos.Lector["MOVIMIENTO"];
                     aux.Fecha = (DateTime)datos.Lector["FECHA"];

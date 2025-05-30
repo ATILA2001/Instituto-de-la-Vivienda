@@ -95,21 +95,7 @@
 				<div class="d-flex flex-wrap gap-3">
 
 
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblObra">Obra:</label>
-						<div>
 
-							<CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
-						</div>
-					</div>
-
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblFecha">Fecha:</label>
-						<div>
-
-							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
-						</div>
-					</div>
 				</div>
 
 				<!-- Contenedor de Botones alineados a la derecha -->
@@ -129,7 +115,10 @@
 
 					<%-- logica que aparezca o desaparezca. copiar de david --%>
 					<div class="form-group mb-2">
-						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
+						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
+							data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Quita todos los filtros">
 					<i class="bi bi-funnel"></i>
 						</asp:LinkButton>
 					</div>
@@ -150,17 +139,44 @@
 		<asp:GridView ID="dgvMovimiento" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="dgvMovimiento_SelectedIndexChanged"
 			OnRowDeleting="dgvMovimiento_RowDeleting"
+			OnRowDataBound="dgvMovimiento_RowDataBound"
 			AutoGenerateColumns="false" runat="server">
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-				<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
+                <%--<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />--%>
+                <asp:TemplateField HeaderText="Obra">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderObra" runat="server"
+                            HeaderText="Obra"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Obra.Descripcion") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
 				<asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" />
 				<asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
 
 
 				<asp:BoundField HeaderText="Movimiento" DataField="Monto" DataFormatString="{0:C}" />
-				<asp:BoundField HeaderText="Fecha" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
+				<%--<asp:BoundField HeaderText="Fecha" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />--%>
+                <asp:TemplateField HeaderText="Fecha">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderFecha" runat="server"
+                            HeaderText="Fecha"
+                            DataTextField="Nombre"
+                            DataValueField="Valor"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Fecha", "{0:dd-MM-yyyy}") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
 				<asp:TemplateField HeaderText="Acciones">
 					<ItemTemplate>

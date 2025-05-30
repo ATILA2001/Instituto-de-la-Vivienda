@@ -3,6 +3,7 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -14,25 +15,79 @@ namespace WebForms
     {
         MovimientoNegocio negocio = new MovimientoNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblObra.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-        }
-
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaMovimientos();
-        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
+                List<Movimiento> listaCompleta = negocio.listar(new List<string>(), null);
+                Session["movimientosCompleto"] = listaCompleta;
+
                 BindDropDownList();
                 CargarListaMovimientos();
             }
         }
+        public void OnAcceptChanges(object sender, EventArgs e)
+        {
+            CargarListaMovimientos();
+        }
+
+        protected void dgvMovimiento_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.Header)
+            {
+                List<Movimiento> movimientosCompleto = Session["movimientosCompleto"] as List<Movimiento>;
+
+                if (movimientosCompleto == null)
+                {
+                    movimientosCompleto = negocio.listar(new List<string>(), null);
+                    Session["movimientosCompleto"] = movimientosCompleto;
+                }
+
+                if (movimientosCompleto == null || !movimientosCompleto.Any())
+                {
+                    return; // No hay datos para poblar los filtros.
+                }
+
+                // Poblar filtro de Obra
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderObra != null)
+                {
+                    var obrasUnicas = movimientosCompleto
+                        .Where(m => m.Obra != null && m.Obra.Id != 0 && !string.IsNullOrEmpty(m.Obra.Descripcion)) // Asegurar que Obra.Id esté disponible
+                        .Select(m => new { Id = m.Obra.Id, Nombre = m.Obra.Descripcion })
+                        .Distinct() // Distinct ahora funcionará correctamente sobre el objeto anónimo con Id y Nombre
+                        .OrderBy(x => x.Nombre)
+                        .ToList();
+                    cblsHeaderObra.DataTextField = "Nombre";
+                    cblsHeaderObra.DataValueField = "Id"; // Correcto, se usará para filtrar por Obra.Id
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+                }
+
+                // Poblar filtro de Fecha
+                var cblsHeaderFecha = e.Row.FindControl("cblsHeaderFecha") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderFecha != null)
+                {
+                    var fechasUnicas = movimientosCompleto
+                        .Where(m => m.Fecha.HasValue)
+                        .Select(m => m.Fecha.Value.Date)
+                        .Distinct()
+                        .OrderByDescending(d => d) // Ordenar por fecha (primer día del mes), los más recientes primero.
+                        .Select(d => new
+                        {
+                            Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")),
+                            Valor = d.ToString("yyyy-MM-dd")
+                        })
+                        .ToList();
+                    cblsHeaderFecha.DataTextField = "Nombre";    // Lo que el usuario ve.
+                    cblsHeaderFecha.DataValueField = "Valor";   // Lo que se usa para filtrar.
+                    cblsHeaderFecha.DataSource = fechasUnicas;
+                    cblsHeaderFecha.DataBind();
+                }
+            }
+        }
+
 
         protected void Page_PreRender(object sender, EventArgs e)
         {
@@ -91,10 +146,70 @@ namespace WebForms
         {
             try
             {
-                var selectedObras = cblObra.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                List<Movimiento> listaCompleta;
+                if (Session["movimientosCompleto"] == null)
+                {
+                    // Fallback si la sesión se pierde
+                    listaCompleta = negocio.listar(new List<string>(), null);
+                    Session["movimientosCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    listaCompleta = (List<Movimiento>)Session["movimientosCompleto"];
+                }
 
-                Session["listaMovimiento"] = negocio.listar(selectedObras, filtro);
-                dgvMovimiento.DataSource = Session["listaMovimiento"];
+                IEnumerable<Movimiento> listaFiltrada = listaCompleta;
+
+                // Obtener valores de los filtros de cabecera
+                List<string> selectedHeaderObras = new List<string>();
+                List<string> selectedHeaderFechas = new List<string>();
+
+
+                if (dgvMovimiento.HeaderRow != null)
+                {
+                    var cblsHeaderObraControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderObraControl != null) selectedHeaderObras = cblsHeaderObraControl.SelectedValues;
+
+                    var cblsHeaderFechaControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderFecha") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderFechaControl != null) selectedHeaderFechas = cblsHeaderFechaControl.SelectedValues;
+                }
+
+
+                // Aplicar filtro de texto general
+                string filtroTextoGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+
+                if (!string.IsNullOrEmpty(filtroTextoGeneral))
+                {
+                    listaFiltrada = listaFiltrada.Where(m =>
+                        (m.Obra?.Descripcion?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (m.Proyecto?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (m.SubProyecto?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (m.Linea?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (m.Monto.ToString().Contains(filtroTextoGeneral)) ||
+                        (m.AutorizadoNuevo?.ToString().Contains(filtroTextoGeneral) ?? false)
+                    );
+                }
+
+                // Aplicar filtros de cabecera
+                if (selectedHeaderObras.Any())
+                    listaFiltrada = listaFiltrada.Where(m => m.Obra != null && selectedHeaderObras.Contains(m.Obra.Id.ToString()));
+
+                if (selectedHeaderFechas.Any())
+                {
+                    var fechasSeleccionadas = selectedHeaderFechas
+                        .Select(s => DateTime.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt) ? (DateTime?)dt : null)
+                        .Where(d => d.HasValue)
+                        .Select(d => d.Value.Date)
+                        .ToList();
+                    if (fechasSeleccionadas.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(l => l.Fecha.HasValue && fechasSeleccionadas.Contains(l.Fecha.Value.Date));
+                    }
+                }
+
+                List<Movimiento> resultadoFinal = listaFiltrada.ToList();
+                Session["listaMovimiento"] = resultadoFinal;
+                dgvMovimiento.DataSource = resultadoFinal;
                 dgvMovimiento.DataBind();
             }
             catch (Exception ex)
@@ -103,6 +218,8 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+
+
 
         protected void dgvMovimiento_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -276,16 +393,6 @@ namespace WebForms
                 Valor = fecha.ToString("yyyy-MM-dd")
             });
 
-            cblFecha.DataSource = meses;
-            cblFecha.DataTextField = "Texto";
-            cblFecha.DataValueField = "Valor";
-            cblFecha.DataBind();
-
-            cblObra.DataSource = ObtenerObras();
-            cblObra.DataTextField = "Nombre";
-            cblObra.DataValueField = "Id";
-            cblObra.DataBind();
-
             ddlObra.DataSource = ObtenerObras();
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
@@ -323,10 +430,41 @@ namespace WebForms
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
-            txtBuscar.Text = string.Empty;
-            cblObra.ClearSelection();
-            cblFecha.ClearSelection();
+            // Limpiar filtros de cabecera
+            if (dgvMovimiento.HeaderRow != null)
+            {
+                ClearFilter("cblsHeaderObra");
+                ClearFilter("cblsHeaderFecha");
+            }
+
             CargarListaMovimientos();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
+        }
+
+        private void ClearFilter(string controlId)
+        {
+            if (dgvMovimiento.HeaderRow != null)
+            {
+                var control = dgvMovimiento.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+
+                    string controlInstanceId = control.ID;
+
+                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    if (HttpContext.Current.Session[sessionKey] != null)
+                    {
+                        HttpContext.Current.Session.Remove(sessionKey);
+                    }
+
+                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey))
+                    {
+                        HttpContext.Current.Items.Remove(contextKey);
+                    }
+                }
+            }
         }
     }
 }
