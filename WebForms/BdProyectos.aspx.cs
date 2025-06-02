@@ -14,18 +14,6 @@ namespace WebForms
     {
         BdProyectoNegocio bdProyectoNegocio = new BdProyectoNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblArea.AcceptChanges += CblFiltro_AcceptChanges;
-            cblLinea.AcceptChanges += CblFiltro_AcceptChanges;
-            cblProyecto.AcceptChanges += CblFiltro_AcceptChanges;
-        }
-
-        private void CblFiltro_AcceptChanges(object sender, EventArgs e)
-        {
-            CargarListaProyectos();
-        }
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -35,18 +23,11 @@ namespace WebForms
                 CalcularSubtotal();
             }
         }
-
-        protected void Page_PreRender(object sender, EventArgs e)
+        
+        // Usado para el nuevo filtro. Las referencias se encuentran en el ASPX por ahora.
+        public void OnAcceptChanges(object sender, EventArgs e)
         {
-            // Configure validators if we're in editing mode
-            if (ViewState["EditingProyectoId"] != null)
-            {
-                // No special validations needed to disable
-            }
-            else
-            {
-                // Normal validation in add mode
-            }
+            CargarListaProyectos();
         }
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
@@ -78,16 +59,27 @@ namespace WebForms
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("CargarListaProyectos EJECUTADO");
-                var selectedAreas = cblArea.SelectedValues;
-                var selectedLineas = cblLinea.SelectedValues;
-                var selectedProyectos = cblProyecto.SelectedValues;
+                List<string> selectedAreas = new List<string>();
+                List<string> selectedProyectos = new List<string>();
+                List<string> selectedLineas = new List<string>();
 
-                // Imprimir los valores obtenidos para depuración
-                System.Diagnostics.Debug.WriteLine("Selected Areas: " + (selectedAreas.Any() ? string.Join(", ", selectedAreas) : "NINGUNA"));
-                System.Diagnostics.Debug.WriteLine("Selected Lineas: " + (selectedLineas.Any() ? string.Join(", ", selectedLineas) : "NINGUNA"));
-                System.Diagnostics.Debug.WriteLine("Selected Proyectos: " + (selectedProyectos.Any() ? string.Join(", ", selectedProyectos) : "NINGUNO"));
+                if (dgvBdProyecto.HeaderRow != null)
+                {
+                    var cblHeaderArea = dgvBdProyecto.HeaderRow.FindControl("cblHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblHeaderArea != null) selectedAreas = cblHeaderArea.SelectedValues;
 
+                    var cblHeaderProyecto = dgvBdProyecto.HeaderRow.FindControl("cblHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblHeaderProyecto != null) selectedProyectos = cblHeaderProyecto.SelectedValues;
+
+                    var cblHeaderLineaGestion = dgvBdProyecto.HeaderRow.FindControl("cblHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblHeaderLineaGestion != null) selectedLineas = cblHeaderLineaGestion.SelectedValues;
+                }
+
+                // Si el filtro de texto general está vacío, tomar el del TextBox txtBuscar
+                if (string.IsNullOrEmpty(filtro))
+                {
+                    filtro = txtBuscar.Text.Trim();
+                }
 
                 Session["listaProyectos"] = bdProyectoNegocio.Listar(selectedLineas, selectedProyectos, selectedAreas, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
@@ -98,6 +90,9 @@ namespace WebForms
             {
                 lblMensaje.Text = $"Error al cargar los Proyectos: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+                dgvBdProyecto.DataSource = null; // Asegurar que la grilla esté vacía en caso de error
+                dgvBdProyecto.DataBind();
+                //txtSubtotal.Text = 0.ToString("C");
             }
         }
 
@@ -143,7 +138,7 @@ namespace WebForms
                     subtotal += monto;
                 }
             }
-            txtSubtotal.Text = subtotal.ToString("C");
+            //txtSubtotal.Text = subtotal.ToString("C");
         }
 
         protected void dgvBdProyecto_SelectedIndexChanged(object sender, EventArgs e)
@@ -231,6 +226,73 @@ namespace WebForms
             {
                 lblMensaje.Text = $"Error al eliminar el proyecto: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        protected void dgvBdProyecto_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+
+            // Asegura que solo se procese la fila de cabecera
+            if (e.Row.RowType == DataControlRowType.Header)
+            {
+                List<BdProyecto> proyectosCompleto = Session["listaProyectosCompleta"] as List<BdProyecto>;
+                if (proyectosCompleto == null || !proyectosCompleto.Any())
+                {
+                    // Si no hay datos completos, intentar recargarlos (aunque idealmente ya deberían estar)
+                    proyectosCompleto = bdProyectoNegocio.Listar(null, null, null, null);
+                    Session["listaProyectosCompleta"] = proyectosCompleto;
+                    if (proyectosCompleto == null || !proyectosCompleto.Any()) return;
+                }
+
+                var cblsHeaderArea = e.Row.FindControl("cblHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                // Poblar filtro de Área
+                if (cblsHeaderArea != null)
+                {
+                    var areasUnicas = proyectosCompleto
+                        .Where(c => c.Obra?.Area != null && c.Obra.Area.Id > 0 && !string.IsNullOrEmpty(c.Obra.Area.Nombre)) // Validar Id del área
+                        .Select(c => c.Obra.Area) // Seleccionar el objeto Area completo
+                        .GroupBy(a => a.Id)       // Agrupar por el Id numérico del Area para obtener unicidad
+                        .Select(g => g.First())   // Tomar el primer objeto Area de cada grupo
+                        .Select(a => new { Id = a.Id, Nombre = a.Nombre }) // Proyectar a Id (numérico) y Nombre
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderArea.DataSource = areasUnicas;
+                    cblsHeaderArea.DataBind();
+                }
+
+
+                // Poblar filtro de Proyecto
+                var cblsHeaderProyecto = e.Row.FindControl("cblHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderProyecto != null)
+                {
+                    var proyectosUnicos = proyectosCompleto
+                        .Where(p => !string.IsNullOrEmpty(p.Proyecto))
+                        .Select(p => p.Proyecto)
+                        .Distinct()
+                        .OrderBy(nombre => nombre)
+                        .Select(nombre => new { Nombre = nombre })
+                        .ToList();
+
+                    cblsHeaderProyecto.DataSource = proyectosUnicos;
+                    cblsHeaderProyecto.DataBind();
+                }
+
+                // Poblar filtro de Línea de Gestión
+                var cblsHeaderLinea = e.Row.FindControl("cblHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderLinea != null)
+                {
+                    var lineasUnicos = proyectosCompleto
+                        .Where(p => p.LineaGestion != null && !string.IsNullOrEmpty(p.LineaGestion.Nombre))
+                        .Select(p => p.LineaGestion)
+                        .GroupBy(lg => lg.Id)
+                        .Select(g => g.First())
+                        .OrderBy(lg => lg.Nombre)
+                        .ToList();
+
+                    cblsHeaderLinea.DataSource = lineasUnicos;
+                    cblsHeaderLinea.DataBind();
+                }
             }
         }
 
@@ -331,31 +393,15 @@ namespace WebForms
         }
         private void BindDropDownList()
         {
-            cblProyecto.DataSource = ObtenerProyecto();
-            cblProyecto.DataTextField = "Nombre";
-            cblProyecto.DataValueField = "Nombre";
-            cblProyecto.DataBind();
-
             ddlObra.DataSource = ObtenerObras();
             ddlObra.DataTextField = "Nombre";
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
 
-            cblArea.DataSource = ObtenerAreas();
-            cblArea.DataTextField = "Nombre";
-            cblArea.DataValueField = "Id";
-            cblArea.DataBind();
-
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";
             ddlLineaGestion.DataValueField = "Nombre";
             ddlLineaGestion.DataBind();
-
-           
-            cblLinea.DataSource = ObtenerLineaGestion();
-            cblLinea.DataTextField = "Nombre";
-            cblLinea.DataValueField = "Id";
-            cblLinea.DataBind();
         }
        
         private DataTable ObtenerObras()
@@ -377,10 +423,28 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblArea.ClearSelection();
-            cblLinea.ClearSelection();
-            cblProyecto.ClearSelection();
+
+            if (dgvBdProyecto.HeaderRow != null)
+            {
+                ClearHeaderFilter("cblHeaderArea");
+                ClearHeaderFilter("cblHeaderProyecto");
+                ClearHeaderFilter("cblHeaderLineaGestion");
+            }
             CargarListaProyectos();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
+        }
+
+        private void ClearHeaderFilter(string controlId)
+        {
+            if (dgvBdProyecto.HeaderRow != null)
+            {
+                var control = dgvBdProyecto.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+                    HttpContext.Current.Session.Remove($"CheckBoxListSearch_SelectedValues_{control.ID}");
+                }
+            }
         }
 
     }
