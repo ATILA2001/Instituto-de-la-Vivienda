@@ -99,6 +99,7 @@
     <Content Include="CustomControls\TreeViewSearch.css" />
     <Content Include="CustomControls\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
+    <Content Include="FormulacionAdmin.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
@@ -217,6 +218,13 @@
     </Compile>
     <Compile Include="Error.aspx.designer.cs">
       <DependentUpon>Error.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FormulacionAdmin.aspx.cs">
+      <DependentUpon>FormulacionAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FormulacionAdmin.aspx.designer.cs">
+      <DependentUpon>FormulacionAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="Legitimos.aspx.cs">

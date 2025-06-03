@@ -57,15 +57,18 @@
     <Compile Include="EstadoAutorizanteNegocio.cs" />
     <Compile Include="EstadoRedetNegocio.cs" />
     <Compile Include="ExpedienteReliqNegocio.cs" />
+    <Compile Include="FormulacionNegocio.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
+    <Compile Include="PrioridadNegocio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedeterminacionNegocio.cs" />
     <Compile Include="TipoPagoNegocio.cs" />
+    <Compile Include="UnidadMedidaNegocio.cs" />
     <Compile Include="UsuarioNegocio.cs" />
   </ItemGroup>
   <ItemGroup>
