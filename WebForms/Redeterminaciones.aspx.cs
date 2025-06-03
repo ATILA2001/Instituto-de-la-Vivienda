@@ -14,14 +14,7 @@ namespace WebForms
     {
         RedeterminacionNegocio negocio = new RedeterminacionNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblObra.AcceptChanges += OnAcceptChanges;
-            cblAutorizante.AcceptChanges += OnAcceptChanges;
-            cblEtapa.AcceptChanges += OnAcceptChanges;
-        }
-
-        private void OnAcceptChanges(object sender, EventArgs e)
+        protected void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaRedeterminacion();
         }
@@ -30,6 +23,10 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
+                // Cargar la lista completa de redeterminaciones y guardarla en Session
+                List<Redeterminacion> redeterminacionesCompletas = negocio.listar(); // Usar la sobrecarga que trae todos los datos necesarios
+                Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
+
                 BindDropDownList();
                 CargarListaRedeterminacion();
             }
@@ -100,30 +97,199 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblObra.ClearSelection();
-            cblEtapa.ClearSelection();
-            cblAutorizante.ClearSelection();
+            // Limpiar filtros de cabecera
+            ClearHeaderFilter("cblsHeaderObra");
+            ClearHeaderFilter("cblsHeaderAutorizante");
+            ClearHeaderFilter("cblsHeaderEstado");
             CargarListaRedeterminacion();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
+        }
+
+        private void ClearHeaderFilter(string controlId)
+        {
+            if (dgvRedeterminacion.HeaderRow != null)
+            {
+                var control = dgvRedeterminacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+                    string controlInstanceId = control.ID;
+                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
+                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
+                }
+            }
         }
 
         private void CargarListaRedeterminacion(string filtro = null)
         {
             try
             {
-                var selectedObras = cblObra.SelectedValues;
-                var selectedAutorizantes = cblAutorizante.SelectedValues;
-                var selectedEtapas = cblEtapa.SelectedValues;
+                List<Redeterminacion> redeterminacionesCompletas = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
+                if (redeterminacionesCompletas == null)
+                {
+                    redeterminacionesCompletas = negocio.listar(); // Recargar si no está en sesión
+                    Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
+                }
 
-                Session["listaRedeterminacion"] = negocio.listar(selectedEtapas, selectedAutorizantes, selectedObras, filtro);
-                dgvRedeterminacion.DataSource = Session["listaRedeterminacion"];
+                if (redeterminacionesCompletas == null)
+                {
+                    lblMensaje.Text = "No se pudieron cargar los datos de las redeterminaciones.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    dgvRedeterminacion.DataSource = null;
+                    dgvRedeterminacion.DataBind();
+                    return;
+                }
+
+                IEnumerable<Redeterminacion> listaFiltrada = redeterminacionesCompletas;
+
+                // Aplicar filtro de texto general (txtBuscar)
+                string filtroGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+                if (!string.IsNullOrEmpty(filtroGeneral))
+                {
+                    listaFiltrada = listaFiltrada.Where(r =>
+                        (r.Autorizante?.Obra?.Descripcion?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.CodigoRedet?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Autorizante?.CodigoAutorizante?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Etapa?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Expediente?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Tipo?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Observaciones?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Empresa?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (r.Area?.ToUpper().Contains(filtroGeneral) ?? false)
+                    );
+                }
+
+                // Aplicar filtros de cabecera
+                if (dgvRedeterminacion.HeaderRow != null)
+                {
+                    var cblsHeaderObra = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    var selectedObras = cblsHeaderObra?.SelectedValues;
+                    if (selectedObras != null && selectedObras.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(r => r.Autorizante?.Obra != null && selectedObras.Contains(r.Autorizante.Obra.Id.ToString()));
+                    }
+
+                    var cblsHeaderAutorizante = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                    var selectedAutorizantes = cblsHeaderAutorizante?.SelectedValues;
+                    if (selectedAutorizantes != null && selectedAutorizantes.Any())
+                    {
+                        // Asumiendo que el filtro de autorizante usa CodigoAutorizante como ValueField, ya que Id no está directamente en Autorizante en el modelo Redeterminacion.
+                        // Si Autorizante.Id estuviera disponible y fuera el DataValueField, se usaría r.Autorizante.Id.ToString()
+                        listaFiltrada = listaFiltrada.Where(r => r.Autorizante != null && selectedAutorizantes.Contains(r.Autorizante.CodigoAutorizante));
+                    }
+
+                    var cblsHeaderEstado = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var selectedEstados = cblsHeaderEstado?.SelectedValues;
+                    if (selectedEstados != null && selectedEstados.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(r => r.Etapa != null && selectedEstados.Contains(r.Etapa.Id.ToString()));
+                    }
+                }
+
+                List<Redeterminacion> resultadoFinal = listaFiltrada.ToList();
+                Session["listaRedeterminacion"] = resultadoFinal; // Guardar lista filtrada para operaciones como edición/eliminación
+                dgvRedeterminacion.DataSource = resultadoFinal;
                 dgvRedeterminacion.DataBind();
+
+                if (!resultadoFinal.Any())
+                {
+                    lblMensaje.Text = "No se encontraron redeterminaciones con los filtros aplicados.";
+                }
+                else
+                {
+                    lblMensaje.Text = "";
+                }
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al cargar las redeterminaciones: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+                dgvRedeterminacion.DataSource = new List<Redeterminacion>();
+                dgvRedeterminacion.DataBind();
+            }
+
+        }
+
+        protected void dgvRedeterminacion_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                // Lógica existente para poblar el DropDownList de Etapas en cada fila
+                DropDownList ddlEtapas = (DropDownList)e.Row.FindControl("ddlEtapas");
+                if (ddlEtapas != null)
+                {
+                    DataTable estados = ObtenerTipos(); // Este método ya existe y obtiene los estados
+                    ddlEtapas.DataSource = estados;
+                    ddlEtapas.DataTextField = "Nombre";
+                    ddlEtapas.DataValueField = "Id";
+                    ddlEtapas.DataBind();
+
+                    // Establecer el valor seleccionado para el DropDownList de la fila
+                    Redeterminacion redetItem = e.Row.DataItem as Redeterminacion;
+                    if (redetItem != null && redetItem.Etapa != null)
+                    {
+                        ListItem item = ddlEtapas.Items.FindByValue(redetItem.Etapa.Id.ToString());
+                        if (item != null)
+                        {
+                            ddlEtapas.SelectedValue = redetItem.Etapa.Id.ToString();
+                        }
+                    }
+                }
+            }
+            else if (e.Row.RowType == DataControlRowType.Header)
+            {
+                // Poblar los CheckBoxListSearch en la cabecera
+                List<Redeterminacion> redeterminacionesCompletas = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
+                if (redeterminacionesCompletas == null || !redeterminacionesCompletas.Any()) return;
+
+                // Poblar filtro de Obra
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderObra != null)
+                {
+                    var items = redeterminacionesCompletas
+                        .Where(r => r.Autorizante?.Obra != null && !string.IsNullOrEmpty(r.Autorizante.Obra.Descripcion))
+                        .Select(r => new { Id = r.Autorizante.Obra.Id, Nombre = r.Autorizante.Obra.Descripcion })
+                        .Distinct()
+                        .OrderBy(o => o.Nombre)
+                        .ToList();
+                    cblsHeaderObra.DataSource = items;
+                    cblsHeaderObra.DataBind();
+                }
+
+                // Poblar filtro de Autorizante
+                var cblsHeaderAutorizante = e.Row.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderAutorizante != null)
+                {
+                    var items = redeterminacionesCompletas
+                        .Where(r => r.Autorizante != null && !string.IsNullOrEmpty(r.Autorizante.CodigoAutorizante))
+                        // Usamos CodigoAutorizante como Id y Nombre para el filtro, asumiendo que es el identificador principal para el usuario.
+                        // Si Autorizante tuviera un Id numérico y un Nombre descriptivo aparte del código, se usarían esos.
+                        .Select(r => new { Id = r.Autorizante.CodigoAutorizante, Nombre = r.Autorizante.CodigoAutorizante })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+                    cblsHeaderAutorizante.DataSource = items;
+                    cblsHeaderAutorizante.DataBind();
+                }
+
+                // Poblar filtro de Estado (Etapa)
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEstado != null)
+                {
+                    var items = redeterminacionesCompletas
+                        .Where(r => r.Etapa != null && !string.IsNullOrEmpty(r.Etapa.Nombre))
+                        .Select(r => new { Id = r.Etapa.Id, Nombre = r.Etapa.Nombre })
+                        .Distinct()
+                        .OrderBy(r => r.Nombre)
+                        .ToList();
+                    cblsHeaderEstado.DataSource = items;
+                    cblsHeaderEstado.DataBind();
+                }
             }
         }
+
 
         protected void dgvRedeterminacion_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -362,11 +528,6 @@ namespace WebForms
 
                     // Añadir opción predeterminada
                     ddlEtapa.Items.Insert(0, new ListItem("Seleccione una etapa", ""));
-
-                    cblEtapa.DataSource = tiposEtapas;
-                    cblEtapa.DataTextField = "Nombre";
-                    cblEtapa.DataValueField = "Id";
-                    cblEtapa.DataBind();
                 }
 
                 // Cargar autorizantes
@@ -380,22 +541,8 @@ namespace WebForms
 
                     // Añadir opción predeterminada
                     ddlAutorizante.Items.Insert(0, new ListItem("Seleccione un autorizante", ""));
-
-                    cblAutorizante.DataSource = autorizantes;
-                    cblAutorizante.DataTextField = "Nombre";
-                    cblAutorizante.DataValueField = "Id";
-                    cblAutorizante.DataBind();
                 }
 
-                // Cargar obras
-                DataTable obras = ObtenerObras();
-                if (obras != null && obras.Rows.Count > 0)
-                {
-                    cblObra.DataSource = obras;
-                    cblObra.DataTextField = "Nombre";
-                    cblObra.DataValueField = "Id";
-                    cblObra.DataBind();
-                }
             }
             catch (Exception ex)
             {
@@ -450,24 +597,5 @@ namespace WebForms
             }
         }
 
-        protected void dgvRedeterminacion_RowDataBound(object sender, GridViewRowEventArgs e)
-        {
-            if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                DropDownList ddlEtapas = (DropDownList)e.Row.FindControl("ddlEtapas");
-
-                if (ddlEtapas != null)
-                {
-                    DataTable estados = ObtenerTipos();
-                    ddlEtapas.DataSource = estados;
-                    ddlEtapas.DataTextField = "Nombre";
-                    ddlEtapas.DataValueField = "Id";
-                    ddlEtapas.DataBind();
-
-                    string estadoActual = DataBinder.Eval(e.Row.DataItem, "Etapa.Id").ToString();
-                    ddlEtapas.SelectedValue = estadoActual;
-                }
-            }
-        }
     }
 }
