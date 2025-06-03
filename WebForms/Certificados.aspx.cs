@@ -3,6 +3,7 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -14,27 +15,33 @@ namespace WebForms
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-        }
-
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-        }
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+                    // Cargar la lista completa de certificados para el área del usuario y guardarla en sesión
+                    List<Certificado> listaCompletaUsuario = negocio.listarFiltro(usuarioLogueado,
+                        new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["certificadosUsuarioCompleto"] = listaCompletaUsuario;
+                }
+                else
+                {
+                    Session["certificadosUsuarioCompleto"] = new List<Certificado>();
+                    lblMensaje.Text = "No se pudo determinar el área del usuario. No se pueden cargar los certificados.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+
                 BindDropDownList();
                 CargarListaCertificados();
             }
+        }
+
+        protected void OnAcceptChanges(object sender, EventArgs e)
+        {
+            CargarListaCertificados();
         }
 
         protected void Page_PreRender(object sender, EventArgs e)
@@ -81,16 +88,17 @@ namespace WebForms
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
+            List<Certificado> dataSource = dgvCertificado.DataSource as List<Certificado>;
 
-            foreach (GridViewRow row in dgvCertificado.Rows)
+            if (dataSource != null)
             {
-                var cellValue = row.Cells[9].Text;
-                if (decimal.TryParse(cellValue, System.Globalization.NumberStyles.Currency, null, out decimal monto))
-                {
-                    subtotal += monto;
-                }
+                subtotal = dataSource.Sum(c => c.MontoTotal);
             }
-
+            else if (Session["listaCertificado"] != null)
+            {
+                dataSource = (List<Certificado>)Session["listaCertificado"];
+                subtotal = dataSource.Sum(c => c.MontoTotal);
+            }
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
@@ -98,16 +106,125 @@ namespace WebForms
         {
             try
             {
-                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                List<Certificado> listaBase;
+                if (Session["certificadosUsuarioCompleto"] == null)
+                {
+                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                    {
+                        listaBase = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        Session["certificadosUsuarioCompleto"] = listaBase;
+                    }
+                    else
+                    {
+                        dgvCertificado.DataSource = new List<Certificado>();
+                        dgvCertificado.DataBind();
+                        CalcularSubtotal();
+                        return;
+                    }
+                }
+                else
+                {
+                    listaBase = (List<Certificado>)Session["certificadosUsuarioCompleto"];
+                }
 
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-                var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                IEnumerable<Certificado> listaFiltrada = listaBase;
 
-                Session["listaCertificado"] = negocio.listarFiltro(usuarioLogueado, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, filtro);
-                dgvCertificado.DataSource = Session["listaCertificado"];
+                // Obtener valores de los filtros de cabecera
+                List<string> selectedHeaderEmpresas = new List<string>();
+                List<string> selectedHeaderCodigosAutorizante = new List<string>();
+                List<string> selectedHeaderEstados = new List<string>();
+                List<string> selectedHeaderTipos = new List<string>(); // IDs de TipoPago
+                List<string> selectedHeaderMesesCertificado = new List<string>(); // Formato yyyy-MM-dd o yyyy_MM o year_yyyy
+
+                if (dgvCertificado.HeaderRow != null)
+                {
+                    var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
+
+                    var cblsHeaderCodigoAutorizanteCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderCodigoAutorizanteCtrl != null) selectedHeaderCodigosAutorizante = cblsHeaderCodigoAutorizanteCtrl.SelectedValues;
+
+                    var cblsHeaderEstadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
+
+                    var cblsHeaderTipoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderTipoCtrl != null) selectedHeaderTipos = cblsHeaderTipoCtrl.SelectedValues;
+
+                    var cblsHeaderMesCertificadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderMesCertificadoCtrl != null) selectedHeaderMesesCertificado = cblsHeaderMesCertificadoCtrl.SelectedValues;
+                }
+
+                // Aplicar filtro de texto general
+                string filtroTexto = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+                if (!string.IsNullOrEmpty(filtroTexto))
+                {
+                    listaFiltrada = listaFiltrada.Where(c =>
+                        (c.Autorizante?.Obra?.Descripcion?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Autorizante?.Obra?.Contrata?.Nombre?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Autorizante?.Detalle?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Empresa?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Autorizante?.CodigoAutorizante?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.ExpedientePago?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Estado?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.Tipo?.Nombre?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (c.BuzonSade?.ToUpper().Contains(filtroTexto) ?? false)
+                    );
+                }
+
+                // Aplicar filtros de cabecera
+                if (selectedHeaderEmpresas.Any())
+                    listaFiltrada = listaFiltrada.Where(c => !string.IsNullOrEmpty(c.Empresa) && selectedHeaderEmpresas.Contains(c.Empresa));
+
+                if (selectedHeaderCodigosAutorizante.Any())
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante != null && !string.IsNullOrEmpty(c.Autorizante.CodigoAutorizante) && selectedHeaderCodigosAutorizante.Contains(c.Autorizante.CodigoAutorizante));
+
+                if (selectedHeaderEstados.Any())
+                    listaFiltrada = listaFiltrada.Where(c => !string.IsNullOrEmpty(c.Estado) && selectedHeaderEstados.Contains(c.Estado));
+
+                if (selectedHeaderTipos.Any())
+                    listaFiltrada = listaFiltrada.Where(c => c.Tipo != null && selectedHeaderTipos.Contains(c.Tipo.Id.ToString()));
+
+                if (selectedHeaderMesesCertificado.Any())
+                {
+                    List<DateTime> fechasSeleccionadasDia = new List<DateTime>();
+                    List<Tuple<int, int>> mesesAnioSeleccionados = new List<Tuple<int, int>>(); // Año, Mes
+                    List<int> aniosSeleccionados = new List<int>();
+
+                    foreach (var sel in selectedHeaderMesesCertificado)
+                    {
+                        if (DateTime.TryParseExact(sel, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dtDia))
+                        {
+                            fechasSeleccionadasDia.Add(dtDia.Date);
+                        }
+                        else if (sel.Contains("_") && !sel.StartsWith("year_")) // Formato "yyyy_MM"
+                        {
+                            var parts = sel.Split('_');
+                            if (parts.Length == 2 && int.TryParse(parts[0], out int year) && int.TryParse(parts[1], out int month))
+                            {
+                                mesesAnioSeleccionados.Add(Tuple.Create(year, month));
+                            }
+                        }
+                        else if (sel.StartsWith("year_")) // Formato "year_yyyy"
+                        {
+                            if (int.TryParse(sel.Substring(5), out int year))
+                            {
+                                aniosSeleccionados.Add(year);
+                            }
+                        }
+                    }
+                    if (fechasSeleccionadasDia.Any() || mesesAnioSeleccionados.Any() || aniosSeleccionados.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(c => c.MesAprobacion.HasValue &&
+                            (fechasSeleccionadasDia.Contains(c.MesAprobacion.Value.Date) ||
+                             mesesAnioSeleccionados.Any(m => m.Item1 == c.MesAprobacion.Value.Year && m.Item2 == c.MesAprobacion.Value.Month) ||
+                             aniosSeleccionados.Contains(c.MesAprobacion.Value.Year)));
+                    }
+                }
+
+                List<Certificado> resultadoFinal = listaFiltrada.ToList();
+                Session["listaCertificado"] = resultadoFinal;
+                dgvCertificado.DataSource = resultadoFinal;
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
             }
@@ -115,7 +232,9 @@ namespace WebForms
             {
                 lblMensaje.Text = $"Error al cargar los Certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+                System.Diagnostics.Debug.WriteLine($"Error en CargarListaCertificados (User): {ex.ToString()}");
             }
+
         }
 
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
@@ -372,6 +491,105 @@ namespace WebForms
             return dt;
         }
 
+        protected void dgvCertificado_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.Header)
+            {
+                List<Certificado> certificadosUsuarioCompleto = Session["certificadosUsuarioCompleto"] as List<Certificado>;
+                if (certificadosUsuarioCompleto == null || !certificadosUsuarioCompleto.Any()) return;
+
+                // Poblar filtro de Empresa
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEmpresa != null)
+                {
+                    var items = certificadosUsuarioCompleto
+                        .Where(c => !string.IsNullOrEmpty(c.Empresa))
+                        .Select(c => c.Empresa)
+                        .Distinct()
+                        .OrderBy(emp => emp)
+                        .Select(emp => new { Nombre = emp }) // El UserControl espera DataTextField y DataValueField
+                        .ToList();
+                    cblsHeaderEmpresa.DataTextField = "Nombre";
+                    cblsHeaderEmpresa.DataValueField = "Nombre"; // Usar Nombre como valor también
+                    cblsHeaderEmpresa.DataSource = items;
+                    cblsHeaderEmpresa.DataBind();
+                }
+
+                // Poblar filtro de Código Autorizante
+                var cblsHeaderCodigoAutorizante = e.Row.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderCodigoAutorizante != null)
+                {
+                    var items = certificadosUsuarioCompleto
+                        .Where(c => c.Autorizante != null && !string.IsNullOrEmpty(c.Autorizante.CodigoAutorizante))
+                        .Select(c => c.Autorizante.CodigoAutorizante)
+                        .Distinct()
+                        .OrderBy(cod => cod)
+                        .Select(cod => new { Codigo = cod })
+                        .ToList();
+                    cblsHeaderCodigoAutorizante.DataTextField = "Codigo";
+                    cblsHeaderCodigoAutorizante.DataValueField = "Codigo";
+                    cblsHeaderCodigoAutorizante.DataSource = items;
+                    cblsHeaderCodigoAutorizante.DataBind();
+                }
+
+                // Poblar filtro de Estado
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEstado != null)
+                {
+                    var items = certificadosUsuarioCompleto
+                        .Where(c => !string.IsNullOrEmpty(c.Estado))
+                        .Select(c => c.Estado)
+                        .Distinct()
+                        .OrderBy(est => est)
+                        .Select(est => new { Nombre = est })
+                        .ToList();
+                    cblsHeaderEstado.DataTextField = "Nombre";
+                    cblsHeaderEstado.DataValueField = "Nombre";
+                    cblsHeaderEstado.DataSource = items;
+                    cblsHeaderEstado.DataBind();
+                }
+
+                // Poblar filtro de Tipo
+                var cblsHeaderTipo = e.Row.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderTipo != null)
+                {
+                    var items = certificadosUsuarioCompleto
+                        .Where(c => c.Tipo != null && !string.IsNullOrEmpty(c.Tipo.Nombre))
+                        .Select(c => c.Tipo)
+                        .GroupBy(t => t.Id)
+                        .Select(g => g.First())
+                        .OrderBy(t => t.Nombre)
+                        .Select(t => new { Id = t.Id.ToString(), Nombre = t.Nombre })
+                        .ToList();
+                    cblsHeaderTipo.DataTextField = "Nombre";
+                    cblsHeaderTipo.DataValueField = "Id";
+                    cblsHeaderTipo.DataSource = items;
+                    cblsHeaderTipo.DataBind();
+                }
+
+                // Poblar filtro de Mes Certificado
+                var cblsHeaderMesCertificado = e.Row.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderMesCertificado != null)
+                {
+                    var mesesCertificadoUnicos = certificadosUsuarioCompleto
+                        .Where(c => c.MesAprobacion.HasValue)
+                        .Select(c => c.MesAprobacion.Value)
+                        .Distinct()
+                        .OrderByDescending(d => d)
+                        .Select(d => new {
+                            Id = d.ToString("yyyy-MM-dd"), // Formato que el UserControl puede parsear
+                            Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")) // Para visualización si es necesario
+                        })
+                        .ToList();
+                    cblsHeaderMesCertificado.DataTextField = "Nombre"; // El UserControl generará la jerarquía
+                    cblsHeaderMesCertificado.DataValueField = "Id";    // El UserControl usará Id para el valor
+                    cblsHeaderMesCertificado.DataSource = mesesCertificadoUnicos;
+                    cblsHeaderMesCertificado.DataBind();
+                }
+            }
+        }
+
+
         private void BindDropDownList()
         {// Clear existing items first
             ddlTipo.Items.Clear();
@@ -390,44 +608,6 @@ namespace WebForms
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-
-            cblTipo.DataSource = ObtenerTipos();
-            cblTipo.DataTextField = "Nombre";
-            cblTipo.DataValueField = "Id";
-            cblTipo.DataBind();
-
-            cblEmpresa.DataSource = ObtenerEmpresas();
-            cblEmpresa.DataTextField = "Nombre";
-            cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind();
-
-            ddlAutorizante.DataSource = ObtenerAutorizantes();
-            ddlAutorizante.DataTextField = "Nombre";
-            ddlAutorizante.DataValueField = "Id";
-            ddlAutorizante.DataBind();
-
-            cblAutorizante.DataSource = ObtenerAutorizantes();
-            cblAutorizante.DataTextField = "Nombre";
-            cblAutorizante.DataValueField = "Id";
-            cblAutorizante.DataBind();
-
-            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
-            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
-            .Select(fecha => new
-            {
-                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
-                Valor = fecha.ToString("yyyy-MM-dd")
-            });
-
-            cblFecha.DataSource = meses;
-            cblFecha.DataTextField = "Texto";
-            cblFecha.DataValueField = "Valor";
-            cblFecha.DataBind();
-
-            cblEstadoExpediente.DataSource = ObtenerEstadosExpedientes();
-            cblEstadoExpediente.DataTextField = "Nombre";
-            cblEstadoExpediente.DataValueField = "Id";
-            cblEstadoExpediente.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
@@ -476,12 +656,33 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblAutorizante.ClearSelection();
-            cblEmpresa.ClearSelection();
-            cblTipo.ClearSelection();
-            cblFecha.ClearSelection();
-            cblEstadoExpediente.ClearSelection();
+
+            // Limpiar filtros de cabecera
+            ClearHeaderFilter("cblsHeaderEmpresa");
+            ClearHeaderFilter("cblsHeaderCodigoAutorizante");
+            ClearHeaderFilter("cblsHeaderEstado");
+            ClearHeaderFilter("cblsHeaderTipo");
+            ClearHeaderFilter("cblsHeaderMesCertificado");
+
             CargarListaCertificados();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlagUser", "sessionStorage.setItem('filtersClearedUser', 'true');", true);
+        }
+
+        private void ClearHeaderFilter(string controlId)
+        {
+            if (dgvCertificado.HeaderRow != null)
+            {
+                var control = dgvCertificado.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+                    string controlInstanceId = control.ID;
+                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
+                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
+                }
+            }
         }
 
     }

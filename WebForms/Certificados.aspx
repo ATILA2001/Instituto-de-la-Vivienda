@@ -128,45 +128,7 @@
 				<div class="d-flex flex-wrap gap-3">
 
 
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblEmpresa">Empresa:</label>
-						<div>
 
-							<CustomControls:CheckBoxListSearch ID="cblEmpresa" runat="server" />
-						</div>
-					</div>
-
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblAutorizante">Autorizante:</label>
-						<div>
-
-							<CustomControls:CheckBoxListSearch ID="cblAutorizante" runat="server" />
-						</div>
-					</div>
-
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblEstadoExpediente">Estado:</label>
-						<div>
-							<CustomControls:CheckBoxListSearch ID="cblEstadoExpediente" runat="server" />
-						</div>
-					</div>
-
-
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblTipo">Tipo:</label>
-						<div>
-
-							<CustomControls:CheckBoxListSearch ID="cblTipo" runat="server" />
-						</div>
-					</div>
-
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblFecha">Mes:</label>
-						<div>
-
-							<CustomControls:CheckBoxListSearch ID="cblFecha" runat="server" />
-						</div>
-					</div>
 					<div class="form-group mb-2">
 						<label class="form-label ms-2 mb-0" for="txtSubtotal">Subtotal:</label>
 						<asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
@@ -195,7 +157,10 @@
 
 					<%-- logica que aparezca o desaparezca. copiar de david --%>
 					<div class="form-group mb-2">
-						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
+						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
+							data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Quita todos los filtros">
 					<i class="bi bi-funnel"></i>
 						</asp:LinkButton>
 					</div>
@@ -213,6 +178,7 @@
 		<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
 			OnRowDeleting="dgvCertificado_RowDeleting"
+			OnRowDataBound="dgvCertificado_RowDataBound"
 			AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
@@ -221,19 +187,83 @@
 				<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
 				<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />
 
-				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />
+<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
+                <asp:TemplateField HeaderText="Empresa">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                            HeaderText="Empresa"
+                            DataTextField="Nombre"
+                            DataValueField="Nombre"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Empresa") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+<%--				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />--%>
+                <asp:TemplateField HeaderText="Código Autorizante">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderCodigoAutorizante" runat="server"
+                            HeaderText="Código Autorizante"
+                            DataTextField="Codigo" 
+                            DataValueField="Codigo"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Autorizante.CodigoAutorizante") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:TemplateField HeaderText="Expediente">
 					<ItemTemplate>
 						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("ExpedientePago") %>' AutoPostBack="true"
 							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
 					</ItemTemplate>
 				</asp:TemplateField>
-				<asp:BoundField HeaderText="Estado" DataField="Estado" />
+<%--				<asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
+                <asp:TemplateField HeaderText="Estado">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEstado" runat="server"
+                            HeaderText="Estado"
+                            DataTextField="Nombre"
+                            DataValueField="Nombre" 
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Estado") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
 
-				<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />
+<%--				<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />--%>
+                <asp:TemplateField HeaderText="Tipo">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderTipo" runat="server"
+                            HeaderText="Tipo"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Tipo.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
-				<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+<%--				<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />--%>
+				                <asp:TemplateField HeaderText="Mes Certificado">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderMesCertificado" runat="server"
+                            HeaderText="Mes Certificado"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 				<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
