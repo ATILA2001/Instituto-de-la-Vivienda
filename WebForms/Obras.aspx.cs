@@ -14,25 +14,35 @@ namespace WebForms
     {
         private ObraNegocio negocio = new ObraNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-        }
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                BindDropDownList();
+                // Cargar la lista completa para el usuario y guardarla en sesión
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+                    // Se asume que el método listar con solo usuario devuelve todas las obras de su área
+                    // sin filtrar por empresa o barrio inicialmente.
+                    List<Obra> listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                }
+                else
+                {
+                    // Manejar el caso donde el usuario o su área no están definidos.
+                    // Podría redirigir a login o mostrar un error.
+                    Session["obrasUsuarioCompleto"] = new List<Obra>(); // Lista vacía para evitar nulls
+                }
+
+                BindDropDownList(); // Para los dropdowns del modal
                 CargarListaObras();
             }
         }
 
-        protected void Page_PreRender(object sender, EventArgs e)
+        // Evento para los filtros de cabecera
+        public void OnAcceptChanges(object sender, EventArgs e)
         {
-            // No hay validadores específicos que necesiten manejarse de manera diferente
-            // Ya que en este caso el área siempre viene del usuario logueado
+            CargarListaObras();
         }
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
@@ -78,12 +88,69 @@ namespace WebForms
         {
             try
             {
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-
                 Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                Session["listaObra"] = negocio.listar(usuarioLogueado, selectedBarrios, selectedEmpresas, filtro);
-                dgvObra.DataSource = Session["listaObra"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    dgvObra.DataSource = new List<Obra>();
+                    dgvObra.DataBind();
+                    return;
+                }
+
+                List<Obra> listaCompletaUsuario;
+                if (Session["obrasUsuarioCompleto"] == null)
+                {
+                    // Fallback si la sesión se pierde, aunque debería haberse cargado en Page_Load
+                    listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                }
+                else
+                {
+                    listaCompletaUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
+                }
+
+                IEnumerable<Obra> listaFiltrada = listaCompletaUsuario;
+
+                // Obtener valores de los filtros de cabecera
+                List<string> selectedHeaderEmpresas = new List<string>();
+                List<string> selectedHeaderBarrios = new List<string>();
+
+                if (dgvObra.HeaderRow != null)
+                {
+                    var cblsHeaderEmpresaControl = dgvObra.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderEmpresaControl != null) selectedHeaderEmpresas = cblsHeaderEmpresaControl.SelectedValues;
+
+                    var cblsHeaderBarrioControl = dgvObra.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
+                    if (cblsHeaderBarrioControl != null) selectedHeaderBarrios = cblsHeaderBarrioControl.SelectedValues;
+                }
+
+                // Aplicar filtro de texto general
+                string filtroTexto = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+
+                if (!string.IsNullOrEmpty(filtroTexto))
+                {
+                    listaFiltrada = listaFiltrada.Where(o =>
+                        (o.Empresa?.Nombre.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (o.Contrata?.Nombre.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (o.Barrio?.Nombre.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (o.Descripcion?.ToUpper().Contains(filtroTexto) ?? false) ||
+                        (o.Numero?.ToString().Contains(filtroTexto) ?? false) ||
+                        (o.Año.ToString().Contains(filtroTexto)) ||
+                        (o.Etapa.ToString().Contains(filtroTexto)) ||
+                        (o.ObraNumero.ToString().Contains(filtroTexto))
+                    );
+                }
+
+                // Aplicar filtros de cabecera (IDs)
+                if (selectedHeaderEmpresas.Any())
+                    listaFiltrada = listaFiltrada.Where(o => o.Empresa != null && selectedHeaderEmpresas.Contains(o.Empresa.Id.ToString()));
+                if (selectedHeaderBarrios.Any())
+                    listaFiltrada = listaFiltrada.Where(o => o.Barrio != null && selectedHeaderBarrios.Contains(o.Barrio.Id.ToString()));
+
+                List<Obra> resultadoFinal = listaFiltrada.ToList();
+                Session["listaObra"] = resultadoFinal; // Actualizar la sesión con la lista filtrada para el SelectedIndexChanged
+                dgvObra.DataSource = resultadoFinal;
                 dgvObra.DataBind();
             }
             catch (Exception ex)
@@ -279,6 +346,52 @@ namespace WebForms
             }
         }
 
+        protected void dgvObra_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.Header)
+            {
+                List<Obra> obrasUsuarioCompleto = Session["obrasUsuarioCompleto"] as List<Obra>;
+
+                if (obrasUsuarioCompleto == null || !obrasUsuarioCompleto.Any())
+                {
+                    return; // No hay datos para poblar los filtros.
+                }
+
+                // Poblar filtro de Empresa en cabecera
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderEmpresa != null)
+                {
+                    var empresasUnicas = obrasUsuarioCompleto
+                        .Where(o => o.Empresa != null && !string.IsNullOrEmpty(o.Empresa.Nombre))
+                        .Select(o => new { Id = o.Empresa.Id, Nombre = o.Empresa.Nombre })
+                        .Distinct()
+                        .OrderBy(x => x.Nombre)
+                        .ToList();
+                    cblsHeaderEmpresa.DataTextField = "Nombre";
+                    cblsHeaderEmpresa.DataValueField = "Id";
+                    cblsHeaderEmpresa.DataSource = empresasUnicas;
+                    cblsHeaderEmpresa.DataBind();
+                }
+
+                // Poblar filtro de Barrio en cabecera
+                var cblsHeaderBarrio = e.Row.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderBarrio != null)
+                {
+                    var barriosUnicos = obrasUsuarioCompleto
+                        .Where(o => o.Barrio != null && !string.IsNullOrEmpty(o.Barrio.Nombre))
+                        .Select(o => new { Id = o.Barrio.Id, Nombre = o.Barrio.Nombre })
+                        .Distinct()
+                        .OrderBy(x => x.Nombre)
+                        .ToList();
+                    cblsHeaderBarrio.DataTextField = "Nombre";
+                    cblsHeaderBarrio.DataValueField = "Id";
+                    cblsHeaderBarrio.DataSource = barriosUnicos;
+                    cblsHeaderBarrio.DataBind();
+                }
+            }
+        }
+
+
         protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
@@ -326,18 +439,6 @@ namespace WebForms
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
-
-            cblBarrio.DataSource = ObtenerBarrios();
-            cblBarrio.DataTextField = "Nombre";
-            cblBarrio.DataValueField = "Id";
-            cblBarrio.DataBind();
-
-
-            cblEmpresa.DataSource = ObtenerEmpresas();
-            cblEmpresa.DataTextField = "Nombre";
-            cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind();
-
         }
 
 
@@ -348,17 +449,47 @@ namespace WebForms
             CargarListaObras(filtro);
         }
 
-        protected void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaObras();
-        }
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblEmpresa.ClearSelection();
-            cblBarrio.ClearSelection();
+
+            // Limpiar filtros de cabecera
+            if (dgvObra.HeaderRow != null)
+            {
+                ClearHeaderFilter("cblsHeaderEmpresa");
+                ClearHeaderFilter("cblsHeaderBarrio");
+            }
+
             CargarListaObras();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
+
+        private void ClearHeaderFilter(string controlId)
+        {
+            if (dgvObra.HeaderRow != null)
+            {
+                var control = dgvObra.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+
+                    // Lógica para limpiar la sesión/contexto si el control CheckBoxListSearch lo requiere internamente
+                    string controlInstanceId = control.ID;
+                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    if (HttpContext.Current.Session[sessionKey] != null)
+                    {
+                        HttpContext.Current.Session.Remove(sessionKey);
+                    }
+                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey))
+                    {
+                        HttpContext.Current.Items.Remove(contextKey);
+                    }
+                }
+            }
+        }
+
+
     }
 }

@@ -168,24 +168,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
-        /// cblEmpresa control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblEmpresa;
-
-        /// <summary>
-        /// cblBarrio control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblBarrio;
-
-        /// <summary>
         /// txtBuscar control.
         /// </summary>
         /// <remarks>
