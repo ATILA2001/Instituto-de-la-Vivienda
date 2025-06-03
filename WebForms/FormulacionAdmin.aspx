@@ -248,12 +248,10 @@
 			<div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
 				<!-- Contenedor de Filtros alineados a la izquierda -->
 				<div class="d-flex flex-wrap gap-3">
-					<div class="form-group mb-2">
-						<label class="form-label ms-2 mb-0" for="cblObra">Obra:</label>
-						<div>
-							<CustomControls:CheckBoxListSearch ID="cblObra" runat="server" />
-						</div>
-					</div>
+					
+
+
+
 				</div>
 
 				<!-- Contenedor de Botones alineados a la derecha -->
@@ -268,7 +266,8 @@
                         </asp:LinkButton>
 					</div>
 					<div class="form-group mb-2">
-						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click">
+						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
+							data-bs-toggle="tooltip" data-bs-placement="top" title="Quita todos los filtros">
                             <i class="bi bi-funnel"></i>
                         </asp:LinkButton>
 					</div>
@@ -285,11 +284,25 @@
 		<asp:GridView ID="dgvFormulacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
 			OnRowDeleting="dgvFormulacion_RowDeleting"
+			OnRowDataBound="dgvFormulacion_DataBound"
 			AutoGenerateColumns="false" runat="server">
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 
-				<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />
+                <%--<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />--%>
+                <asp:TemplateField HeaderText="Área">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderArea" runat="server"
+                            HeaderText="Área"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Obra.Area.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Empresa" DataField="Obra.Empresa.Nombre" />
 				<asp:TemplateField HeaderText="Contrata">
 					<ItemTemplate>
@@ -298,11 +311,51 @@
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Barrio" DataField="Obra.Barrio.Nombre" />
 				<asp:BoundField HeaderText="Nombre de Obra" DataField="Obra.Descripcion" />
-				<asp:BoundField HeaderText="Linea de Gestión" DataField="Obra.LineaGestion.Nombre" />
-				<asp:BoundField HeaderText="Proyecto" DataField="Obra.Proyecto.Proyecto" />
+                <%--<asp:BoundField HeaderText="Linea de Gestión" DataField="Obra.LineaGestion.Nombre" />--%>
+                <asp:TemplateField HeaderText="Linea de Gestión">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderLineaGestion" runat="server"
+                            HeaderText="Línea de Gestión"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Obra.LineaGestion.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <%--<asp:BoundField HeaderText="Proyecto" DataField="Obra.Proyecto.Proyecto" />--%>
+                <asp:TemplateField HeaderText="Proyecto">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderProyecto" runat="server"
+                            HeaderText="Proyecto"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Obra.Proyecto.Proyecto") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+
 				<asp:BoundField HeaderText="Plurianual (2026,2027,2028)" DataField="Plurianual" DataFormatString="{0:C}" />
 
-				<asp:BoundField HeaderText="Monto 2026" DataField="Monto_26" DataFormatString="{0:C}" />
+                <%--<asp:BoundField HeaderText="Monto 2026" DataField="Monto_26" DataFormatString="{0:C}" />--%>
+                <asp:TemplateField HeaderText="Monto 2026">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderMonto2026" runat="server"
+                            HeaderText="Monto 2026"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Monto_26", "{0:C}") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 				<asp:BoundField HeaderText="Monto 2027" DataField="Monto_27" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Monto 2028" DataField="Monto_28" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
@@ -312,7 +365,20 @@
 
 				<asp:BoundField HeaderText="Techos 2026" DataField="Techos2026" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Observaciones" DataField="Observacion" />
-				<asp:BoundField HeaderText="Prioridad" DataField="Prioridad.Nombre" />
+                <%--<asp:BoundField HeaderText="Prioridad" DataField="Prioridad.Nombre" />--%>
+                <asp:TemplateField HeaderText="Prioridad">
+                    <HeaderTemplate>
+                        <CustomControls:CheckBoxListSearch ID="cblsHeaderPrioridad" runat="server"
+                            HeaderText="Prioridad"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Prioridad.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
 
 				<asp:TemplateField HeaderText="Acciones">
 					<ItemTemplate>

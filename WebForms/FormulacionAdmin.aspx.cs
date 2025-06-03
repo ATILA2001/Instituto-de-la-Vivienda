@@ -3,6 +3,7 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -14,12 +15,7 @@ namespace WebForms
     {
         private FormulacionNegocio negocio = new FormulacionNegocio();
 
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblObra.AcceptChanges += OnAcceptChanges;
-        }
-
-        private void OnAcceptChanges(object sender, EventArgs e)
+        protected void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaFormulaciones();
         }
@@ -41,8 +37,11 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                BindDropDownList();
-                CargarListaFormulaciones();
+                List<Formulacion> formulacionesCompletas = negocio.listar();
+                Session["formulacionesCompletas"] = formulacionesCompletas;
+
+                BindDropDownList(); 
+                CargarListaFormulaciones(); 
             }
         }
 
@@ -86,39 +85,87 @@ namespace WebForms
         {
             try
             {
-                var selectedObras = cblObra.SelectedValues;
-
-                // Si hay obras seleccionadas, filtrar por ellas
-                List<Formulacion> listaFormulaciones;
-                if (selectedObras.Count > 0)
+                // 1. Get complete list from session
+                List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
+                if (formulacionesCompletas == null)
                 {
-                    listaFormulaciones = new List<Formulacion>();
-                    foreach (var idObra in selectedObras)
+                    formulacionesCompletas = negocio.listar();
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+                }
+
+                IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
+
+                // 2. Apply general text filter (txtBuscar)
+                string filtroGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+                if (!string.IsNullOrEmpty(filtroGeneral))
+                {
+                    listaFiltrada = listaFiltrada.Where(f =>
+                        (f.Obra?.Area?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Empresa?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Contrata?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Numero?.ToString().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Año?.ToString().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Barrio?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Descripcion?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.LineaGestion?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Obra?.Proyecto?.Proyecto?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Monto_26.ToString(CultureInfo.InvariantCulture).Contains(filtroGeneral)) ||
+                        (f.Prioridad?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (f.Observacion?.ToUpper().Contains(filtroGeneral) ?? false)
+                    );
+                }
+
+                // 3. Get and apply header filters
+                if (dgvFormulacion.HeaderRow != null)
+                {
+                    var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var filtroHeaderArea = cblsHeaderArea?.SelectedValues;
+                    if (filtroHeaderArea != null && filtroHeaderArea.Any())
                     {
-                        if (int.TryParse(idObra, out int obraId))
-                        {
-                            listaFormulaciones.AddRange(negocio.listar());
-                        }
+                        listaFiltrada = listaFiltrada.Where(f => f.Obra?.Area != null && filtroHeaderArea.Contains(f.Obra.Area.Id.ToString()));
+                    }
+
+                    var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                    var filtroHeaderLineaGestion = cblsHeaderLineaGestion?.SelectedValues;
+                    if (filtroHeaderLineaGestion != null && filtroHeaderLineaGestion.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(f => f.Obra?.LineaGestion != null && filtroHeaderLineaGestion.Contains(f.Obra.LineaGestion.Id.ToString()));
+                    }
+
+                    var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                    var filtroHeaderProyecto = cblsHeaderProyecto?.SelectedValues;
+                    if (filtroHeaderProyecto != null && filtroHeaderProyecto.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(f => f.Obra?.Proyecto != null && filtroHeaderProyecto.Contains(f.Obra.Proyecto.Id.ToString()));
+                    }
+
+                    var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.CheckBoxListSearch;
+                    var filtroHeaderMonto2026 = cblsHeaderMonto2026?.SelectedValues;
+                    if (filtroHeaderMonto2026 != null && filtroHeaderMonto2026.Any())
+                    {
+                        var montosDecimal = filtroHeaderMonto2026.Select(m => decimal.Parse(m, CultureInfo.InvariantCulture)).ToList();
+                        listaFiltrada = listaFiltrada.Where(f => montosDecimal.Contains(f.Monto_26));
+                    }
+
+                    var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.CheckBoxListSearch;
+                    var filtroHeaderPrioridad = cblsHeaderPrioridad?.SelectedValues;
+                    if (filtroHeaderPrioridad != null && filtroHeaderPrioridad.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(f => f.Prioridad != null && filtroHeaderPrioridad.Contains(f.Prioridad.Id.ToString()));
                     }
                 }
-                else
-                {
-                    // Obtener todas las formulaciones
-                    listaFormulaciones = negocio.listar();
-                }
 
-
-
-                Session["listaFormulacionAdmin"] = listaFormulaciones;
-                dgvFormulacion.DataSource = listaFormulaciones;
+                List<Formulacion> resultadoFinal = listaFiltrada.ToList();
+                Session["listaFormulacionAdmin"] = resultadoFinal; 
+                dgvFormulacion.DataSource = resultadoFinal;
                 dgvFormulacion.DataBind();
-                BindDropDownList();
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al cargar las formulaciones: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
+
         }
 
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
@@ -366,6 +413,90 @@ namespace WebForms
             ddlPrioridades.SelectedIndex = 0; // Seleccionar el primer elemento si no hay prioridad
         }
 
+        protected void dgvFormulacion_DataBound(object sender, EventArgs e)
+        {
+            if (dgvFormulacion.HeaderRow != null)
+            {
+                List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
+                if (formulacionesCompletas == null)
+                {
+                    formulacionesCompletas = negocio.listar(); // Fallback, should be in session
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+                }
+
+                var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderArea != null)
+                {
+                    var areasUnicas = formulacionesCompletas
+                        .Where(f => f.Obra?.Area != null && !string.IsNullOrEmpty(f.Obra.Area.Nombre))
+                        .Select(f => new { Id = f.Obra.Area.Id.ToString(), Nombre = f.Obra.Area.Nombre })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+                    cblsHeaderArea.DataSource = areasUnicas;
+                    cblsHeaderArea.DataBind();
+                    cblsHeaderArea.AcceptChanges += OnAcceptChanges;
+                }
+
+                var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderLineaGestion != null)
+                {
+                    var lineasUnicas = formulacionesCompletas
+                        .Where(f => f.Obra?.LineaGestion != null && !string.IsNullOrEmpty(f.Obra.LineaGestion.Nombre))
+                        .Select(f => new { Id = f.Obra.LineaGestion.Id.ToString(), Nombre = f.Obra.LineaGestion.Nombre })
+                        .Distinct()
+                        .OrderBy(lg => lg.Nombre)
+                        .ToList();
+                    cblsHeaderLineaGestion.DataSource = lineasUnicas;
+                    cblsHeaderLineaGestion.DataBind();
+                    cblsHeaderLineaGestion.AcceptChanges += OnAcceptChanges;
+                }
+
+                var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderProyecto != null)
+                {
+                    var proyectosUnicos = formulacionesCompletas
+                        .Where(f => f.Obra?.Proyecto != null && !string.IsNullOrEmpty(f.Obra.Proyecto.Proyecto))
+                        .Select(f => new { Id = f.Obra.Proyecto.Id.ToString(), Nombre = f.Obra.Proyecto.Proyecto })
+                        .Distinct()
+                        .OrderBy(p => p.Nombre)
+                        .ToList();
+                    cblsHeaderProyecto.DataSource = proyectosUnicos;
+                    cblsHeaderProyecto.DataBind();
+                    cblsHeaderProyecto.AcceptChanges += OnAcceptChanges;
+                }
+
+                var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderMonto2026 != null)
+                {
+                    var montosUnicos = formulacionesCompletas
+                        .Select(f => f.Monto_26)
+                        .Distinct()
+                        .OrderBy(m => m)
+                        .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m.ToString("N2") }) // Use "N2" or "C" for display
+                        .ToList();
+                    cblsHeaderMonto2026.DataSource = montosUnicos;
+                    cblsHeaderMonto2026.DataBind();
+                    cblsHeaderMonto2026.AcceptChanges += OnAcceptChanges;
+                }
+
+                var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.CheckBoxListSearch;
+                if (cblsHeaderPrioridad != null)
+                {
+                    var prioridadesUnicas = formulacionesCompletas
+                        .Where(f => f.Prioridad != null && !string.IsNullOrEmpty(f.Prioridad.Nombre))
+                        .Select(f => new { Id = f.Prioridad.Id.ToString(), Nombre = f.Prioridad.Nombre })
+                        .Distinct()
+                        .OrderBy(p => p.Nombre)
+                        .ToList();
+                    cblsHeaderPrioridad.DataSource = prioridadesUnicas;
+                    cblsHeaderPrioridad.DataBind();
+                    cblsHeaderPrioridad.AcceptChanges += OnAcceptChanges;
+                }
+            }
+        }
+
+
         private void BindDropDownList()
         {
             ddlObra.Items.Clear();
@@ -396,12 +527,6 @@ namespace WebForms
             ddlUnidadMedida.DataValueField = "ID";
             ddlUnidadMedida.DataBind();
 
-            // Cargar el control de filtro de obras
-            cblObra.DataSource = ObtenerObras();
-            cblObra.DataTextField = "NOMBRE";
-            cblObra.DataValueField = "ID";
-            cblObra.DataBind();
-
             ddlPrioridades.DataSource = listarPrioridades();
             ddlPrioridades.DataTextField = "NOMBRE";
             ddlPrioridades.DataValueField = "ID";
@@ -421,8 +546,42 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblObra.ClearSelection();
+
+            // Clear header filters
+            ClearFilter("cblsHeaderArea");
+            ClearFilter("cblsHeaderLineaGestion");
+            ClearFilter("cblsHeaderProyecto");
+            ClearFilter("cblsHeaderMonto2026");
+            ClearFilter("cblsHeaderPrioridad");
+
             CargarListaFormulaciones();
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
+        private void ClearFilter(string controlId)
+        {
+            if (dgvFormulacion.HeaderRow != null)
+            {
+                var control = dgvFormulacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                if (control != null)
+                {
+                    control.ClearSelection();
+
+                    // Clear session/context state if your CheckBoxListSearch uses it
+                    string controlInstanceId = control.ID;
+                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    if (HttpContext.Current.Session[sessionKey] != null)
+                    {
+                        HttpContext.Current.Session.Remove(sessionKey);
+                    }
+                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    if (HttpContext.Current.Items.Contains(contextKey))
+                    {
+                        HttpContext.Current.Items.Remove(contextKey);
+                    }
+                }
+            }
+        }
+
     }
 }
