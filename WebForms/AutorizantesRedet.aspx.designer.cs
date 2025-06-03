@@ -15,51 +15,6 @@ namespace WebForms
     {
 
         /// <summary>
-        /// cblArea control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblArea;
-
-        /// <summary>
-        /// cblObra control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblObra;
-
-        /// <summary>
-        /// cblEmpresa control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblEmpresa;
-
-        /// <summary>
-        /// cblConcepto control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblConcepto;
-
-        /// <summary>
-        /// cblEstado control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblEstado;
-
-        /// <summary>
         /// txtSubtotal control.
         /// </summary>
         /// <remarks>
