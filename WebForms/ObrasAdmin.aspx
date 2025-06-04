@@ -182,30 +182,7 @@
                 <div class="d-flex flex-wrap gap-3">
 
 
-                    <div class="form-group mb-2">
-                        <label class="form-label ms-2 mb-0" for="cblArea">Area:</label>
-                        <div>
 
-                            <CustomControls:TreeViewSearch ID="cblArea" runat="server" />
-                        </div>
-                    </div>
-
-                    <div class="form-group mb-2">
-                        <label class="form-label ms-2 mb-0" for="cblEmpresa">Empresa:</label>
-                        <div>
-
-                            <CustomControls:TreeViewSearch ID="cblEmpresa" runat="server" />
-                        </div>
-                    </div>
-
-
-                    <div class="form-group mb-2">
-                        <label class="form-label ms-2 mb-0" for="cblBarrio">Barrio:</label>
-                        <div>
-
-                            <CustomControls:TreeViewSearch ID="cblBarrio" runat="server" />
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Contenedor de Botones alineados a la derecha -->

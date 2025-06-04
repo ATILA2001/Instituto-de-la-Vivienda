@@ -135,11 +135,6 @@ namespace WebForms
 
                 IEnumerable<Obra> listaFiltrada = listaCompleta;
 
-                // Obtener valores de los filtros laterales existentes
-                var selectedAreas = cblArea.SelectedValues;
-                var selectedEmpresas = cblEmpresa.SelectedValues;
-                var selectedBarrios = cblBarrio.SelectedValues;
-
                 // Obtener valores de los filtros de cabecera
                 List<string> selectedHeaderAreas = new List<string>();
                 List<string> selectedHeaderEmpresas = new List<string>();
@@ -184,14 +179,6 @@ namespace WebForms
                         (o.ObraNumero.ToString().Contains(filtroTextoGeneral))
                     );
                 }
-
-                // Aplicar filtros laterales existentes
-                if (selectedAreas.Any())
-                    listaFiltrada = listaFiltrada.Where(o => !string.IsNullOrEmpty(o.Area.Nombre) && selectedAreas.Contains(o.Area.Id.ToString()));
-                if (selectedEmpresas.Any())
-                    listaFiltrada = listaFiltrada.Where(o => !string.IsNullOrEmpty(o.Empresa.Nombre) && selectedEmpresas.Contains(o.Empresa.Id.ToString()));
-                if (selectedBarrios.Any())
-                    listaFiltrada = listaFiltrada.Where(o => !string.IsNullOrEmpty(o.Barrio.Nombre) && selectedBarrios.Contains(o.Barrio.Id.ToString()));
 
                 // Aplicar filtros de cabecera
                 if (selectedHeaderAreas.Any())
@@ -582,24 +569,6 @@ namespace WebForms
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
-
-            cblBarrio.DataSource = ObtenerBarrios();
-            cblBarrio.DataTextField = "Nombre";
-            cblBarrio.DataValueField = "Id";
-            cblBarrio.DataBind();
-
-
-            cblEmpresa.DataSource = ObtenerEmpresas();
-            cblEmpresa.DataTextField = "Nombre";
-            cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind();
-
-            cblArea.DataSource = ObtenerAreas();
-            cblArea.DataTextField = "Nombre";
-            cblArea.DataValueField = "Id";
-            cblArea.DataBind();
-
-
         }
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -611,11 +580,6 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-
-            // Limpiar filtros laterales existentes
-            cblArea.ClearSelection();
-            cblBarrio.ClearSelection();
-            cblEmpresa.ClearSelection();
 
             // Limpiar filtros de cabecera
             if (dgvObra.HeaderRow != null)
