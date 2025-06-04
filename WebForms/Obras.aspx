@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Obras.aspx.cs" Inherits="WebForms.Obras" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
@@ -214,7 +214,7 @@
 <%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
                 <asp:TemplateField HeaderText="Empresa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
                             HeaderText="Empresa"
                             DataTextField="Nombre"
                             DataValueField="Id"
@@ -235,7 +235,7 @@
 <%--				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />--%>
                 <asp:TemplateField HeaderText="Barrio">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderBarrio" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
                             HeaderText="Barrio"
                             DataTextField="Nombre"
                             DataValueField="Id"

@@ -1,5 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Redet.Master" AutoEventWireup="true" CodeBehind="AutorizantesRedet.aspx.cs" Inherits="WebForms.AutorizantesRedet" %>
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -59,7 +59,7 @@
 <%--					<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />--%>
                     <asp:TemplateField HeaderText="Área">
                         <HeaderTemplate>
-                            <CustomControls:CheckBoxListSearch ID="cblsHeaderArea" runat="server" HeaderText="Área" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                            <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server" HeaderText="Área" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
                             <%# Eval("Obra.Area.Nombre") %>
@@ -69,7 +69,7 @@
 <%--					<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />--%>
                     <asp:TemplateField HeaderText="Obra">
                         <HeaderTemplate>
-                            <CustomControls:CheckBoxListSearch ID="cblsHeaderObra" runat="server" HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                            <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server" HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
                             <%# Eval("Obra.Descripcion") %>
@@ -80,7 +80,7 @@
 <%--					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
                 <asp:TemplateField HeaderText="Empresa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
                             HeaderText="Empresa"
                             DataTextField="Nombre"
                             DataValueField="Id"
@@ -95,7 +95,7 @@
 <%--					<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" />--%>
                     <asp:TemplateField HeaderText="Concepto">
                         <HeaderTemplate>
-                            <CustomControls:CheckBoxListSearch ID="cblsHeaderConcepto" runat="server" HeaderText="Concepto" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                            <CustomControls:TreeViewSearch ID="cblsHeaderConcepto" runat="server" HeaderText="Concepto" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
                             <%# Eval("Concepto.Nombre") %>
@@ -109,7 +109,7 @@
 <%--					<asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
                     <asp:TemplateField HeaderText="Estado">
                         <HeaderTemplate>
-                            <CustomControls:CheckBoxListSearch ID="cblsHeaderEstado" runat="server" HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                            <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server" HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
                             <%# Eval("Estado.Nombre") %>

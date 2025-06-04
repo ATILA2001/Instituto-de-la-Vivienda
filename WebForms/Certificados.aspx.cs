@@ -139,19 +139,19 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow != null)
                 {
-                    var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
-                    var cblsHeaderCodigoAutorizanteCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderCodigoAutorizanteCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderCodigoAutorizanteCtrl != null) selectedHeaderCodigosAutorizante = cblsHeaderCodigoAutorizanteCtrl.SelectedValues;
 
-                    var cblsHeaderEstadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEstadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
 
-                    var cblsHeaderTipoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderTipoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderTipoCtrl != null) selectedHeaderTipos = cblsHeaderTipoCtrl.SelectedValues;
 
-                    var cblsHeaderMesCertificadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderMesCertificadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderMesCertificadoCtrl != null) selectedHeaderMesesCertificado = cblsHeaderMesCertificadoCtrl.SelectedValues;
                 }
 
@@ -499,7 +499,7 @@ namespace WebForms
                 if (certificadosUsuarioCompleto == null || !certificadosUsuarioCompleto.Any()) return;
 
                 // Poblar filtro de Empresa
-                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEmpresa != null)
                 {
                     var items = certificadosUsuarioCompleto
@@ -516,7 +516,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Código Autorizante
-                var cblsHeaderCodigoAutorizante = e.Row.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderCodigoAutorizante = e.Row.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderCodigoAutorizante != null)
                 {
                     var items = certificadosUsuarioCompleto
@@ -533,7 +533,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Estado
-                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEstado != null)
                 {
                     var items = certificadosUsuarioCompleto
@@ -550,7 +550,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Tipo
-                var cblsHeaderTipo = e.Row.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderTipo = e.Row.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderTipo != null)
                 {
                     var items = certificadosUsuarioCompleto
@@ -568,7 +568,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Mes Certificado
-                var cblsHeaderMesCertificado = e.Row.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderMesCertificado = e.Row.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderMesCertificado != null)
                 {
                     var mesesCertificadoUnicos = certificadosUsuarioCompleto
@@ -672,14 +672,14 @@ namespace WebForms
         {
             if (dgvCertificado.HeaderRow != null)
             {
-                var control = dgvCertificado.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvCertificado.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
                     string controlInstanceId = control.ID;
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
                 }
             }

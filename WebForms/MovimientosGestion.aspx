@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="MovimientosGestion.aspx.cs" Inherits="WebForms.MovimientosGestion" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -146,7 +146,7 @@
                 <%--<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />--%>
                 <asp:TemplateField HeaderText="Obra">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderObra" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
                             HeaderText="Obra"
                             DataTextField="Nombre"
                             DataValueField="Id"
@@ -166,7 +166,7 @@
 				<%--<asp:BoundField HeaderText="Fecha" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />--%>
                 <asp:TemplateField HeaderText="Fecha">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderFecha" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderFecha" runat="server"
                             HeaderText="Fecha"
                             DataTextField="Nombre"
                             DataValueField="Valor"

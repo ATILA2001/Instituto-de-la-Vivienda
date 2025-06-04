@@ -200,55 +200,55 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow != null)
                 {
-                    var cblsHeaderAreaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderAreaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderAreaControl != null)
                     {
                         filtroHeaderArea = cblsHeaderAreaControl.SelectedValues;
                     }
 
-                    var cblsHeaderBarrioControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderBarrioControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderBarrioControl != null)
                     {
                         filtroHeaderBarrio = cblsHeaderBarrioControl.SelectedValues;
                     }
 
-                    var cblsHeaderProyectoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderProyectoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderProyectoControl != null)
                     {
                         filtroHeaderProyecto = cblsHeaderProyectoControl.SelectedValues;
                     }
                     
-                    var cblsHeaderEmpresaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEmpresaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaControl != null)
                     {
                         filtroHeaderEmpresa = cblsHeaderEmpresaControl.SelectedValues;
                     }
 
-                    var cblsHeaderCodigoAutorizanteControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderCodigoAutorizanteControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderCodigoAutorizanteControl != null)
                     {
                         filtroHeaderCodigoAutorizante = cblsHeaderCodigoAutorizanteControl.SelectedValues;
                     }
 
-                    var cblsHeaderEstadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEstadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoControl != null)
                     {
                         filtroHeaderEstado = cblsHeaderEstadoControl.SelectedValues;
                     }
 
-                    var cblsHeaderTipoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderTipoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderTipoControl != null)
                     {
                         filtroHeaderTipo = cblsHeaderTipoControl.SelectedValues;
                     }
 
-                    var cblsHeaderMesCertificadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderMesCertificadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderMesCertificadoControl != null)
                     {
                         filtroHeaderMesCertificado = cblsHeaderMesCertificadoControl.SelectedValues;
                     }
 
-                    var cblsHeaderLineaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderLineaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderLineaControl != null)
                     {
                         filtroHeaderLinea = cblsHeaderLineaControl.SelectedValues;
@@ -481,15 +481,15 @@ namespace WebForms
             {
                 List<Certificado> certificadosCompleto = (List<Certificado>)Session["certificadosCompleto"];//calculoRedeterminacionNegocio.listarCertReliq();
 
-                var cblsHeaderArea = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderBarrio = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderProyecto = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderEmpresa = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderCodigoAutorizante = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderEstado = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderTipo = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderMesCertificado = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.CheckBoxListSearch;
-                var cblsHeaderLinea = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderArea = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderBarrio = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderProyecto = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderEmpresa = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderCodigoAutorizante = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderEstado = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderTipo = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderMesCertificado = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderLinea = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
 
                 if (cblsHeaderArea != null)
                 {
@@ -636,7 +636,7 @@ namespace WebForms
         }
 
         /// <summary>
-        /// Populates dropdown lists and CheckBoxListSearch controls used for filtering.
+        /// Populates dropdown lists and TreeViewSearch controls used for filtering.
         /// The date filter (cblFecha) is populated based on the distinct MesAprobacion
         /// values found in the provided list of certificates.
         /// </summary>
@@ -792,37 +792,37 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            ClearCheckBoxListSearchFilter("cblsHeaderArea");
-            ClearCheckBoxListSearchFilter("cblsHeaderBarrio");
-            ClearCheckBoxListSearchFilter("cblsHeaderProyecto");
-            ClearCheckBoxListSearchFilter("cblsHeaderEmpresa");
-            ClearCheckBoxListSearchFilter("cblsHeaderCodigoAutorizante");
-            ClearCheckBoxListSearchFilter("cblsHeaderEstado");
-            ClearCheckBoxListSearchFilter("cblsHeaderTipo");
-            ClearCheckBoxListSearchFilter("cblsHeaderMesCertificado");
-            ClearCheckBoxListSearchFilter("cblsHeaderLinea");
+            ClearTreeViewSearchFilter("cblsHeaderArea");
+            ClearTreeViewSearchFilter("cblsHeaderBarrio");
+            ClearTreeViewSearchFilter("cblsHeaderProyecto");
+            ClearTreeViewSearchFilter("cblsHeaderEmpresa");
+            ClearTreeViewSearchFilter("cblsHeaderCodigoAutorizante");
+            ClearTreeViewSearchFilter("cblsHeaderEstado");
+            ClearTreeViewSearchFilter("cblsHeaderTipo");
+            ClearTreeViewSearchFilter("cblsHeaderMesCertificado");
+            ClearTreeViewSearchFilter("cblsHeaderLinea");
 
             CargarListaCertificados();
 
             // Establece un flag en sessionStorage para que el cliente sepa que los filtros fueron limpiados.
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
-        private void ClearCheckBoxListSearchFilter(string controlId)
+        private void ClearTreeViewSearchFilter(string controlId)
         {
             if (dgvCertificado.HeaderRow != null)
             {
-                var control = dgvCertificado.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvCertificado.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 control?.ClearSelection();
 
                 string controlInstanceId = control.ID; // Usar el ID del control para la clave de sesión/contexto.
 
-                string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                 if (HttpContext.Current.Session[sessionKey] != null)
                 {
                     HttpContext.Current.Session.Remove(sessionKey);
                 }
 
-                string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                 if (HttpContext.Current.Items.Contains(contextKey))
                 {
                     HttpContext.Current.Items.Remove(contextKey);

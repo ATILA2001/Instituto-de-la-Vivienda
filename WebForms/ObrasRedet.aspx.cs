@@ -46,18 +46,18 @@ namespace WebForms
         {
             if (dgvObra.HeaderRow != null)
             {
-                var control = dgvObra.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvObra.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
                     // Limpiar estado de sesión/contexto si el control lo usa internamente
                     string controlInstanceId = control.ID;
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null)
                     {
                         HttpContext.Current.Session.Remove(sessionKey);
                     }
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         HttpContext.Current.Items.Remove(contextKey);
@@ -122,21 +122,21 @@ namespace WebForms
                 // Aplicar filtros de cabecera
                 if (dgvObra.HeaderRow != null)
                 {
-                    var cblsHeaderArea = dgvObra.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderArea = dgvObra.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderArea = cblsHeaderArea?.SelectedValues;
                     if (filtroHeaderArea != null && filtroHeaderArea.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(o => o.Area != null && filtroHeaderArea.Contains(o.Area.Id.ToString()));
                     }
 
-                    var cblsHeaderEmpresa = dgvObra.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEmpresa = dgvObra.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderEmpresa = cblsHeaderEmpresa?.SelectedValues;
                     if (filtroHeaderEmpresa != null && filtroHeaderEmpresa.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(o => o.Empresa != null && filtroHeaderEmpresa.Contains(o.Empresa.Id.ToString()));
                     }
 
-                    var cblsHeaderBarrio = dgvObra.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderBarrio = dgvObra.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderBarrio = cblsHeaderBarrio?.SelectedValues;
                     if (filtroHeaderBarrio != null && filtroHeaderBarrio.Any())
                     {
@@ -174,7 +174,7 @@ namespace WebForms
                 if (obrasCompletas == null) return; // No hay datos para poblar filtros
 
                 // Poblar filtro de Área
-                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = obrasCompletas
@@ -188,7 +188,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Empresa
-                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = obrasCompletas
@@ -202,7 +202,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Barrio
-                var cblsHeaderBarrio = e.Row.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderBarrio = e.Row.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderBarrio != null)
                 {
                     var barriosUnicos = obrasCompletas

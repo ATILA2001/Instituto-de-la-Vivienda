@@ -109,14 +109,14 @@ namespace WebForms
         {
             if (dgvRedeterminacion.HeaderRow != null)
             {
-                var control = dgvRedeterminacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvRedeterminacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
                     string controlInstanceId = control.ID;
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
                 }
             }
@@ -164,14 +164,14 @@ namespace WebForms
                 // Aplicar filtros de cabecera
                 if (dgvRedeterminacion.HeaderRow != null)
                 {
-                    var cblsHeaderObra = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderObra = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                     var selectedObras = cblsHeaderObra?.SelectedValues;
                     if (selectedObras != null && selectedObras.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(r => r.Autorizante?.Obra != null && selectedObras.Contains(r.Autorizante.Obra.Id.ToString()));
                     }
 
-                    var cblsHeaderAutorizante = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderAutorizante = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     var selectedAutorizantes = cblsHeaderAutorizante?.SelectedValues;
                     if (selectedAutorizantes != null && selectedAutorizantes.Any())
                     {
@@ -180,7 +180,7 @@ namespace WebForms
                         listaFiltrada = listaFiltrada.Where(r => r.Autorizante != null && selectedAutorizantes.Contains(r.Autorizante.CodigoAutorizante));
                     }
 
-                    var cblsHeaderEstado = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEstado = dgvRedeterminacion.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     var selectedEstados = cblsHeaderEstado?.SelectedValues;
                     if (selectedEstados != null && selectedEstados.Any())
                     {
@@ -240,12 +240,12 @@ namespace WebForms
             }
             else if (e.Row.RowType == DataControlRowType.Header)
             {
-                // Poblar los CheckBoxListSearch en la cabecera
+                // Poblar los TreeViewSearch en la cabecera
                 List<Redeterminacion> redeterminacionesCompletas = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
                 if (redeterminacionesCompletas == null || !redeterminacionesCompletas.Any()) return;
 
                 // Poblar filtro de Obra
-                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderObra != null)
                 {
                     var items = redeterminacionesCompletas
@@ -259,7 +259,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Autorizante
-                var cblsHeaderAutorizante = e.Row.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderAutorizante = e.Row.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderAutorizante != null)
                 {
                     var items = redeterminacionesCompletas
@@ -275,7 +275,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Estado (Etapa)
-                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEstado != null)
                 {
                     var items = redeterminacionesCompletas

@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="CheckBoxListSearch.ascx.cs" Inherits="WebForms.CustomControls.CheckBoxListSearch" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="TreeViewSearch.ascx.cs" Inherits="WebForms.CustomControls.TreeViewSearch" %>
 
 <!-- <link rel="stylesheet" href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" /> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">

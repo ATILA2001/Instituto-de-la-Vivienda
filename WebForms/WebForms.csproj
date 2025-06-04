@@ -93,7 +93,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="CustomControls\CheckBoxListSearch.ascx" />
+    <Content Include="CustomControls\TreeViewSearch.ascx" />
     <Content Include="CustomControls\chevron-down.svg" />
     <Content Include="CustomControls\chevron-right.svg" />
     <Content Include="CustomControls\TreeViewSearch.css" />
@@ -208,8 +208,8 @@
     <Compile Include="CertificadosAdmin.aspx.designer.cs">
       <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="CustomControls\CheckBoxListSearch.ascx.cs">
-      <DependentUpon>CheckBoxListSearch.ascx</DependentUpon>
+    <Compile Include="CustomControls\TreeViewSearch.ascx.cs">
+      <DependentUpon>TreeViewSearch.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Error.aspx.cs">

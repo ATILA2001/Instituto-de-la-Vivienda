@@ -142,16 +142,16 @@ namespace WebForms
 
                 if (dgvAutorizante.HeaderRow != null)
                 {
-                    var cblsHeaderObraCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderObraCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderObraCtrl != null) selectedHeaderObras = cblsHeaderObraCtrl.SelectedValues;
 
-                    var cblsHeaderEmpresaCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEmpresaCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
-                    var cblsHeaderConceptoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderConceptoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderConceptoCtrl != null) selectedHeaderConceptos = cblsHeaderConceptoCtrl.SelectedValues;
 
-                    var cblsHeaderEstadoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEstadoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
                 }
 
@@ -357,7 +357,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Obra en cabecera
-                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderObra != null)
                 {
                     var obrasUnicas = autorizantesUsuarioCompleto
@@ -373,7 +373,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Empresa en cabecera
-                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = autorizantesUsuarioCompleto
@@ -389,7 +389,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Concepto en cabecera
-                var cblsHeaderConcepto = e.Row.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderConcepto = e.Row.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderConcepto != null)
                 {
                     var conceptosUnicos = autorizantesUsuarioCompleto
@@ -405,7 +405,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Estado en cabecera
-                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEstado != null)
                 {
                     var estadosUnicos = autorizantesUsuarioCompleto
@@ -655,19 +655,19 @@ namespace WebForms
         {
             if (dgvAutorizante.HeaderRow != null)
             {
-                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
-                    // Lógica para limpiar la sesión/contexto si el control CheckBoxListSearch lo requiere internamente
+                    // Lógica para limpiar la sesión/contexto si el control TreeViewSearch lo requiere internamente
                     // (similar a AutorizantesAdmin.aspx.cs)
                     string controlInstanceId = control.ID;
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null)
                     {
                         HttpContext.Current.Session.Remove(sessionKey);
                     }
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         HttpContext.Current.Items.Remove(contextKey);

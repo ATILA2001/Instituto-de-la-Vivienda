@@ -118,28 +118,28 @@ namespace WebForms
                 // 3. Get and apply header filters
                 if (dgvFormulacion.HeaderRow != null)
                 {
-                    var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderArea = cblsHeaderArea?.SelectedValues;
                     if (filtroHeaderArea != null && filtroHeaderArea.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(f => f.Obra?.Area != null && filtroHeaderArea.Contains(f.Obra.Area.Id.ToString()));
                     }
 
-                    var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderLineaGestion = cblsHeaderLineaGestion?.SelectedValues;
                     if (filtroHeaderLineaGestion != null && filtroHeaderLineaGestion.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(f => f.Obra?.LineaGestion != null && filtroHeaderLineaGestion.Contains(f.Obra.LineaGestion.Id.ToString()));
                     }
 
-                    var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderProyecto = cblsHeaderProyecto?.SelectedValues;
                     if (filtroHeaderProyecto != null && filtroHeaderProyecto.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(f => f.Obra?.Proyecto != null && filtroHeaderProyecto.Contains(f.Obra.Proyecto.Id.ToString()));
                     }
 
-                    var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderMonto2026 = cblsHeaderMonto2026?.SelectedValues;
                     if (filtroHeaderMonto2026 != null && filtroHeaderMonto2026.Any())
                     {
@@ -147,7 +147,7 @@ namespace WebForms
                         listaFiltrada = listaFiltrada.Where(f => montosDecimal.Contains(f.Monto_26));
                     }
 
-                    var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderPrioridad = cblsHeaderPrioridad?.SelectedValues;
                     if (filtroHeaderPrioridad != null && filtroHeaderPrioridad.Any())
                     {
@@ -424,7 +424,7 @@ namespace WebForms
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
-                var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = formulacionesCompletas
@@ -438,7 +438,7 @@ namespace WebForms
                     cblsHeaderArea.AcceptChanges += OnAcceptChanges;
                 }
 
-                var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderLineaGestion = dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderLineaGestion != null)
                 {
                     var lineasUnicas = formulacionesCompletas
@@ -452,7 +452,7 @@ namespace WebForms
                     cblsHeaderLineaGestion.AcceptChanges += OnAcceptChanges;
                 }
 
-                var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderProyecto = dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = formulacionesCompletas
@@ -466,7 +466,7 @@ namespace WebForms
                     cblsHeaderProyecto.AcceptChanges += OnAcceptChanges;
                 }
 
-                var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderMonto2026 = dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderMonto2026 != null)
                 {
                     var montosUnicos = formulacionesCompletas
@@ -480,7 +480,7 @@ namespace WebForms
                     cblsHeaderMonto2026.AcceptChanges += OnAcceptChanges;
                 }
 
-                var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderPrioridad = dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderPrioridad != null)
                 {
                     var prioridadesUnicas = formulacionesCompletas
@@ -562,19 +562,19 @@ namespace WebForms
         {
             if (dgvFormulacion.HeaderRow != null)
             {
-                var control = dgvFormulacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvFormulacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
 
-                    // Clear session/context state if your CheckBoxListSearch uses it
+                    // Clear session/context state if your TreeViewSearch uses it
                     string controlInstanceId = control.ID;
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null)
                     {
                         HttpContext.Current.Session.Remove(sessionKey);
                     }
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         HttpContext.Current.Items.Remove(contextKey);

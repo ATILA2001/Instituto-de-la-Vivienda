@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Legitimos.aspx.cs" Inherits="WebForms.Legitimos" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -215,7 +215,7 @@
 <%--                <asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
                 <asp:TemplateField HeaderText="Empresa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
                             HeaderText="Empresa"
                             DataTextField="Nombre"
                             DataValueField="Nombre" 
@@ -229,7 +229,7 @@
 <%--                <asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />--%>
                 <asp:TemplateField HeaderText="Código Autorizante">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderAutorizante" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
                             HeaderText="Código Autorizante"
                             DataTextField="Nombre"
                             DataValueField="Nombre" 
@@ -252,7 +252,7 @@
 <%--                <asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />--%>
                 <asp:TemplateField HeaderText="Mes Aprobación">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderMesAprobacion" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderMesAprobacion" runat="server"
                             HeaderText="Mes Aprobación"
                             DataTextField="Nombre" 
                             DataValueField="Valor" 
@@ -266,7 +266,7 @@
 <%--                <asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
                 <asp:TemplateField HeaderText="Estado">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEstado" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
                             HeaderText="Estado"
                             DataTextField="Nombre"
                             DataValueField="Nombre"

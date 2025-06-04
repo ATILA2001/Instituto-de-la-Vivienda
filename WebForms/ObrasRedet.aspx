@@ -1,5 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Redet.Master" AutoEventWireup="true" CodeBehind="ObrasRedet.aspx.cs" Inherits="WebForms.ObrasRedet" %>
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -55,7 +55,7 @@
 <%--				<asp:BoundField HeaderText="ID" DataField="Id" />--%>
                 <asp:TemplateField HeaderText="Área">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderArea" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
                             HeaderText="Área"
                             DataTextField="Nombre"
                             DataValueField="Id"
@@ -68,7 +68,7 @@
 
                 <asp:TemplateField HeaderText="Empresa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
                             HeaderText="Empresa"
                             DataTextField="Nombre"
                             DataValueField="Id"
@@ -87,7 +87,7 @@
 <%--				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />--%>
                 <asp:TemplateField HeaderText="Barrio">
                      <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderBarrio" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
                             HeaderText="Barrio"
                             DataTextField="Nombre"
                             DataValueField="Id"

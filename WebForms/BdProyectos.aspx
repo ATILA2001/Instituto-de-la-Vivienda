@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="BdProyectos.aspx.cs" Inherits="WebForms.BdProyectos" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -148,7 +148,7 @@
                 <%--<asp:BoundField HeaderText="Area " DataField="Obra.Area.Nombre" />--%>
                 <asp:TemplateField HeaderText="Área">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblHeaderArea" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblHeaderArea" runat="server"
                                 HeaderText="Área"
                                 DataTextField="Nombre"
                                 DataValueField="Id"
@@ -164,7 +164,7 @@
                 <%--                <asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />--%>
                 <asp:TemplateField HeaderText="Proyecto">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblHeaderProyecto" runat="server" 
+                        <CustomControls:TreeViewSearch ID="cblHeaderProyecto" runat="server" 
                             HeaderText="Proyecto"
                             DataTextField="Nombre" 
                             DataValueField="Nombre" 
@@ -179,7 +179,7 @@
                 <%--                <asp:BoundField HeaderText="Linea de Gestión" DataField="LineaGestion.Nombre" />--%>
                 <asp:TemplateField HeaderText="Línea de Gestión">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblHeaderLineaGestion" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblHeaderLineaGestion" runat="server"
                             HeaderText="Línea de Gestión"
                             DataTextField="Nombre" 
                             DataValueField="Id" 

@@ -192,7 +192,7 @@ namespace WebForms
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblArea;
+        protected global::WebForms.CustomControls.TreeViewSearch cblArea;
 
         /// <summary>
         /// cblEmpresa control.
@@ -201,7 +201,7 @@ namespace WebForms
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblEmpresa;
+        protected global::WebForms.CustomControls.TreeViewSearch cblEmpresa;
 
         /// <summary>
         /// cblBarrio control.
@@ -210,7 +210,7 @@ namespace WebForms
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::WebForms.CustomControls.CheckBoxListSearch cblBarrio;
+        protected global::WebForms.CustomControls.TreeViewSearch cblBarrio;
 
         /// <summary>
         /// txtBuscar control.

@@ -50,7 +50,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Obra
-                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderObra != null)
                 {
                     var obrasUnicas = movimientosCompleto
@@ -66,7 +66,7 @@ namespace WebForms
                 }
 
                 // Poblar filtro de Fecha
-                var cblsHeaderFecha = e.Row.FindControl("cblsHeaderFecha") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderFecha = e.Row.FindControl("cblsHeaderFecha") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderFecha != null)
                 {
                     var fechasUnicas = movimientosCompleto
@@ -167,10 +167,10 @@ namespace WebForms
 
                 if (dgvMovimiento.HeaderRow != null)
                 {
-                    var cblsHeaderObraControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderObraControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderObraControl != null) selectedHeaderObras = cblsHeaderObraControl.SelectedValues;
 
-                    var cblsHeaderFechaControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderFecha") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderFechaControl = dgvMovimiento.HeaderRow.FindControl("cblsHeaderFecha") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderFechaControl != null) selectedHeaderFechas = cblsHeaderFechaControl.SelectedValues;
                 }
 
@@ -445,20 +445,20 @@ namespace WebForms
         {
             if (dgvMovimiento.HeaderRow != null)
             {
-                var control = dgvMovimiento.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvMovimiento.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 if (control != null)
                 {
                     control.ClearSelection();
 
                     string controlInstanceId = control.ID;
 
-                    string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                     if (HttpContext.Current.Session[sessionKey] != null)
                     {
                         HttpContext.Current.Session.Remove(sessionKey);
                     }
 
-                    string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         HttpContext.Current.Items.Remove(contextKey);

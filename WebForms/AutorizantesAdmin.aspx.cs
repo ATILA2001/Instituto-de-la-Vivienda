@@ -221,19 +221,19 @@ namespace WebForms
 
                 if (dgvAutorizante.HeaderRow != null)
                 {
-                    var cblsHeaderAreaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderAreaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderAreaControl != null) selectedAreas = cblsHeaderAreaControl.SelectedValues;
 
-                    var cblsHeaderObraControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderObraControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderObraControl != null) selectedObras = cblsHeaderObraControl.SelectedValues;
 
-                    var cblsHeaderEmpresaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEmpresaControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaControl != null) selectedEmpresas = cblsHeaderEmpresaControl.SelectedValues;
 
-                    var cblsHeaderConceptoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderConceptoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderConceptoControl != null) selectedConceptos = cblsHeaderConceptoControl.SelectedValues;
 
-                    var cblsHeaderEstadoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                    var cblsHeaderEstadoControl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoControl != null) selectedEstados = cblsHeaderEstadoControl.SelectedValues;
                 }
 
@@ -557,7 +557,7 @@ namespace WebForms
                     autorizantesCompleto = (List<Autorizante>)Session["autorizantesCompleto"];
                 }
 
-                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderArea != null && autorizantesCompleto != null)
                 {
                     var areasUnicas = autorizantesCompleto
@@ -571,7 +571,7 @@ namespace WebForms
                     cblsHeaderArea.DataBind();
                 }
 
-                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderObra != null && autorizantesCompleto != null)
                 {
                     var obrasUnicas = autorizantesCompleto
@@ -586,7 +586,7 @@ namespace WebForms
                     cblsHeaderObra.DataBind();
                 }
 
-                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEmpresa != null && autorizantesCompleto != null)
                 {
                     var empresasUnicas = autorizantesCompleto
@@ -600,7 +600,7 @@ namespace WebForms
                     cblsHeaderEmpresa.DataBind();
                 }
 
-                var cblsHeaderConcepto = e.Row.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderConcepto = e.Row.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderConcepto != null && autorizantesCompleto != null)
                 {
                     var conceptosUnicos = autorizantesCompleto
@@ -614,7 +614,7 @@ namespace WebForms
                     cblsHeaderConcepto.DataBind();
                 }
 
-                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.CheckBoxListSearch;
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderEstado != null && autorizantesCompleto != null)
                 {
                     var estadosUnicos = autorizantesCompleto
@@ -652,18 +652,18 @@ namespace WebForms
         {
             if (dgvAutorizante.HeaderRow != null)
             {
-                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.CheckBoxListSearch;
+                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
                 control?.ClearSelection();
 
                 string controlInstanceId = control.ID; // Usar el ID del control para la clave de sesión/contexto.
 
-                string sessionKey = $"CheckBoxListSearch_SelectedValues_{controlInstanceId}";
+                string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
                 if (HttpContext.Current.Session[sessionKey] != null)
                 {
                     HttpContext.Current.Session.Remove(sessionKey);
                 }
 
-                string contextKey = $"CheckBoxListSearch_{controlInstanceId}_ContextSelectedValues";
+                string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
                 if (HttpContext.Current.Items.Contains(contextKey))
                 {
                     HttpContext.Current.Items.Remove(contextKey);

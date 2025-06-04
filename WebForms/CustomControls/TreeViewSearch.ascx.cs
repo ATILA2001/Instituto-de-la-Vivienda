@@ -11,7 +11,7 @@ using System.Web.UI.WebControls;
 
 namespace WebForms.CustomControls
 {
-    public partial class CheckBoxListSearch : UserControl
+    public partial class TreeViewSearch : UserControl
     {
         //public event EventHandler SelectedIndexChanged;
         // Modificar la definición del evento para coincidir con TreeView
@@ -51,7 +51,7 @@ namespace WebForms.CustomControls
 
         private string GetSessionKeyForSelectedValues() 
         { 
-            return $"CheckBoxListSearch_SelectedValues_{this.ID}"; 
+            return $"TreeViewSearch_SelectedValues_{this.ID}"; 
         }
         
         private void SaveSelectedValuesToSession(List<string> values)
@@ -110,7 +110,7 @@ namespace WebForms.CustomControls
         {
             List<string> currentSelectedValues = this.SelectedValues;
 
-            string contextKey = $"CheckBoxListSearch_{this.ID}_ContextSelectedValues";
+            string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
             HttpContext.Current.Items[contextKey] = currentSelectedValues;
 
             SaveSelectedValuesToSession(currentSelectedValues);
@@ -135,7 +135,7 @@ namespace WebForms.CustomControls
                 }
                 else // Is PostBack
                 {
-                    string contextKey = $"CheckBoxListSearch_{this.ID}_ContextSelectedValues";
+                    string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         // This control's "Accept" button triggered the postback, use values from current request context
@@ -331,7 +331,7 @@ namespace WebForms.CustomControls
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[CheckBoxListSearch] Error in DataBind ({this.ID}): {ex.Message}\nStackTrace: {ex.StackTrace}");
+                Debug.WriteLine($"[TreeViewSearch] Error in DataBind ({this.ID}): {ex.Message}\nStackTrace: {ex.StackTrace}");
             }
             finally
             {

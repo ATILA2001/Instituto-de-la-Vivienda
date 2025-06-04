@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="LegitimosAdmin.aspx.cs" Inherits="WebForms.LegitimosAdmin" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -207,7 +207,7 @@
                 <%--<asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre" />--%>
                 <asp:TemplateField HeaderText="Area">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderArea" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
                             HeaderText="Área"
                             DataTextField="Nombre"
                             DataValueField="Nombre"
@@ -221,7 +221,7 @@
                 <%--<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
                 <asp:TemplateField HeaderText="Empresa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEmpresa" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
                             HeaderText="Empresa"
                             DataTextField="Nombre"
                             DataValueField="Nombre" 
@@ -235,7 +235,7 @@
                 <%--<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />--%>
                 <asp:TemplateField HeaderText="Código Autorizante">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderCodigoAutorizante" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderCodigoAutorizante" runat="server"
                             HeaderText="Código Autorizante"
                             DataTextField="Nombre"
                             DataValueField="Nombre" 
@@ -259,7 +259,7 @@
                 <%--				<asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />--%>
                 <asp:TemplateField HeaderText="Mes Aprobación">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderMesAprobacion" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderMesAprobacion" runat="server"
                             HeaderText="Mes Aprobación"
                             DataTextField="Nombre" 
                             DataValueField="Valor" 
@@ -273,7 +273,7 @@
                 <%--				<asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
                 <asp:TemplateField HeaderText="Estado">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEstado" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
                             HeaderText="Estado"
                             DataTextField="Nombre"
                             DataValueField="Nombre"
@@ -290,7 +290,7 @@
                 <%--				<asp:BoundField HeaderText="Linea de gestion" DataField="Linea" />--%>
                 <asp:TemplateField HeaderText="Linea de gestion">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderLinea" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderLinea" runat="server"
                             HeaderText="Linea de gestion"
                             DataTextField="Nombre"
                             DataValueField="Nombre"

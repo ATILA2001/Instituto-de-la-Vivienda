@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Redet.Master" AutoEventWireup="true" CodeBehind="Redeterminaciones.aspx.cs" Inherits="WebForms.Redeterminaciones" %>
 
-<%@ Register Src="~/CustomControls/CheckBoxListSearch.ascx" TagPrefix="CustomControls" TagName="CheckBoxListSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
@@ -210,7 +210,7 @@
                 <%--<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />--%>
                 <asp:TemplateField HeaderText="Obra">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderObra" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
                             HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
@@ -221,7 +221,7 @@
                 <%--<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" />--%>
                 <asp:TemplateField HeaderText="Código Autorizante">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderAutorizante" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
                             HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
@@ -231,7 +231,7 @@
 
                 <asp:TemplateField HeaderText="Etapa">
                     <HeaderTemplate>
-                        <CustomControls:CheckBoxListSearch ID="cblsHeaderEstado" runat="server"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
                             HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
