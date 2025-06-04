@@ -54,7 +54,7 @@
 
 
                         </ul>
-
+                         </div>
                         <li class="nav-item">
                             <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary " OnClick="btnCerrarSession_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
 					<i class="bi bi-box-arrow-right"></i>
