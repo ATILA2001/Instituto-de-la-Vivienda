@@ -11,7 +11,7 @@ using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class FormulacionAdmin : System.Web.UI.Page
+    public partial class FormulacionUsuario : System.Web.UI.Page
     {
         private FormulacionNegocio negocio = new FormulacionNegocio();
 
@@ -37,11 +37,19 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                List<Formulacion> formulacionesCompletas = negocio.listar();
+                // Verificar que el usuario esté logueado
+                if (Session["usuario"] == null)
+                {
+                    Response.Redirect("Login.aspx");
+                    return;
+                }
+
+                Usuario usuarioActual = (Usuario)Session["usuario"];
+                List<Formulacion> formulacionesCompletas = negocio.listar(usuarioActual);
                 Session["formulacionesCompletas"] = formulacionesCompletas;
 
-                BindDropDownList(); 
-                CargarListaFormulaciones(); 
+                BindDropDownList();
+                CargarListaFormulaciones();
             }
         }
 
@@ -71,8 +79,12 @@ namespace WebForms
 
         private DataTable ObtenerObras()
         {
+            // Obtener el usuario actual
+            Usuario usuarioActual = (Usuario)Session["usuario"];
             ObraNegocio obraNegocio = new ObraNegocio();
-            return obraNegocio.listarddlFormulacion();
+
+            // Obtener solo las obras del área del usuario
+            return obraNegocio.listarddlFormulacion(usuarioActual);
         }
 
         private DataTable ObtenerUnidadesMedida()
@@ -85,17 +97,20 @@ namespace WebForms
         {
             try
             {
-                // 1. Get complete list from session
+                // Obtener el usuario actual
+                Usuario usuarioActual = (Usuario)Session["usuario"];
+
+                // 1. Obtener lista completa desde la sesión
                 List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
                 if (formulacionesCompletas == null)
                 {
-                    formulacionesCompletas = negocio.listar();
+                    formulacionesCompletas = negocio.listar(usuarioActual);
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
                 IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
 
-                // 2. Apply general text filter (txtBuscar)
+                // 2. Aplicar filtro de texto general (txtBuscar)
                 string filtroGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
                 if (!string.IsNullOrEmpty(filtroGeneral))
                 {
@@ -115,7 +130,7 @@ namespace WebForms
                     );
                 }
 
-                // 3. Get and apply header filters
+                // 3. Obtener y aplicar filtros de encabezado
                 if (dgvFormulacion.HeaderRow != null)
                 {
                     var cblsHeaderArea = dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
@@ -156,7 +171,7 @@ namespace WebForms
                 }
 
                 List<Formulacion> resultadoFinal = listaFiltrada.ToList();
-                Session["listaFormulacionAdmin"] = resultadoFinal; 
+                Session["listaFormulacionUser"] = resultadoFinal;
                 dgvFormulacion.DataSource = resultadoFinal;
                 dgvFormulacion.DataBind();
             }
@@ -165,7 +180,6 @@ namespace WebForms
                 lblMensaje.Text = $"Error al cargar las formulaciones: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
-
         }
 
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
@@ -176,7 +190,7 @@ namespace WebForms
                 int idFormulacion = Convert.ToInt32(dgvFormulacion.SelectedDataKey.Value);
 
                 // Obtener la lista de formulaciones de la sesión
-                List<Formulacion> listaFormulaciones = (List<Formulacion>)Session["listaFormulacionAdmin"];
+                List<Formulacion> listaFormulaciones = (List<Formulacion>)Session["listaFormulacionUser"];
 
                 // Encontrar la formulación seleccionada
                 Formulacion formulacionSeleccionada = listaFormulaciones.FirstOrDefault(f => f.Id == idFormulacion);
@@ -197,8 +211,6 @@ namespace WebForms
                     txtMonto26.Text = formulacionSeleccionada.Monto_26.ToString();
                     txtMonto27.Text = formulacionSeleccionada.Monto_27.ToString();
                     txtMonto28.Text = formulacionSeleccionada.Monto_28.ToString();
-                    txtPPI.Text = formulacionSeleccionada.Ppi.ToString();
-                    txtTechos.Text = formulacionSeleccionada.Techos2026.ToString();
                     txtMesBase.Text = formulacionSeleccionada.MesBase?.ToString("yyyy-MM-dd") ?? string.Empty;
 
                     if (formulacionSeleccionada.UnidadMedida != null)
@@ -232,7 +244,6 @@ namespace WebForms
                             // Mostrar el modal
                             $('#modalAgregar').modal('show');
                         });", true);
-                    CargarListaFormulaciones();
                 }
             }
             catch (Exception ex)
@@ -266,8 +277,11 @@ namespace WebForms
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
 
-                    // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                    Session["formulacionesCompletas"] = negocio.listar();
+                    // Actualizar la lista de formulaciones
+                    Usuario usuarioActual = (Usuario)Session["usuario"];
+                    List<Formulacion> formulacionesCompletas = negocio.listar(usuarioActual);
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+
                     CargarListaFormulaciones(); // Actualizar el GridView
                 }
             }
@@ -285,6 +299,7 @@ namespace WebForms
             {
                 FormulacionNegocio negocio = new FormulacionNegocio();
                 Formulacion formulacion = new Formulacion();
+                Usuario usuarioActual = (Usuario)Session["usuario"];
 
                 try
                 {
@@ -334,8 +349,6 @@ namespace WebForms
                     formulacion.Monto_26 = decimal.Parse(txtMonto26.Text.Trim());
                     formulacion.Monto_27 = decimal.Parse(txtMonto27.Text.Trim());
                     formulacion.Monto_28 = decimal.Parse(txtMonto28.Text.Trim());
-                    formulacion.Ppi = int.Parse(txtPPI.Text.Trim());
-                    formulacion.Techos2026 = decimal.Parse(txtTechos.Text.Trim());
 
                     // Manejar valores que pueden ser nulos
                     formulacion.MesBase = !string.IsNullOrWhiteSpace(txtMesBase.Text.Trim())
@@ -355,21 +368,20 @@ namespace WebForms
                     // Asignar unidad de medida
                     formulacion.UnidadMedida = new UnidadMedida { Id = int.Parse(ddlUnidadMedida.SelectedValue) };
 
+                    if (!string.IsNullOrEmpty(txtValorMedida.Text))
+                        formulacion.ValorMedida = decimal.Parse(txtValorMedida.Text.Trim());
+                    else
+                        formulacion.ValorMedida = 0;
+
                     // Ejecutar operación según modo
                     if (ViewState["EditingFormulacionId"] != null)
                     {
                         negocio.modificar(formulacion);
-                        // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                        Session["formulacionesCompletas"] = negocio.listar();
-                        CargarListaFormulaciones();
                         lblMensaje.Text = "Formulación modificada exitosamente!";
                     }
                     else
                     {
-                        negocio.agregar(formulacion);
-                        // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                        Session["formulacionesCompletas"] = negocio.listar();
-                        CargarListaFormulaciones();
+                        negocio.agregarUser(usuarioActual, formulacion);
                         lblMensaje.Text = "Formulación agregada exitosamente!";
                     }
 
@@ -390,6 +402,10 @@ namespace WebForms
 
                     btnAgregar.Text = "Agregar";
 
+                    // Actualizar la lista de formulaciones
+                    List<Formulacion> formulacionesCompletas = negocio.listar(usuarioActual);
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+                    CargarListaFormulaciones();
                 }
                 catch (Exception ex)
                 {
@@ -407,10 +423,8 @@ namespace WebForms
             txtMonto26.Text = string.Empty;
             txtMonto27.Text = string.Empty;
             txtMonto28.Text = string.Empty;
-            txtPPI.Text = string.Empty;
             ddlUnidadMedida.SelectedIndex = 0;
             txtValorMedida.Text = string.Empty;
-            txtTechos.Text = string.Empty;
             txtMesBase.Text = string.Empty;
             txtObservaciones.Text = string.Empty;
             ddlPrioridades.SelectedIndex = 0; // Seleccionar el primer elemento si no hay prioridad
@@ -420,10 +434,11 @@ namespace WebForms
         {
             if (dgvFormulacion.HeaderRow != null)
             {
+                Usuario usuarioActual = (Usuario)Session["usuario"];
                 List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
                 if (formulacionesCompletas == null)
                 {
-                    formulacionesCompletas = negocio.listar(); // Fallback, should be in session
+                    formulacionesCompletas = negocio.listar(usuarioActual); // Fallback, should be in session
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
@@ -499,19 +514,16 @@ namespace WebForms
             }
         }
 
-
         private void BindDropDownList()
         {
             ddlObra.Items.Clear();
             ddlUnidadMedida.Items.Clear();
             ddlPrioridades.Items.Clear(); // Añadir esta línea para limpiar las prioridades
 
-
             // Agregar elementos vacíos a cada dropdown
             ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
             ddlUnidadMedida.Items.Add(new ListItem("Seleccione una unidad de medida", ""));
             ddlPrioridades.Items.Add(new ListItem("Seleccione una prioridad", "")); // Añadir esta línea
-
 
             // Establecer la propiedad AppendDataBoundItems a true para todos los dropdowns
             ddlObra.AppendDataBoundItems = true;
@@ -535,11 +547,13 @@ namespace WebForms
             ddlPrioridades.DataValueField = "ID";
             ddlPrioridades.DataBind();
         }
+
         private DataTable listarPrioridades()
         {
             PrioridadNegocio prioridadNegocio = new PrioridadNegocio();
             return prioridadNegocio.listarddl();
         }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();
@@ -561,6 +575,7 @@ namespace WebForms
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
+
         private void ClearFilter(string controlId)
         {
             if (dgvFormulacion.HeaderRow != null)
@@ -585,6 +600,5 @@ namespace WebForms
                 }
             }
         }
-
     }
 }
