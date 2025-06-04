@@ -13,14 +13,14 @@
 
 @font-face {
 	font-family: 'Archivo';
-	src: url('<%= ResolveUrl("~/Fonts/Archivo-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	src: url('../Fonts/Archivo-VariableFont_wdth,wght.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'Archivo';
-	src: url('<%= ResolveUrl("~/Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf") %>') format('truetype');
+	src: url('../Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf') format('truetype');
 	font-weight: normal;
 	font-style: italic;
 }
