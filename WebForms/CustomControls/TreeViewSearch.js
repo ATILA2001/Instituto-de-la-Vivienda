@@ -6,8 +6,11 @@ document.addEventListener("click", function (event) {
     const buttons = document.querySelectorAll(".dropdown-button");
 
     dropdowns.forEach((dropdown, index) => {
-        const button = buttons[index];
-        if (dropdown.style.display === 'block' && !dropdown.contains(event.target) && !button.contains(event.target)) {
+        const button = buttons[index]; 
+
+        const clickedOnAssociatedButton = button ? button.contains(event.target) : false;
+
+        if (dropdown.style.display === 'block' && !dropdown.contains(event.target) && !clickedOnAssociatedButton) {
             dropdown.style.display = "none";
         }
     });
