@@ -49,46 +49,67 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarMenu">
                         <ul class="navbar-nav ms-auto">
-
-
-                            <li class="nav-item"><a class="nav-link text-white" href="BdProyectos.aspx"><span>Proyectos</span></a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="MovimientosGestion.aspx"><span>Movimientos</span></a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="FormulacionAdmin.aspx"><span>Formulacion 2026</span></a></li>
-
+                            <!-- Gestión -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Consolidado</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span>Gestión</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="BdProyectos.aspx">Proyectos</a></li>
+                                    <li><a class="dropdown-item" href="MovimientosGestion.aspx">Movimientos</a></li>
+                                    <li><a class="dropdown-item" href="FormulacionAdmin.aspx">Formulación 2026</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <h6 class="dropdown-header">Líneas de Gestión</h6>
+                                    </li>
+                                    <li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
+                                    <li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Planificación -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span>Planificación</span>
+                                </a>
+                                <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="ObrasAdmin.aspx">Obras</a></li>
                                     <li><a class="dropdown-item" href="AutorizantesAdmin.aspx">Autorizantes</a></li>
                                     <li><a class="dropdown-item" href="CertificadosAdmin.aspx">Certificados</a></li>
                                     <li><a class="dropdown-item" href="LegitimosAdmin.aspx">Legítimos Abonos</a></li>
                                 </ul>
                             </li>
+
+                            <!-- Admin -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Listados</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span>Admin</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
+
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <h6 class="dropdown-header">Base de Datos</h6>
+                                    </li>
                                     <li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
                                     <li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
                                 </ul>
                             </li>
-
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Líneas de Gestión</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
-                                    <li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item"><a class="nav-link text-white" href="AbmlUsuarios.aspx"><span>Usuarios</span></a></li>
                         </ul>
-                        <li class="nav-item">
-                            <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary " OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
-							<i class="bi bi-box-arrow-right"></i>
-                            </asp:LinkButton>
-                        </li>
 
+                        <!-- Botón Cerrar Sesión -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </asp:LinkButton>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </nav>
