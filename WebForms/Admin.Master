@@ -52,10 +52,6 @@
                         <ul class="navbar-nav ms-auto">
                             <!-- Gestión -->
                             <li class="nav-item dropdown">
-<<<<<<< HEAD
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownConsolidado" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Consolidado</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-=======
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span>Gestión</span>
                                 </a>
@@ -80,7 +76,6 @@
                                     <span>Planificación</span>
                                 </a>
                                 <ul class="dropdown-menu">
->>>>>>> b4a9f4c2024da492ad8bd738028c6b958dbf00af
                                     <li><a class="dropdown-item" href="ObrasAdmin.aspx">Obras</a></li>
                                     <li><a class="dropdown-item" href="AutorizantesAdmin.aspx">Autorizantes</a></li>
                                     <li><a class="dropdown-item" href="CertificadosAdmin.aspx">Certificados</a></li>
@@ -90,10 +85,6 @@
 
                             <!-- Admin -->
                             <li class="nav-item dropdown">
-<<<<<<< HEAD
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownListados" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Listados</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-=======
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span>Admin</span>
                                 </a>
@@ -106,32 +97,12 @@
                                     <li>
                                         <h6 class="dropdown-header">Base de Datos</h6>
                                     </li>
->>>>>>> b4a9f4c2024da492ad8bd738028c6b958dbf00af
                                     <li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
                                     <li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
                                 </ul>
                             </li>
-<<<<<<< HEAD
 
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownLineasGestion" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span>Líneas de Gestión</span></a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
-                                    <li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item"><a class="nav-link text-white" href="AbmlUsuarios.aspx"><span>Usuarios</span></a></li>
                         </ul>
-                        <div class="nav-item">
-                            <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary " OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
-							<i class="bi bi-box-arrow-right"></i>
-                            </asp:LinkButton>
-                        </div>
-=======
-                        </ul>
->>>>>>> b4a9f4c2024da492ad8bd738028c6b958dbf00af
 
                         <!-- Botón Cerrar Sesión -->
                         <ul class="navbar-nav">
