@@ -54,6 +54,18 @@ document.addEventListener("click", function (event) {
     });
 });
 
+function getPageName() {
+    try {
+        const path = window.location.pathname;
+        const pageName = path.split('/').pop().split('.')[0];
+        return pageName && pageName.length > 0 ? pageName : 'Unknown';
+    } catch (error) {
+        console.warn('Error al obtener nombre de página:', error);
+        return 'Unknown';
+    }
+}
+
+
 /**
  * Inicializa componentes, gestiona estado de dropdowns y añade listeners al cargar.
  */
@@ -87,6 +99,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Itera sobre cada TreeView y configura sus listeners y estado inicial.
     document.querySelectorAll(".date-tree-view").forEach(treeViewContainer => {
+         if (filtersWereClearedOnServer) {
+            clearLocalStatesForTreeView(treeViewContainer);
+        }
+
         if (!treeViewContainer || !treeViewContainer.id) {
             return; // Saltar a la siguiente iteración
         }
@@ -187,9 +203,28 @@ document.addEventListener("DOMContentLoaded", function () {
     // Limpia el flag para los filtros después de usarlo
     if (filtersWereClearedOnServer) {
         sessionStorage.removeItem('filtersCleared');
-        console.log("[DOMContentLoaded] Flag 'filtersCleared' procesado y eliminado de sessionStorage.");
     }
 });
+
+// Función para limpiar estados locales de un TreeView específico
+function clearLocalStatesForTreeView(treeViewContainer) {
+    const pageName = (typeof getPageName === 'function') ? getPageName() : 'Unknown';
+    
+    // Limpiar estado inicial guardado
+    sessionStorage.removeItem(`initialState_${pageName}_${treeViewContainer.id}`);
+    
+    // Desmarcar todos los checkboxes
+    const checkboxes = treeViewContainer.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        cb.indeterminate = false;
+    });
+    
+    // Actualizar ícono
+    if (typeof updateDropdownIcon === 'function') {
+        updateDropdownIcon(treeViewContainer);
+    }
+}
 
 /**
  * Actualiza el ícono del botón dropdown basado en los nodos HOJA seleccionados.
@@ -795,7 +830,9 @@ function saveInitialState(treeViewContainer) {
         state[cb.id] = { checked: cb.checked, indeterminate: cb.indeterminate };
     });
     // Guarda el estado asociado al ID del contenedor
-    sessionStorage.setItem(`initialState_${treeViewContainer.id}`, JSON.stringify(state));
+    // sessionStorage.setItem(`initialState_${treeViewContainer.id}`, JSON.stringify(state));
+    const pageName = getPageName();
+    sessionStorage.setItem(`initialState_${pageName}_${treeViewContainer.id}`, JSON.stringify(state));
 }
 
 /**
@@ -803,16 +840,15 @@ function saveInitialState(treeViewContainer) {
  * @param {HTMLElement} treeViewContainer - El contenedor principal del TreeView.
  */
 function restoreState(treeViewContainer) {
-    const savedState = sessionStorage.getItem(`initialState_${treeViewContainer.id}`);
+    const pageName = getPageName();
+    // const savedState = sessionStorage.getItem(`initialState_${treeViewContainer.id}`);
+    const savedState = sessionStorage.getItem(`initialState_${pageName}_${treeViewContainer.id}`);
     if (savedState) {
         const state = JSON.parse(savedState);
         const checkboxes = treeViewContainer.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach(cb => {
             if (state[cb.id]) {
                 cb.checked = state[cb.id].checked;
-                // NO restaurar cb.indeterminate directamente aquí.
-                // Se recalculará para asegurar consistencia.
-                // cb.indeterminate = state[cb.id].indeterminate; 
             }
         });
 

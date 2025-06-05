@@ -19,6 +19,7 @@ namespace WebForms.CustomControls
         public event EventHandler AcceptChanges;
 
         protected TreeView chkList;
+        protected HtmlButton chkList_btnAccept;
         protected LinkButton chkList_btnDeselectAll;
         protected HtmlGenericControl litTitle;
         protected HtmlButton dropdownButton;
@@ -27,6 +28,9 @@ namespace WebForms.CustomControls
         private string _dataTextField;
         private string _dataValueField;
         private object _dataSource;
+        private static Dictionary<string, bool> _pageFiltersApplied = new Dictionary<string, bool>();
+
+
 
 
         public string HeaderText { get; set; } = "Filtro";
@@ -51,7 +55,10 @@ namespace WebForms.CustomControls
 
         private string GetSessionKeyForSelectedValues() 
         { 
-            return $"TreeViewSearch_SelectedValues_{this.ID}"; 
+            // return $"TreeViewSearch_SelectedValues_{this.ID}"; 
+
+            string pageName = Page?.GetType().Name ?? "Unknown";
+            return $"TreeViewSearch_SelectedValues_{pageName}_{this.ID}"; 
         }
         
         private void SaveSelectedValuesToSession(List<string> values)
@@ -74,6 +81,8 @@ namespace WebForms.CustomControls
                 dropdownButton.Attributes["onclick"] = $"toggleDropdown('{chkList.ClientID}_dropdown'); return false;"; // Añadido return false;
             }
         }
+
+
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -103,19 +112,66 @@ namespace WebForms.CustomControls
                 {
                     chkList.Attributes["data-title-id"] = litTitle.ClientID;
                 }
+                string pageName = Page?.GetType().Name ?? "Unknown";
+                if (_pageFiltersApplied.ContainsKey(pageName))
+                {
+                    _pageFiltersApplied.Remove(pageName);
+                }
+                if (HasStoredFilters())
+                {
+                    Page.LoadComplete += ApplyStoredFiltersOnLoadComplete;
+                }
+
             }
         }
+        private void ApplyStoredFiltersOnLoadComplete(object sender, EventArgs e)
+        {
+            string pageName = Page?.GetType().Name ?? "Unknown";
+
+            if (!_pageFiltersApplied.ContainsKey(pageName))
+            {
+                _pageFiltersApplied[pageName] = true;
+
+                // Remover el handler para evitar múltiples ejecuciones
+                Page.LoadComplete -= ApplyStoredFiltersOnLoadComplete;
+
+                // Aplicar los filtros
+                AcceptChanges?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        protected void Page_PreRenderComplete(object sender, EventArgs e)
+        {
+            string pageName = Page?.GetType().Name ?? "Unknown";
+
+            // Solo aplicar una vez por página y solo en primera carga
+            if (!Page.IsPostBack && !_pageFiltersApplied.ContainsKey(pageName))
+            {
+                _pageFiltersApplied[pageName] = true;
+
+                // Verificar si este control tiene filtros guardados
+                if (HasStoredFilters())
+                {
+                    // Ejecutar directamente el click del botón para aplicar filtros
+                    BtnAccept_Click(this, EventArgs.Empty);
+                }
+            }
+        }
+
 
         protected void BtnAccept_Click(object sender, EventArgs e)
         {
             List<string> currentSelectedValues = this.SelectedValues;
 
-            string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
+            // string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
+            string pageName = Page?.GetType().Name ?? "Unknown";
+            string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
             HttpContext.Current.Items[contextKey] = currentSelectedValues;
 
             SaveSelectedValuesToSession(currentSelectedValues);
 
             AcceptChanges?.Invoke(this, EventArgs.Empty);
+
         }
 
         public override void DataBind()
@@ -135,7 +191,9 @@ namespace WebForms.CustomControls
                 }
                 else // Is PostBack
                 {
-                    string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
+                    // string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
+                    string pageName = Page?.GetType().Name ?? "Unknown";
+                    string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
                         // This control's "Accept" button triggered the postback, use values from current request context
@@ -328,6 +386,7 @@ namespace WebForms.CustomControls
                         }
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -456,13 +515,97 @@ namespace WebForms.CustomControls
 
         public void ClearSelection()
         {
-            foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
+            try
             {
-                node.Checked = false;
+                // Limpiar checkboxes del TreeView
+                ClearAllNodesRecursive(chkList.Nodes);
+                
+                // Limpiar estado de sesión
+                ClearSessionState();
+                
+                // Limpiar estado de contexto
+                ClearContextState();
+                
+                // Actualizar UI
+                UpdateTitleAndIcon();
+                UpdateDeselectAllButtonState();
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ClearSelection: {ex.ToString()}");
+            }
+        }
 
-            UpdateTitleAndIcon();
-            UpdateDeselectAllButtonState();
+        private void ClearSessionState()
+        {
+            string sessionKey = GetSessionKeyForSelectedValues();
+            if (HttpContext.Current.Session[sessionKey] != null)
+            {
+                HttpContext.Current.Session.Remove(sessionKey);
+            }
+        }
+
+        private void ClearContextState()
+        {
+            string pageName = Page?.GetType().Name ?? "Unknown";
+            string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
+            if (HttpContext.Current.Items.Contains(contextKey))
+            {
+                HttpContext.Current.Items.Remove(contextKey);
+            }
+        }
+
+        // Método estático para limpiar todos los filtros de una página
+        public static void ClearAllFiltersOnPage(Page page)
+        {
+            try
+            {
+                string pageName = page?.GetType().Name ?? "Unknown";
+                
+                // Limpiar todos los estados de sesión para esta página
+                var keysToRemove = new List<string>();
+                foreach (string key in HttpContext.Current.Session.Keys)
+                {
+                    if (key.StartsWith($"TreeViewSearch_SelectedValues_{pageName}_"))
+                    {
+                        keysToRemove.Add(key);
+                    }
+                }
+                
+                foreach (string key in keysToRemove)
+                {
+                    HttpContext.Current.Session.Remove(key);
+                }
+                
+                // Limpiar estados de contexto
+                var contextKeysToRemove = new List<string>();
+                foreach (string key in HttpContext.Current.Items.Keys)
+                {
+                    if (key.ToString().StartsWith($"TreeViewSearch_{pageName}_") && 
+                        key.ToString().EndsWith("_ContextSelectedValues"))
+                    {
+                        contextKeysToRemove.Add(key.ToString());
+                    }
+                }
+                
+                foreach (string key in contextKeysToRemove)
+                {
+                    HttpContext.Current.Items.Remove(key);
+                }
+                
+                // Marcar en sesión que se limpiaron los filtros para JavaScript
+                HttpContext.Current.Session["filtersCleared"] = "true";
+
+                if (page != null)
+                {
+                    ScriptManager.RegisterStartupScript(page, page.GetType(), "setFiltersCleared", 
+                        "sessionStorage.setItem('filtersCleared', 'true');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ClearAllFiltersOnPage: {ex.ToString()}");
+            }
         }
 
         private void ClearAllNodesRecursive(TreeNodeCollection nodes)
@@ -510,6 +653,97 @@ namespace WebForms.CustomControls
         protected void BtnDeselectAll_Click(object sender, EventArgs e)
         {
             ClearSelection();
+        }
+
+        private void ApplyPendingFiltersOnPage()
+        {
+            var allControls = FindAllTreeViewSearchControls(Page);
+
+            foreach (var control in allControls)
+            {
+                if (control != this && control.HasStoredFilters())
+                {
+                    // Solo disparar AcceptChanges para re-aplicar el filtro
+                    control.AcceptChanges?.Invoke(control, EventArgs.Empty);
+                }
+            }
+        }
+
+        private List<TreeViewSearch> FindAllTreeViewSearchControls(Control parent)
+        {
+            var controls = new List<TreeViewSearch>();
+
+            foreach (Control control in parent.Controls)
+            {
+                if (control is TreeViewSearch treeViewSearch)
+                {
+                    controls.Add(treeViewSearch);
+                }
+                else
+                {
+                    controls.AddRange(FindAllTreeViewSearchControls(control));
+                }
+            }
+
+            return controls;
+        }
+
+        public bool HasStoredFilters()
+        {
+            var savedValues = LoadSelectedValuesFromSession();
+            return savedValues != null && savedValues.Any();
+        }
+
+        private void RestoreAndApplyStoredFilters()
+        {
+            var savedValues = LoadSelectedValuesFromSession();
+            if (savedValues != null && savedValues.Any())
+            {
+                SetSelectedValues(savedValues);
+                AcceptChanges?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        // AGREGAR: Método que falta en la clase TreeViewSearch
+        private void SetSelectedValues(List<string> values)
+        {
+            if (chkList?.Nodes != null && values != null)
+            {
+                // Desmarcar todos los nodos primero
+                foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
+                {
+                    node.Checked = false;
+                }
+
+                // Marcar los nodos que están en la lista de valores
+                foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
+                {
+                    if (values.Contains(node.Value))
+                    {
+                        node.Checked = true;
+                    }
+                }
+
+                // Actualizar el estado del nodo "select-all" si existe
+                if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
+                {
+                    TreeNode selectAllNode = chkList.Nodes[0];
+                    var leafNodes = selectAllNode.ChildNodes
+                        .Cast<TreeNode>()
+                        .SelectMany(GetAllNodes)
+                        .Where(n => n.ChildNodes.Count == 0 && n.Value != "select-all")
+                        .ToList();
+
+                    if (leafNodes.Any())
+                    {
+                        selectAllNode.Checked = leafNodes.All(n => n.Checked);
+                    }
+                }
+
+                // Actualizar UI
+                UpdateTitleAndIcon();
+                UpdateDeselectAllButtonState();
+            }
         }
     }
 }
