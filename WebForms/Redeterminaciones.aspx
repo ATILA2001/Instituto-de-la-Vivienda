@@ -206,7 +206,7 @@
             OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
             OnRowDeleting="dgvRedeterminacion_RowDeleting"
             OnRowDataBound="dgvRedeterminacion_RowDataBound"
-            AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
             <Columns>
                 <asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
                 <%--<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />--%>

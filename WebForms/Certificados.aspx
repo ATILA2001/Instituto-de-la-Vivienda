@@ -8,7 +8,7 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-		<!-- Modal -->
+	<!-- Modal -->
 	<div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
@@ -21,27 +21,27 @@
 						<div class="container">
 							<div class="row">
 								<div id="autorizanteContainer" class="col-12">
-    <div class="mb-3">
-        <label for="ddlAutorizante" class="form-label">Código Autorizante</label>
-        <asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-            <asp:ListItem Value="" Text="Seleccione un autorizante" Selected="True"></asp:ListItem>
-        </asp:DropDownList>
-        <asp:RequiredFieldValidator ID="rfvAutorizante"
-            ControlToValidate="ddlAutorizante"
-            ValidationGroup="AgregarCertificado"
-            runat="server"
-            ErrorMessage="Seleccione un autorizante"
-            Display="Dynamic"
-            CssClass="text-danger"
-            EnableClientScript="true"
-            InitialValue="" />
-    </div>
-</div>
+									<div class="mb-3">
+										<label for="ddlAutorizante" class="form-label">Código Autorizante</label>
+										<asp:DropDownList ID="ddlAutorizante" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+											<asp:ListItem Value="" Text="Seleccione un autorizante" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvAutorizante"
+											ControlToValidate="ddlAutorizante"
+											ValidationGroup="AgregarCertificado"
+											runat="server"
+											ErrorMessage="Seleccione un autorizante"
+											Display="Dynamic"
+											CssClass="text-danger"
+											EnableClientScript="true"
+											InitialValue="" />
+									</div>
+								</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
 										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                        <asp:RequiredFieldValidator ID="rfvExpediente"
+										<asp:RequiredFieldValidator ID="rfvExpediente"
 											ControlToValidate="txtExpediente"
 											ValidationGroup="AgregarCertificado"
 											runat="server"
@@ -55,9 +55,9 @@
 									<div class="mb-3">
 										<label for="ddlTipo" class="form-label">Tipo</label>
 										<asp:DropDownList ID="ddlTipo" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione un tipo" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvTipo"
+											<asp:ListItem Value="" Text="Seleccione un tipo" Selected="True"></asp:ListItem>
+										</asp:DropDownList>
+										<asp:RequiredFieldValidator ID="rfvTipo"
 											ControlToValidate="ddlTipo"
 											ValidationGroup="AgregarCertificado"
 											runat="server"
@@ -65,13 +65,13 @@
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true"
-                                            InitialValue="" />
+											InitialValue="" />
 									</div>
 								</div>
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00"/>
+										<asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00" />
 										<asp:RequiredFieldValidator ID="rfvMontoAutorizado"
 											ControlToValidate="txtMontoAutorizado"
 											ValidationGroup="AgregarCertificado"
@@ -95,7 +95,7 @@
 									<div class="mb-3">
 										<label for="txtFecha" class="form-label">Mes Aprobacion</label>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
-                                        <asp:RequiredFieldValidator ID="rfvFecha"
+										<asp:RequiredFieldValidator ID="rfvFecha"
 											ControlToValidate="txtFecha"
 											ValidationGroup="AgregarCertificado"
 											runat="server"
@@ -158,141 +158,141 @@
 					<%-- logica que aparezca o desaparezca. copiar de david --%>
 					<div class="form-group mb-2">
 						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
-							data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            title="Quita todos los filtros">
+							data-bs-toggle="tooltip"
+							data-bs-placement="top"
+							title="Quita todos los filtros">
 					<i class="bi bi-funnel"></i>
 						</asp:LinkButton>
 					</div>
 
 					<div class="form-group mb-2">
-    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
-    </asp:LinkButton>
-</div>
+						</asp:LinkButton>
+					</div>
 				</div>
 			</div>
 		</div>
 
 		<hr class="mb-3" />
-				<div class="gridview-scroll-container">
+		<div class="gridview-scroll-container">
 
-		<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
-			OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
-			OnRowDeleting="dgvCertificado_RowDeleting"
-			OnRowDataBound="dgvCertificado_RowDataBound"
-			AutoGenerateColumns="false" runat="server" Style="display: block; overflow-x: auto;">
-			<Columns>
-				<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
+			<asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
+				OnRowDeleting="dgvCertificado_RowDeleting"
+				OnRowDataBound="dgvCertificado_RowDataBound"
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvCertificado_PageIndexChanging" runat="server">
+				<Columns>
+					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 
-				<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
-				<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
-				<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />
+					<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
+					<asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
+					<asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />
 
-<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
-                <asp:TemplateField HeaderText="Empresa">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
-                            HeaderText="Empresa"
-                            DataTextField="Nombre"
-                            DataValueField="Nombre"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Empresa") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+					<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
+					<asp:TemplateField HeaderText="Empresa">
+						<HeaderTemplate>
+							<CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+								HeaderText="Empresa"
+								DataTextField="Nombre"
+								DataValueField="Nombre"
+								OnAcceptChanges="OnAcceptChanges" />
+						</HeaderTemplate>
+						<ItemTemplate>
+							<%# Eval("Empresa") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 
-<%--				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />--%>
-                <asp:TemplateField HeaderText="Código Autorizante">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderCodigoAutorizante" runat="server"
-                            HeaderText="Código Autorizante"
-                            DataTextField="Codigo" 
-                            DataValueField="Codigo"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Autorizante.CodigoAutorizante") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+					<%--				<asp:BoundField HeaderText="Código Autorizante" DataField="Autorizante.CodigoAutorizante" />--%>
+					<asp:TemplateField HeaderText="Código Autorizante">
+						<HeaderTemplate>
+							<CustomControls:TreeViewSearch ID="cblsHeaderCodigoAutorizante" runat="server"
+								HeaderText="Código Autorizante"
+								DataTextField="Codigo"
+								DataValueField="Codigo"
+								OnAcceptChanges="OnAcceptChanges" />
+						</HeaderTemplate>
+						<ItemTemplate>
+							<%# Eval("Autorizante.CodigoAutorizante") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 
-				<asp:TemplateField HeaderText="Expediente">
-					<ItemTemplate>
-						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("ExpedientePago") %>' AutoPostBack="true"
-							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
-					</ItemTemplate>
-				</asp:TemplateField>
-<%--				<asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
-                <asp:TemplateField HeaderText="Estado">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
-                            HeaderText="Estado"
-                            DataTextField="Nombre"
-                            DataValueField="Nombre" 
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Estado") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+					<asp:TemplateField HeaderText="Expediente">
+						<ItemTemplate>
+							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("ExpedientePago") %>' AutoPostBack="true"
+								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+						</ItemTemplate>
+					</asp:TemplateField>
+					<%--				<asp:BoundField HeaderText="Estado" DataField="Estado" />--%>
+					<asp:TemplateField HeaderText="Estado">
+						<HeaderTemplate>
+							<CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
+								HeaderText="Estado"
+								DataTextField="Nombre"
+								DataValueField="Nombre"
+								OnAcceptChanges="OnAcceptChanges" />
+						</HeaderTemplate>
+						<ItemTemplate>
+							<%# Eval("Estado") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 
-<%--				<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />--%>
-                <asp:TemplateField HeaderText="Tipo">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderTipo" runat="server"
-                            HeaderText="Tipo"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Tipo.Nombre") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+					<%--				<asp:BoundField HeaderText="Tipo" DataField="Tipo.Nombre" />--%>
+					<asp:TemplateField HeaderText="Tipo">
+						<HeaderTemplate>
+							<CustomControls:TreeViewSearch ID="cblsHeaderTipo" runat="server"
+								HeaderText="Tipo"
+								DataTextField="Nombre"
+								DataValueField="Id"
+								OnAcceptChanges="OnAcceptChanges" />
+						</HeaderTemplate>
+						<ItemTemplate>
+							<%# Eval("Tipo.Nombre") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 
-				<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
-<%--				<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />--%>
-				                <asp:TemplateField HeaderText="Mes Certificado">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderMesCertificado" runat="server"
-                            HeaderText="Mes Certificado"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+					<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
+					<%--				<asp:BoundField HeaderText="Mes Certificado" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />--%>
+					<asp:TemplateField HeaderText="Mes Certificado">
+						<HeaderTemplate>
+							<CustomControls:TreeViewSearch ID="cblsHeaderMesCertificado" runat="server"
+								HeaderText="Mes Certificado"
+								DataTextField="Nombre"
+								DataValueField="Id"
+								OnAcceptChanges="OnAcceptChanges" />
+						</HeaderTemplate>
+						<ItemTemplate>
+							<%# Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
+						</ItemTemplate>
+					</asp:TemplateField>
 
-				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
-				<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
-				<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
-				<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+					<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" />
+					<asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
 
-				<asp:TemplateField HeaderText="Acciones">
-					<ItemTemplate>
-						<div class="d-flex justify-content-center gap-2">
-							<asp:LinkButton ID="btnModificar" runat="server"
-								CommandName="Select"
-								CssClass="btn btn-sm btn-warning "
-								ToolTip="Modificar">
+					<asp:TemplateField HeaderText="Acciones">
+						<ItemTemplate>
+							<div class="d-flex justify-content-center gap-2">
+								<asp:LinkButton ID="btnModificar" runat="server"
+									CommandName="Select"
+									CssClass="btn btn-sm btn-warning "
+									ToolTip="Modificar">
                 <i class="bi bi-pencil-square"></i>
-							</asp:LinkButton>
-							<asp:LinkButton ID="btnEliminar" runat="server"
-								CommandName="Delete"
-								CssClass="btn btn-sm btn-danger "
-								ToolTip="Eliminar"
-								OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+								</asp:LinkButton>
+								<asp:LinkButton ID="btnEliminar" runat="server"
+									CommandName="Delete"
+									CssClass="btn btn-sm btn-danger "
+									ToolTip="Eliminar"
+									OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
                 <i class="bi bi-trash"></i>
-							</asp:LinkButton>
-						</div>
-					</ItemTemplate>
-				</asp:TemplateField>
-			</Columns>
-		</asp:GridView>
-					</div>
+								</asp:LinkButton>
+							</div>
+						</ItemTemplate>
+					</asp:TemplateField>
+				</Columns>
+			</asp:GridView>
+		</div>
 
 		<div class="text-center p-4">
 			<asp:Label ID="lblMensaje" Text="" runat="server" />
@@ -307,6 +307,6 @@
 			document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
 			document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;
 		}
-</script>
+	</script>
 
 </asp:Content>

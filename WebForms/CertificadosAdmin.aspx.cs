@@ -801,6 +801,20 @@ namespace WebForms
 
             CargarListaCertificados();
         }
+        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                dgvCertificado.PageIndex = e.NewPageIndex;
+                CargarListaCertificados();
+                CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
 
     }
 }

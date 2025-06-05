@@ -172,7 +172,7 @@
 				OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
 				OnRowDeleting="dgvCertificado_RowDeleting"
 				OnDataBound="dgvCertificado_DataBound"
-				AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvCertificado_PageIndexChanging" runat="server">
 				<Columns>
 					<asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 

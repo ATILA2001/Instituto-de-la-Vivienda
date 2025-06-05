@@ -203,7 +203,8 @@
         <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1 table-bordered table-hover mb-4"
             OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
             OnRowDataBound="dgvLegitimos_RowDataBound"
-            AutoGenerateColumns="false" runat="server">
+            AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvLegitimos_PageIndexChanging" runat="server">
+
             <Columns>
                 <%--<asp:BoundField HeaderText="Area" DataField="Obra.Area.Nombre" />--%>
                 <asp:TemplateField HeaderText="Area">

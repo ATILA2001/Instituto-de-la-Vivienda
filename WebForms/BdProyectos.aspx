@@ -144,7 +144,7 @@
             OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
             OnRowDeleting="dgvBdProyecto_RowDeleting"
             OnRowDataBound="dgvBdProyecto_RowDataBound"
-            AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvBdProyecto_PageIndexChanging" runat="server">
             <Columns>
                 <%--<asp:BoundField HeaderText="Area " DataField="Obra.Area.Nombre" />--%>
                 <asp:TemplateField HeaderText="Área">

@@ -209,8 +209,10 @@
 
 
         <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4 "
-            OnRowDeleting="dgvLegitimos_RowDeleting" AutoGenerateColumns="false" runat="server" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged" Style="display: block; overflow-x: auto;"
-            OnRowDataBound="dgvLegitimos_RowDataBound">
+            OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
+            OnRowDataBound="dgvLegitimos_RowDataBound" 				
+            AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvLegitimos_PageIndexChanging" runat="server">
+
             <Columns>
                 <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
 <%--                <asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>

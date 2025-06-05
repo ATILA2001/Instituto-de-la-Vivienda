@@ -50,7 +50,7 @@
 
 		<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
 			OnRowDataBound="dgvObra_RowDataBound"
-			AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvObra_PageIndexChanging" runat="server">
 
 			<Columns>
 <%--				<asp:BoundField HeaderText="ID" DataField="Id" />--%>

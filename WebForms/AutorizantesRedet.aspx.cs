@@ -259,8 +259,21 @@ namespace WebForms
             }
         }
 
-        
-        
+        protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                dgvAutorizante.PageIndex = e.NewPageIndex;
+                CargarListaAutorizantes();
+                CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
     }
 
 }

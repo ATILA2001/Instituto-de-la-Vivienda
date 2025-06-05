@@ -523,6 +523,9 @@ namespace WebForms
             {
                 dgvLegitimos.PageIndex = e.NewPageIndex;
                 CargarListaLegitimos();
+                CalcularSubtotal();
+
+
             }
             catch (Exception ex)
             {

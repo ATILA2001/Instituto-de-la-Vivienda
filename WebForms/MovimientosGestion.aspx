@@ -142,7 +142,7 @@
 			OnSelectedIndexChanged="dgvMovimiento_SelectedIndexChanged"
 			OnRowDeleting="dgvMovimiento_RowDeleting"
 			OnRowDataBound="dgvMovimiento_RowDataBound"
-			AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvMovimiento_PageIndexChanging" runat="server">
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
                 <%--<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />--%>

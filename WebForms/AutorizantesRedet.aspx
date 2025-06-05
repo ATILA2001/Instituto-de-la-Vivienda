@@ -53,8 +53,8 @@
 
 			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4 "
                 OnRowDataBound="dgvAutorizante_RowDataBound"
-				AutoGenerateColumns="false" runat="server" >
-				<Columns>
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvAutorizante_PageIndexChanging" runat="server">
+<Columns>
 <%--					<asp:BoundField HeaderText="Obra" DataField="Obra.Id" />--%>
 
 <%--					<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />--%>

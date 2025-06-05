@@ -65,7 +65,22 @@ namespace WebForms
                 }
             }
         }
+        protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                // Cambiar el índice de la página
+                dgvObra.PageIndex = e.NewPageIndex;
 
+                // Refrescar el listado de empresas
+                CargarListaObras();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         private DataTable ObtenerEmpresas()
         {
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();

@@ -19,6 +19,19 @@ namespace WebForms
         {
             CargarListaFormulaciones();
         }
+        protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                dgvFormulacion.PageIndex = e.NewPageIndex;
+                CargarListaFormulaciones();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_PreRender(object sender, EventArgs e)
         {
             // Configurar validadores según si estamos en modo edición

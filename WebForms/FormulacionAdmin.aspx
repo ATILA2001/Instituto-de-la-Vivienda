@@ -286,7 +286,7 @@
 			OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
 			OnRowDeleting="dgvFormulacion_RowDeleting"
 			OnRowDataBound="dgvFormulacion_DataBound"
-			AutoGenerateColumns="false" runat="server">
+				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 

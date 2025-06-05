@@ -296,10 +296,20 @@ namespace WebForms
             }
         }
 
+       
         protected void dgvBdProyecto_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            CargarListaProyectos();
-            CalcularSubtotal();
+            try
+            {
+                dgvBdProyecto.PageIndex = e.NewPageIndex;
+                CargarListaProyectos();
+                CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
