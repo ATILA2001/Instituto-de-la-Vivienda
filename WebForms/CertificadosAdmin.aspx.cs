@@ -378,12 +378,7 @@ namespace WebForms
             }
         }
 
-        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            dgvCertificado.PageIndex = e.NewPageIndex;
-            CargarListaCertificados();
-        }
-
+ 
 
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {

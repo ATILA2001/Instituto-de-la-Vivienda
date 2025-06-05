@@ -569,23 +569,7 @@ namespace WebForms
             CargarListaFormulaciones();
         }
 
-
-
-                    // Clear session/context state if your TreeViewSearch uses it
-                    string controlInstanceId = control.ID;
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null)
-                    {
-                        HttpContext.Current.Session.Remove(sessionKey);
-                    }
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey))
-                    {
-                        HttpContext.Current.Items.Remove(contextKey);
-                    }
-                }
-            }
-        }
+ 
         protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
