@@ -230,6 +230,7 @@
         </div>
     </div>
     <hr class="mb-3" />
+    		<div class="gridview-scroll-container">
 
     <asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4 w-100"
         OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
@@ -355,6 +356,7 @@
 
         </EmptyDataTemplate>
     </asp:GridView>
+                </div>
 
 
     <div class="text-center p-4">

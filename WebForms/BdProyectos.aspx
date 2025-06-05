@@ -138,6 +138,7 @@
         </div>
 
         <hr class="mb-3" />
+        		<div class="gridview-scroll-container">
 
         <asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
@@ -213,6 +214,7 @@
                 </asp:TemplateField>
             </Columns>
         </asp:GridView>
+                    </div>
 
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />

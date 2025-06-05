@@ -166,9 +166,6 @@
 				<!-- Contenedor de Filtros alineados a la izquierda -->
 
 				<div class="d-flex flex-wrap gap-3">
-
-
-
 				</div>
 
 				<!-- Contenedor de Botones alineados a la derecha -->
@@ -194,14 +191,16 @@
 						</asp:LinkButton>
 					</div>
 					<div class="form-group mb-2">
-    <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
-    </asp:LinkButton>
-</div>
+						</asp:LinkButton>
+					</div>
 				</div>
 			</div>
 		</div>
 		<hr class="mb-3" />
+				<div class="gridview-scroll-container">
+
 
 		<asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
@@ -211,19 +210,19 @@
 			<Columns>
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 				<asp:BoundField HeaderText="Área" DataField="Area" Visible="false" />
-<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
-                <asp:TemplateField HeaderText="Empresa">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
-                            HeaderText="Empresa"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Empresa.Nombre") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+				<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
+				<asp:TemplateField HeaderText="Empresa">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+							HeaderText="Empresa"
+							DataTextField="Nombre"
+							DataValueField="Id"
+							OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Empresa.Nombre") %>
+					</ItemTemplate>
+				</asp:TemplateField>
 
 				<asp:TemplateField HeaderText="Contrata">
 					<ItemTemplate>
@@ -232,19 +231,19 @@
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Etapa" DataField="Etapa" />
 				<asp:BoundField HeaderText="Obra N°" DataField="ObraNumero" />
-<%--				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />--%>
-                <asp:TemplateField HeaderText="Barrio">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
-                            HeaderText="Barrio"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Barrio.Nombre") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+				<%--				<asp:BoundField HeaderText="Barrio" DataField="Barrio" />--%>
+				<asp:TemplateField HeaderText="Barrio">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
+							HeaderText="Barrio"
+							DataTextField="Nombre"
+							DataValueField="Id"
+							OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Barrio.Nombre") %>
+					</ItemTemplate>
+				</asp:TemplateField>
 
 				<asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
 				<asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
@@ -273,6 +272,7 @@
 				</asp:TemplateField>
 			</Columns>
 		</asp:GridView>
+					</div>
 
 		<div class="text-center p-4">
 			<asp:Label ID="lblMensaje" Text="" runat="server" />
