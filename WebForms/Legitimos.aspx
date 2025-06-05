@@ -205,6 +205,7 @@
         <hr class="mb-3" />
 
 
+        		<div class="gridview-scroll-container">
 
 
         <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4 "
@@ -303,6 +304,7 @@
                 </asp:TemplateField>
             </Columns>
         </asp:GridView>
+                    </div>
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" CssClass="text-success" runat="server" />
         </div>

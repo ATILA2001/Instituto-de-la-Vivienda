@@ -49,6 +49,7 @@
       </div>
 
       <hr class="mb-3" />
+          		<div class="gridview-scroll-container">
 
 			<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4 "
                 OnRowDataBound="dgvAutorizante_RowDataBound"
@@ -120,7 +121,7 @@
 					<asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
 				</Columns>
 			</asp:GridView>
-
+                      </div>
 
 			<div class="text-center p-4">
 				<asp:Label ID="lblMensaje" Text="" runat="server" />
