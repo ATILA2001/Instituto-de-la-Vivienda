@@ -581,18 +581,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            // Limpiar filtros de cabecera
-            if (dgvObra.HeaderRow != null)
-            {
-                ClearFilter("cblsHeaderArea");
-                ClearFilter("cblsHeaderEmpresa");
-                ClearFilter("cblsHeaderBarrio");
-                ClearFilter("cblsHeaderLineaGestion");
-                ClearFilter("cblsHeaderProyecto");
-            }
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaObras();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
         private void ClearFilter(string controlId)

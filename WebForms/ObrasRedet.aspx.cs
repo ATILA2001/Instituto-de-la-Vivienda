@@ -246,6 +246,9 @@ namespace WebForms
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();
+
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
+
             CargarListaObras(filtro);
         }
     }

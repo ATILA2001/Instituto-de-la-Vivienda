@@ -634,18 +634,10 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            if (dgvAutorizante.HeaderRow != null)
-            {
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
-                ClearFilter("cblsHeaderArea");
-                ClearFilter("cblsHeaderObra");
-                ClearFilter("cblsHeaderEmpresa");
-                ClearFilter("cblsHeaderConcepto");
-                ClearFilter("cblsHeaderEstado");
-            }
 
             CargarListaAutorizantesRedet();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
         private void ClearFilter(string controlId)

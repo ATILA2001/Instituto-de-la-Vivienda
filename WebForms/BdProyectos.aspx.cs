@@ -424,28 +424,12 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            if (dgvBdProyecto.HeaderRow != null)
-            {
-                ClearHeaderFilter("cblHeaderArea");
-                ClearHeaderFilter("cblHeaderProyecto");
-                ClearHeaderFilter("cblHeaderLineaGestion");
-            }
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
+
             CargarListaProyectos();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
-        private void ClearHeaderFilter(string controlId)
-        {
-            if (dgvBdProyecto.HeaderRow != null)
-            {
-                var control = dgvBdProyecto.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null)
-                {
-                    control.ClearSelection();
-                    HttpContext.Current.Session.Remove($"TreeViewSearch_SelectedValues_{control.ID}");
-                }
-            }
-        }
+
 
     }
 }

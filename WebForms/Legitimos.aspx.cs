@@ -596,35 +596,12 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            // Limpiar filtros de cabecera
-            ClearHeaderFilter("cblsHeaderEmpresa");
-            ClearHeaderFilter("cblsHeaderAutorizante");
-            ClearHeaderFilter("cblsHeaderMesAprobacion");
-            ClearHeaderFilter("cblsHeaderEstado");
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaLegitimos();
-            // Considerar si se necesita el flag 'filtersCleared' como en otras páginas
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlagUserLegitimos", "sessionStorage.setItem('filtersClearedUserLegitimos', 'true');", true);
         }
 
-        private void ClearHeaderFilter(string controlId)
-        {
-            if (dgvLegitimos.HeaderRow != null)
-            {
-                var control = dgvLegitimos.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null)
-                {
-                    control.ClearSelection();
-                    // Lógica para limpiar la sesión/contexto si el control TreeViewSearch lo requiere internamente
-                    string controlInstanceId = control.ID;
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
-
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
-                }
-            }
-        }
+        
 
     }
 

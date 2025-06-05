@@ -46,32 +46,12 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            ClearFilter("cblsHeaderArea");
-            ClearFilter("cblsHeaderObra");
-            ClearFilter("cblsHeaderEmpresa");
-            ClearFilter("cblsHeaderConcepto");
-            ClearFilter("cblsHeaderEstado");
+
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
+
             CargarListaAutorizantes();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
-        private void ClearFilter(string controlId)
-        {
-            if (dgvAutorizante.HeaderRow != null)
-            {
-                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null)
-                {
-                    control.ClearSelection();
-                    // Limpiar estado de sesión/contexto si el control lo usa internamente
-                    string controlInstanceId = control.ID;
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null) HttpContext.Current.Session.Remove(sessionKey);
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
-                }
-            }
-        }
 
         private void CargarListaAutorizantes(string filtro = null)
         {

@@ -564,41 +564,12 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            // Clear header filters
-            ClearFilter("cblsHeaderArea");
-            ClearFilter("cblsHeaderLineaGestion");
-            ClearFilter("cblsHeaderProyecto");
-            ClearFilter("cblsHeaderMonto2026");
-            ClearFilter("cblsHeaderPrioridad");
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaFormulaciones();
-
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
-        private void ClearFilter(string controlId)
-        {
-            if (dgvFormulacion.HeaderRow != null)
-            {
-                var control = dgvFormulacion.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null)
-                {
-                    control.ClearSelection();
 
-                    // Clear session/context state if your TreeViewSearch uses it
-                    string controlInstanceId = control.ID;
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null)
-                    {
-                        HttpContext.Current.Session.Remove(sessionKey);
-                    }
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey))
-                    {
-                        HttpContext.Current.Items.Remove(contextKey);
-                    }
-                }
-            }
-        }
+
     }
 }

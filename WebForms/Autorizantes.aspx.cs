@@ -637,18 +637,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            // Limpiar filtros de cabecera
-            if (dgvAutorizante.HeaderRow != null)
-            {
-                ClearHeaderFilter("cblsHeaderObra");
-                ClearHeaderFilter("cblsHeaderEmpresa");
-                ClearHeaderFilter("cblsHeaderConcepto");
-                ClearHeaderFilter("cblsHeaderEstado");
-            }
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaAutorizantes();
-            // Considerar si se necesita el flag 'filtersCleared' como en ObrasAdmin o AutorizantesAdmin
-            // ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
         private void ClearHeaderFilter(string controlId)

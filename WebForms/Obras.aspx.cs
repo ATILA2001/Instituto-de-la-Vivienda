@@ -454,15 +454,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            // Limpiar filtros de cabecera
-            if (dgvObra.HeaderRow != null)
-            {
-                ClearHeaderFilter("cblsHeaderEmpresa");
-                ClearHeaderFilter("cblsHeaderBarrio");
-            }
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaObras();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
         private void ClearHeaderFilter(string controlId)

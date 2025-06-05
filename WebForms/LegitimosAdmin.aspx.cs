@@ -647,18 +647,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
 
-            if (dgvLegitimos.HeaderRow != null)
-            {
-                ClearFilter("cblsHeaderArea");
-                ClearFilter("cblsHeaderEmpresa");
-                ClearFilter("cblsHeaderCodigoAutorizante"); 
-                ClearFilter("cblsHeaderMesAprobacion");    
-                ClearFilter("cblsHeaderEstado");
-                ClearFilter("cblsHeaderLinea");            
-            }
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
             CargarListaLegitimos();
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
 
         private void ClearFilter(string controlId)
