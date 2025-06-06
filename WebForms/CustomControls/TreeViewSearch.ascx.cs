@@ -541,51 +541,45 @@ namespace WebForms.CustomControls
         {
             try
             {
-                string pageName = page?.GetType().Name ?? "Unknown";
-                
-                // Limpiar todos los estados de sesión para esta página
-                var keysToRemove = new List<string>();
-                foreach (string key in HttpContext.Current.Session.Keys)
-                {
-                    if (key.StartsWith($"TreeViewSearch_SelectedValues_{pageName}_"))
-                    {
-                        keysToRemove.Add(key);
-                    }
-                }
-                
-                foreach (string key in keysToRemove)
-                {
-                    HttpContext.Current.Session.Remove(key);
-                }
-                
-                // Limpiar estados de contexto
-                var contextKeysToRemove = new List<string>();
-                foreach (string key in HttpContext.Current.Items.Keys)
-                {
-                    if (key.ToString().StartsWith($"TreeViewSearch_{pageName}_") && 
-                        key.ToString().EndsWith("_ContextSelectedValues"))
-                    {
-                        contextKeysToRemove.Add(key.ToString());
-                    }
-                }
-                
-                foreach (string key in contextKeysToRemove)
-                {
-                    HttpContext.Current.Items.Remove(key);
-                }
-                
-                // Marcar en sesión que se limpiaron los filtros para JavaScript
-                HttpContext.Current.Session["filtersCleared"] = "true";
+                if (page == null) return;
 
-                if (page != null)
+                // 1. Find all TreeViewSearch controls on the page
+                List<TreeViewSearch> allTvsControls = new List<TreeViewSearch>();
+                FindAllTvsControlsRecursive(page, allTvsControls); // Usaremos un nuevo helper estático
+
+                // 2. Call ClearSelection on each control instance.
+                // Esto desmarcará los nodos del TreeView, limpiará su estado de sesión/contexto individualmente
+                // y actualizará los elementos de la UI del control del lado del servidor.
+                foreach (TreeViewSearch tvsControl in allTvsControls)
                 {
-                    ScriptManager.RegisterStartupScript(page, page.GetType(), "setFiltersCleared", 
-                        "sessionStorage.setItem('filtersCleared', 'true');", true);
+                    tvsControl.ClearSelection();
                 }
+
+                // 3. Set client-side flag for JavaScript to perform its UI updates (e.g., dropdown titles).
+                // El JavaScript escuchará este flag y llamará a clearLocalStatesForTreeView.
+                ScriptManager.RegisterStartupScript(page, page.GetType(), "setFiltersCleared",
+                    "sessionStorage.setItem('filtersCleared', 'true'); console.log('[TreeViewSearch.ClearAllFiltersOnPage] filtersCleared flag set for client-side refresh.');", true);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en ClearAllFiltersOnPage: {ex.ToString()}");
+                System.Diagnostics.Debug.WriteLine($"Error en TreeViewSearch.ClearAllFiltersOnPage: {ex.ToString()}");
+                // Considerar un logging más formal para producción.
+            }
+        }
+
+        // Auxiliar estático para encontrar recursivamente todos los controles TreeViewSearch en un control padre.
+        private static void FindAllTvsControlsRecursive(Control parent, List<TreeViewSearch> foundControls)
+        {
+            foreach (Control ctl in parent.Controls)
+            {
+                if (ctl is TreeViewSearch tvs)
+                {
+                    foundControls.Add(tvs);
+                }
+                if (ctl.HasControls())
+                {
+                    FindAllTvsControlsRecursive(ctl, foundControls);
+                }
             }
         }
 
