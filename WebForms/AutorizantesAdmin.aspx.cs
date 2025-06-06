@@ -661,32 +661,10 @@ namespace WebForms
 
             WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
 
-
             CargarListaAutorizantesRedet();
         }
 
-        private void ClearFilter(string controlId)
-        {
-            if (dgvAutorizante.HeaderRow != null)
-            {
-                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                control?.ClearSelection();
 
-                string controlInstanceId = control.ID; // Usar el ID del control para la clave de sesión/contexto.
-
-                string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                if (HttpContext.Current.Session[sessionKey] != null)
-                {
-                    HttpContext.Current.Session.Remove(sessionKey);
-                }
-
-                string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                if (HttpContext.Current.Items.Contains(contextKey))
-                {
-                    HttpContext.Current.Items.Remove(contextKey);
-                }
-            }
-        }
         protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
