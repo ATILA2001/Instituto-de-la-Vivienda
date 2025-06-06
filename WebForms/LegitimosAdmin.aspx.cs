@@ -20,14 +20,13 @@ namespace WebForms
             if (!IsPostBack)
             {
                 // Cargar la lista completa una vez y guardarla en sesión
-                // Se asume que llamar a listarFiltro con todos los parámetros null/vacíos devuelve todos los legítimos.
                 // Idealmente, habría un método negocio.ListarTodosLegitimos() o similar.
                 List<Legitimo> listaCompleta = negocio.listarFiltro(new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
 
                 Session["legitimosCompleto"] = listaCompleta;
 
-                BindDropDownList(); // Para los dropdowns del modal
-                CargarListaLegitimos(); // Carga inicial
+                BindDropDownList();
+                CargarListaLegitimos();
             }
             else
             {
@@ -324,7 +323,7 @@ namespace WebForms
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = legitimosCompleto
-                        .Where(l => l.Obra?.Area != null && !string.IsNullOrEmpty(l.Obra.Area.Nombre))
+                        .Where(l => l.Obra?.Area != null)
                         .Select(l => l.Obra.Area.Nombre)
                         .Distinct()
                         .OrderBy(nombre => nombre)
@@ -340,7 +339,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = legitimosCompleto
-                        .Where(l => !string.IsNullOrEmpty(l.Empresa))
+                        .Where(l => l != null)
                         .Select(l => l.Empresa)
                         .Distinct()
                         .OrderBy(nombre => nombre)
@@ -356,7 +355,7 @@ namespace WebForms
                 if (cblsHeaderCodigoAutorizante != null)
                 {
                     var codigosUnicos = legitimosCompleto
-                        .Where(l => !string.IsNullOrEmpty(l.CodigoAutorizante))
+                        .Where(l => l != null)
                         .Select(l => l.CodigoAutorizante)
                         .Distinct()
                         .OrderBy(nombre => nombre)
@@ -391,7 +390,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null)
                 {
                     var estadosUnicos = legitimosCompleto
-                        .Where(l => !string.IsNullOrEmpty(l.Estado))
+                        .Where(l => l != null)
                         .Select(l => l.Estado)
                         .Distinct()
                         .OrderBy(nombre => nombre)
@@ -407,7 +406,7 @@ namespace WebForms
                 if (cblsHeaderLinea != null)
                 {
                     var lineasUnicas = legitimosCompleto
-                        .Where(l => !string.IsNullOrEmpty(l.Linea))
+                        .Where(l => l != null)
                         .Select(l => l.Linea)
                         .Distinct()
                         .OrderBy(nombre => nombre)

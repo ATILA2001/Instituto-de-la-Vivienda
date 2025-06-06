@@ -444,7 +444,7 @@ namespace WebForms
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = formulacionesCompletas
-                        .Where(f => f.Obra?.Area != null && !string.IsNullOrEmpty(f.Obra.Area.Nombre))
+                        .Where(f => f.Obra?.Area != null)
                         .Select(f => new { Id = f.Obra.Area.Id.ToString(), Nombre = f.Obra.Area.Nombre })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -458,7 +458,7 @@ namespace WebForms
                 if (cblsHeaderLineaGestion != null)
                 {
                     var lineasUnicas = formulacionesCompletas
-                        .Where(f => f.Obra?.LineaGestion != null && !string.IsNullOrEmpty(f.Obra.LineaGestion.Nombre))
+                        .Where(f => f.Obra?.LineaGestion != null)
                         .Select(f => new { Id = f.Obra.LineaGestion.Id.ToString(), Nombre = f.Obra.LineaGestion.Nombre })
                         .Distinct()
                         .OrderBy(lg => lg.Nombre)
@@ -472,7 +472,7 @@ namespace WebForms
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = formulacionesCompletas
-                        .Where(f => f.Obra?.Proyecto != null && !string.IsNullOrEmpty(f.Obra.Proyecto.Proyecto))
+                        .Where(f => f.Obra?.Proyecto != null)
                         .Select(f => new { Id = f.Obra.Proyecto.Id.ToString(), Nombre = f.Obra.Proyecto.Proyecto })
                         .Distinct()
                         .OrderBy(p => p.Nombre)
@@ -500,7 +500,7 @@ namespace WebForms
                 if (cblsHeaderPrioridad != null)
                 {
                     var prioridadesUnicas = formulacionesCompletas
-                        .Where(f => f.Prioridad != null && !string.IsNullOrEmpty(f.Prioridad.Nombre))
+                        .Where(f => f.Prioridad != null)
                         .Select(f => new { Id = f.Prioridad.Id.ToString(), Nombre = f.Prioridad.Nombre })
                         .Distinct()
                         .OrderBy(p => p.Nombre)

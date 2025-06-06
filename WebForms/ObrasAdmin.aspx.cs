@@ -227,7 +227,7 @@ namespace WebForms
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = obrasCompleto
-                        .Where(o => o.Area != null && !string.IsNullOrEmpty(o.Area.Nombre))
+                        .Where(o => o.Area != null)
                         .Select(o => new { Id = o.Area.Id, Nombre = o.Area.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)
@@ -243,7 +243,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = obrasCompleto
-                        .Where(o => o.Empresa != null && !string.IsNullOrEmpty(o.Empresa.Nombre))
+                        .Where(o => o.Empresa != null)
                         .Select(o => new { Id = o.Empresa.Id, Nombre = o.Empresa.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)
@@ -259,7 +259,7 @@ namespace WebForms
                 if (cblsHeaderBarrio != null)
                 {
                     var barriosUnicos = obrasCompleto
-                        .Where(o => o.Barrio != null && !string.IsNullOrEmpty(o.Barrio.Nombre))
+                        .Where(o => o.Barrio != null)
                         .Select(o => new { Id = o.Barrio.Id, Nombre = o.Barrio.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)
@@ -275,7 +275,7 @@ namespace WebForms
                 if (cblsHeaderLineaGestion != null)
                 {
                     var lineasUnicas = obrasCompleto
-                        .Where(o => o.LineaGestion != null && !string.IsNullOrEmpty(o.LineaGestion.Nombre))
+                        .Where(o => o.LineaGestion != null)
                         .Select(o => new { Id = o.LineaGestion.Id, Nombre = o.LineaGestion.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)
@@ -291,7 +291,7 @@ namespace WebForms
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = obrasCompleto
-                        .Where(o => o.Proyecto != null && !string.IsNullOrEmpty(o.Proyecto.Proyecto))
+                        .Where(o => o.Proyecto != null)
                         .Select(o => new { Id = o.Proyecto.Id, Nombre = o.Proyecto.Proyecto })
                         .Distinct()
                         .OrderBy(x => x.Nombre)

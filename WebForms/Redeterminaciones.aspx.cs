@@ -249,7 +249,7 @@ namespace WebForms
                 if (cblsHeaderObra != null)
                 {
                     var items = redeterminacionesCompletas
-                        .Where(r => r.Autorizante?.Obra != null && !string.IsNullOrEmpty(r.Autorizante.Obra.Descripcion))
+                        .Where(r => r.Autorizante?.Obra != null)
                         .Select(r => new { Id = r.Autorizante.Obra.Id, Nombre = r.Autorizante.Obra.Descripcion })
                         .Distinct()
                         .OrderBy(o => o.Nombre)
@@ -263,7 +263,7 @@ namespace WebForms
                 if (cblsHeaderAutorizante != null)
                 {
                     var items = redeterminacionesCompletas
-                        .Where(r => r.Autorizante != null && !string.IsNullOrEmpty(r.Autorizante.CodigoAutorizante))
+                        .Where(r => r.Autorizante != null)
                         // Usamos CodigoAutorizante como Id y Nombre para el filtro, asumiendo que es el identificador principal para el usuario.
                         // Si Autorizante tuviera un Id numérico y un Nombre descriptivo aparte del código, se usarían esos.
                         .Select(r => new { Id = r.Autorizante.CodigoAutorizante, Nombre = r.Autorizante.CodigoAutorizante })
@@ -279,7 +279,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null)
                 {
                     var items = redeterminacionesCompletas
-                        .Where(r => r.Etapa != null && !string.IsNullOrEmpty(r.Etapa.Nombre))
+                        .Where(r => r.Etapa != null)
                         .Select(r => new { Id = r.Etapa.Id, Nombre = r.Etapa.Nombre })
                         .Distinct()
                         .OrderBy(r => r.Nombre)

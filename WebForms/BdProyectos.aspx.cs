@@ -249,7 +249,7 @@ namespace WebForms
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = proyectosCompleto
-                        .Where(c => c.Obra?.Area != null && c.Obra.Area.Id > 0 && !string.IsNullOrEmpty(c.Obra.Area.Nombre)) // Validar Id del área
+                        .Where(c => c.Obra?.Area != null && c.Obra.Area.Id > 0) // Validar Id del área
                         .Select(c => c.Obra.Area) // Seleccionar el objeto Area completo
                         .GroupBy(a => a.Id)       // Agrupar por el Id numérico del Area para obtener unicidad
                         .Select(g => g.First())   // Tomar el primer objeto Area de cada grupo
@@ -267,7 +267,7 @@ namespace WebForms
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = proyectosCompleto
-                        .Where(p => !string.IsNullOrEmpty(p.Proyecto))
+                        .Where(p => p != null)
                         .Select(p => p.Proyecto)
                         .Distinct()
                         .OrderBy(nombre => nombre)
@@ -283,7 +283,7 @@ namespace WebForms
                 if (cblsHeaderLinea != null)
                 {
                     var lineasUnicos = proyectosCompleto
-                        .Where(p => p.LineaGestion != null && !string.IsNullOrEmpty(p.LineaGestion.Nombre))
+                        .Where(p => p.LineaGestion != null)
                         .Select(p => p.LineaGestion)
                         .GroupBy(lg => lg.Id)
                         .Select(g => g.First())

@@ -362,7 +362,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = obrasUsuarioCompleto
-                        .Where(o => o.Empresa != null && !string.IsNullOrEmpty(o.Empresa.Nombre))
+                        .Where(o => o.Empresa != null)
                         .Select(o => new { Id = o.Empresa.Id, Nombre = o.Empresa.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)
@@ -378,7 +378,7 @@ namespace WebForms
                 if (cblsHeaderBarrio != null)
                 {
                     var barriosUnicos = obrasUsuarioCompleto
-                        .Where(o => o.Barrio != null && !string.IsNullOrEmpty(o.Barrio.Nombre))
+                        .Where(o => o.Barrio != null)
                         .Select(o => new { Id = o.Barrio.Id, Nombre = o.Barrio.Nombre })
                         .Distinct()
                         .OrderBy(x => x.Nombre)

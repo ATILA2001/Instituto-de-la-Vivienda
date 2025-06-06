@@ -494,7 +494,7 @@ namespace WebForms
                 if (cblsHeaderArea != null)
                 {
                     var areasUnicas = certificadosCompleto
-                        .Where(c => c.Autorizante?.Obra?.Area != null && !string.IsNullOrEmpty(c.Autorizante.Obra.Area.Nombre))
+                        .Where(c => c.Autorizante?.Obra?.Area != null)
                         .Select(c => new { Nombre = c.Autorizante.Obra.Area.Nombre, Id = c.Autorizante.Obra.Area.Nombre })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -507,7 +507,7 @@ namespace WebForms
                 if (cblsHeaderBarrio != null)
                 {
                     var barriosUnicos = certificadosCompleto
-                        .Where(c => c.Autorizante?.Obra?.Barrio != null && !string.IsNullOrEmpty(c.Autorizante.Obra.Barrio.Nombre))
+                        .Where(c => c.Autorizante?.Obra?.Barrio != null)
                         .Select(c => new { Nombre = c.Autorizante.Obra.Barrio.Nombre, Id = c.Autorizante.Obra.Barrio.Id })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -520,7 +520,7 @@ namespace WebForms
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = certificadosCompleto
-                        .Where(c => c.Autorizante?.Obra?.Proyecto != null && !string.IsNullOrEmpty(c.Autorizante.Obra.Proyecto.Proyecto))
+                        .Where(c => c.Autorizante?.Obra?.Proyecto != null)
                         .Select(c => new { Nombre = c.Autorizante.Obra.Proyecto.Proyecto, Id = c.Autorizante.Obra.Proyecto.Id  })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -533,7 +533,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = certificadosCompleto
-                        .Where(c => c.Autorizante?.Obra?.Empresa != null && !string.IsNullOrEmpty(c.Autorizante.Obra.Empresa.Nombre))
+                        .Where(c => c.Autorizante?.Obra?.Empresa != null)
                         .Select(c => new { Nombre = c.Autorizante.Obra.Empresa.Nombre, Id = c.Autorizante.Obra.Empresa.Id })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -546,7 +546,7 @@ namespace WebForms
                 if (cblsHeaderCodigoAutorizante != null)
                 {
                     var codigoAutorizantesUnicos = certificadosCompleto
-                        .Where(c => c.Autorizante?.CodigoAutorizante != null && !string.IsNullOrEmpty(c.Autorizante.CodigoAutorizante))
+                        .Where(c => c.Autorizante?.CodigoAutorizante != null)
                         .Select(c => new { Nombre = c.Autorizante.CodigoAutorizante, Id = c.Autorizante.CodigoAutorizante })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -559,7 +559,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null)
                 {
                     var estadoUnicos = certificadosCompleto
-                        .Where(c => c.Estado != null && !string.IsNullOrEmpty(c.Estado))
+                        .Where(c => c.Estado != null)
                         .Select(c => new { Nombre = c.Estado, Id = c.Estado })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -572,7 +572,7 @@ namespace WebForms
                 if (cblsHeaderTipo != null)
                 {
                     var tipoUnicos = certificadosCompleto
-                        .Where(c => c.Tipo != null && !string.IsNullOrEmpty(c.Tipo.Nombre))
+                        .Where(c => c.Tipo != null)
                         .Select(c => new { Nombre = c.Tipo.Nombre, Id = c.Tipo.Id })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
@@ -607,7 +607,7 @@ namespace WebForms
                 if (cblsHeaderLinea != null)
                 {
                     var lineaUnicos = certificadosCompleto
-                        .Where(c => c.Autorizante?.Obra?.LineaGestion != null && !string.IsNullOrEmpty(c.Autorizante.Obra.LineaGestion.Nombre))
+                        .Where(c => c.Autorizante?.Obra?.LineaGestion != null)
                         .Select(c => c.Autorizante.Obra.LineaGestion)
                         .GroupBy(lg => lg.Id) // Agrupar por ID para obtener líneas únicas
                         .Select(g => g.First()) // Tomar la primera de cada grupo (línea única)

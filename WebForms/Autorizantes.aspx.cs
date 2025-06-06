@@ -361,7 +361,7 @@ namespace WebForms
                 if (cblsHeaderObra != null)
                 {
                     var obrasUnicas = autorizantesUsuarioCompleto
-                        .Where(a => a.Obra != null && !string.IsNullOrEmpty(a.Obra.Descripcion))
+                        .Where(a => a.Obra != null)
                         .Select(a => new { Id = a.Obra.Id, Descripcion = a.Obra.Descripcion })
                         .Distinct()
                         .OrderBy(o => o.Descripcion)
@@ -377,7 +377,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var empresasUnicas = autorizantesUsuarioCompleto
-                        .Where(a => a.Obra?.Empresa != null && !string.IsNullOrEmpty(a.Obra.Empresa.Nombre))
+                        .Where(a => a.Obra?.Empresa != null)
                         .Select(a => new { Id = a.Obra.Empresa.Id, Nombre = a.Obra.Empresa.Nombre })
                         .Distinct()
                         .OrderBy(em => em.Nombre)
@@ -393,7 +393,7 @@ namespace WebForms
                 if (cblsHeaderConcepto != null)
                 {
                     var conceptosUnicos = autorizantesUsuarioCompleto
-                        .Where(a => a.Concepto != null && !string.IsNullOrEmpty(a.Concepto.Nombre))
+                        .Where(a => a.Concepto != null)
                         .Select(a => new { Id = a.Concepto.Id, Nombre = a.Concepto.Nombre })
                         .Distinct()
                         .OrderBy(c => c.Nombre)
@@ -409,7 +409,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null)
                 {
                     var estadosUnicos = autorizantesUsuarioCompleto
-                        .Where(a => a.Estado != null && !string.IsNullOrEmpty(a.Estado.Nombre))
+                        .Where(a => a.Estado != null)
                         .Select(a => new { Id = a.Estado.Id, Nombre = a.Estado.Nombre })
                         .Distinct()
                         .OrderBy(es => es.Nombre)

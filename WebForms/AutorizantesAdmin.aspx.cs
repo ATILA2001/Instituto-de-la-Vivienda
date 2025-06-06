@@ -586,7 +586,7 @@ namespace WebForms
                 if (cblsHeaderArea != null && autorizantesCompleto != null)
                 {
                     var areasUnicas = autorizantesCompleto
-                        .Where(a => a.Obra?.Area != null && !string.IsNullOrEmpty(a.Obra.Area.Nombre))
+                        .Where(a => a.Obra?.Area != null)
                         .Select(a => a.Obra.Area)
                         .GroupBy(area => area.Id)
                         .Select(g => g.First())
@@ -600,7 +600,7 @@ namespace WebForms
                 if (cblsHeaderObra != null && autorizantesCompleto != null)
                 {
                     var obrasUnicas = autorizantesCompleto
-                        .Where(a => a.Obra != null && !string.IsNullOrEmpty(a.Obra.Descripcion))
+                        .Where(a => a.Obra != null)
                         .Select(a => new { Id = a.Obra.Id, Nombre = a.Obra.Descripcion }) // Nombre aquí es Descripcion
                         .Distinct()
                         .OrderBy(o => o.Nombre)
@@ -615,7 +615,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null && autorizantesCompleto != null)
                 {
                     var empresasUnicas = autorizantesCompleto
-                        .Where(a => a.Obra?.Empresa != null && !string.IsNullOrEmpty(a.Obra.Empresa.Nombre))
+                        .Where(a => a.Obra?.Empresa != null)
                         .Select(a => a.Obra.Empresa)
                         .GroupBy(emp => emp.Id)
                         .Select(g => g.First())
@@ -629,7 +629,7 @@ namespace WebForms
                 if (cblsHeaderConcepto != null && autorizantesCompleto != null)
                 {
                     var conceptosUnicos = autorizantesCompleto
-                        .Where(a => a.Concepto != null && !string.IsNullOrEmpty(a.Concepto.Nombre))
+                        .Where(a => a.Concepto != null)
                         .Select(a => a.Concepto)
                         .GroupBy(con => con.Id)
                         .Select(g => g.First())
@@ -643,7 +643,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null && autorizantesCompleto != null)
                 {
                     var estadosUnicos = autorizantesCompleto
-                        .Where(a => a.Estado != null && !string.IsNullOrEmpty(a.Estado.Nombre))
+                        .Where(a => a.Estado != null)
                         .Select(a => a.Estado)
                         .GroupBy(est => est.Id)
                         .Select(g => g.First())

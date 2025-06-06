@@ -54,13 +54,13 @@ namespace WebForms
                 if (cblsHeaderObra != null)
                 {
                     var obrasUnicas = movimientosCompleto
-                        .Where(m => m.Obra != null && m.Obra.Id != 0 && !string.IsNullOrEmpty(m.Obra.Descripcion)) // Asegurar que Obra.Id esté disponible
+                        .Where(m => m.Obra != null && m.Obra.Id != 0)
                         .Select(m => new { Id = m.Obra.Id, Nombre = m.Obra.Descripcion })
-                        .Distinct() // Distinct ahora funcionará correctamente sobre el objeto anónimo con Id y Nombre
+                        .Distinct() 
                         .OrderBy(x => x.Nombre)
                         .ToList();
                     cblsHeaderObra.DataTextField = "Nombre";
-                    cblsHeaderObra.DataValueField = "Id"; // Correcto, se usará para filtrar por Obra.Id
+                    cblsHeaderObra.DataValueField = "Id"; 
                     cblsHeaderObra.DataSource = obrasUnicas;
                     cblsHeaderObra.DataBind();
                 }

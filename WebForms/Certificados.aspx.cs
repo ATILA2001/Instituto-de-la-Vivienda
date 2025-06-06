@@ -503,7 +503,7 @@ namespace WebForms
                 if (cblsHeaderEmpresa != null)
                 {
                     var items = certificadosUsuarioCompleto
-                        .Where(c => !string.IsNullOrEmpty(c.Empresa))
+                        .Where(c => c != null)
                         .Select(c => c.Empresa)
                         .Distinct()
                         .OrderBy(emp => emp)
@@ -520,7 +520,7 @@ namespace WebForms
                 if (cblsHeaderCodigoAutorizante != null)
                 {
                     var items = certificadosUsuarioCompleto
-                        .Where(c => c.Autorizante != null && !string.IsNullOrEmpty(c.Autorizante.CodigoAutorizante))
+                        .Where(c => c.Autorizante != null)
                         .Select(c => c.Autorizante.CodigoAutorizante)
                         .Distinct()
                         .OrderBy(cod => cod)
@@ -537,7 +537,7 @@ namespace WebForms
                 if (cblsHeaderEstado != null)
                 {
                     var items = certificadosUsuarioCompleto
-                        .Where(c => !string.IsNullOrEmpty(c.Estado))
+                        .Where(c => c != null)
                         .Select(c => c.Estado)
                         .Distinct()
                         .OrderBy(est => est)
@@ -554,7 +554,7 @@ namespace WebForms
                 if (cblsHeaderTipo != null)
                 {
                     var items = certificadosUsuarioCompleto
-                        .Where(c => c.Tipo != null && !string.IsNullOrEmpty(c.Tipo.Nombre))
+                        .Where(c => c.Tipo != null)
                         .Select(c => c.Tipo)
                         .GroupBy(t => t.Id)
                         .Select(g => g.First())
