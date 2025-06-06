@@ -452,34 +452,38 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            // Identifica el TextBox modificado
             TextBox txtExpediente = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-            // Obtiene la clave del registro desde DataKeyNames
             string codigoAutorizante = dgvAutorizante.DataKeys[row.RowIndex].Value.ToString();
-
-            // Nuevo valor del expediente
             string nuevoExpediente = txtExpediente.Text;
 
-            // Actualiza en la base de datos
             try
             {
-                // Llama al método del negocio para actualizar el expediente
                 AutorizanteNegocio negocio = new AutorizanteNegocio();
-                negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
 
-                // Mensaje de éxito o retroalimentación opcional
-                lblMensaje.Text = "Expediente actualizado correctamente.";
-                //CargarListaAutorizantes();
-                CargarListaAutorizantesRedet();
-                CalcularSubtotal();
+                if (negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente))
+                {
+                    // Refrescar la sesión completa del usuario
+                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                    {
+                        List<Autorizante> listaCompletaActualizada = negocio.listar(usuarioLogueado,
+                            new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        Session["autorizantesUsuarioCompleto"] = listaCompletaActualizada;
+                    }
 
+                    CargarListaAutorizantesRedet();
+                    CalcularSubtotal();
+
+                    lblMensaje.Text = "Expediente actualizado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+                }
             }
             catch (Exception ex)
             {
-                // Manejo de errores
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
             }
         }
         private DataTable ObtenerEstado()
@@ -503,21 +507,42 @@ namespace WebForms
             DropDownList ddlEstadoAutorizante = (DropDownList)sender;
             GridViewRow row = (GridViewRow)ddlEstadoAutorizante.NamingContainer;
 
-            List<Autorizante> listaAutorizantes = (List<Autorizante>)Session["listaAutorizante"];
-            string codAutorizante = dgvAutorizante.DataKeys[row.RowIndex].Value.ToString();
-            Autorizante autorizante = listaAutorizantes.Find(a => a.CodigoAutorizante == codAutorizante);
-
-            if (autorizante != null)
+            try
             {
-                autorizante.Estado.Id = int.Parse(ddlEstadoAutorizante.SelectedValue);
-                AutorizanteNegocio negocio = new AutorizanteNegocio();
-                negocio.ActualizarEstado(autorizante);
-                //CargarListaAutorizantes();
-                CargarListaAutorizantesRedet();
+                List<Autorizante> listaAutorizantes = (List<Autorizante>)Session["listaAutorizanteAdmin"];
+                string codAutorizante = dgvAutorizante.DataKeys[row.RowIndex].Value.ToString();
+                Autorizante autorizante = listaAutorizantes.Find(a => a.CodigoAutorizante == codAutorizante);
 
-                lblMensaje.Text = "Estado actualizado correctamente.";
-                lblMensaje.CssClass = "alert alert-success";
+                if (autorizante != null)
+                {
+                    autorizante.Estado.Id = int.Parse(ddlEstadoAutorizante.SelectedValue);
+                    AutorizanteNegocio negocio = new AutorizanteNegocio();
+
+                    if (negocio.ActualizarEstado(autorizante))
+                    {
+                        // Refrescar la sesión completa de administrador
+                        List<Autorizante> listaCompletaActualizada = calculoRedeterminacionNegocio.listarAutRedet();
+                        Session["autorizantesCompleto"] = listaCompletaActualizada;
+
+                        // Recargar la lista filtrada
+                        CargarListaAutorizantesRedet();
+
+                        lblMensaje.Text = "Estado actualizado correctamente.";
+                        lblMensaje.CssClass = "alert alert-success";
+                    }
+                    else
+                    {
+                        lblMensaje.Text = "Error al actualizar el estado.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al actualizar el estado: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+
         }
         protected void dgvAutorizante_RowDataBound(object sender, GridViewRowEventArgs e)
         {
