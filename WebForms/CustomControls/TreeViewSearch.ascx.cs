@@ -13,9 +13,6 @@ namespace WebForms.CustomControls
 {
     public partial class TreeViewSearch : UserControl
     {
-        //public event EventHandler SelectedIndexChanged;
-        // Modificar la definición del evento para coincidir con TreeView
-        public event EventHandler<TreeNodeEventArgs> SelectedIndexChanged;
         public event EventHandler AcceptChanges;
 
         protected TreeView chkList;
@@ -55,8 +52,6 @@ namespace WebForms.CustomControls
 
         private string GetSessionKeyForSelectedValues() 
         { 
-            // return $"TreeViewSearch_SelectedValues_{this.ID}"; 
-
             string pageName = Page?.GetType().Name ?? "Unknown";
             return $"TreeViewSearch_SelectedValues_{pageName}_{this.ID}"; 
         }
@@ -163,7 +158,6 @@ namespace WebForms.CustomControls
         {
             List<string> currentSelectedValues = this.SelectedValues;
 
-            // string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
             string pageName = Page?.GetType().Name ?? "Unknown";
             string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
             HttpContext.Current.Items[contextKey] = currentSelectedValues;
@@ -186,27 +180,22 @@ namespace WebForms.CustomControls
                 {
                     // Initial page load
                     populateNodes = (_dataSource != null);
-                    // For initial display, load any previously saved selections from session
                     selectedValuesToRestore = LoadSelectedValuesFromSession();
                 }
                 else // Is PostBack
                 {
-                    // string contextKey = $"TreeViewSearch_{this.ID}_ContextSelectedValues";
                     string pageName = Page?.GetType().Name ?? "Unknown";
                     string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
                     if (HttpContext.Current.Items.Contains(contextKey))
                     {
-                        // This control's "Accept" button triggered the postback, use values from current request context
                         selectedValuesToRestore = HttpContext.Current.Items[contextKey] as List<string>;
                     }
                     else
                     {
-                        // Postback triggered by something else (another control, or this control's checkbox auto-postback)
-                        // Load this control's persisted selections from session
                         selectedValuesToRestore = LoadSelectedValuesFromSession();
                     }
 
-                    // If TreeView is empty on postback (e.g., ViewState might be off for TreeView or dynamic creation)
+
                     if (chkList.Nodes.Count == 0)
                     {
                         populateNodes = (_dataSource != null);
@@ -227,7 +216,7 @@ namespace WebForms.CustomControls
                     if (_dataSource != null)
                     {
                         bool areDates = false;
-                        // Date detection logic (simplified for brevity, use your existing logic)
+
                         if (!string.IsNullOrEmpty(DataValueField) && _dataSource is IEnumerable<object> enumerableForDateCheck)
                         {
                             var firstItem = enumerableForDateCheck.FirstOrDefault();
@@ -258,7 +247,7 @@ namespace WebForms.CustomControls
                                 {
                                     foreach (DataRow row in dtDateSource.Rows.Cast<DataRow>())
                                     {
-                                        string dateStr = GetPropertyValue(row, DataValueField); // Use helper for DataRow
+                                        string dateStr = GetPropertyValue(row, DataValueField); 
                                         if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
                                         {
                                             dates.Add(parsedDate);
@@ -306,7 +295,7 @@ namespace WebForms.CustomControls
                             {
                                 foreach (DataRow row in dtSource.Rows.Cast<DataRow>())
                                 {
-                                    var text = GetPropertyValue(row, DataTextField) ?? string.Empty; // Use helper for DataRow
+                                    var text = GetPropertyValue(row, DataTextField) ?? string.Empty;
                                     var value = (!string.IsNullOrEmpty(DataValueField) && dtSource.Columns.Contains(DataValueField))
                                                 ? GetPropertyValue(row, DataValueField) ?? text
                                                 : text;
@@ -342,16 +331,13 @@ namespace WebForms.CustomControls
                     }
                 }
 
-                // Apply selected states to the TreeView nodes
                 if (chkList.Nodes.Count > 0)
                 {
-                    // First, reset all nodes to unchecked. This is important if nodes came from ViewState or were just repopulated.
                     foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
                     {
                         node.Checked = false;
                     }
 
-                    // Apply the restored selections
                     if (selectedValuesToRestore != null && selectedValuesToRestore.Any())
                     {
                         foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
@@ -363,7 +349,6 @@ namespace WebForms.CustomControls
                         }
                     }
 
-                    // Update the "select-all" node's checked state based on its children's states
                     if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
                     {
                         TreeNode selectAllServerNode = chkList.Nodes[0];
@@ -379,9 +364,6 @@ namespace WebForms.CustomControls
                         }
                         else
                         {
-                            // No actual items to select, so "select-all" should be unchecked
-                            // unless it was explicitly checked and there are no children (edge case, typically means "select all of nothing")
-                            // For consistency, if no leaf nodes, "select-all" is unchecked.
                             selectAllServerNode.Checked = false;
                         }
                     }
@@ -400,7 +382,6 @@ namespace WebForms.CustomControls
         }
 
 
-        // Helper method to get property value using reflection
         private string GetPropertyValue(object item, string propertyName)
         {
             if (item == null || string.IsNullOrEmpty(propertyName)) return null;
@@ -655,20 +636,6 @@ namespace WebForms.CustomControls
             ClearSelection();
         }
 
-        private void ApplyPendingFiltersOnPage()
-        {
-            var allControls = FindAllTreeViewSearchControls(Page);
-
-            foreach (var control in allControls)
-            {
-                if (control != this && control.HasStoredFilters())
-                {
-                    // Solo disparar AcceptChanges para re-aplicar el filtro
-                    control.AcceptChanges?.Invoke(control, EventArgs.Empty);
-                }
-            }
-        }
-
         private List<TreeViewSearch> FindAllTreeViewSearchControls(Control parent)
         {
             var controls = new List<TreeViewSearch>();
@@ -694,57 +661,7 @@ namespace WebForms.CustomControls
             return savedValues != null && savedValues.Any();
         }
 
-        private void RestoreAndApplyStoredFilters()
-        {
-            var savedValues = LoadSelectedValuesFromSession();
-            if (savedValues != null && savedValues.Any())
-            {
-                SetSelectedValues(savedValues);
-                AcceptChanges?.Invoke(this, EventArgs.Empty);
-            }
-        }
 
-        // AGREGAR: Método que falta en la clase TreeViewSearch
-        private void SetSelectedValues(List<string> values)
-        {
-            if (chkList?.Nodes != null && values != null)
-            {
-                // Desmarcar todos los nodos primero
-                foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
-                {
-                    node.Checked = false;
-                }
-
-                // Marcar los nodos que están en la lista de valores
-                foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
-                {
-                    if (values.Contains(node.Value))
-                    {
-                        node.Checked = true;
-                    }
-                }
-
-                // Actualizar el estado del nodo "select-all" si existe
-                if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
-                {
-                    TreeNode selectAllNode = chkList.Nodes[0];
-                    var leafNodes = selectAllNode.ChildNodes
-                        .Cast<TreeNode>()
-                        .SelectMany(GetAllNodes)
-                        .Where(n => n.ChildNodes.Count == 0 && n.Value != "select-all")
-                        .ToList();
-
-                    if (leafNodes.Any())
-                    {
-                        selectAllNode.Checked = leafNodes.All(n => n.Checked);
-                    }
-                }
-
-                // Actualizar UI
-                UpdateTitleAndIcon();
-                UpdateDeselectAllButtonState();
-            }
-        }
     }
 }
 
