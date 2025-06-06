@@ -299,14 +299,16 @@ namespace WebForms.CustomControls
                                     var value = (!string.IsNullOrEmpty(DataValueField) && dtSource.Columns.Contains(DataValueField))
                                                 ? GetPropertyValue(row, DataValueField) ?? text
                                                 : text;
-                                    if (!string.IsNullOrEmpty(text))
-                                    {
-                                        selectAllNode.ChildNodes.Add(new TreeNode(text, value)
+
+                                    var displayText = string.IsNullOrEmpty(text) ? "(Vacías)" : text;
+
+
+                                        selectAllNode.ChildNodes.Add(new TreeNode(displayText, value)
                                         {
                                             ShowCheckBox = true,
                                             SelectAction = TreeNodeSelectAction.None
                                         });
-                                    }
+                                    
                                 }
                             }
                             else if (_dataSource is IEnumerable<object> enumerableDataSource)
@@ -317,14 +319,17 @@ namespace WebForms.CustomControls
                                     var value = !string.IsNullOrEmpty(DataValueField)
                                                 ? GetPropertyValue(item, DataValueField) ?? text
                                                 : text;
-                                    if (!string.IsNullOrEmpty(text))
-                                    {
-                                        selectAllNode.ChildNodes.Add(new TreeNode(text, value)
+
+
+                                    var displayText = string.IsNullOrEmpty(text) ? "(Vacías)" : text;
+
+
+                                        selectAllNode.ChildNodes.Add(new TreeNode(displayText, value)
                                         {
                                             ShowCheckBox = true,
                                             SelectAction = TreeNodeSelectAction.None
                                         });
-                                    }
+                                    
                                 }
                             }
                         }
