@@ -1,76 +1,120 @@
 .btn-primary {
-    --bs-btn-bg: var(--bs-primary); /*Color del relleno*/
-    --bs-btn-border-color: var(--bs-primary); /*Color del bordea*/
-    --bs-btn-color: var(--inst-white); /* Color del texto */
-    --bs-btn-hover-bg: var(--bs-secondary); /* Color al pasar el mouse */
-    --bs-btn-hover-border-color: var(--bs-primary);
-    --bs-btn-hover-color: var(--bs-primary); /* Color del texto al pasar el mouse */
-    --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
-    --bs-btn-active-border-color: #0f2430;
-    font-weight: bold;
+	--bs-btn-bg: var(--bs-primary); /*Color del relleno*/
+	--bs-btn-border-color: var(--bs-primary); /*Color del bordea*/
+	--bs-btn-color: var(--inst-white); /* Color del texto */
+	--bs-btn-hover-bg: var(--bs-secondary); /* Color al pasar el mouse */
+	--bs-btn-hover-border-color: var(--bs-primary);
+	--bs-btn-hover-color: var(--bs-primary); /* Color del texto al pasar el mouse */
+	--bs-btn-active-bg: #0f2430; /* Color al hacer clic */
+	--bs-btn-active-border-color: #0f2430;
+	font-weight: bold;
 }
 
 .btn-secondary {
-    --bs-btn-bg: var(--bs-secondary); 
-    --bs-btn-border-color: var(--bs-primary);
-    --bs-btn-color: var(--bs-primary); /* Color del texto */
-    --bs-btn-hover-bg: var(--bs-primary); /* Color al pasar el mouse */
-    --bs-btn-hover-border-color: var(--bs-primary);
-    --bs-btn-hover-color: var(--inst-white); /* Color del texto al pasar el mouse */
-    --bs-btn-active-bg: #0f2430; /* Color al hacer clic */
-    --bs-btn-active-border-color: #0f2430;
-    font-weight:bold;
+	--bs-btn-bg: var(--bs-secondary);
+	--bs-btn-border-color: var(--bs-primary);
+	--bs-btn-color: var(--bs-primary); /* Color del texto */
+	--bs-btn-hover-bg: var(--bs-primary); /* Color al pasar el mouse */
+	--bs-btn-hover-border-color: var(--bs-primary);
+	--bs-btn-hover-color: var(--inst-white); /* Color del texto al pasar el mouse */
+	--bs-btn-active-bg: #0f2430; /* Color al hacer clic */
+	--bs-btn-active-border-color: #0f2430;
+	font-weight: bold;
 }
+
 .navbar-3d {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 -2px 1px rgba(255, 255, 255, 0.2) inset;
-    background-color: var(--bs-primary);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 -2px 1px rgba(255, 255, 255, 0.2) inset;
+	background-color: var(--bs-primary);
 }
 
 /*MEJORAR*/
 
 .table-bordered th, .table-bordered td {
-    border: 1px solid #dddddd;
-    text-align: center;
+	border: 1px solid #dddddd;
+	text-align: center;
 }
 
 .table-hover tbody tr:hover {
-    background-color: #f2f2f2;
-}
-
-.table1 th, .table1 td {
-    padding: 12px;
-    font-size: 14px;
+	background-color: #f2f2f2;
 }
 
 .table1 {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
 }
 
-    .table1 th {
-        text-align: center;
-        font-weight: bold;
-        background: #153244;
-        color: white;
-        border: 1px solid #153244;
-    }
+	.table1 th, .table1 td {
+		padding: 12px;
+		font-size: 14px;
+	}
 
-    .grid-header-control-wrapper {
-        background: transparent !important; /* Anula el fondo del th */
-        color: initial !important; /* Permite que el control use su propio color o el heredado del body */
-        font-weight: normal !important; /* Anula la negrita del th */
-        text-align: left !important; /* O 'initial' o 'inherit', según lo que necesite el control */
-        border: none !important; /* Anula el borde del th si afecta al layout interno */
-        padding: 0 !important; /* Resetea el padding del th para este contenedor */
-        margin: 0 !important; /* Resetea el margin */
-        /* Asegura que el contenedor no restrinja el ancho del control si este lo necesita */
-        width: 100%; 
-        box-sizing: border-box;
-    }
+	/* Normal cell styling with ellipsis */
+	.table1 td {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.table1 th {
+		text-align: center;
+		font-weight: bold;
+		background: #153244;
+		color: white;
+		border: 1px solid #153244;
+		position: relative; /* Important for dropdown positioning */
+		overflow: visible; /* Allow dropdowns to be visible */
+		white-space: normal; /* Allow text to wrap in headers */
+	}
+
+
+
+		/* Specifically target the dropdown controls in headers with improved scrolling */
+		.table1 th .dropdown-content {
+			position: absolute;
+			z-index: 1001; /* Ensure it's above other elements */
+			overflow-y: auto; /* Enable vertical scrolling */
+			white-space: normal; /* Allow text to wrap */
+			width: auto; /* Let content determine width */
+			min-width: 250px; /* Minimum width for usability */
+		}
+
+			/* Ensure the checkbox container inside the dropdown can scroll */
+			.table1 th .dropdown-content .checkbox-container {
+				max-height: 300px; /* Allow scrolling within this container */
+				overflow-y: auto;
+			}
+
+		/* Fix positioning issues with TreeViewSearch component in table headers */
+		.table1 th .dropdown {
+			position: static; /* Reset positioning to allow dropdown to work properly */
+		}
+
+			/* Make sure dropdown button remains clickable */
+			.table1 th .dropdown .dropdown-button {
+				cursor: pointer;
+				display: inline-block;
+				white-space: nowrap;
+			}
+
+.grid-header-control-wrapper {
+	background: transparent !important; /* Anula el fondo del th */
+	color: initial !important; /* Permite que el control use su propio color o el heredado del body */
+	font-weight: normal !important; /* Anula la negrita del th */
+	text-align: left !important; /* O 'initial' o 'inherit', según lo que necesite el control */
+	border: none !important; /* Anula el borde del th si afecta al layout interno */
+	padding: 0 !important; /* Resetea el padding del th para este contenedor */
+	margin: 0 !important; /* Resetea el margin */
+	/* Asegura que el contenedor no restrinja el ancho del control si este lo necesita */
+	width: 100%;
+	box-sizing: border-box;
+}
 
 .gridview-scroll-container {
-    max-height: 78vh;
-    overflow: auto;
-    min-height: 78vh;
+	max-height: 78vh;
+	overflow: auto;
+	min-height: 78vh;
 }
 /*PARA TENER GUARDADO / MODIFICAR / MEJORAR */
 
@@ -159,8 +203,9 @@
 }*/
 
 .oculto {
-    display: none;
-}/*
+	display: none;
+}
+/*
 .section-divider {
     margin: 2rem 0;
     border-top: 2px solid #ccc;
