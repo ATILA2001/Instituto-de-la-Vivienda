@@ -48,6 +48,7 @@
     <Compile Include="AutorizanteNegocio.cs" />
     <Compile Include="BarrioNegocio.cs" />
     <Compile Include="BdProyectoNegocio.cs" />
+    <Compile Include="CalculoRedeterminacionNegocio.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ContrataNegocio.cs" />
@@ -55,14 +56,19 @@
     <Compile Include="EmpresaNegocio.cs" />
     <Compile Include="EstadoAutorizanteNegocio.cs" />
     <Compile Include="EstadoRedetNegocio.cs" />
+    <Compile Include="ExpedienteReliqNegocio.cs" />
+    <Compile Include="FormulacionNegocio.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
+    <Compile Include="PrioridadNegocio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedeterminacionNegocio.cs" />
     <Compile Include="TipoPagoNegocio.cs" />
+    <Compile Include="UnidadMedidaNegocio.cs" />
     <Compile Include="UsuarioNegocio.cs" />
   </ItemGroup>
   <ItemGroup>

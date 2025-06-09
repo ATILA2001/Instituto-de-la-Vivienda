@@ -18,16 +18,23 @@ namespace Negocio
 
             try
             {
-                string query = "select M.ID,CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA, BD.PROYECTO, BD.SUBPROYECTO,LG.NOMBRE as LINEA, M.MOVIMIENTO,M.FECHA," +
-                    "                    BD.AUTORIZADO_INICIAL + ISNULL(" +
-                    "    (SELECT SUM(M2.MOVIMIENTO)" +
-                    "       FROM MOVIMIENTOS_GESTION M2" +
-                    "      WHERE M2.ID_BASE = M.ID_BASE), 0" +
-                    ") AS AUTORIZADO_NUEVO" +
-                    "                     from MOVIMIENTOS_GESTION M" +
-                    "                    INNER JOIN OBRAS O ON M.ID_BASE = O.ID" +
-                    "                    inner join BD_PROYECTOS BD on O.ID = BD.ID_BASE" +
-                    "                    inner join BARRIOS BA on O.BARRIO = BA.ID                    inner join LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID WHERE 1 = 1 ";
+                string query = @"SELECT 
+                                M.ID,
+                                O.ID AS ObraId,
+                                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+                                BD.PROYECTO, 
+                                BD.SUBPROYECTO,LG.NOMBRE as LINEA,
+                                M.MOVIMIENTO,
+                                M.FECHA,
+                                BD.AUTORIZADO_INICIAL + ISNULL((SELECT SUM(M2.MOVIMIENTO)
+                                FROM MOVIMIENTOS_GESTION M2
+                                WHERE M2.ID_BASE = M.ID_BASE), 0) AS AUTORIZADO_NUEVO
+                                FROM MOVIMIENTOS_GESTION M 
+                                INNER JOIN OBRAS O ON M.ID_BASE = O.ID
+                                LEFT JOIN BD_PROYECTOS BD on O.ID = BD.ID_BASE
+                                INNER JOIN BARRIOS BA on O.BARRIO = BA.ID
+                                LEFT JOIN LINEA_DE_GESTION LG on BD.LINEA_DE_GESTION = LG.ID
+                                WHERE 1 = 1 ";
 
                 if (obras != null && obras.Count > 0)
                 {
@@ -41,11 +48,12 @@ namespace Negocio
 
                 if (!string.IsNullOrEmpty(filtro))
                 {
-                    query += " AND (E.NOMBRE LIKE @filtro OR NUMERO LIKE @filtro OR C.NOMBRE LIKE @filtro OR AÑO LIKE @filtro OR ETAPA LIKE @filtro OR OBRA LIKE @filtro OR B.NOMBRE LIKE @filtro OR DESCRIPCION LIKE @filtro) ";
+                    query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR BD.PROYECTO LIKE @filtro OR BD.SUBPROYECTO LIKE @filtro OR LG.NOMBRE LIKE @filtro OR M.MOVIMIENTO LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
+            
 
-                query += " ORDER BY ID";
+                query += " ORDER BY M.ID";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
                 while (datos.Lector.Read())
@@ -53,13 +61,16 @@ namespace Negocio
                     Movimiento aux = new Movimiento();
                     aux.Id = (int)datos.Lector["ID"];
                     aux.Obra = new Obra(); // Initialize the Obra property
+                    aux.Obra.Id = (int)datos.Lector["ObraId"];
                     aux.Obra.Descripcion = datos.Lector["OBRA"] as string;
                     aux.Monto = (decimal)datos.Lector["MOVIMIENTO"];
                     aux.Fecha = (DateTime)datos.Lector["FECHA"];
-                    aux.AutorizadoNuevo = (decimal)datos.Lector["AUTORIZADO_NUEVO"];
-                    aux.Proyecto = datos.Lector["PROYECTO"] as string;
-                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] as string;
-                    aux.Linea = datos.Lector["LINEA"] as string;
+                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] != DBNull.Value
+                        ? (decimal?)datos.Lector["AUTORIZADO_NUEVO"]
+                        : null;
+                    aux.Proyecto = datos.Lector["PROYECTO"] != DBNull.Value ? datos.Lector["PROYECTO"] as string : null;
+                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] != DBNull.Value ? datos.Lector["SUBPROYECTO"] as string : null;
+                    aux.Linea = datos.Lector["LINEA"] != DBNull.Value ? datos.Lector["LINEA"] as string : null;
 
                     lista.Add(aux);
                 }
@@ -131,49 +142,39 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        //public bool modificar(Obra obraModificada)
-        //{
-        //    AccesoDatos datos = new AccesoDatos();
-        //    try
-        //    {
-        //        // Consulta para actualizar una obra existente
-        //        datos.setearConsulta("UPDATE OBRAS SET " +
-        //                             "EMPRESA = @EMPRESA, " +
-        //                             "CONTRATA = @CONTRATA, " +
-        //                             "NUMERO = @NUMERO, " +
-        //                             "AÑO = @AÑO, " +
-        //                             "ETAPA = @ETAPA, " +
-        //                             "OBRA = @OBRA, " +
-        //                             "BARRIO = @BARRIO, " +
-        //                             "DESCRIPCION = @DESCRIPCION " +
-        //                             "WHERE ID = @ID");
+        public bool modificar(Movimiento movimientoModificado)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Consulta para actualizar un movimiento existente
+                datos.setearConsulta("UPDATE MOVIMIENTOS_GESTION SET " +
+                                     "ID_BASE = @OBRA, " +
+                                     "MOVIMIENTO = @MOVIMIENTO, " +
+                                     "FECHA = @FECHA " +
+                                     "WHERE ID = @ID");
 
-        //        // Asignar los parámetros
-        //        datos.agregarParametro("@EMPRESA", obraModificada.Empresa.Id);
-        //        datos.agregarParametro("@CONTRATA", obraModificada.Contrata.Id);
-        //        datos.agregarParametro("@NUMERO", obraModificada.Numero);
-        //        datos.agregarParametro("@AÑO", obraModificada.Año);
-        //        datos.agregarParametro("@ETAPA", obraModificada.Etapa);
-        //        datos.agregarParametro("@OBRA", obraModificada.ObraNumero);
-        //        datos.agregarParametro("@BARRIO", obraModificada.Barrio.Id);
-        //        datos.agregarParametro("@DESCRIPCION", obraModificada.Descripcion);
-        //        datos.agregarParametro("@ID", obraModificada.Id);
+                // Asignar los parámetros
+                datos.agregarParametro("@OBRA", movimientoModificado.Obra.Id);
+                datos.agregarParametro("@MOVIMIENTO", movimientoModificado.Monto);
+                datos.agregarParametro("@FECHA", movimientoModificado.Fecha);
+                datos.agregarParametro("@ID", movimientoModificado.Id);
 
-        //        // Ejecutar la actualización
-        //        datos.ejecutarAccion();
+                // Ejecutar la actualización
+                datos.ejecutarAccion();
 
-        //        // Si todo fue bien, devolvemos true
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-        //        throw ex;
-        //    }
-        //    finally
-        //    {
-        //        datos.cerrarConexion();
-        //    }
-        //}
+                // Si todo fue bien, devolvemos true
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

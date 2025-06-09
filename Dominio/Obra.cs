@@ -25,8 +25,8 @@ namespace Dominio
         public decimal? MontoInicial { get; set; }
         public decimal? MontoActual { get; set; }
         public decimal? MontoFaltante { get; set; }
-        public string Linea {  get; set; }
-        public string Proyecto { get; set; }
+        public LineaGestion LineaGestion {  get; set; }
+        public BdProyecto Proyecto { get; set; }
 
 
         public DateTime? FechaInicio { get; set; }

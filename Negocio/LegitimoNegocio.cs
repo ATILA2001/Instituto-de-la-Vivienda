@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using Dominio.Enums;
+using Negocio.Negocio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace Negocio
                 datos.setearConsulta(@"
             UPDATE LEGITIMOS_ABONOS 
             SET 
+                CODIGO_AUTORIZANTE = @CODIGO,
                 EXPEDIENTE = @EXPEDIENTE,
                 INICIO_EJECUCION = @INICIO_EJECUCION,
                 FIN_EJECUCION = @FIN_EJECUCION,
@@ -29,7 +31,7 @@ namespace Negocio
                 MES_APROBACION = @MES_APROBACION
             WHERE 
                 ID = @ID");
-
+                datos.agregarParametro("@CODIGO", legitimoModificado.CodigoAutorizante);
                 datos.agregarParametro("@EXPEDIENTE", legitimoModificado.Expediente);
                 datos.agregarParametro("@INICIO_EJECUCION", legitimoModificado.InicioEjecucion);
                 datos.agregarParametro("@FIN_EJECUCION", legitimoModificado.FinEjecucion);
@@ -200,21 +202,24 @@ namespace Negocio
 
             try
             {
-                string query = " SELECT L.ID, CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA," +
-                    " L.CODIGO_AUTORIZANTE, L.EXPEDIENTE, L.INICIO_EJECUCION, L.FIN_EJECUCION," +
-                    " L.CERTIFICADO, L.MES_APROBACION, EM.NOMBRE AS EMPRESA," +
-                    " CASE WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1" +
-                    " THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D" +
-                    " WHERE D.EE_FINANCIERA = L.EXPEDIENTE) " +
-                    "ELSE (SELECT SUM(D.IMPORTE_PP) " +
-                    "FROM DEVENGADOS D " +
-                    "WHERE D.EE_FINANCIERA = L.EXPEDIENTE) * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) " +
-                    "FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) END AS SIGAF, " +
+                // Consulta básica para obtener los legítimos abonos sin calcular SIGAF
+                string query = @"SELECT 
+            L.ID, 
+            CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+            L.CODIGO_AUTORIZANTE, 
+            L.EXPEDIENTE, 
+            L.INICIO_EJECUCION, 
+            L.FIN_EJECUCION,
+            L.CERTIFICADO, 
+            L.MES_APROBACION, 
+            EM.NOMBRE AS EMPRESA
+        FROM LEGITIMOS_ABONOS AS L 
+        INNER JOIN OBRAS AS O ON L.OBRA = O.ID 
+        INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID 
+        INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID 
+        WHERE O.AREA = @area";
 
-                    "CASE WHEN L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '' THEN 'NO INICIADO' WHEN EXISTS(SELECT 1 FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) THEN 'DEVENGADO' ELSE 'EN TRAMITE' END AS ESTADO," +
-                    
-                    "PS.[BUZON DESTINO], PS.[FECHA ULTIMO PASE] FROM LEGITIMOS_ABONOS AS L INNER JOIN OBRAS AS O ON L.OBRA = O.ID INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS WHERE O.AREA = @area ";
-
+                // Aplicar filtros si están presentes
                 if (empresa != null && empresa.Count > 0)
                 {
                     string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
@@ -224,6 +229,7 @@ namespace Negocio
                         datos.setearParametros($"@empresa{i}", empresa[i]);
                     }
                 }
+
                 if (autorizante != null && autorizante.Count > 0)
                 {
                     string AutorizanteParam = string.Join(",", autorizante.Select((e, i) => $"@autorizante{i}"));
@@ -241,7 +247,7 @@ namespace Negocio
                         // Dividir y validar el formato de las fechas
                         var mesesAnios = mesAprobacion
                             .Where(ma => ma.Contains("-"))
-                            .Select(ma => ma.Split('-')) // Separar "2024-01" en ["2024", "01"]
+                            .Select(ma => ma.Split('-'))
                             .Select(parts => new { Año = parts[0], Mes = parts[1] });
 
                         // Construir los filtros dinámicos
@@ -266,19 +272,20 @@ namespace Negocio
                     }
                 }
 
+                // Filtro por estado de expediente
                 if (estadoExpediente != null && estadoExpediente.Count > 0)
                 {
                     var condicionesSql = new Dictionary<EstadoExpediente, string>
                     {
                         [EstadoExpediente.NoIniciado] = "(L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '')",
                         [EstadoExpediente.EnTramite] = @"(L.EXPEDIENTE IS NOT NULL 
-        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
-        AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
-        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
+                    AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+                    AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                    WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
                         [EstadoExpediente.Devengado] = @"(L.EXPEDIENTE IS NOT NULL 
-        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
-        AND EXISTS (SELECT 1 FROM DEVENGADOS D 
-        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
+                    AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+                    AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                    WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
                     };
 
                     var condiciones = estadoExpediente
@@ -292,30 +299,177 @@ namespace Negocio
                     }
                 }
 
+                // Filtro de búsqueda general
                 if (!string.IsNullOrEmpty(filtro))
                 {
                     query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
 
-
-                query += " ORDER BY O.DESCRIPCION,L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
-
+                query += " ORDER BY O.DESCRIPCION, L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
                 datos.setearConsulta(query);
-
                 datos.agregarParametro("@area", usuario.Area.Id);
-
                 datos.ejecutarLectura();
+
+                // Primera pasada: Recopilar todos los expedientes y montos de los legítimos
+                Dictionary<string, List<decimal>> legitimosPorExpediente = new Dictionary<string, List<decimal>>();
 
                 while (datos.Lector.Read())
                 {
+                    string expediente = datos.Lector["EXPEDIENTE"]?.ToString();
+                    if (!string.IsNullOrEmpty(expediente) && datos.Lector["CERTIFICADO"] != DBNull.Value)
+                    {
+                        decimal certificado = Convert.ToDecimal(datos.Lector["CERTIFICADO"]);
+
+                        if (!legitimosPorExpediente.ContainsKey(expediente))
+                            legitimosPorExpediente[expediente] = new List<decimal>();
+
+                        legitimosPorExpediente[expediente].Add(certificado);
+                    }
+                }
+
+                // Obtener los certificados (incluyendo redeterminaciones) para combinar con los legítimos
+                Dictionary<string, List<decimal>> certificadosPorExpediente = new Dictionary<string, List<decimal>>();
+
+                // Intentar obtener los datos de certificados desde CalculoRedeterminacionNegocio
+                try
+                {
+                    var calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
+                    var certificados = calculoRedeterminacionNegocio.listarCertReliq();
+
+                    // Agrupar los certificados por expediente
+                    foreach (var cert in certificados)
+                    {
+                        if (!string.IsNullOrEmpty(cert.ExpedientePago))
+                        {
+                            if (!certificadosPorExpediente.ContainsKey(cert.ExpedientePago))
+                                certificadosPorExpediente[cert.ExpedientePago] = new List<decimal>();
+
+                            certificadosPorExpediente[cert.ExpedientePago].Add(cert.MontoTotal);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Si hay error al obtener los certificados, continuamos solo con los legítimos
+                    System.Diagnostics.Debug.WriteLine($"Error al obtener certificados: {ex.Message}");
+                }
+
+                // Combinar los montos de legítimos y certificados
+                Dictionary<string, List<decimal>> montosCombinados = new Dictionary<string, List<decimal>>();
+
+                // Primero agregamos todos los legítimos
+                foreach (var kvp in legitimosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    List<decimal> montos = kvp.Value;
+
+                    montosCombinados[expediente] = new List<decimal>(montos);
+                }
+
+                // Luego agregamos los certificados
+                foreach (var kvp in certificadosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    List<decimal> montos = kvp.Value;
+
+                    if (!montosCombinados.ContainsKey(expediente))
+                        montosCombinados[expediente] = new List<decimal>();
+
+                    montosCombinados[expediente].AddRange(montos);
+                }
+
+                // Reiniciar la consulta para procesar los objetos legítimos
+                datos.cerrarConexion();
+                datos = new AccesoDatos();
+                datos.setearConsulta(query);
+                datos.agregarParametro("@area", usuario.Area.Id);
+
+                // Reaplicar todos los parámetros
+                if (empresa != null && empresa.Count > 0)
+                {
+                    for (int i = 0; i < empresa.Count; i++)
+                    {
+                        datos.setearParametros($"@empresa{i}", empresa[i]);
+                    }
+                }
+
+                if (autorizante != null && autorizante.Count > 0)
+                {
+                    for (int i = 0; i < autorizante.Count; i++)
+                    {
+                        datos.setearParametros($"@autorizante{i}", autorizante[i]);
+                    }
+                }
+
+                if (mesAprobacion != null && mesAprobacion.Count > 0)
+                {
+                    try
+                    {
+                        var mesesAnios = mesAprobacion
+                            .Where(ma => ma.Contains("-"))
+                            .Select(ma => ma.Split('-'))
+                            .Select(parts => new { Año = parts[0], Mes = parts[1] });
+
+                        int index = 0;
+                        foreach (var ma in mesesAnios)
+                        {
+                            if (int.TryParse(ma.Mes, out int mes) && int.TryParse(ma.Año, out int año))
+                            {
+                                datos.setearParametros($"@Mes{index}", mes);
+                                datos.setearParametros($"@Año{index}", año);
+                                index++;
+                            }
+                        }
+                    }
+                    catch { /* Ya manejamos esta excepción antes */ }
+                }
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+
+                datos.ejecutarLectura();
+
+                // Procesar los resultados y crear los objetos Legitimo
+                while (datos.Lector.Read())
+                {
+                    string expediente = datos.Lector["EXPEDIENTE"]?.ToString();
+                    decimal? certificado = datos.Lector["CERTIFICADO"] != DBNull.Value
+                        ? Convert.ToDecimal(datos.Lector["CERTIFICADO"])
+                        : (decimal?)null;
+
+                    // Calcular SIGAF usando los montos combinados
+                    decimal? sigaf = null;
+                    if (!string.IsNullOrEmpty(expediente) && certificado.HasValue && montosCombinados.ContainsKey(expediente))
+                    {
+                        // Obtener total de devengados
+                        decimal totalDevengado = SIGAFHelper.ObtenerTotalImporteDevengados(expediente);
+
+                        if (totalDevengado > 0)
+                        {
+                            // Calcular proporción
+                            decimal sumaMontos = montosCombinados[expediente].Sum();
+                            if (sumaMontos > 0)
+                            {
+                                sigaf = totalDevengado * certificado.Value / sumaMontos;
+                            }
+                        }
+                    }
+
+                    // Obtener información de SADE
+                    var sadeInfo = SADEHelper.ObtenerInfoSADE(expediente);
+
+                    // Determinar el estado del expediente
+                    string estado = SIGAFHelper.DeterminarEstadoExpediente(expediente);
+
                     var legitimoAbono = new Legitimo
                     {
                         Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
-                        Expediente = datos.Lector["EXPEDIENTE"] as string,
-                        Estado = datos.Lector["ESTADO"] as string,
-
+                        Expediente = expediente,
+                        Estado = estado,
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         InicioEjecucion = datos.Lector["INICIO_EJECUCION"] != DBNull.Value
                             ? (DateTime?)Convert.ToDateTime(datos.Lector["INICIO_EJECUCION"])
@@ -323,9 +477,7 @@ namespace Negocio
                         FinEjecucion = datos.Lector["FIN_EJECUCION"] != DBNull.Value
                             ? (DateTime?)Convert.ToDateTime(datos.Lector["FIN_EJECUCION"])
                             : null,
-                        Certificado = datos.Lector["CERTIFICADO"] != DBNull.Value
-                            ? (decimal?)Convert.ToDecimal(datos.Lector["CERTIFICADO"])
-                            : null,
+                        Certificado = certificado,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value
                             ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"])
                             : null,
@@ -333,9 +485,9 @@ namespace Negocio
                         {
                             Descripcion = datos.Lector["OBRA"].ToString()
                         },
-                        Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
-                        FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
-                        BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString()
+                        Sigaf = sigaf,
+                        FechaSade = sadeInfo.FechaUltimoPase,
+                        BuzonSade = sadeInfo.BuzonDestino
                     };
 
                     lista.Add(legitimoAbono);
@@ -352,51 +504,38 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Legitimo> listarFiltro(List<string> linea, List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante,List<string> estadoExpediente, string filtro = null)
+        public List<Legitimo> listarFiltro(List<string> linea, List<string> areas, List<string> mesAprobacion, List<string> empresa, List<string> autorizante, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Legitimo>();
             var datos = new AccesoDatos();
 
             try
             {
+                // Consulta simplificada sin los cálculos de SIGAF y ESTADO
                 string query = @"
-            SELECT 
-                L.ID,
-                CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
-                L.CODIGO_AUTORIZANTE,
-                L.EXPEDIENTE,
-                L.INICIO_EJECUCION,
-                L.FIN_EJECUCION,
-                L.CERTIFICADO,
-                L.MES_APROBACION,
-                EM.NOMBRE AS EMPRESA,
-                A.ID AS AREA_ID,
-                A.NOMBRE AS AREA,
-                LG.NOMBRE AS LINEA,
-                CASE 
-                    WHEN COUNT(L.EXPEDIENTE) OVER (PARTITION BY L.EXPEDIENTE) = 1 
-                    THEN (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-                    ELSE (SELECT SUM(D.IMPORTE_PP) FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) 
-                         * L.CERTIFICADO / (SELECT SUM(L2.CERTIFICADO) FROM LEGITIMOS_ABONOS L2 WHERE L2.EXPEDIENTE = L.EXPEDIENTE) 
-                END AS SIGAF,
-                CASE 
-    WHEN L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '' THEN 'NO INICIADO'
-    WHEN EXISTS (SELECT 1 FROM DEVENGADOS D WHERE D.EE_FINANCIERA = L.EXPEDIENTE) THEN 'DEVENGADO'
-    ELSE 'EN TRAMITE'
-END AS ESTADO,
+        SELECT 
+            L.ID,
+            CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE) AS OBRA,
+            L.CODIGO_AUTORIZANTE,
+            L.EXPEDIENTE,
+            L.INICIO_EJECUCION,
+            L.FIN_EJECUCION,
+            L.CERTIFICADO,
+            L.MES_APROBACION,
+            EM.NOMBRE AS EMPRESA,
+            A.ID AS AREA_ID,
+            A.NOMBRE AS AREA,
+            LG.NOMBRE AS LINEA
+        FROM LEGITIMOS_ABONOS AS L
+        INNER JOIN OBRAS AS O ON L.OBRA = O.ID
+        INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+        INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
+        INNER JOIN AREAS AS A ON O.AREA = A.ID
+        LEFT JOIN BD_PROYECTOS BD ON O.ID = BD.ID_BASE
+        LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
+        WHERE 1 = 1";
 
-                PS.[BUZON DESTINO],
-                PS.[FECHA ULTIMO PASE]
-            FROM LEGITIMOS_ABONOS AS L
-            INNER JOIN OBRAS AS O ON L.OBRA = O.ID
-            INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
-            INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID
-            INNER JOIN AREAS AS A ON O.AREA = A.ID
-            LEFT JOIN PASES_SADE PS ON L.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
-            LEFT JOIN BD_PROYECTOS BD ON O.ID = BD.ID_BASE
-            LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID
-            WHERE 1 = 1";
-
+                // Aplicar filtros si están presentes
                 if (linea != null && linea.Count > 0)
                 {
                     string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
@@ -406,6 +545,7 @@ END AS ESTADO,
                         datos.setearParametros($"@linea{i}", linea[i]);
                     }
                 }
+
                 if (empresa != null && empresa.Count > 0)
                 {
                     string empresasParam = string.Join(",", empresa.Select((e, i) => $"@empresa{i}"));
@@ -415,6 +555,7 @@ END AS ESTADO,
                         datos.setearParametros($"@empresa{i}", empresa[i]);
                     }
                 }
+
                 if (areas != null && areas.Count > 0)
                 {
                     string areaParam = string.Join(",", areas.Select((e, i) => $"@area{i}"));
@@ -424,6 +565,7 @@ END AS ESTADO,
                         datos.setearParametros($"@area{i}", areas[i]);
                     }
                 }
+
                 if (autorizante != null && autorizante.Count > 0)
                 {
                     string AutorizanteParam = string.Join(",", autorizante.Select((e, i) => $"@autorizante{i}"));
@@ -466,21 +608,21 @@ END AS ESTADO,
                     }
                 }
 
+                // Filtro por estado de expediente
                 if (estadoExpediente != null && estadoExpediente.Count > 0)
                 {
                     var condicionesSql = new Dictionary<EstadoExpediente, string>
                     {
                         [EstadoExpediente.NoIniciado] = "(L.EXPEDIENTE IS NULL OR LTRIM(RTRIM(L.EXPEDIENTE)) = '')",
                         [EstadoExpediente.EnTramite] = @"(L.EXPEDIENTE IS NOT NULL 
-        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
-        AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
-        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
+                    AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+                    AND NOT EXISTS (SELECT 1 FROM DEVENGADOS D 
+                    WHERE D.EE_FINANCIERA = L.EXPEDIENTE))",
                         [EstadoExpediente.Devengado] = @"(L.EXPEDIENTE IS NOT NULL 
-        AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
-        AND EXISTS (SELECT 1 FROM DEVENGADOS D 
-        WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
+                    AND LTRIM(RTRIM(L.EXPEDIENTE)) != '' 
+                    AND EXISTS (SELECT 1 FROM DEVENGADOS D 
+                    WHERE D.EE_FINANCIERA = L.EXPEDIENTE))"
                     };
-
 
                     var condiciones = estadoExpediente
                         .Select(e => int.Parse(e))
@@ -493,26 +635,191 @@ END AS ESTADO,
                     }
                 }
 
+                // Filtro de búsqueda general
                 if (!string.IsNullOrEmpty(filtro))
                 {
-                    query += " AND (O.DESCRIPCION LIKE @filtro OR  A.NOMBRE LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
+                    query += " AND (O.DESCRIPCION LIKE @filtro OR A.NOMBRE LIKE @filtro OR BA.NOMBRE LIKE @filtro OR L.CODIGO_AUTORIZANTE LIKE @filtro OR L.EXPEDIENTE LIKE @filtro OR L.CERTIFICADO LIKE @filtro OR L.MES_APROBACION LIKE @filtro OR EM.NOMBRE LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
 
-                query += " ORDER BY O.DESCRIPCION,L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
+                query += " ORDER BY O.DESCRIPCION, L.CODIGO_AUTORIZANTE, L.MES_APROBACION";
                 datos.setearConsulta(query);
-
-
                 datos.ejecutarLectura();
+
+                // Primera pasada: Recopilar todos los expedientes y montos de los legítimos
+                Dictionary<string, List<decimal>> legitimosPorExpediente = new Dictionary<string, List<decimal>>();
 
                 while (datos.Lector.Read())
                 {
+                    string expediente = datos.Lector["EXPEDIENTE"]?.ToString();
+                    if (!string.IsNullOrEmpty(expediente) && datos.Lector["CERTIFICADO"] != DBNull.Value)
+                    {
+                        decimal certificado = Convert.ToDecimal(datos.Lector["CERTIFICADO"]);
+
+                        if (!legitimosPorExpediente.ContainsKey(expediente))
+                            legitimosPorExpediente[expediente] = new List<decimal>();
+
+                        legitimosPorExpediente[expediente].Add(certificado);
+                    }
+                }
+
+                // Obtener los certificados (incluyendo redeterminaciones) para combinar con los legítimos
+                Dictionary<string, List<decimal>> certificadosPorExpediente = new Dictionary<string, List<decimal>>();
+
+                // Intentar obtener los datos de certificados desde CalculoRedeterminacionNegocio
+                try
+                {
+                    var calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
+                    var certificados = calculoRedeterminacionNegocio.listarCertReliq();
+
+                    // Agrupar los certificados por expediente
+                    foreach (var cert in certificados)
+                    {
+                        if (!string.IsNullOrEmpty(cert.ExpedientePago))
+                        {
+                            if (!certificadosPorExpediente.ContainsKey(cert.ExpedientePago))
+                                certificadosPorExpediente[cert.ExpedientePago] = new List<decimal>();
+
+                            certificadosPorExpediente[cert.ExpedientePago].Add(cert.MontoTotal);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Si hay error al obtener los certificados, continuamos solo con los legítimos
+                    System.Diagnostics.Debug.WriteLine($"Error al obtener certificados: {ex.Message}");
+                }
+
+                // Combinar los montos de legítimos y certificados
+                Dictionary<string, List<decimal>> montosCombinados = new Dictionary<string, List<decimal>>();
+
+                // Primero agregamos todos los legítimos
+                foreach (var kvp in legitimosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    List<decimal> montos = kvp.Value;
+
+                    montosCombinados[expediente] = new List<decimal>(montos);
+                }
+
+                // Luego agregamos los certificados
+                foreach (var kvp in certificadosPorExpediente)
+                {
+                    string expediente = kvp.Key;
+                    List<decimal> montos = kvp.Value;
+
+                    if (!montosCombinados.ContainsKey(expediente))
+                        montosCombinados[expediente] = new List<decimal>();
+
+                    montosCombinados[expediente].AddRange(montos);
+                }
+
+                // Reiniciar la consulta para procesar los objetos legítimos
+                datos.cerrarConexion();
+                datos = new AccesoDatos();
+                datos.setearConsulta(query);
+
+                // Reaplicar todos los parámetros para la segunda consulta
+                if (linea != null && linea.Count > 0)
+                {
+                    for (int i = 0; i < linea.Count; i++)
+                    {
+                        datos.setearParametros($"@linea{i}", linea[i]);
+                    }
+                }
+
+                if (empresa != null && empresa.Count > 0)
+                {
+                    for (int i = 0; i < empresa.Count; i++)
+                    {
+                        datos.setearParametros($"@empresa{i}", empresa[i]);
+                    }
+                }
+
+                if (areas != null && areas.Count > 0)
+                {
+                    for (int i = 0; i < areas.Count; i++)
+                    {
+                        datos.setearParametros($"@area{i}", areas[i]);
+                    }
+                }
+
+                if (autorizante != null && autorizante.Count > 0)
+                {
+                    for (int i = 0; i < autorizante.Count; i++)
+                    {
+                        datos.setearParametros($"@autorizante{i}", autorizante[i]);
+                    }
+                }
+
+                if (mesAprobacion != null && mesAprobacion.Count > 0)
+                {
+                    try
+                    {
+                        var mesesAnios = mesAprobacion
+                            .Where(ma => ma.Contains("-"))
+                            .Select(ma => ma.Split('-'))
+                            .Select(parts => new { Año = parts[0], Mes = parts[1] });
+
+                        int index = 0;
+                        foreach (var ma in mesesAnios)
+                        {
+                            if (int.TryParse(ma.Mes, out int mes) && int.TryParse(ma.Año, out int año))
+                            {
+                                datos.setearParametros($"@Mes{index}", mes);
+                                datos.setearParametros($"@Año{index}", año);
+                                index++;
+                            }
+                        }
+                    }
+                    catch { /* Ya manejamos esta excepción antes */ }
+                }
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    datos.setearParametros("@filtro", $"%{filtro}%");
+                }
+
+                datos.ejecutarLectura();
+
+                // Procesar los resultados y crear los objetos Legitimo
+                while (datos.Lector.Read())
+                {
+                    string expediente = datos.Lector["EXPEDIENTE"]?.ToString();
+                    decimal? certificado = datos.Lector["CERTIFICADO"] != DBNull.Value
+                        ? Convert.ToDecimal(datos.Lector["CERTIFICADO"])
+                        : (decimal?)null;
+
+                    // Calcular SIGAF usando los montos combinados
+                    decimal? sigaf = null;
+                    if (!string.IsNullOrEmpty(expediente) && certificado.HasValue && montosCombinados.ContainsKey(expediente))
+                    {
+                        // Obtener total de devengados
+                        decimal totalDevengado = SIGAFHelper.ObtenerTotalImporteDevengados(expediente);
+
+                        if (totalDevengado > 0)
+                        {
+                            // Calcular proporción
+                            decimal sumaMontos = montosCombinados[expediente].Sum();
+                            if (sumaMontos > 0)
+                            {
+                                sigaf = totalDevengado * certificado.Value / sumaMontos;
+                            }
+                        }
+                    }
+
+                    // Obtener información de SADE
+                    var sadeInfo = SADEHelper.ObtenerInfoSADE(expediente);
+
+                    // Determinar el estado del expediente
+                    string estado = SIGAFHelper.DeterminarEstadoExpediente(expediente);
+
                     var legitimoAbono = new Legitimo
                     {
                         Id = (int)datos.Lector["ID"],
                         CodigoAutorizante = datos.Lector["CODIGO_AUTORIZANTE"].ToString(),
-                        Expediente = datos.Lector["EXPEDIENTE"] as string,
-                        Estado = datos.Lector["ESTADO"] as string,
+                        Expediente = expediente,
+                        Estado = estado, // Determinado por el helper
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         InicioEjecucion = datos.Lector["INICIO_EJECUCION"] != DBNull.Value
                             ? Convert.ToDateTime(datos.Lector["INICIO_EJECUCION"])
@@ -520,9 +827,7 @@ END AS ESTADO,
                         FinEjecucion = datos.Lector["FIN_EJECUCION"] != DBNull.Value
                             ? Convert.ToDateTime(datos.Lector["FIN_EJECUCION"])
                             : (DateTime?)null,
-                        Certificado = datos.Lector["CERTIFICADO"] != DBNull.Value
-                            ? Convert.ToDecimal(datos.Lector["CERTIFICADO"])
-                            : (decimal?)null,
+                        Certificado = certificado,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value
                             ? Convert.ToDateTime(datos.Lector["MES_APROBACION"])
                             : (DateTime?)null,
@@ -535,11 +840,10 @@ END AS ESTADO,
                                 Nombre = datos.Lector["AREA"].ToString()
                             }
                         },
-                        Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
-                        FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
-                        BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
+                        Sigaf = sigaf, // Calculado usando montos combinados
+                        FechaSade = sadeInfo.FechaUltimoPase, // Obtenido del helper
+                        BuzonSade = sadeInfo.BuzonDestino, // Obtenido del helper
                         Linea = datos.Lector["LINEA"]?.ToString()
-
                     };
 
                     lista.Add(legitimoAbono);

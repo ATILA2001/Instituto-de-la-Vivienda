@@ -1,0 +1,189 @@
+﻿
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+    .search-row input[type='text'] {
+        flex: 1;
+    }
+
+/* Contenedor del dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+
+
+    font-family: inherit; /* Hereda la fuente del elemento padre en la página contenedora */
+    color: inherit;       /* Hereda el color del elemento padre */
+    font-weight: inherit; /* Hereda el peso de la fuente del elemento padre */
+    font-size: inherit;   /* Asegura que también herede el tamaño de fuente */
+    line-height: inherit; /* Asegura que también herede la altura de línea */
+}
+
+/* Botón de apertura */
+.dropdown-button {
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+
+
+    font-family: inherit;
+    color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-decoration: none; /* Evita la decoración de texto si la hubiera */
+}
+
+    .dropdown-button:hover {
+        /* background-color: var(--inst-blue); */
+        border:solid 1px var(--inst-white);
+    }
+
+/* Contenedor fijo para el input */
+.search-container {
+    padding: 5px;
+    background: var(--inst-white);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Contenido desplegable */
+.dropdown-content {
+    position: absolute;
+    background-color: var(--inst-white);
+    color: var(--inst-gray);
+    border: 1px solid #ccc;
+    width: auto;
+    min-width: 10vw;
+    max-width: 30vw;
+    max-height: 68vh;
+    overflow: auto;
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: none;
+    text-align: left;
+    font-weight: normal;
+}
+
+
+/* Cuadro de búsqueda */
+.dropdown-content input[type='text'] {
+width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    background: var(--inst-white);
+    z-index: 10;
+    border: 1px solid var(--inst-blue);
+    border-radius: 5px;
+ }
+
+/* Contenedor con scroll solo para los checkboxes */
+.checkbox-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    white-space: nowrap;
+}
+
+.checkbox-list {
+    margin: 0;
+    padding: 0;
+}
+
+    .checkbox-list span {
+        display: block; /* Cada ítem en su propia línea */
+        white-space: nowrap;
+        margin: 3px 0;
+    }
+
+    /* Alineamos el checkbox y su texto en la misma fila */
+    .checkbox-list input[type='checkbox'] {
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
+
+    .checkbox-list label {
+        vertical-align: middle;
+        white-space: nowrap; /* Evita que el texto salte de línea */
+    }
+
+
+
+/* Estilos base del TreeView */
+.date-tree-view {
+    padding: 5px;
+    width: 100%;
+}
+
+    .date-tree-view table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .date-tree-view tr {
+        display: table-row;
+        height: 1em; /* Altura fija para cada fila */
+        vertical-align: middle;
+    }
+
+    .date-tree-view td {
+        display: inline-flex;
+        vertical-align: middle;
+        align-items: center;
+        /*  width: 100%;*/
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
+
+        /* Icono (botón de expandir/colapsar) */
+        .date-tree-view td img {
+            margin-right: 4px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* Checkbox */
+        .date-tree-view td input[type="checkbox"] {
+            margin: 0 4px 0;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+
+    /* Sangría para nodos anidados */
+    .date-tree-view table table td {
+        padding-left: 2px;
+    }
+
+    /* Margen especial para "Seleccionar todos" */
+    .date-tree-view > table:first-child {
+        margin: 5px 0;
+    }
+
+
+.action-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 5px;
+    background: var(--inst-white);
+    border-top: 1px solid #ccc;
+}
+
+.action-buttons .btn i.material-symbols-rounded,
+.action-buttons .btn i.bi {
+    font-size: var(--bs-btn-font-size);
+    line-height: 1;  /* Asegura que la altura de línea del ícono no añada espacio extra. */
+}

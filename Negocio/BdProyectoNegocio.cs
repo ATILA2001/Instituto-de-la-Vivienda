@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,23 +18,26 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT DISTINCT proyecto FROM BD_PROYECTOS");
+                //datos.setearConsulta("SELECT DISTINCT proyecto FROM BD_PROYECTOS");
+                datos.setearConsulta("SELECT DISTINCT proyecto AS NOMBRE FROM BD_PROYECTOS WHERE proyecto IS NOT NULL AND LTRIM(RTRIM(proyecto)) <> '' ORDER BY proyecto");
 
                 datos.ejecutarLectura();
-                dt.Columns.Add("ID", typeof(int)); // Generar ID incremental
-                dt.Columns.Add("NOMBRE", typeof(string));
 
-                int id = 1; // Inicializamos el contador de ID
+                dt.Load(datos.Lector);
+                //dt.Columns.Add("ID", typeof(int)); // Generar ID incremental
+                //dt.Columns.Add("NOMBRE", typeof(string));
 
-                while (datos.Lector.Read())
-                {
-                    DataRow row = dt.NewRow();
-                    row["ID"] = id; // Generar ID único incremental
-                    row["NOMBRE"] = datos.Lector["proyecto"] as string;
+                //int id = 1; // Inicializamos el contador de ID
 
-                    dt.Rows.Add(row);
-                    id++; // Incrementar el ID para la siguiente fila
-                }
+                //while (datos.Lector.Read())
+                //{
+                //    DataRow row = dt.NewRow();
+                //    row["ID"] = id; // Generar ID único incremental
+                //    row["NOMBRE"] = datos.Lector["proyecto"] as string;
+
+                //    dt.Rows.Add(row);
+                //    id++; // Incrementar el ID para la siguiente fila
+                //}
 
                 return dt;
             }
@@ -90,112 +94,120 @@ namespace Negocio
             try
             {
                 string query = @"
-                SELECT 
-    BD.ID,
-    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
-    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
-    PROYECTO,
-    SUBPROYECTO,
-    L.NOMBRE AS NombreLineaGestion,
-    AUTORIZADO_INICIAL,
-    AUTORIZADO_INICIAL + ISNULL(
-        (
-            SELECT SUM(MG.MOVIMIENTO)
-            FROM MOVIMIENTOS_GESTION AS MG
-            WHERE MG.ID_BASE = BD.ID_BASE
-        ), 0
-    ) AS AUTORIZADO_NUEVO,
-    O.ID as ID_OBRA,
-    L.ID as ID_LINEA,
-    A.ID AS ID_AREA,
-    A.NOMBRE AS AREA
-FROM BD_PROYECTOS AS BD
-INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
-INNER JOIN AREAS AS A ON O.AREA = A.ID
-INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
-INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
-INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID
-WHERE 1=1";
+                                SELECT 
+                    BD.ID,
+                    CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
+                    CONCAT(O.DESCRIPCION, ' - ', BA.NOMBRE ) AS OBRA, 
+                    PROYECTO,
+                    SUBPROYECTO,
+                    L.NOMBRE AS NombreLineaGestion,
+                    AUTORIZADO_INICIAL,
+                    AUTORIZADO_INICIAL + ISNULL(
+                        (
+                            SELECT SUM(MG.MOVIMIENTO)
+                            FROM MOVIMIENTOS_GESTION AS MG
+                            WHERE MG.ID_BASE = BD.ID_BASE
+                        ), 0
+                    ) AS AUTORIZADO_NUEVO,
+                    O.ID as ID_OBRA,
+                    L.ID as ID_LINEA,
+                    A.ID AS ID_AREA,
+                    A.NOMBRE AS AREA,
+                    C.ID AS ID_CONTRATA
+                FROM BD_PROYECTOS AS BD
+                INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
+                INNER JOIN AREAS AS A ON O.AREA = A.ID
+                INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
+                INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
+                INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID
+                WHERE 1=1";
+
 
                 if (linea != null && linea.Count > 0)
                 {
-                    string lineasParam = string.Join(",", linea.Select((e, i) => $"@linea{i}"));
-                    query += $" AND L.NOMBRE IN ({lineasParam})";
-                    for (int i = 0; i < linea.Count; i++)
+                    try
                     {
-                        datos.setearParametros($"@linea{i}", linea[i]);
+                        var lineaIds = linea.Select(int.Parse).ToList();
+                        if (lineaIds.Any())
+                        {
+                            string lineasParam = string.Join(",", lineaIds.Select((id, i) => $"@linea{i}"));
+                            query += $" AND L.ID IN ({lineasParam})"; // Usa L.ID
+                            setearParametrosInt(datos, lineaIds, "linea"); // Llama al helper de INT
+                        }
                     }
+                    catch (FormatException ex) { Debug.WriteLine("Error al convertir IDs de línea a int: " + ex.Message); }
                 }
                 if (area != null && area.Count > 0)
                 {
-                    string areasParam = string.Join(",", area.Select((e, i) => $"@area{i}"));
-                    query += $" AND A.NOMBRE IN ({areasParam})";
-                    for (int i = 0; i < area.Count; i++)
+                    try
                     {
-                        datos.setearParametros($"@area{i}", area[i]);
+                        var areaIds = area.Select(int.Parse).ToList();
+                        if (areaIds.Any())
+                        {
+                            string areasParam = string.Join(",", areaIds.Select((id, i) => $"@area{i}"));
+                            query += $" AND A.ID IN ({areasParam})"; // Usa A.ID
+                            setearParametrosInt(datos, areaIds, "area"); // Llama al helper de INT
+                        }
                     }
+                    catch (FormatException ex) { Debug.WriteLine("Error al convertir IDs de área a int: " + ex.Message); }
                 }
                 if (proye != null && proye.Count > 0)
                 {
-                    string proyeParam = string.Join(",", proye.Select((e, i) => $"@proye{i}"));
-                    query += $" AND PROYECTO IN ({proyeParam})";
+                    string proyeParamNombres = string.Join(",", proye.Select((nombre, i) => $"@proyeNombre{i}"));
+                    query += $" AND BD.PROYECTO IN ({proyeParamNombres})";
+
                     for (int i = 0; i < proye.Count; i++)
                     {
-                        datos.setearParametros($"@proye{i}", proye[i]);
+                        datos.setearParametros($"@proyeNombre{i}", proye[i]); // Pasar los nombres como parámetros string.
                     }
                 }
 
+
                 if (!string.IsNullOrEmpty(filtro))
                 {
-
-                    query += " AND (PROYECTO LIKE @filtro OR  L.NOMBRE LIKE @filtro OR SUBPROYECTO LIKE @filtro OR O.DESCRIPCION LIKE @filtro ) ";
-                    datos.setearParametros("@filtro", $"%{filtro}%");
-
+                    // Usar los alias BD, O, A, C, L definidos en la consulta
+                    query += " AND (BD.PROYECTO LIKE @filtro OR BD.SUBPROYECTO LIKE @filtro OR O.DESCRIPCION LIKE @filtro OR A.NOMBRE LIKE @filtro OR C.NOMBRE LIKE @filtro OR L.NOMBRE LIKE @filtro)";
+                    datos.setearParametros("@filtro", "%" + filtro + "%");
                 }
+
                 query += " ORDER BY OBRA ";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
                 {
-                    BdProyecto proyecto = new BdProyecto
-                    {
-                        Obra = new Obra
-                        {
-                            Id = datos.Lector["ID_OBRA"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID_OBRA"]) : 0,
-                            Descripcion = datos.Lector["OBRA"].ToString(),
-                            Contrata = new Contrata
-                            {
-                                Nombre = datos.Lector["CONTRATA"].ToString()
-                            },
-                            Area = new Area
-                            {
-                                Id = datos.Lector["ID_AREA"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID_AREA"]) : 0,
-                                Nombre = datos.Lector["AREA"].ToString()
-                            }
+                    BdProyecto aux = new BdProyecto();
+                    aux.Id = (int)datos.Lector["ID"]; // Usa "ID" del SELECT
+                    aux.Proyecto = (string)datos.Lector["PROYECTO"]; // Usa "PROYECTO" del SELECT
+                    aux.SubProyecto = datos.Lector["SUBPROYECTO"] != DBNull.Value ? (string)datos.Lector["SUBPROYECTO"] : ""; // Usa "SUBPROYECTO"
+                    aux.AutorizadoInicial = (decimal)datos.Lector["AUTORIZADO_INICIAL"]; // Usa "AUTORIZADO_INICIAL"
+                    aux.AutorizadoNuevo = (decimal)datos.Lector["AUTORIZADO_NUEVO"]; // Usa "AUTORIZADO_NUEVO"
 
-                        },
-                        Id = datos.Lector["ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID"]) : 0,
-                        Proyecto = datos.Lector["PROYECTO"].ToString(),
-                        SubProyecto = datos.Lector["SUBPROYECTO"].ToString(),
-                        LineaGestion = new LineaGestion
-                        {
-                            Id = datos.Lector["ID_LINEA"] != DBNull.Value ? Convert.ToInt32(datos.Lector["ID_LINEA"]) : 0,
-                            Nombre = datos.Lector["NombreLineaGestion"].ToString()
-                        },
-                        AutorizadoInicial = Convert.ToDecimal(datos.Lector["AUTORIZADO_INICIAL"]),
-                        AutorizadoNuevo = Convert.ToDecimal(datos.Lector["AUTORIZADO_NUEVO"]),
+                    aux.Obra = new Obra();
+                    aux.Obra.Id = (int)datos.Lector["ID_OBRA"]; // Usa "ID_OBRA"
+                    aux.Obra.Descripcion = (string)datos.Lector["OBRA"]; // Usa "OBRA" (el CONCAT)
 
-                    };
+                    aux.Obra.Area = new Area();
+                    aux.Obra.Area.Id = (int)datos.Lector["ID_AREA"]; // Usa "ID_AREA"
+                    aux.Obra.Area.Nombre = (string)datos.Lector["AREA"]; // Usa "AREA" (A.NOMBRE AS AREA)
 
-                    lista.Add(proyecto);
+                    aux.Obra.Contrata = new Contrata();
+                    aux.Obra.Contrata.Id = (int)datos.Lector["ID_CONTRATA"]; // Usa "ID_CONTRATA" (añadido al SELECT)
+                    aux.Obra.Contrata.Nombre = (string)datos.Lector["CONTRATA"]; // Usa "CONTRATA" (el CONCAT)
+
+                    aux.LineaGestion = new LineaGestion();
+                    aux.LineaGestion.Id = (int)datos.Lector["ID_LINEA"]; // Usa "ID_LINEA"
+                    aux.LineaGestion.Nombre = (string)datos.Lector["NombreLineaGestion"]; // Usa "NombreLineaGestion"
+
+                    lista.Add(aux);
                 }
-
                 return lista;
             }
             catch (Exception ex)
             {
-                throw ex;
+                // Loggear o manejar la excepción
+                System.Diagnostics.Debug.WriteLine("Error en BdProyectoNegocio.Listar: " + ex.ToString());
+                throw; // Relanzar para que la capa superior se entere
             }
             finally
             {
@@ -203,17 +215,35 @@ WHERE 1=1";
             }
         }
 
-        public void agregar(BdProyecto proyecto)
+        private void setearParametrosInt(AccesoDatos datos, List<int> valores, string prefijo)
+        {
+            for (int i = 0; i < valores.Count; i++)
+            {
+                // Pasar el valor INT directamente a setearParametro
+                datos.setearParametros($"@{prefijo}{i}", valores[i]);
+            }
+        }
+
+        // Método auxiliar para parámetros string (sin cambios)
+        private void setearParametros(AccesoDatos datos, List<string> valores, string prefijo)
+        {
+            for (int i = 0; i < valores.Count; i++)
+            {
+                datos.setearParametros($"@{prefijo}{i}", valores[i]);
+            }
+        }
+
+        public bool agregar(BdProyecto proyecto)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
                 string query = @"
-            INSERT INTO BD_PROYECTOS 
-            (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO_INICIAL) 
-            VALUES 
-            (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO_INICIAL)";
+                    INSERT INTO BD_PROYECTOS 
+                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO_INICIAL) 
+                    VALUES 
+                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO_INICIAL)";
 
                 datos.setearConsulta(query);
 
@@ -224,10 +254,11 @@ WHERE 1=1";
                 datos.agregarParametro("@AUTORIZADO_INICIAL", proyecto.AutorizadoInicial);
 
                 datos.ejecutarAccion();
+                return true;
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("Error al agregar el proyecto.", ex);
             }
             finally
             {

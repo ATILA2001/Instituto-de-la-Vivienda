@@ -9,7 +9,7 @@ namespace Dominio
     public class Redeterminacion
     {
         public int Id { get; set; }
-        public string Obra { get; set; } 
+        public Obra Obra { get; set; } 
         public Autorizante Autorizante { get; set; }
         public string Expediente { get; set; }
         public DateTime? Salto { get; set; }
@@ -23,6 +23,8 @@ namespace Dominio
         public String Area { get; set; }
         public DateTime? FechaSade { get; set; }
         public string BuzonSade { get; set; }
+
+        public decimal? MontoRedet { get; set; }
 
         public Redeterminacion() { }
     }

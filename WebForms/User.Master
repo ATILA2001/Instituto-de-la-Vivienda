@@ -3,81 +3,79 @@
 <!DOCTYPE html>
 <html>
 <head runat="server">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-	<title> Instituto de la Vivienda - Buenos Aires</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Instituto de la Vivienda - Buenos Aires</title>
 
-	<asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
-	<link rel="icon" href="Images/IVC-Blanco.png" type="image/x-icon" />
+    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
+    <link rel="icon" href="Images/IVC-Blanco.png" type="image/x-icon" />
 
-	<link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
-	<script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
-	<link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
+    <!-- En Admin.Master, después del título -->
+    <script src="<%= ResolveUrl("~/Scripts/jquery-3.6.0.min.js") %>"></script>
+
+    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
+    <script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
+    <link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
 
 
 
-	<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var form = document.getElementById('<%= form1.ClientID %>');
-        form.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-            }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('<%= form1.ClientID %>');
+            form.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                }
+            });
         });
-    });
-</script>
-
+    </script>
 
 </head>
 <body class="bg-light">
-	<form id="form1" runat="server">
-		<asp:ScriptManager ID="ScriptManager1" runat="server" />
-		<header>
-			<nav class="navbar navbar-expand-lg navbar-light" style="background-color: var(--color-principal);">
-				<div class="container-fluid">
-					<a class="navbar-brand d-flex align-items-center">
-						<img src="Images/IVC-Azul.png" class="me-2" width="50" height="50" style="margin-right:0!important;margin-top:0!important; margin-left:0.5rem!important;" />
-					</a>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					<div class="collapse navbar-collapse" id="navbarMenu">
-						<ul class="navbar-nav me-auto">
-							<li class="nav-item">
-								<a class="nav-link" href="Obras.aspx"  style="font-size: 20px;"><span>Obras</span></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="Autorizantes.aspx"  style="font-size: 20px;"><span>Autorizantes</span></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="Certificados.aspx"  style="font-size: 20px;"><span>Certificados</span></a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="Legitimos.aspx"  style="font-size: 20px;"><span>Legítimos Abonos</span></a>
-							</li>
-						</ul>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" />
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-dark m-2 rounded-3 navbar-3d">
+                <div class="container-fluid">
+                    <a class="navbar-brand d-flex align-items-center">
+                        <img src="Images/IVC-Blanco.png" width="50" height="50" style="margin-right: 0!important; margin-top: 0!important; margin-left: 0.5rem!important;" />
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarMenu">
+                        <ul class="navbar-nav ms-auto">
 
-						<% if (Session["usuario"] != null)
-							{ %>
-						<asp:LinkButton ID="btnCerrarSession" CssClass="btn btn-primary" OnClick="btnCerrarSession_Click" runat="server">
-                            Cerrar Sesión
-						</asp:LinkButton>
-						<% } %>
-					</div>
-				</div>
-			</nav>
-		</header>
-		<main class="container-fluid">
-			<asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
-		</main>
-		<footer class="bg-dark text-light py-4">
-			<div class="container text-center">
-				<p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
-				<p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
-			</div>
-		</footer>
-		
-	</form>
+                            <li class="nav-item"><a class="nav-link text-white" href="Formulacion.aspx"><span>Formulacion 2026</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="Obras.aspx"><span>Obras</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="Autorizantes.aspx"><span>Autorizantes</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="Certificados.aspx"><span>Certificados</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="Legitimos.aspx"><span>Legítimos Abonos</span></a></li>
+
+
+                        </ul>
+                         </div>
+                        <li class="nav-item">
+                            <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary " OnClick="btnCerrarSession_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
+					<i class="bi bi-box-arrow-right"></i>
+                            </asp:LinkButton>
+                        </li>
+
+                   
+                </div>
+            </nav>
+        </header>
+        <main class="container-fluid">
+            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
+        </main>
+        <footer class="bg-dark text-light py-4">
+            <div class="container text-center">
+                <p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
+                <p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
+            </div>
+        </footer>
+
+    </form>
 </body>
 </html>
 

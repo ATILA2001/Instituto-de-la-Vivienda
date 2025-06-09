@@ -9,7 +9,7 @@ namespace Dominio
     public class Certificado
     {
         public int Id { get; set; } 
-        public string Porcentaje { get; set; }
+        public decimal Porcentaje { get; set; }
 
         public Autorizante Autorizante { get; set; }
 

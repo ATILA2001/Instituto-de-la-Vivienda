@@ -1,8 +1,10 @@
 ﻿using Dominio;
 using Negocio;
+using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -13,133 +15,444 @@ namespace WebForms
     public partial class CertificadosAdmin : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            cblArea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblBarrio.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblProyecto.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEmpresa.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblAutorizante.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblTipo.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblFecha.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblEstadoExpediente.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-            cblLinea.SelectedIndexChanged += OnCheckBoxListSearch_SelectedIndexChanged;
-        }
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
-        private void OnCheckBoxListSearch_SelectedIndexChanged(object sender, EventArgs e)
+        public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaCertificados();
         }
-        //protected void Page_Init(object sender, EventArgs e) 
-        //{
-        //    //cblArea.AcceptChanges += OnAcceptChanges;
-        //    //cblBarrio.AcceptChanges += OnAcceptChanges;
-        //    //cblProyecto.AcceptChanges += OnAcceptChanges;
-        //    //cblEmpresa.AcceptChanges += OnAcceptChanges;
-        //    //cblAutorizante.AcceptChanges += OnAcceptChanges;
-        //    //cblTipo.AcceptChanges += OnAcceptChanges;
-        //    //cblFecha.AcceptChanges += OnAcceptChanges;
-        //    //cblEstadoExpediente.AcceptChanges += OnAcceptChanges;
-        //}
-
-        //private void OnAcceptChanges(object sender, EventArgs e)
-        //{
-        //    CargarListaCertificados();
-        //}
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                BindDropDownList();
+                List<Certificado> listaCertificados = negocio.listarFiltroAdmin();
+                BindDropDownList(listaCertificados);
                 CargarListaCertificados();
             }
         }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            // Configure validators if we're in editing mode
+            if (ViewState["EditingCertificadoId"] != null)
+            {
+                // Disable the Autorizante validator since the field is hidden
+                rfvAutorizante.Enabled = false;
+            }
+            else
+            {
+                // Enable validators in add mode
+                rfvAutorizante.Enabled = true;
+            }
+        }
+
+        protected void btnShowAddModal_Click(object sender, EventArgs e)
+        {
+            // Clear any existing data
+            LimpiarFormulario();
+
+            // Reset the modal title and button text to "Add" and show Autorizante field
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+        $(document).ready(function() {
+            $('#modalAgregar .modal-title').text('Agregar Certificado');
+            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
+            
+            // Show the Autorizante dropdown and its label
+            $('#autorizanteContainer').show();
+            
+            // Show the modal
+            $('#modalAgregar').modal('show');
+        });", true);
+
+            btnAgregar.Text = "Agregar";
+
+            // Clear any editing state
+            ViewState["EditingCertificadoId"] = null;
+            ViewState["EditingAutorizanteId"] = null;
+            ViewState["EditingCodigoAutorizante"] = null;
+        }
+
         protected void btnLimpiar_Click(object sender, EventArgs e)
         {
-            txtMontoAutorizado.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtFecha.Text = string.Empty;
-            ddlAutorizante.SelectedIndex = -1;
-            ddlTipo.SelectedIndex = -1;
+            LimpiarFormulario();
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-          try
+            if (Page.IsValid)
             {
-                CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
-                Certificado nuevoCertificado = new Certificado
+                try
                 {
-                    Autorizante = new Autorizante
-                    {
-                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
-                    },
-                    ExpedientePago = string.IsNullOrWhiteSpace(txtExpediente.Text) ? null : txtExpediente.Text,
-                    Tipo = new TipoPago
-                    {
-                        Id = int.Parse(ddlTipo.SelectedValue)
-                    },
-                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text),
-                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
+                    CertificadoNegocio certificadoNegocio = new CertificadoNegocio();
+                    Certificado certificado = new Certificado();
+
+                    // Common data for both add and update operations
+                    certificado.ExpedientePago = txtExpediente.Text.Trim();
+                    certificado.MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim());
+
+                    certificado.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text)
                         ? null
-                        : (DateTime?)DateTime.Parse(txtFecha.Text)
-                };
+                        : (DateTime?)DateTime.Parse(txtFecha.Text);
 
-                certificadoNegocio.agregar(nuevoCertificado);
+                    certificado.Tipo = new TipoPago { Id = int.Parse(ddlTipo.SelectedValue) };
 
-                lblMensaje.Text = "Certificado agregado con éxito.";
-                lblMensaje.ForeColor = System.Drawing.Color.Green;
+                    // Check if we're editing an existing certificado or adding a new one
+                    if (ViewState["EditingCertificadoId"] != null)
+                    {
+                        // We're updating an existing certificado
+                        certificado.Id = (int)ViewState["EditingCertificadoId"];
 
-                CargarListaCertificados();
-                CalcularSubtotal();
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al agregar el certificado: {ex.Message}";
-                lblMensaje.ForeColor = System.Drawing.Color.Red;
+                        // Use both the ID and CodigoAutorizante from ViewState for the update
+                        if (ViewState["EditingAutorizanteId"] != null && ViewState["EditingCodigoAutorizante"] != null)
+                        {
+                            certificado.Autorizante = new Autorizante
+                            {
+                                Id = (int)ViewState["EditingAutorizanteId"],
+                                CodigoAutorizante = ViewState["EditingCodigoAutorizante"].ToString()
+                            };
+                        }
+
+                        if (certificadoNegocio.modificar(certificado))
+                        {
+                            lblMensaje.Text = "Certificado modificado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+
+                            // Clear the editing state
+                            ViewState["EditingCertificadoId"] = null;
+                            ViewState["EditingAutorizanteId"] = null;
+                            ViewState["EditingCodigoAutorizante"] = null;
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al modificar el certificado.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
+                    else
+                    {
+                        // We're adding a new certificado
+                        // IMPORTANTE: Usamos CodigoAutorizante en lugar del Id, manteniendo el comportamiento original
+                        certificado.Autorizante = new Autorizante
+                        {
+                            CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                        };
+
+                        if (certificadoNegocio.agregar(certificado))
+                        {
+                            lblMensaje.Text = "Certificado agregado exitosamente!";
+                            lblMensaje.CssClass = "alert alert-success";
+                        }
+                        else
+                        {
+                            lblMensaje.Text = "Hubo un problema al agregar el certificado.";
+                            lblMensaje.CssClass = "alert alert-danger";
+                        }
+                    }
+
+                    // Clear fields
+                    LimpiarFormulario();
+
+                    // Reset the modal title and button text
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
+                        "$('#modalAgregar .modal-title').text('Agregar Certificado');", true);
+                    btnAgregar.Text = "Agregar";
+
+                    // Hide the modal
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                        "$('#modalAgregar').modal('hide');", true);
+
+                    // Refresh the certificados list
+                    CargarListaCertificados();
+                    CalcularSubtotal();
+                }
+                catch (Exception ex)
+                {
+                    lblMensaje.Text = $"Error: {ex.Message}";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
             }
         }
 
-
-        private DataTable ObtenerAreas()
+        private void LimpiarFormulario()
         {
-            AreaNegocio areaNegocio = new AreaNegocio();
-            return areaNegocio.listarddl();
+            txtExpediente.Text = string.Empty;
+            txtMontoAutorizado.Text = string.Empty;
+            txtFecha.Text = string.Empty;
+            ddlAutorizante.SelectedIndex = 0;
+            ddlTipo.SelectedIndex = 0;
         }
+
         private void CargarListaCertificados(string filtro = null)
         {
             try
             {
-                var selectedAreas = cblArea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedBarrios = cblBarrio.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedProyectos = cblProyecto.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                // 1. Obtener valores de filtros de cabecera
+                List<string> filtroHeaderArea = new List<string>();
+                List<string> filtroHeaderBarrio = new List<string>();
+                List<string> filtroHeaderProyecto = new List<string>();
+                List<string> filtroHeaderEmpresa = new List<string>();
+                List<string> filtroHeaderCodigoAutorizante = new List<string>();
+                List<string> filtroHeaderEstado = new List<string>();
+                List<string> filtroHeaderTipo = new List<string>();
+                List<string> filtroHeaderMesCertificado = new List<string>();
+                List<string> filtroHeaderLinea = new List<string>();
 
-                var selectedEmpresas = cblEmpresa.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedAutorizantes = cblAutorizante.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
-                var selectedTipos = cblTipo.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                if (dgvCertificado.HeaderRow != null)
+                {
+                    var cblsHeaderAreaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderAreaControl != null)
+                    {
+                        filtroHeaderArea = cblsHeaderAreaControl.SelectedValues;
+                    }
 
-                var selectedFechas = cblFecha.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
-                var selectedLineas = cblLinea.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Text).ToList();
+                    var cblsHeaderBarrioControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderBarrioControl != null)
+                    {
+                        filtroHeaderBarrio = cblsHeaderBarrioControl.SelectedValues;
+                    }
 
-                //string filtroExpediente = ddlExpediente.SelectedValue;
-                var selectedEstadoExpedientes = cblEstadoExpediente.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
+                    var cblsHeaderProyectoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderProyectoControl != null)
+                    {
+                        filtroHeaderProyecto = cblsHeaderProyectoControl.SelectedValues;
+                    }
+                    
+                    var cblsHeaderEmpresaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderEmpresaControl != null)
+                    {
+                        filtroHeaderEmpresa = cblsHeaderEmpresaControl.SelectedValues;
+                    }
 
-                Session["listaCertificado"] = negocio.listarFiltroAdmin(selectedAreas, selectedBarrios, selectedProyectos, selectedAutorizantes, selectedTipos, selectedFechas, selectedEmpresas, selectedEstadoExpedientes, selectedLineas, filtro);
-                dgvCertificado.DataSource = Session["listaCertificado"];
+                    var cblsHeaderCodigoAutorizanteControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderCodigoAutorizanteControl != null)
+                    {
+                        filtroHeaderCodigoAutorizante = cblsHeaderCodigoAutorizanteControl.SelectedValues;
+                    }
+
+                    var cblsHeaderEstadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderEstadoControl != null)
+                    {
+                        filtroHeaderEstado = cblsHeaderEstadoControl.SelectedValues;
+                    }
+
+                    var cblsHeaderTipoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderTipoControl != null)
+                    {
+                        filtroHeaderTipo = cblsHeaderTipoControl.SelectedValues;
+                    }
+
+                    var cblsHeaderMesCertificadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderMesCertificadoControl != null)
+                    {
+                        filtroHeaderMesCertificado = cblsHeaderMesCertificadoControl.SelectedValues;
+                    }
+
+                    var cblsHeaderLineaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
+                    if (cblsHeaderLineaControl != null)
+                    {
+                        filtroHeaderLinea = cblsHeaderLineaControl.SelectedValues;
+                    }
+                }
+
+                // 2. Obtener lista completa de certificados
+                List<Certificado> listaCompleta = (List<Certificado>)Session["certificadosCompleto"];
+                if (listaCompleta == null)
+                {
+                    listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+                    Session["certificadosCompleto"] = listaCompleta;
+                }
+
+                IEnumerable<Certificado> listaFiltrada = listaCompleta;
+
+                // 3. Aplicar filtro de texto general (si se proporciona 'filtro' o se usa txtBuscar.Text)
+                string filtroTextoGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
+                if (!string.IsNullOrEmpty(filtroTextoGeneral))
+                {
+                    listaFiltrada = listaFiltrada.Where(c =>
+                        (c.Autorizante?.Obra?.Area?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Autorizante?.Obra?.Contrata?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Autorizante?.Obra?.Descripcion?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Autorizante?.Obra?.Barrio?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Autorizante?.Obra?.Proyecto?.Proyecto?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Empresa?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Autorizante?.CodigoAutorizante?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.ExpedientePago?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Estado?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Tipo?.Nombre?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
+                        (c.Sigaf.ToString().ToUpper().Contains(filtroTextoGeneral)) ||
+                        (c.BuzonSade?.ToUpper().Contains(filtroTextoGeneral) ?? false)
+                    );
+                }
+
+                // 4. Aplicar filtros de cabecera
+                if (filtroHeaderArea != null && filtroHeaderArea.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Area != null && filtroHeaderArea.Contains(c.Autorizante.Obra.Area.Nombre));
+                }
+
+                if (filtroHeaderBarrio != null && filtroHeaderBarrio.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && filtroHeaderBarrio.Contains(c.Autorizante.Obra.Barrio.Id.ToString()));
+                }
+                
+                if (filtroHeaderProyecto != null && filtroHeaderProyecto.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && filtroHeaderProyecto.Contains(c.Autorizante.Obra.Proyecto.Id.ToString()));
+                }
+
+                if (filtroHeaderEmpresa != null && filtroHeaderEmpresa.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Empresa != null && filtroHeaderEmpresa.Contains(c.Autorizante.Obra.Empresa.Id.ToString()));
+                }
+
+                if (filtroHeaderCodigoAutorizante != null && filtroHeaderCodigoAutorizante.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.CodigoAutorizante != null && filtroHeaderCodigoAutorizante.Contains(c.Autorizante.CodigoAutorizante));
+                }
+
+                if (filtroHeaderEstado != null && filtroHeaderEstado.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Estado != null && filtroHeaderEstado.Contains(c.Estado));
+                }
+
+                if (filtroHeaderTipo != null && filtroHeaderTipo.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Tipo != null && filtroHeaderTipo.Contains(c.Tipo.Id.ToString()));
+                }
+
+                if (filtroHeaderLinea != null && filtroHeaderLinea.Any())
+                {
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.LineaGestion != null && filtroHeaderLinea.Contains(c.Autorizante.Obra.LineaGestion.Id.ToString()));
+                }
+
+                if (filtroHeaderMesCertificado != null && filtroHeaderMesCertificado.Any())
+                {
+                    List<DateTime> fechasSeleccionadasDia = new List<DateTime>();
+                    List<Tuple<int, int>> mesesAnioSeleccionados = new List<Tuple<int, int>>(); // Año, Mes
+                    List<int> aniosSeleccionados = new List<int>();
+
+                    foreach (var sel in filtroHeaderMesCertificado)
+                    {
+                        if (DateTime.TryParseExact(sel, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dtDia))
+                        {
+                            fechasSeleccionadasDia.Add(dtDia.Date);
+                        }
+                        else if (sel.Contains("_") && !sel.StartsWith("year_"))
+                        {
+                            var parts = sel.Split('_');
+                            if (parts.Length == 2 && int.TryParse(parts[0], out int year) && int.TryParse(parts[1], out int month))
+                            {
+                                mesesAnioSeleccionados.Add(Tuple.Create(year, month));
+                            }
+                        }
+                        else if (sel.StartsWith("year_"))
+                        {
+                            if (int.TryParse(sel.Substring(5), out int year))
+                            {
+                                aniosSeleccionados.Add(year);
+                            }
+                        }
+                    }
+                    if (fechasSeleccionadasDia.Any() || mesesAnioSeleccionados.Any() || aniosSeleccionados.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(c => c.MesAprobacion.HasValue &&
+                            (fechasSeleccionadasDia.Contains(c.MesAprobacion.Value.Date) ||
+                             mesesAnioSeleccionados.Any(m => m.Item1 == c.MesAprobacion.Value.Year && m.Item2 == c.MesAprobacion.Value.Month) ||
+                             aniosSeleccionados.Contains(c.MesAprobacion.Value.Year)));
+                    }
+                }
+
+                // 5. Actualizar GridView y otros elementos
+                List<Certificado> resultadoFinal = listaFiltrada.ToList();
+                Session["listaCertificado"] = resultadoFinal;
+
+                dgvCertificado.DataSource = resultadoFinal;
                 dgvCertificado.DataBind();
                 CalcularSubtotal();
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los Certificados: {ex.Message}";
+                lblMensaje.Text = "Error al cargar los certificados: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine($"Error en CargarListaCertificados: {ex.ToString()}");
+            }
+        }
+
+ 
+
+        protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // Get the ID of the selected row
+                int idCertificado = Convert.ToInt32(dgvCertificado.SelectedDataKey.Value);
+
+                // Get the list of certificados from session
+                List<Certificado> certificadosList = (List<Certificado>)Session["listaCertificado"];
+
+                // Find the selected certificado
+                Certificado certificadoSeleccionado = certificadosList.FirstOrDefault(c => c.Id == idCertificado);
+
+                if (certificadoSeleccionado != null)
+                {
+                    // Set button text to "Actualizar"
+                    btnAgregar.Text = "Actualizar";
+
+                    // Load the certificado data into the form fields
+                    txtExpediente.Text = certificadoSeleccionado.ExpedientePago;
+                    txtMontoAutorizado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+
+                    if (certificadoSeleccionado.MesAprobacion.HasValue)
+                        txtFecha.Text = certificadoSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+
+                    // Select the corresponding value in the Tipo dropdown
+                    if (certificadoSeleccionado.Tipo != null)
+                        SelectDropDownListByValue(ddlTipo, certificadoSeleccionado.Tipo.Id.ToString());
+
+                    // Store the ID of the certificado being edited in ViewState
+                    ViewState["EditingCertificadoId"] = idCertificado;
+
+                    // Also store both the Autorizante ID and CodigoAutorizante for the update
+                    if (certificadoSeleccionado.Autorizante != null)
+                    {
+                        ViewState["EditingAutorizanteId"] = certificadoSeleccionado.Autorizante.Id;
+                        ViewState["EditingCodigoAutorizante"] = certificadoSeleccionado.Autorizante.CodigoAutorizante;
+                    }
+
+                    // Update modal title and hide the Autorizante field
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                    $(document).ready(function() {
+                    // Change title and button text
+                    $('#modalAgregar .modal-title').text('Modificar Certificado');
+                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+                    
+                    // Hide the Autorizante dropdown and its label
+                    $('#autorizanteContainer').hide();
+                    
+                    // Show the modal
+                    $('#modalAgregar').modal('show');
+                    });", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
+
+        // Helper method to select dropdown item by value
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
-            var idSeleccionado = dgvCertificado.SelectedDataKey.Value.ToString();
-            Response.Redirect("ModificarCertificadoAdmin.aspx?codM=" + idSeleccionado);
+            // Clear any current selection
+            dropDown.ClearSelection();
+
+            // Try to find and select the item
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
+            }
         }
         protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
@@ -162,48 +475,153 @@ namespace WebForms
             }
         }
 
-        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void dgvCertificado_DataBound(object sender, EventArgs e)
         {
-            try
+            if (dgvCertificado.HeaderRow != null) 
             {
-                dgvCertificado.PageIndex = e.NewPageIndex;
+                List<Certificado> certificadosCompleto = (List<Certificado>)Session["certificadosCompleto"];//calculoRedeterminacionNegocio.listarCertReliq();
 
-                CargarListaCertificados();
-                CalcularSubtotal();
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
-        private DataTable ObtenerTiposFiltro()
-        {
-            TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
-            return tipoPagNegocio.listarddl();
-        }
+                var cblsHeaderArea = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderBarrio = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderProyecto = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderEmpresa = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderCodigoAutorizante = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderEstado = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderTipo = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderMesCertificado = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderLinea = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
 
-        private DataTable ObtenerAutorizantesFiltro()
-        {
-            AutorizanteNegocio autorizanteNegocio = new AutorizanteNegocio();
-            return autorizanteNegocio.listarddl();
+                if (cblsHeaderArea != null)
+                {
+                    var areasUnicas = certificadosCompleto
+                        .Where(c => c.Autorizante?.Obra?.Area != null)
+                        .Select(c => new { Nombre = c.Autorizante.Obra.Area.Nombre, Id = c.Autorizante.Obra.Area.Nombre })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderArea.DataSource = areasUnicas;
+                    cblsHeaderArea.DataBind();
+                }
+
+                if (cblsHeaderBarrio != null)
+                {
+                    var barriosUnicos = certificadosCompleto
+                        .Where(c => c.Autorizante?.Obra?.Barrio != null)
+                        .Select(c => new { Nombre = c.Autorizante.Obra.Barrio.Nombre, Id = c.Autorizante.Obra.Barrio.Id })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderBarrio.DataSource = barriosUnicos;
+                    cblsHeaderBarrio.DataBind();
+                }
+                
+                if (cblsHeaderProyecto != null)
+                {
+                    var proyectosUnicos = certificadosCompleto
+                        .Where(c => c.Autorizante?.Obra?.Proyecto != null)
+                        .Select(c => new { Nombre = c.Autorizante.Obra.Proyecto.Proyecto, Id = c.Autorizante.Obra.Proyecto.Id  })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderProyecto.DataSource = proyectosUnicos;
+                    cblsHeaderProyecto.DataBind();
+                }
+
+                if (cblsHeaderEmpresa != null)
+                {
+                    var empresasUnicas = certificadosCompleto
+                        .Where(c => c.Autorizante?.Obra?.Empresa != null)
+                        .Select(c => new { Nombre = c.Autorizante.Obra.Empresa.Nombre, Id = c.Autorizante.Obra.Empresa.Id })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderEmpresa.DataSource = empresasUnicas;
+                    cblsHeaderEmpresa.DataBind();
+                }
+
+                if (cblsHeaderCodigoAutorizante != null)
+                {
+                    var codigoAutorizantesUnicos = certificadosCompleto
+                        .Where(c => c.Autorizante?.CodigoAutorizante != null)
+                        .Select(c => new { Nombre = c.Autorizante.CodigoAutorizante, Id = c.Autorizante.CodigoAutorizante })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderCodigoAutorizante.DataSource = codigoAutorizantesUnicos;
+                    cblsHeaderCodigoAutorizante.DataBind();
+                }
+
+                if (cblsHeaderEstado != null)
+                {
+                    var estadoUnicos = certificadosCompleto
+                        .Where(c => c.Estado != null)
+                        .Select(c => new { Nombre = c.Estado, Id = c.Estado })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderEstado.DataSource = estadoUnicos;
+                    cblsHeaderEstado.DataBind();
+                }
+
+                if (cblsHeaderTipo != null)
+                {
+                    var tipoUnicos = certificadosCompleto
+                        .Where(c => c.Tipo != null)
+                        .Select(c => new { Nombre = c.Tipo.Nombre, Id = c.Tipo.Id })
+                        .Distinct()
+                        .OrderBy(a => a.Nombre)
+                        .ToList();
+
+                    cblsHeaderTipo.DataSource = tipoUnicos;
+                    cblsHeaderTipo.DataBind();
+                }
+
+                if (cblsHeaderMesCertificado != null)
+                {
+                    var mesesCertificadoUnicos = certificadosCompleto
+                        .Where(c => c.MesAprobacion.HasValue)
+                        .Select(c => c.MesAprobacion.Value) // Obtener solo las fechas
+                        .Distinct()
+                        .OrderByDescending(d => d) // Ordenar por fecha, más recientes primero
+                        .Select(d => new {
+                            // El UserControl usará 'Id' para el valor del nodo y para parsear la fecha.
+                            // El UserControl generará la jerarquía Año/Mes/Día.
+                            Id = d.ToString("yyyy-MM-dd"), // Formato que el UserControl puede parsear a DateTime
+                                                           // 'Nombre' se usa si el UserControl no detecta que son fechas o como fallback.
+                                                           // Para fechas, el UserControl suele generar su propio texto (Año, Mes, Día).
+                            Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES"))
+                        })
+                        .ToList();
+
+                    cblsHeaderMesCertificado.DataSource = mesesCertificadoUnicos;
+                    cblsHeaderMesCertificado.DataBind();
+
+                }
+
+                if (cblsHeaderLinea != null)
+                {
+                    var lineaUnicos = certificadosCompleto
+                        .Where(c => c.Autorizante?.Obra?.LineaGestion != null)
+                        .Select(c => c.Autorizante.Obra.LineaGestion)
+                        .GroupBy(lg => lg.Id) // Agrupar por ID para obtener líneas únicas
+                        .Select(g => g.First()) // Tomar la primera de cada grupo (línea única)
+                        .Select(lg => new { Id = lg.Id.ToString(), Nombre = lg.Nombre }) // Proyectar a un objeto anónimo
+                        .OrderBy(lg => lg.Nombre)
+                        .ToList();
+
+                    cblsHeaderLinea.DataSource = lineaUnicos;
+                    cblsHeaderLinea.DataBind();
+                }
+
+            }
         }
  
-        protected void ddlAutorizanteFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
-        protected void ddlTipoFiltro_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
-        protected void ddlEmpresa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            CargarListaCertificados();
-            CalcularSubtotal();
-        }
         private DataTable ObtenerTipos()
         {
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();
@@ -216,157 +634,134 @@ namespace WebForms
 
             return autorizanteNegocio.listarddl();
         }
-        private DataTable ObtenerProyectos()
-        { 
-            BdProyectoNegocio proyectoNegocio = new BdProyectoNegocio();
 
-            return proyectoNegocio.listarddl();
-        }
-
-        private DataTable ObtenerBarrios()
-        {
-            BarrioNegocio barrioNegocio = new BarrioNegocio();
-
-            return barrioNegocio.listarddl();
-        }
-
-        private DataTable ObtenerEstadosExpedientes()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(int));
-            dt.Columns.Add("NOMBRE", typeof(string));
-
-            DataRow _1 = dt.NewRow();
-            _1["ID"] = 0;
-            _1["NOMBRE"] = "NO INICIADO";
-            dt.Rows.Add(_1);
-
-            DataRow _2 = dt.NewRow();
-            _2["ID"] = 1;
-            _2["NOMBRE"] = "EN TRAMITE";
-            dt.Rows.Add(_2);
-
-            DataRow _3 = dt.NewRow();
-            _3["ID"] = 2;
-            _3["NOMBRE"] = "DEVENGADO";
-            dt.Rows.Add(_3);
-
-            return dt;
-        }
-        private void BindDropDownList()
+        /// <summary>
+        /// Populates dropdown lists and TreeViewSearch controls used for filtering.
+        /// The date filter (cblFecha) is populated based on the distinct MesAprobacion
+        /// values found in the provided list of certificates.
+        /// </summary>
+        /// <param name="certificados">A list of Certificado objects used to extract distinct dates for the date filter.</param>
+        private void BindDropDownList(List<Certificado> certificados)
         {
             ddlTipo.DataSource = ObtenerTipos();
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-            
+
             ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
-
-            cblTipo.DataSource = ObtenerTipos();
-            cblTipo.DataTextField = "Nombre";
-            cblTipo.DataValueField = "Id";
-            cblTipo.DataBind();
-
-            cblBarrio.DataSource = ObtenerBarrios();
-            cblBarrio.DataTextField = "Nombre";
-            cblBarrio.DataValueField = "Id";
-            cblBarrio.DataBind();
-
-            cblProyecto.DataSource = ObtenerProyectos();
-            cblProyecto.DataTextField = "Nombre";
-            cblProyecto.DataValueField = "Id";
-            cblProyecto.DataBind();
-
-
-            cblEmpresa.DataSource = ObtenerEmpresas();
-            cblEmpresa.DataTextField = "Nombre";
-            cblEmpresa.DataValueField = "Id";
-            cblEmpresa.DataBind(); 
-            
-            cblArea.DataSource = ObtenerAreas();
-            cblArea.DataTextField = "Nombre";
-            cblArea.DataValueField = "Id";
-            cblArea.DataBind();
-
-            cblAutorizante.DataSource = ObtenerAutorizantes();
-            cblAutorizante.DataTextField = "Nombre";
-            cblAutorizante.DataValueField = "Id";
-            cblAutorizante.DataBind();
-
-            cblEstadoExpediente.DataSource = ObtenerEstadosExpedientes();
-            cblEstadoExpediente.DataTextField = "Nombre";
-            cblEstadoExpediente.DataValueField = "Id";
-            cblEstadoExpediente.DataBind();
-
-            cblLinea.DataSource = ObtenerLineasGestion();
-            cblLinea.DataTextField = "Nombre";
-            cblLinea.DataValueField = "Id";
-            cblLinea.DataBind();
-
-            var meses = Enumerable.Range(0, 36) // 36 meses entre 2024 y 2026
-            .Select(i => new DateTime(2024, 1, 1).AddMonths(i))
-            .Select(fecha => new
-            {
-                Texto = fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES")), // Texto: "Enero 2024"
-                Valor = fecha.ToString("yyyy-MM-dd")
-            });
-
-            cblFecha.DataSource = meses;
-            cblFecha.DataTextField = "Texto";
-            cblFecha.DataValueField = "Valor";
-            cblFecha.DataBind();
-        }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
         }
 
-        private DataTable ObtenerLineasGestion()
-        {
-            LineaGestionNegocio lineaGestionNegocio = new LineaGestionNegocio();
-            return lineaGestionNegocio.listarddl();
-        }
 
-        private DataRow CrearFilaTodos(DataTable table)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = 0;            
-            row["Nombre"] = "Todos";   
-            return row;
-        }
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            // Identifica el TextBox modificado
-            TextBox txtExpediente = (TextBox)sender;
-            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
-
-            // Obtiene la clave del registro desde DataKeyNames
-            int id = int.Parse(dgvCertificado.DataKeys[row.RowIndex].Value.ToString());
-
-            // Nuevo valor del expediente
-            string nuevoExpediente = txtExpediente.Text;
-
-            // Actualiza en la base de datos
             try
             {
-                // Llama al método del negocio para actualizar el expediente
-                CertificadoNegocio negocio = new CertificadoNegocio();
-                negocio.ActualizarExpediente(id, nuevoExpediente);
+                // Identifica el TextBox modificado
+                TextBox txtExpediente = (TextBox)sender;
+                GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-                // Mensaje de éxito o retroalimentación opcional
-                lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaCertificados();
-                CalcularSubtotal();
+                // Obtiene el índice de la fila en la GridView - esto es crucial
+                int rowIndex = row.RowIndex;
 
+                // Obtiene la clave del registro desde DataKeyNames
+                int id = int.Parse(dgvCertificado.DataKeys[rowIndex].Value.ToString());
+
+                // Obtenemos directamente el certificado de la lista actual por índice de fila
+                // en lugar de buscar por ID
+                List<Certificado> certificados = (List<Certificado>)Session["listaCertificado"];
+
+                // Esto garantiza que obtenemos el certificado exacto que se muestra en la GridView
+                Certificado certificado = certificados[rowIndex];
+
+                // Nuevo valor del expediente
+                string nuevoExpediente = txtExpediente.Text;
+
+                if (certificado != null)
+                {
+                    // Verificamos si es una reliquidación
+                    bool esReliquidacion = certificado.Tipo != null &&
+                        (certificado.Tipo.Id == 2 ||
+                         certificado.Tipo.Nombre.ToUpper().Contains("RELIQUIDACION") ||
+                         certificado.Tipo.Nombre.ToUpper().Contains("REDETERMINACION"));
+
+                    // Actualiza el expediente en el certificado en memoria
+                    certificado.ExpedientePago = nuevoExpediente;
+
+                    // Si tiene ID válido en la base de datos, actualizar también allí
+                    if (certificado.Id > 0)
+                    {
+                        CertificadoNegocio negocio = new CertificadoNegocio();
+                        negocio.ActualizarExpediente(certificado.Id, nuevoExpediente);
+                    }
+
+                    // Actualizar el estado según la lógica requerida
+                    if (string.IsNullOrEmpty(nuevoExpediente))
+                    {
+                        certificado.Estado = "NO INICIADO";
+                    }
+                    else if (!certificado.Sigaf.HasValue || certificado.Sigaf == 0)
+                    {
+                        certificado.Estado = "EN TRAMITE";
+                    }
+                    else
+                    {
+                        certificado.Estado = "DEVENGADO";
+                    }
+
+                    // Si es un certificado de reliquidación, guardar en EXPEDIENTES_RELIQ
+                    if (esReliquidacion)
+                    {
+                        if (certificado.MesAprobacion.HasValue &&
+                            certificado.Autorizante != null &&
+                            !string.IsNullOrEmpty(certificado.Autorizante.CodigoAutorizante))
+                        {
+                            try
+                            {
+                                string codigoRedet = certificado.Autorizante.CodigoAutorizante;
+
+                                ExpedienteReliqNegocio expedienteReliqNegocio = new ExpedienteReliqNegocio();
+                                expedienteReliqNegocio.GuardarOActualizar(
+                                    codigoRedet,
+                                    certificado.MesAprobacion.Value,
+                                    nuevoExpediente);
+
+                                // Log para depuración
+                                System.Diagnostics.Debug.WriteLine($"Guardando expediente {nuevoExpediente} para redeterminación {codigoRedet}, mes {certificado.MesAprobacion.Value:MMM yyyy}");
+                            }
+                            catch (Exception exReliq)
+                            {
+                                // Mostrar error completo para depuración
+                                System.Diagnostics.Debug.WriteLine($"Error al actualizar expediente reliquidación: {exReliq.Message}");
+                                System.Diagnostics.Debug.WriteLine($"Stack Trace: {exReliq.StackTrace}");
+                            }
+                        }
+                    }
+
+                    // Actualizar la lista en Session para que los cambios persistan
+                    Session["listaCertificado"] = certificados;
+                    CargarListaCertificados();
+
+                    // Mensaje de éxito
+                    lblMensaje.Text = "Expediente actualizado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+
+                    CalcularSubtotal();
+                }
+                else
+                {
+                    lblMensaje.Text = "No se pudo identificar el certificado. Por favor, inténtelo de nuevo.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
             }
             catch (Exception ex)
             {
-                // Manejo de errores
+                // Manejo de errores con más detalles
                 lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+                System.Diagnostics.Debug.WriteLine($"Error completo: {ex}");
             }
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -392,19 +787,28 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
+
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-            cblArea.ClearSelection();
-            cblBarrio.ClearSelection();
-            cblProyecto.ClearSelection();
-            cblEmpresa.ClearSelection();
-            cblAutorizante.ClearSelection();
-            cblTipo.ClearSelection();
-            cblFecha.ClearSelection();
-            cblEstadoExpediente.ClearSelection();
-            cblLinea.ClearSelection();
+
+            WebForms.CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
+
             CargarListaCertificados();
+        }
+        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            try
+            {
+                dgvCertificado.PageIndex = e.NewPageIndex;
+                CargarListaCertificados();
+                CalcularSubtotal();
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
 
     }

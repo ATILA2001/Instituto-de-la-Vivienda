@@ -26,11 +26,56 @@
     background-color: var(--bs-primary);
 }
 
+/*MEJORAR*/
 
+.table-bordered th, .table-bordered td {
+    border: 1px solid #dddddd;
+    text-align: center;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+.table1 th, .table1 td {
+    padding: 12px;
+    font-size: 14px;
+}
+
+.table1 {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+    .table1 th {
+        text-align: center;
+        font-weight: bold;
+        background: #153244;
+        color: white;
+        border: 1px solid #153244;
+    }
+
+    .grid-header-control-wrapper {
+        background: transparent !important; /* Anula el fondo del th */
+        color: initial !important; /* Permite que el control use su propio color o el heredado del body */
+        font-weight: normal !important; /* Anula la negrita del th */
+        text-align: left !important; /* O 'initial' o 'inherit', según lo que necesite el control */
+        border: none !important; /* Anula el borde del th si afecta al layout interno */
+        padding: 0 !important; /* Resetea el padding del th para este contenedor */
+        margin: 0 !important; /* Resetea el margin */
+        /* Asegura que el contenedor no restrinja el ancho del control si este lo necesita */
+        width: 100%; 
+        box-sizing: border-box;
+    }
+
+.gridview-scroll-container {
+    max-height: 78vh;
+    overflow: auto;
+    min-height: 78vh;
+}
 /*PARA TENER GUARDADO / MODIFICAR / MEJORAR */
 
 
-.form-group label {
+/*.form-group label {
     font-size: 14px;
     color: #212529;
     font-weight: 600;
@@ -90,35 +135,10 @@
                 background-color: transparent;
                 font-weight: normal;
             }
+*/
 
 
-.table-bordered th, .table-bordered td {
-    border: 1px solid #dddddd;
-    text-align: center;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #f2f2f2;
-}
-
-.table1 th, .table1 td {
-    padding: 12px;
-    font-size: 14px;
-}
-
-.table1 {
-   
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-    .table1 th {
-        text-align: center;
-        font-weight: bold;
-        background: #153244;
-        color: white;
-        border: 1px solid #153244;
-    }
-.form-label {
+/*.form-label {
     margin-bottom: 0;
 }
 
@@ -136,12 +156,12 @@
     text-align: left;
     display: block;
     font-weight: bold;
-}
+}*/
 
 .oculto {
     display: none;
-}
+}/*
 .section-divider {
     margin: 2rem 0;
     border-top: 2px solid #ccc;
-}
+}*/
