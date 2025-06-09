@@ -147,9 +147,6 @@
             <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
                 <!-- Contenedor de Filtros alineados a la izquierda -->
                 <div class="d-flex flex-wrap gap-3">
-
- 
-
                 </div>
 
                 <%--<div class="form-group">
@@ -199,87 +196,96 @@
         </div>
 
         <hr class="mb-3" />
-        		<div class="gridview-scroll-container">
+        <div class="gridview-scroll-container">
 
 
-        <asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover  mb-4"
-            OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
-            OnRowDeleting="dgvRedeterminacion_RowDeleting"
-            OnRowDataBound="dgvRedeterminacion_RowDataBound"
-				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
-            <Columns>
-                <asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
-                <%--<asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />--%>
-                <asp:TemplateField HeaderText="Obra">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
-                            HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Autorizante.Obra.Descripcion") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+            <asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover  mb-4"
+                OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
+                OnRowDeleting="dgvRedeterminacion_RowDeleting"
+                OnRowDataBound="dgvRedeterminacion_RowDataBound"
+                ShowHeaderWhenEmpty="true"
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
+                <Columns>
+                    <asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
+                    <asp:TemplateField HeaderText="Obra">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
+                                HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Autorizante.Obra.Descripcion") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <%--<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoRedet" />--%>
-                <asp:TemplateField HeaderText="Código Autorizante">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
-                            HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("CodigoRedet") %> <%-- O Eval("Autorizante.CodigoAutorizante") si es más directo --%>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Código Autorizante">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
+                                HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("CodigoRedet") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="Etapa">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
-                            HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
-                            OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
-                        </asp:DropDownList>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Etapa">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
+                                HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
+                                OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+                            </asp:DropDownList>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="Expediente">
-                    <ItemTemplate>
-                        <asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-                            OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
-                    </ItemTemplate>
-                </asp:TemplateField>
-                <asp:BoundField HeaderText="Tipo" DataField="Tipo" />
-                <asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
-                <asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
-                <asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
-                <asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-                <asp:BoundField HeaderText="Área" DataField="Area" />
-                <asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
-                <asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+                    <asp:TemplateField HeaderText="Expediente">
+                        <ItemTemplate>
+                            <asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+                                OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:BoundField HeaderText="Tipo" DataField="Tipo" />
+                    <asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
+                    <asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+                    <asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
+                    <asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+                    <asp:BoundField HeaderText="Área" DataField="Area" />
+                    <asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
+                    <asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
 
-                <asp:TemplateField HeaderText="Acciones">
-                    <ItemTemplate>
-                        <div class="d-flex justify-content-center gap-2">
-                            <asp:LinkButton ID="btnModificar" runat="server"
-                                CommandName="Select"
-                                CssClass="btn btn-sm btn-warning "
-                                ToolTip="Modificar">
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-warning "
+                                    ToolTip="Modificar">
                     <i class="bi bi-pencil-square"></i>
-                            </asp:LinkButton>
-                            <asp:LinkButton ID="btnEliminar" runat="server"
-                                CommandName="Delete"
-                                CssClass="btn btn-sm btn-danger "
-                                ToolTip="Eliminar"
-                                OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-danger "
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
                     <i class="bi bi-trash"></i>
-                            </asp:LinkButton>
-                        </div>
-                    </ItemTemplate>
-                </asp:TemplateField>
-            </Columns>
-        </asp:GridView>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
+                        <i class="bi bi-info-circle fs-4"></i>
+                        <p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
+                        <button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
+                            <i class="bi bi-funnel-fill"></i>
+                            Quitar todos los filtros
+                        </button>
                     </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </div>
 
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />

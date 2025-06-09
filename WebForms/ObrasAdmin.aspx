@@ -180,9 +180,6 @@
                 <!-- Contenedor de Filtros alineados a la izquierda -->
 
                 <div class="d-flex flex-wrap gap-3">
-
-
-
                 </div>
 
                 <!-- Contenedor de Botones alineados a la derecha -->
@@ -203,8 +200,8 @@
                     <%-- logica que aparezca o desaparezca. copiar de david --%>
                     <div class="form-group mb-2">
                         <asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
-                            data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
                             title="Quita todos los filtros">
 					<i class="bi bi-funnel"></i>
                         </asp:LinkButton>
@@ -221,101 +218,109 @@
             </div>
         </div>
         <hr class="mb-3" />
-        		<div class="gridview-scroll-container">
+        <div class="gridview-scroll-container">
 
 
-        <asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
-            OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
-            OnRowDeleting="dgvObra_RowDeleting"
-            OnRowDataBound="dgvObra_RowDataBound"
-				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvObra_PageIndexChanging" runat="server">
+            <asp:GridView ID="dgvObra" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+                OnSelectedIndexChanged="dgvObra_SelectedIndexChanged"
+                OnRowDeleting="dgvObra_RowDeleting"
+                OnRowDataBound="dgvObra_RowDataBound"
+                ShowHeaderWhenEmpty="true"
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvObra_PageIndexChanging" runat="server">
 
-            <Columns>
-                <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
-                <%--<asp:BoundField HeaderText="Área" DataField="Area" />--%>
-                <asp:TemplateField HeaderText="Área">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
-                            HeaderText="Área"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Area") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                <Columns>
+                    <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+                    <asp:TemplateField HeaderText="Área">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
+                                HeaderText="Área"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Area") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <%--<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
-                <asp:TemplateField HeaderText="Empresa">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
-                            HeaderText="Empresa"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Empresa") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Empresa">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+                                HeaderText="Empresa"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Empresa") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="Contrata">
-                    <ItemTemplate>
-                        <%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Año") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Contrata">
+                        <ItemTemplate>
+                            <%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Año") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <%--<asp:BoundField HeaderText="Barrio" DataField="Barrio" />--%>
-                <asp:TemplateField HeaderText="Barrio">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
-                            HeaderText="Barrio"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Barrio") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Barrio">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
+                                HeaderText="Barrio"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Barrio") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
-                <asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestion.Nombre" />
-                <asp:BoundField HeaderText="Proyecto" DataField="Proyecto.Proyecto" />
+                    <asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
+                    <asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestion.Nombre" />
+                    <asp:BoundField HeaderText="Proyecto" DataField="Proyecto.Proyecto" />
 
-                <asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+                    <asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 
-                <asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
-                <asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
+                    <asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
+                    <asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
-                <asp:TemplateField HeaderText="Acciones">
-                    <ItemTemplate>
-                        <div class="d-flex justify-content-center gap-2">
-                            <asp:LinkButton ID="btnModificar" runat="server"
-                                CommandName="Select"
-                                CssClass="btn btn-sm btn-warning "
-                                ToolTip="Modificar">
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-warning "
+                                    ToolTip="Modificar">
                                     <i class="bi bi-pencil-square"></i>
-                            </asp:LinkButton>
-                            <asp:LinkButton ID="btnEliminar" runat="server"
-                                CommandName="Delete"
-                                CssClass="btn btn-sm btn-danger "
-                                ToolTip="Eliminar"
-                                OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-danger "
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
                                     <i class="bi bi-trash"></i>
-                            </asp:LinkButton>
-                        </div>
-                    </ItemTemplate>
-                </asp:TemplateField>
-            </Columns>
-        </asp:GridView>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
+                        <i class="bi bi-info-circle fs-4"></i>
+                        <p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
+                        <button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
+                            <i class="bi bi-funnel-fill"></i>
+                            Quitar todos los filtros
+                        </button>
                     </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </div>
 
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />

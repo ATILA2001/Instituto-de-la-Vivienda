@@ -99,9 +99,6 @@
             <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
                 <!-- Contenedor de Filtros alineados a la izquierda -->
                 <div class="d-flex flex-wrap gap-3">
-
-
-
                 </div>
 
                 <!-- Contenedor de Botones alineados a la derecha -->
@@ -138,83 +135,93 @@
         </div>
 
         <hr class="mb-3" />
-        		<div class="gridview-scroll-container">
+        <div class="gridview-scroll-container">
 
-        <asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
-            OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
-            OnRowDeleting="dgvBdProyecto_RowDeleting"
-            OnRowDataBound="dgvBdProyecto_RowDataBound"
-				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvBdProyecto_PageIndexChanging" runat="server">
-            <Columns>
-                <%--<asp:BoundField HeaderText="Area " DataField="Obra.Area.Nombre" />--%>
-                <asp:TemplateField HeaderText="Área">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblHeaderArea" runat="server"
+            <asp:GridView ID="dgvBdProyecto" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+                OnSelectedIndexChanged="dgvBdProyecto_SelectedIndexChanged"
+                OnRowDeleting="dgvBdProyecto_RowDeleting"
+                OnRowDataBound="dgvBdProyecto_RowDataBound"
+                ShowHeaderWhenEmpty="true"
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvBdProyecto_PageIndexChanging" runat="server">
+                <Columns>
+                    <asp:TemplateField HeaderText="Área">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblHeaderArea" runat="server"
                                 HeaderText="Área"
                                 DataTextField="Nombre"
                                 DataValueField="Id"
-                                OnAcceptChanges="OnAcceptChanges"/>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Obra.Area.Nombre") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Obra.Area.Nombre") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" />
-                <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
-                <%--                <asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />--%>
-                <asp:TemplateField HeaderText="Proyecto">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblHeaderProyecto" runat="server" 
-                            HeaderText="Proyecto"
-                            DataTextField="Nombre" 
-                            DataValueField="Nombre" 
-                            OnAcceptChanges="OnAcceptChanges"/>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Proyecto") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:BoundField HeaderText="Contrata " DataField="Obra.Contrata.Nombre" />
+                    <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />
 
-                <asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" />
-                <%--                <asp:BoundField HeaderText="Linea de Gestión" DataField="LineaGestion.Nombre" />--%>
-                <asp:TemplateField HeaderText="Línea de Gestión">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblHeaderLineaGestion" runat="server"
-                            HeaderText="Línea de Gestión"
-                            DataTextField="Nombre" 
-                            DataValueField="Id" 
-                            OnAcceptChanges="OnAcceptChanges"/>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("LineaGestion.Nombre") %>
-                    </ItemTemplate>
-                </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Proyecto">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblHeaderProyecto" runat="server"
+                                HeaderText="Proyecto"
+                                DataTextField="Nombre"
+                                DataValueField="Nombre"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Proyecto") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Monto Inicial" DataField="AutorizadoInicial" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Monto Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
-                <asp:TemplateField HeaderText="Acciones">
-                    <ItemTemplate>
-                        <div class="d-flex justify-content-center gap-2">
-                            <asp:LinkButton ID="btnModificar" runat="server"
-                                CommandName="Select"
-                                CssClass="btn btn-sm btn-warning"
-                                ToolTip="Modificar">
+                    <asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" />
+
+                    <asp:TemplateField HeaderText="Línea de Gestión">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblHeaderLineaGestion" runat="server"
+                                HeaderText="Línea de Gestión"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("LineaGestion.Nombre") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:BoundField HeaderText="Monto Inicial" DataField="AutorizadoInicial" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Monto Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="d-flex justify-content-center gap-2">
+                                <asp:LinkButton ID="btnModificar" runat="server"
+                                    CommandName="Select"
+                                    CssClass="btn btn-sm btn-warning"
+                                    ToolTip="Modificar">
                                     <i class="bi bi-pencil-square"></i>
-                            </asp:LinkButton>
-                            <asp:LinkButton ID="btnEliminar" runat="server"
-                                CommandName="Delete"
-                                CssClass="btn btn-sm btn-danger "
-                                ToolTip="Eliminar"
-                                OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                </asp:LinkButton>
+                                <asp:LinkButton ID="btnEliminar" runat="server"
+                                    CommandName="Delete"
+                                    CssClass="btn btn-sm btn-danger "
+                                    ToolTip="Eliminar"
+                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
                                     <i class="bi bi-trash"></i>
-                            </asp:LinkButton>
-                        </div>
-                    </ItemTemplate>
-                </asp:TemplateField>
-            </Columns>
-        </asp:GridView>
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
+                        <i class="bi bi-info-circle fs-4"></i>
+                        <p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
+                        <button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
+                            <i class="bi bi-funnel-fill"></i>
+                            Quitar todos los filtros
+                        </button>
                     </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </div>
 
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />

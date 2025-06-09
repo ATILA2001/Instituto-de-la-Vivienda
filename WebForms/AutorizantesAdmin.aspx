@@ -235,10 +235,9 @@
 		<asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4 w-100"
 			OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
 			OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
+			ShowHeaderWhenEmpty="true"
 			AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvAutorizante_PageIndexChanging" runat="server">
 			<Columns>
-
-				<%--<asp:BoundField HeaderText="Área" DataField="Obra.Area.Nombre" />--%>
 				<asp:TemplateField HeaderText="Área">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
@@ -253,8 +252,6 @@
 				</asp:TemplateField>
 
 				<asp:BoundField HeaderText="Obra" DataField="Obra.Id" Visible="false" />
-
-				<%--				<asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />--%>
 				<asp:TemplateField HeaderText="Obra">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
@@ -268,7 +265,6 @@
 					</ItemTemplate>
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" />
-				<%--<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
 				<asp:TemplateField HeaderText="Empresa">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
@@ -278,11 +274,10 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Empresa") %> <%-- Muestra Autorizante.Empresa (string) --%>
+						<%# Eval("Empresa") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />
-				<%--<asp:BoundField HeaderText="Concepto" DataField="Concepto.Nombre" />--%>
 				<asp:TemplateField HeaderText="Concepto">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderConcepto" runat="server"
@@ -350,11 +345,14 @@
 				</asp:TemplateField>
 			</Columns>
 			<EmptyDataTemplate>
-				<div class="alert alert-info text-center m-3" role="alert">
+				<div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
 					<i class="bi bi-info-circle fs-4"></i>
 					<p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
+						<button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
+							<i class="bi bi-funnel-fill"></i>
+							Quitar todos los filtros
+						</button>
 				</div>
-
 			</EmptyDataTemplate>
 		</asp:GridView>
 	</div>
