@@ -1,28 +1,39 @@
-﻿using Dominio;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Negocio
-{
-    using Dominio;
-    using Dominio.Enums;
+﻿    using Dominio;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Cryptography;
-    using System.Text;
-    using System.Threading.Tasks;
 
     namespace Negocio
     {
         public class CalculoRedeterminacionNegocio
         {
+
+            // Desestimado = "35, 36"
+            // No iniciado = 37, 38
+            // Aprobado = 12, 22, 33, 39
+            // En tramite todos los demas
+
+            private readonly int[] idsDesestimado =  { 35, 36 }; // Rechazada, Fuera de Plazo
+            private readonly int[] idsNoIniciado = { 37, 38 }; // Pendiente, No presentada
+            private readonly int[] idsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
+
+            // Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre }, /////////////////////////////////////////////////////////////////////////////////
+            private EstadoAutorizante MapearEstadosRedetAEstadoAutorizante(Redeterminacion redet)
+            {
+                if (idsDesestimado.Contains(redet.Etapa.Id))
+                    return new EstadoAutorizante { Id = 3, Nombre = "DESESTIMADO" };
+
+                if (idsNoIniciado.Contains(redet.Etapa.Id))
+                    return new EstadoAutorizante { Id = 4, Nombre = "NO INICIADO" };
+
+                if (idsAprobado.Contains(redet.Etapa.Id))
+                    return new EstadoAutorizante { Id = 1, Nombre = "APROBADO" };
+
+                return new EstadoAutorizante { Id = 2, Nombre = "EN TRAMITE" };
+            }
+
+
             public List<Autorizante> listarAutRedet()
-
-
             {
                 List<Autorizante> listaAut = new List<Autorizante>();
                 List<Certificado> listaCert = new List<Certificado>();
@@ -117,19 +128,13 @@ namespace Negocio
                         // Create a new autorizante with the fields from the redeterminación
                         var nuevoAutorizante = new Autorizante
                         {
-                            //Obra = new Obra
-                            //{
-                            //    Descripcion = redet.Autorizante.Obra.Descripcion,
-                            //    Id = redet.Autorizante.Obra.Id,
-                            //    Area = redet.Autorizante.Obra.Area != null ? new Area { Nombre = redet.Autorizante.Obra.Area.Nombre } : null,
-                            //    Contrata = redet.Autorizante.Obra.Contrata != null ? new Contrata { Nombre = redet.Autorizante.Obra.Contrata.Nombre } : null
-                            //},
                             Obra = autorizanteOriginal.Obra,
                             CodigoAutorizante = redet.CodigoRedet,
                             Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Assign a default concept
                             Detalle = redet.Tipo + " - " + redet.Etapa,
                             Expediente = redet.Expediente,
-                            Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
+                            //Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre }, /////////////////////////////////////////////////////////////////////////////////
+                            Estado = MapearEstadosRedetAEstadoAutorizante(redet),
                             MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
                             Fecha = redet.Salto,
                             Empresa = redet.Empresa,
@@ -397,8 +402,8 @@ namespace Negocio
                                 }
                                 else
                                 {
-                                    montoCertificadoRedet = montoCalculado * ((porcentajeEjecucionCertificado+porcentajeEjecucionAcumulado) / 100);
-                                    porcentajeCalculado = porcentajeEjecucionCertificado+porcentajeEjecucionAcumulado ;
+                                    montoCertificadoRedet = montoCalculado * ((porcentajeEjecucionCertificado + porcentajeEjecucionAcumulado) / 100);
+                                    porcentajeCalculado = porcentajeEjecucionCertificado + porcentajeEjecucionAcumulado;
                                 }
 
                                 Certificado certificadoRedet = new Certificado
@@ -895,4 +900,3 @@ namespace Negocio
 
         }
     }
-}

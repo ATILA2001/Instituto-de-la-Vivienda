@@ -126,12 +126,10 @@ namespace WebForms
         {
             try
             {
-                List<Redeterminacion> redeterminacionesCompletas = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
-                if (redeterminacionesCompletas == null)
-                {
-                    redeterminacionesCompletas = negocio.listar(); // Recargar si no está en sesión
-                    Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
-                }
+                List<Redeterminacion> redeterminacionesCompletas = negocio.listar();
+                
+                Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
+                
 
                 if (redeterminacionesCompletas == null)
                 {

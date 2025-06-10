@@ -101,13 +101,10 @@ namespace WebForms
                 Usuario usuarioActual = (Usuario)Session["usuario"];
 
                 // 1. Obtener lista completa desde la sesión
-                List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
-                if (formulacionesCompletas == null)
-                {
-                    formulacionesCompletas = negocio.listar(usuarioActual);
-                    Session["formulacionesCompletas"] = formulacionesCompletas;
-                }
-
+                List<Formulacion> formulacionesCompletas =  negocio.listar(usuarioActual);
+                
+                Session["formulacionesCompletas"] = formulacionesCompletas;
+                
                 IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
 
                 // 2. Aplicar filtro de texto general (txtBuscar)

@@ -108,13 +108,10 @@ namespace WebForms
         {
             try
             {
-                List<Obra> obrasCompletas = Session["obrasCompletasRedet"] as List<Obra>;
-                if (obrasCompletas == null) // Fallback si la sesión se pierde
-                {
-                    obrasCompletas = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                    Session["obrasCompletasRedet"] = obrasCompletas;
-                }
-
+                List<Obra> obrasCompletas =  negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                
+                Session["obrasCompletasRedet"] = obrasCompletas;
+                
                 IEnumerable<Obra> listaFiltrada = obrasCompletas;
 
                 // Aplicar filtro de texto general

@@ -110,9 +110,8 @@ namespace WebForms
             try
             {
                 List<Autorizante> listaBase;
-                if (Session["autorizantesUsuarioCompleto"] == null)
-                {
-                    // Fallback si la sesión se pierde, aunque debería haberse cargado en Page_Load
+
+                    
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     if (usuarioLogueado != null && usuarioLogueado.Area != null)
                     {
@@ -126,11 +125,7 @@ namespace WebForms
                         CalcularSubtotal();
                         return;
                     }
-                }
-                else
-                {
-                    listaBase = (List<Autorizante>)Session["autorizantesUsuarioCompleto"];
-                }
+                
 
                 IEnumerable<Autorizante> listaFiltrada = listaBase;
 
