@@ -608,6 +608,11 @@ namespace WebForms
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
+
+            ddlAutorizante.DataSource = ObtenerAutorizantes();
+            ddlAutorizante.DataTextField = "Nombre";
+            ddlAutorizante.DataValueField = "Id"; 
+            ddlAutorizante.DataBind();
         }
         private DataTable ObtenerEmpresas()
         {
