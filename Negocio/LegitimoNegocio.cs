@@ -1,6 +1,5 @@
 ﻿using Dominio;
 using Dominio.Enums;
-using Negocio.Negocio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
