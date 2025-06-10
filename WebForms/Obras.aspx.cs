@@ -98,17 +98,9 @@ namespace WebForms
                     return;
                 }
 
-                List<Obra> listaCompletaUsuario;
-                if (Session["obrasUsuarioCompleto"] == null)
-                {
-                    // Fallback si la sesión se pierde, aunque debería haberse cargado en Page_Load
-                    listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
-                    Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
-                }
-                else
-                {
-                    listaCompletaUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
-                }
+                List<Obra> listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                
+                Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
 
                 IEnumerable<Obra> listaFiltrada = listaCompletaUsuario;
 

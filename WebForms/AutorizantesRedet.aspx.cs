@@ -1,6 +1,5 @@
 ﻿using Dominio;
 using Negocio;
-using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -57,16 +56,10 @@ namespace WebForms
         {
             try
             {
-                List<Autorizante> listaCompleta;
-                if (Session["autorizantesCompletosRedet"] == null)
-                {
-                    listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
-                    Session["autorizantesCompletosRedet"] = listaCompleta;
-                }
-                else
-                {
-                    listaCompleta = (List<Autorizante>)Session["autorizantesCompletosRedet"];
-                }
+                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+
+                Session["autorizantesCompletosRedet"] = listaCompleta;
+
 
                 if (listaCompleta == null)
                 {

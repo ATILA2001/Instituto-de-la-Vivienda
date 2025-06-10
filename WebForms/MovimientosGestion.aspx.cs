@@ -146,17 +146,9 @@ namespace WebForms
         {
             try
             {
-                List<Movimiento> listaCompleta;
-                if (Session["movimientosCompleto"] == null)
-                {
-                    // Fallback si la sesión se pierde
-                    listaCompleta = negocio.listar(new List<string>(), null);
-                    Session["movimientosCompleto"] = listaCompleta;
-                }
-                else
-                {
-                    listaCompleta = (List<Movimiento>)Session["movimientosCompleto"];
-                }
+                List<Movimiento> listaCompleta = negocio.listar(new List<string>(), null);
+                
+                Session["movimientosCompleto"] = listaCompleta;
 
                 IEnumerable<Movimiento> listaFiltrada = listaCompleta;
 

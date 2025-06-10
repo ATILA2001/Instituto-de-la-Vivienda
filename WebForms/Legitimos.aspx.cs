@@ -152,8 +152,7 @@ namespace WebForms
             try
             {
                 List<Legitimo> listaBase;
-                if (Session["legitimosUsuarioCompleto"] == null)
-                {
+
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     if (usuarioLogueado != null && usuarioLogueado.Area != null)
                     {
@@ -167,11 +166,7 @@ namespace WebForms
                         CalcularSubtotal();
                         return;
                     }
-                }
-                else
-                {
-                    listaBase = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
-                }
+
 
                 IEnumerable<Legitimo> listaFiltrada = listaBase;
 

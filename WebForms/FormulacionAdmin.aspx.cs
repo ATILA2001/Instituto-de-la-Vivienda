@@ -99,13 +99,10 @@ namespace WebForms
             try
             {
                 // 1. Get complete list from session
-                List<Formulacion> formulacionesCompletas = Session["formulacionesCompletas"] as List<Formulacion>;
-                if (formulacionesCompletas == null)
-                {
-                    formulacionesCompletas = negocio.listar();
-                    Session["formulacionesCompletas"] = formulacionesCompletas;
-                }
-
+                List<Formulacion> formulacionesCompletas = negocio.listar();
+                
+                Session["formulacionesCompletas"] = formulacionesCompletas;
+                
                 IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
 
                 // 2. Apply general text filter (txtBuscar)

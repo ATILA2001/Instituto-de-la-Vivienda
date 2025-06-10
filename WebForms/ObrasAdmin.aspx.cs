@@ -121,17 +121,9 @@ namespace WebForms
         {
             try
             {
-                List<Obra> listaCompleta;
-                if (Session["obrasCompleto"] == null)
-                {
-                    // Fallback si la sesión se pierde
-                    listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                    Session["obrasCompleto"] = listaCompleta;
-                }
-                else
-                {
-                    listaCompleta = (List<Obra>)Session["obrasCompleto"];
-                }
+                List<Obra> listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+
+                Session["obrasCompleto"] = listaCompleta;
 
                 IEnumerable<Obra> listaFiltrada = listaCompleta;
 

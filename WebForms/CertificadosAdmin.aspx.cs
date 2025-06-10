@@ -1,6 +1,5 @@
 ﻿using Dominio;
 using Negocio;
-using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -256,13 +255,10 @@ namespace WebForms
                 }
 
                 // 2. Obtener lista completa de certificados
-                List<Certificado> listaCompleta = (List<Certificado>)Session["certificadosCompleto"];
-                if (listaCompleta == null)
-                {
-                    listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
-                    Session["certificadosCompleto"] = listaCompleta;
-                }
-
+                List<Certificado> listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+                
+                Session["certificadosCompleto"] = listaCompleta;
+                
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
 
                 // 3. Aplicar filtro de texto general (si se proporciona 'filtro' o se usa txtBuscar.Text)

@@ -1,6 +1,5 @@
 ﻿using Dominio;
 using Negocio;
-using Negocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -199,17 +198,8 @@ namespace WebForms
             try
             {
                 // 1. Obtener la lista completa
-                List<Autorizante> listaCompleta;
-                if (Session["autorizantesCompleto"] == null)
-                {
-                    listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
-                    Session["autorizantesCompleto"] = listaCompleta;
-                }
-                else
-                {
-                    listaCompleta = (List<Autorizante>)Session["autorizantesCompleto"];
-                }
-
+                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                Session["autorizantesCompleto"] = listaCompleta;
                 IEnumerable<Autorizante> listaFiltrada = listaCompleta;
 
                 // Obtener IDs seleccionados desde los controles de cabecera del GridView
