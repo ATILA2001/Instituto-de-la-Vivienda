@@ -208,7 +208,7 @@
         <div class="gridview-scroll-container">
 
 
-            <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4 "
+            <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
                 OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
                 OnRowDataBound="dgvLegitimos_RowDataBound"
                 ShowHeaderWhenEmpty="true"
@@ -305,13 +305,9 @@
                     </asp:TemplateField>
                 </Columns>
                 <EmptyDataTemplate>
-                    <div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
+                    <div class="text-center m-3">
                         <i class="bi bi-info-circle fs-4"></i>
-                        <p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
-                        <button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
-                            <i class="bi bi-funnel-fill"></i>
-                            Quitar todos los filtros
-                        </button>
+                        <p class="mb-0">No hay elementos para mostrar o registros que coincidan con los filtros aplicados.</p>
                     </div>
                 </EmptyDataTemplate>
             </asp:GridView>

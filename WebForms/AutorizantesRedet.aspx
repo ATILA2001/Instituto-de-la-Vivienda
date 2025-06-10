@@ -52,7 +52,7 @@
         <hr class="mb-3" />
         <div class="gridview-scroll-container">
 
-            <asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4 "
+            <asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4"
                 OnRowDataBound="dgvAutorizante_RowDataBound"
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvAutorizante_PageIndexChanging" runat="server">
@@ -116,13 +116,9 @@
                     <asp:BoundField HeaderText="Mes Aprobacion" DataField="Fecha" DataFormatString="{0:dd-MM-yyyy}" />
                 </Columns>
                 <EmptyDataTemplate>
-                    <div class="alert alert-info text-center m-3 d-flex flex-column gap-2" role="alert">
+                    <div class="text-center m-3">
                         <i class="bi bi-info-circle fs-4"></i>
-                        <p class="mb-0">No se encontraron datos que coincidan con los filtros aplicados.</p>
-                        <button type="submit" class="btn btn-primary align-self-center" runat="server" onserverclick="BtnClearFilters_Click">
-                            <i class="bi bi-funnel-fill"></i>
-                            Quitar todos los filtros
-                        </button>
+                        <p class="mb-0">No hay elementos para mostrar o registros que coincidan con los filtros aplicados.</p>
                     </div>
                 </EmptyDataTemplate>
             </asp:GridView>
