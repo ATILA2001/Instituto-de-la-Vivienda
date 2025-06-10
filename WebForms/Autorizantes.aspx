@@ -62,14 +62,7 @@
                                     <div class="mb-3">
                                         <label for="txtExpediente" class="form-label">Expediente</label>
                                         <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                        <asp:RequiredFieldValidator ID="rfvExpediente"
-                                            ControlToValidate="txtExpediente"
-                                            ValidationGroup="AgregarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="El expediente es requerido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
+                                       
                                     </div>
                                 </div>
 
