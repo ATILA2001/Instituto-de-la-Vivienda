@@ -347,8 +347,22 @@ namespace WebForms
                     formulacion.Monto_26 = decimal.Parse(txtMonto26.Text.Trim());
                     formulacion.Monto_27 = decimal.Parse(txtMonto27.Text.Trim());
                     formulacion.Monto_28 = decimal.Parse(txtMonto28.Text.Trim());
-                    formulacion.Ppi = int.Parse(txtPPI.Text.Trim());
-                    formulacion.Techos2026 = decimal.Parse(txtTechos.Text.Trim());
+                    if (!string.IsNullOrWhiteSpace(txtPPI.Text.Trim()))
+                    {
+                        formulacion.Ppi = int.Parse(txtPPI.Text.Trim());
+                    }
+                    else
+                    {
+                        formulacion.Ppi = null; // Default value or appropriate handling
+                    }
+                    if (!string.IsNullOrWhiteSpace(txtTechos.Text.Trim()))
+                    {
+                        formulacion.Techos2026 = decimal.Parse(txtTechos.Text.Trim());
+                    }
+                    else
+                    {
+                        formulacion.Techos2026 = null; // Default value or appropriate handling
+                    }
 
                     // Manejar valores que pueden ser nulos
                     formulacion.MesBase = !string.IsNullOrWhiteSpace(txtMesBase.Text.Trim())

@@ -41,14 +41,7 @@
                                         <label for="txtTechos" class="form-label">Techos 2026</label>
 
                                         <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvTechos"
-                                            ControlToValidate="txtTechos"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese los techos"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
+                                      
                                         <asp:RegularExpressionValidator ID="revTechos"
                                             ControlToValidate="txtTechos"
                                             ValidationGroup="AgregarFormulacion"
@@ -144,14 +137,7 @@
                                     <div class="mb-3">
                                         <label for="txtPPI" class="form-label">PPI</label>
                                         <asp:TextBox ID="txtPPI" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvPPI"
-                                            ControlToValidate="txtPPI"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese el valor PPI"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
+                                       
                                         <asp:RegularExpressionValidator ID="revPPI"
                                             ControlToValidate="txtPPI"
                                             ValidationGroup="AgregarFormulacion"

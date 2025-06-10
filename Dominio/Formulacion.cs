@@ -13,11 +13,11 @@ namespace Dominio
        public decimal Monto_26 { get; set; }
         public decimal Monto_27 { get; set; }
         public decimal Monto_28 { get; set; }
-        public int Ppi { get; set; }
+        public int? Ppi { get; set; }
         public UnidadMedida UnidadMedida { get; set; }
         public decimal ValorMedida { get; set; }
         public decimal Plurianual { get; set; }
-        public decimal Techos2026 { get; set; }
+        public decimal? Techos2026 { get; set; }
         public string Observacion { get; set; }
         public Prioridad Prioridad { get; set; }
         public Formulacion() { }
