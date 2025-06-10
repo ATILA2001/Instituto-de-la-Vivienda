@@ -42,15 +42,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtTechos;
 
         /// <summary>
-        /// rfvTechos control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTechos;
-
-        /// <summary>
         /// revTechos control.
         /// </summary>
         /// <remarks>
@@ -157,15 +148,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtPPI;
-
-        /// <summary>
-        /// rfvPPI control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvPPI;
 
         /// <summary>
         /// revPPI control.

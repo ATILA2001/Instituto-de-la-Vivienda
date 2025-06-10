@@ -202,17 +202,9 @@ namespace WebForms
         {
             try
             {
-                List<Legitimo> listaCompleta;
-                if (Session["legitimosCompleto"] == null)
-                {
-                    // Fallback si la sesión se pierde, idealmente no debería pasar si se carga en Page_Load
-                    listaCompleta = negocio.listarFiltro(null, null, null, null, null, null, null);
-                    Session["legitimosCompleto"] = listaCompleta;
-                }
-                else
-                {
-                    listaCompleta = (List<Legitimo>)Session["legitimosCompleto"];
-                }
+                List<Legitimo> listaCompleta = negocio.listarFiltro(null, null, null, null, null, null, null);
+
+                Session["legitimosCompleto"] = listaCompleta;
 
                 IEnumerable<Legitimo> listaFiltrada = listaCompleta;
 

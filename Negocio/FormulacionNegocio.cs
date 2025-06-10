@@ -22,8 +22,17 @@ namespace Negocio
                 datos.setearParametros("@Monto26", formulacion.Monto_26);
                 datos.setearParametros("@Monto27", formulacion.Monto_27);
                 datos.setearParametros("@Monto28", formulacion.Monto_28);
-                datos.setearParametros("@Ppi", formulacion.Ppi);
-                datos.setearParametros("@Techos", formulacion.Techos2026);
+
+                if (formulacion.Ppi != null)
+                    datos.setearParametros("@Ppi", formulacion.Ppi);
+                else
+                    datos.setearParametros("@Ppi", DBNull.Value);
+
+                if (formulacion.Techos2026 != null)
+                    datos.setearParametros("@Techos", formulacion.Techos2026);
+                else
+                    datos.setearParametros("@Techos", DBNull.Value);
+
                 if (formulacion.MesBase != null)
                     datos.setearParametros("@Mes", formulacion.MesBase);
                 else
@@ -69,7 +78,7 @@ namespace Negocio
                 datos.setearParametros("@IdBase", formulacion.Obra.Id);
                 datos.setearParametros("@Monto26", formulacion.Monto_26);
                 datos.setearParametros("@Monto27", formulacion.Monto_27);
-                datos.setearParametros("@Monto28", formulacion.Monto_28);              
+                datos.setearParametros("@Monto28", formulacion.Monto_28);
                 if (formulacion.MesBase != null)
                     datos.setearParametros("@Mes", formulacion.MesBase);
                 else

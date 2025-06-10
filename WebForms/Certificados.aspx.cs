@@ -107,8 +107,7 @@ namespace WebForms
             try
             {
                 List<Certificado> listaBase;
-                if (Session["certificadosUsuarioCompleto"] == null)
-                {
+
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     if (usuarioLogueado != null && usuarioLogueado.Area != null)
                     {
@@ -122,11 +121,8 @@ namespace WebForms
                         CalcularSubtotal();
                         return;
                     }
-                }
-                else
-                {
-                    listaBase = (List<Certificado>)Session["certificadosUsuarioCompleto"];
-                }
+                
+
 
                 IEnumerable<Certificado> listaFiltrada = listaBase;
 
