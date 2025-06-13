@@ -25,9 +25,10 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                List<Certificado> listaCertificados = negocio.listarFiltroAdmin();
-                BindDropDownList(listaCertificados);
-                CargarListaCertificados();
+                //List<Certificado> listaCertificados = negocio.listarFiltroAdmin();
+                //BindDropDownList(listaCertificados);
+                CargarListaCertificados(null, true);
+                BindDropDownList((List<Certificado>)Session["certificadosCompleto"]);
             }
         }
 
@@ -162,7 +163,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the certificados list
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -182,7 +183,7 @@ namespace WebForms
             ddlTipo.SelectedIndex = 0;
         }
 
-        private void CargarListaCertificados(string filtro = null)
+        private void CargarListaCertificados(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
@@ -255,10 +256,22 @@ namespace WebForms
                 }
 
                 // 2. Obtener lista completa de certificados
-                List<Certificado> listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
-                
-                Session["certificadosCompleto"] = listaCompleta;
-                
+                //List<Certificado> listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+
+                //Session["certificadosCompleto"] = listaCompleta;
+
+                List<Certificado> listaCompleta;
+
+                if (forzarRecargaCompleta || Session["certificadosCompleto"] == null)
+                {
+                    listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+                    Session["certificadosCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    listaCompleta = (List<Certificado>)Session["certificadosCompleto"];
+                }
+
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
 
                 // 3. Aplicar filtro de texto general (si se proporciona 'filtro' o se usa txtBuscar.Text)
@@ -460,7 +473,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados(); 
+                    CargarListaCertificados(null,true); 
                     CalcularSubtotal();
                 }
             }
@@ -738,7 +751,7 @@ namespace WebForms
 
                     // Actualizar la lista en Session para que los cambios persistan
                     Session["listaCertificado"] = certificados;
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
 
                     // Mensaje de éxito
                     lblMensaje.Text = "Expediente actualizado correctamente.";

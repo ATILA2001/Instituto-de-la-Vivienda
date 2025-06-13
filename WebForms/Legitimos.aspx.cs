@@ -23,9 +23,10 @@ namespace WebForms
                 if (usuarioLogueado != null && usuarioLogueado.Area != null)
                 {
                     // Cargar la lista completa de legitimos para el área del usuario y guardarla en sesión
-                    List<Legitimo> listaCompletaUsuario = negocio.listarFiltro(usuarioLogueado,
-                        new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                    Session["legitimosUsuarioCompleto"] = listaCompletaUsuario;
+                    //List<Legitimo> listaCompletaUsuario = negocio.listarFiltro(usuarioLogueado,
+                    //    new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //Session["legitimosUsuarioCompleto"] = listaCompletaUsuario;
+                    CargarListaLegitimos(null, true);
                 }
                 else
                 {
@@ -147,17 +148,28 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        private void CargarListaLegitimos(string filtro = null)
+        private void CargarListaLegitimos(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Legitimo> listaBase;
+                List<Legitimo> listaCompleta;
 
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     if (usuarioLogueado != null && usuarioLogueado.Area != null)
                     {
-                        listaBase = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        Session["legitimosUsuarioCompleto"] = listaBase;
+                        //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        //Session["legitimosUsuarioCompleto"] = listaCompleta;
+
+                        if (forzarRecargaCompleta || Session["legitimosUsuarioCompleto"] == null)
+                        {
+                            listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                            Session["legitimosUsuarioCompleto"] = listaCompleta;
+                        }
+                        else
+                        {
+                            listaCompleta = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
+                        }
+
                     }
                     else
                     {
@@ -168,7 +180,7 @@ namespace WebForms
                     }
 
 
-                IEnumerable<Legitimo> listaFiltrada = listaBase;
+                IEnumerable<Legitimo> listaFiltrada = listaCompleta;
 
                 // Obtener valores de los filtros de cabecera
                 List<string> selectedHeaderEmpresas = new List<string>();

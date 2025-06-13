@@ -23,9 +23,10 @@ namespace WebForms
                 if (usuarioLogueado != null && usuarioLogueado.Area != null)
                 {
                     // Cargar la lista completa de certificados para el área del usuario y guardarla en sesión
-                    List<Certificado> listaCompletaUsuario = negocio.listarFiltro(usuarioLogueado,
-                        new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                    Session["certificadosUsuarioCompleto"] = listaCompletaUsuario;
+                    //List<Certificado> listaCompletaUsuario = negocio.listarFiltro(usuarioLogueado,
+                    //    new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //Session["certificadosUsuarioCompleto"] = listaCompletaUsuario;
+                    CargarListaCertificados(null, true);
                 }
                 else
                 {
@@ -102,29 +103,38 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
-        private void CargarListaCertificados(string filtro = null)
+        private void CargarListaCertificados(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Certificado> listaBase;
+                List<Certificado> listaCompleta;
 
-                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+
+                    if (forzarRecargaCompleta || Session["certificadosUsuarioCompleto"] == null)
                     {
-                        listaBase = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        Session["certificadosUsuarioCompleto"] = listaBase;
+                        listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        Session["certificadosUsuarioCompleto"] = listaCompleta;
                     }
                     else
                     {
-                        dgvCertificado.DataSource = new List<Certificado>();
-                        dgvCertificado.DataBind();
-                        CalcularSubtotal();
-                        return;
+                        listaCompleta = (List<Certificado>)Session["certificadosUsuarioCompleto"];
                     }
+
+                }
+                else
+                {
+                    dgvCertificado.DataSource = new List<Certificado>();
+                    dgvCertificado.DataBind();
+                    CalcularSubtotal();
+                    return;
+                }
                 
 
 
-                IEnumerable<Certificado> listaFiltrada = listaBase;
+                IEnumerable<Certificado> listaFiltrada = listaCompleta;
 
                 // Obtener valores de los filtros de cabecera
                 List<string> selectedHeaderEmpresas = new List<string>();
