@@ -21,12 +21,11 @@ namespace WebForms
             {
                 // Cargar la lista completa una vez y guardarla en sesión
                 // Idealmente, habría un método negocio.ListarTodosLegitimos() o similar.
-                List<Legitimo> listaCompleta = negocio.listarFiltro(new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                //List<Legitimo> listaCompleta = negocio.listarFiltro(new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
 
-                Session["legitimosCompleto"] = listaCompleta;
-
+                //Session["legitimosCompleto"] = listaCompleta;
+                CargarListaLegitimos(null, true);
                 BindDropDownList();
-                CargarListaLegitimos();
             }
             else
             {
@@ -167,7 +166,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the legitimos list
-                    CargarListaLegitimos();
+                    CargarListaLegitimos(null,true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -198,11 +197,22 @@ namespace WebForms
             return areaNegocio.listarddl();
         }
 
-        private void CargarListaLegitimos(string filtro = null)
+        private void CargarListaLegitimos(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Legitimo> listaCompleta = negocio.listarFiltro(null, null, null, null, null, null, null);
+                //List<Legitimo> listaCompleta = negocio.listarFiltro(null, null, null, null, null, null, null);
+                List<Legitimo> listaCompleta;
+
+                if (forzarRecargaCompleta || Session["legitimosCompleto"] == null)
+                {
+                    listaCompleta = negocio.listarFiltro(new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                }
+                else
+                {
+                    listaCompleta = (List<Legitimo>)Session["legitimosCompleto"];
+                }
+
 
                 Session["legitimosCompleto"] = listaCompleta;
 
@@ -498,7 +508,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos();
+                    CargarListaLegitimos(null,true);
                 }
             }
             catch (Exception ex)
@@ -570,7 +580,7 @@ namespace WebForms
                 negocio.ActualizarExpediente(id, nuevoExpediente);
 
                 lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaLegitimos();
+                CargarListaLegitimos(null, true);
                 CalcularSubtotal();
             }
             catch (Exception ex)
@@ -646,30 +656,7 @@ namespace WebForms
             CargarListaLegitimos();
         }
 
-        private void ClearFilter(string controlId)
-        {
-            if (dgvLegitimos.HeaderRow != null)
-            {
-                var control = dgvLegitimos.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null) 
-                {
-                    control.ClearSelection();
 
-                    string controlInstanceId = control.ID;
 
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null)
-                    {
-                        HttpContext.Current.Session.Remove(sessionKey);
-                    }
-
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey))
-                    {
-                        HttpContext.Current.Items.Remove(contextKey);
-                    }
-                }
-            }
-        }
     }
 }

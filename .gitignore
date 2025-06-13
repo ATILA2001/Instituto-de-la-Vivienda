@@ -5,6 +5,8 @@
 
 .github/
 connectionStrings.config
+*.csproj.user
+
 
 # dotenv files
 .env
