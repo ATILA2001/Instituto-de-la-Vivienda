@@ -156,7 +156,7 @@
                     				<div class="form-group mb-2">
 					<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
 						data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
-    <i class="bi bi-file-excel"></i> Exportar
+    <i class="bi bi-download"></i> Exportar
 </asp:LinkButton>
 				</div>
                 </div>

@@ -296,6 +296,13 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                         Nombre = datos.Lector["CONTRATA"] as string
                     };
 
+                    // NUEVO: Crear la propiedad de contrata formateada
+                    // Esto será útil para la exportación a Excel
+                    string nombreContrata = datos.Lector["CONTRATA"] as string ?? "";
+                    int? numero = datos.Lector["NUMERO"] as int?;
+                    int? anio = datos.Lector["AÑO"] as int?;
+                    aux.ContrataFormateada = $"{nombreContrata} {numero}/{anio}";
+
                     lista.Add(aux);
                 }
 
