@@ -137,6 +137,7 @@ namespace WebForms
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
 
                 // Obtener valores de los filtros de cabecera
+                List<string> selectedHeaderObra = new List<string>();
                 List<string> selectedHeaderEmpresas = new List<string>();
                 List<string> selectedHeaderCodigosAutorizante = new List<string>();
                 List<string> selectedHeaderEstados = new List<string>();
@@ -145,6 +146,10 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow != null)
                 {
+                    var cblsHeaderObraControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
+                    if (cblsHeaderObraControl != null) selectedHeaderObra = cblsHeaderObraControl.SelectedValues;
+                    
+
                     var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
@@ -179,6 +184,9 @@ namespace WebForms
                 }
 
                 // Aplicar filtros de cabecera
+                if (selectedHeaderObra.Any())
+                    listaFiltrada = listaFiltrada.Where(m => m.Autorizante?.Obra != null && selectedHeaderObra.Contains(m.Autorizante.Obra.Id.ToString()));
+
                 if (selectedHeaderEmpresas.Any())
                     listaFiltrada = listaFiltrada.Where(c => !string.IsNullOrEmpty(c.Empresa) && selectedHeaderEmpresas.Contains(c.Empresa));
 
@@ -503,6 +511,25 @@ namespace WebForms
             {
                 List<Certificado> certificadosUsuarioCompleto = Session["certificadosUsuarioCompleto"] as List<Certificado>;
                 if (certificadosUsuarioCompleto == null || !certificadosUsuarioCompleto.Any()) return;
+
+
+                // Poblar filtro de Obra
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
+                if (cblsHeaderObra != null)
+                {
+                    var obrasUnicas = certificadosUsuarioCompleto
+                        .Where(a => a.Autorizante?.Obra != null)
+                        .Select(a => new { Id = a.Autorizante.Obra.Id, Nombre = a.Autorizante.Obra.Descripcion })
+                        .Distinct()
+                        .OrderBy(o => o.Nombre)
+                        .ToList();
+
+                    cblsHeaderObra.DataTextField = "Nombre";
+                    cblsHeaderObra.DataValueField = "Id";
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+
+                }
 
                 // Poblar filtro de Empresa
                 var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;

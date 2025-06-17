@@ -164,7 +164,7 @@
             <asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover  mb-4"
                 OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
                 OnRowDeleting="dgvCertificado_RowDeleting"
-                OnDataBound="dgvCertificado_DataBound"
+                OnRowDataBound="dgvCertificado_RowDataBound"
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvCertificado_PageIndexChanging" runat="server">
                 <Columns>
@@ -185,7 +185,19 @@
                     </asp:TemplateField>
 
                     <asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
-                    <asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
+
+                    <asp:TemplateField HeaderText="Obra">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
+                                HeaderText="Obra"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Autorizante.Obra.Descripcion") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Barrio">
                         <HeaderTemplate>
