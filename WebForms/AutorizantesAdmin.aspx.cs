@@ -20,6 +20,63 @@ namespace WebForms
             CargarListaAutorizantesRedet();
         }
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener datos completos (sin paginación)
+                List<Autorizante> autorizantes;
+
+                if (Session["autorizantesCompleto"] != null)
+                {
+                    autorizantes = (List<Autorizante>)Session["autorizantesCompleto"];
+                }
+                else
+                {
+                    AutorizanteNegocio negocio = new AutorizanteNegocio();
+                    autorizantes = negocio.listar();
+                    Session["autorizantesCompleto"] = autorizantes;
+                }
+
+
+                if (autorizantes.Any())
+                {
+                    // Definir mapeo de columnas
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Área", "Obra.Area.Nombre" },
+                { "Area", "Obra.Area.Nombre" }, // Versión sin acento
+                { "Obra", "Obra.Descripcion" },
+                { "Contrata", "Obra.Contrata.Nombre" },
+                { "Empresa", "Empresa" },
+                { "Código Autorizante", "CodigoAutorizante" },
+                { "Codigo Autorizante", "CodigoAutorizante" }, // Versión sin acento
+                { "Concepto", "Concepto.Nombre" },
+                { "Detalle", "Detalle" },
+                { "Expediente", "Expediente" },
+                { "Estado", "Estado" },
+                { "Monto Autorizado", "MontoAutorizado" },
+                { "Mes Aprobacion", "Fecha" },
+                { "Mes Base", "MesBase" },
+                { "Buzon sade", "BuzonSade" },
+                { "Fecha sade", "FechaSade" }
+            };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvAutorizante, autorizantes, mapeoColumnas, "Autorizantes");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

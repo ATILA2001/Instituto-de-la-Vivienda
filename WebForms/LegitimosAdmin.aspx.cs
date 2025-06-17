@@ -42,6 +42,65 @@ namespace WebForms
                 }
             }
         }
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener todos los legítimos abonos (sin paginación)  
+                List<Legitimo> legitimos;
+
+                if (Session["legitimosCompleto"] != null)
+                {
+                    legitimos = (List<Legitimo>)Session["legitimosCompleto"];
+                }
+                else
+                {
+                    // Correct method call based on provided type signatures  
+                    legitimos = negocio.listarFiltro(new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["legitimosCompleto"] = legitimos;
+                }
+
+                if (legitimos.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)  
+                    var mapeoColumnas = new Dictionary<string, string>
+                    {
+                        { "Area", "Obra.Area.Nombre" },
+                        { "Área", "Obra.Area.Nombre" },
+                        { "Obra", "Obra.Descripcion" },
+                        { "Empresa", "Empresa" },
+                        { "Código Autorizante", "CodigoAutorizante" },
+                        { "Codigo Autorizante", "CodigoAutorizante" },
+                        { "Expediente", "Expediente" },
+                        { "Inicio Ejecución", "InicioEjecucion" },
+                        { "Inicio Ejecucion", "InicioEjecucion" },
+                        { "Fin Ejecución", "FinEjecucion" },
+                        { "Fin Ejecucion", "FinEjecucion" },
+                        { "Certificado", "Certificado" },
+                        { "Mes Aprobación", "MesAprobacion" },
+                        { "Mes Aprobacion", "MesAprobacion" },
+                        { "Estado", "Estado" },
+                        { "Sigaf", "Sigaf" },
+                        { "Buzon sade", "BuzonSade" },
+                        { "Fecha sade", "FechaSade" },
+                        { "Linea de gestion", "Linea" }
+                    };
+
+                    // Exportar a Excel  
+                    ExcelHelper.ExportarDatosGenericos(dgvLegitimos, legitimos, mapeoColumnas, "LegitimosAbonos");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaLegitimos();
