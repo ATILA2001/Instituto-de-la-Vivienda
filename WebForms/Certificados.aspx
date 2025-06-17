@@ -41,7 +41,7 @@
                                     <div class="mb-3">
                                         <label for="txtExpediente" class="form-label">Expediente</label>
                                         <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                       
+
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -179,7 +179,20 @@
                 <Columns>
                     <asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 
-                    <asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />
+                    <%--                    <asp:BoundField HeaderText="Obra" DataField="Autorizante.Obra.Descripcion" />--%>
+                    <asp:TemplateField HeaderText="Obra">
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
+                                HeaderText="Obra"
+                                DataTextField="Nombre"
+                                DataValueField="Id"
+                                OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <%# Eval("Autorizante.Obra.Descripcion") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
                     <asp:BoundField HeaderText="Contrata" DataField="Autorizante.Obra.Contrata.Nombre" />
                     <asp:BoundField HeaderText="Detalle" DataField="Autorizante.Detalle" />
 

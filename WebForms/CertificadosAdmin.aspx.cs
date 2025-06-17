@@ -73,10 +73,20 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                //List<Certificado> listaCertificados = negocio.listarFiltroAdmin();
-                //BindDropDownList(listaCertificados);
                 CargarListaCertificados(null, true);
-                BindDropDownList((List<Certificado>)Session["certificadosCompleto"]);
+
+                // Validación adicional para evitar pasar null a BindDropDownList
+                var certificados = Session["certificadosCompleto"] as List<Certificado>;
+                if (certificados != null && certificados.Any())
+                {
+                    BindDropDownList(certificados);
+                }
+                else
+                {
+                    lblMensaje.Text = "No se encontraron certificados para mostrar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    System.Diagnostics.Debug.WriteLine("ATENCIÓN: La lista de certificados está vacía o nula.");
+                }
             }
         }
 
@@ -236,70 +246,77 @@ namespace WebForms
             try
             {
                 // 1. Obtener valores de filtros de cabecera
-                List<string> filtroHeaderArea = new List<string>();
-                List<string> filtroHeaderBarrio = new List<string>();
-                List<string> filtroHeaderProyecto = new List<string>();
-                List<string> filtroHeaderEmpresa = new List<string>();
-                List<string> filtroHeaderCodigoAutorizante = new List<string>();
-                List<string> filtroHeaderEstado = new List<string>();
-                List<string> filtroHeaderTipo = new List<string>();
-                List<string> filtroHeaderMesCertificado = new List<string>();
-                List<string> filtroHeaderLinea = new List<string>();
+                List<string> selectedHeaderArea = new List<string>();
+                List<string> selectedHeaderObra = new List<string>();
+                List<string> selectedHeaderBarrio = new List<string>();
+                List<string> selectedHeaderProyecto = new List<string>();
+                List<string> selectedHeaderEmpresa = new List<string>();
+                List<string> selectedHeaderCodigoAutorizante = new List<string>();
+                List<string> selectedHeaderEstado = new List<string>();
+                List<string> selectedHeaderTipo = new List<string>();
+                List<string> selectedHeaderMesCertificado = new List<string>();
+                List<string> selectedHeaderLinea = new List<string>();
 
                 if (dgvCertificado.HeaderRow != null)
                 {
                     var cblsHeaderAreaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderAreaControl != null)
                     {
-                        filtroHeaderArea = cblsHeaderAreaControl.SelectedValues;
+                        selectedHeaderArea = cblsHeaderAreaControl.SelectedValues;
+                    }
+
+                    var cblsHeaderObraControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
+                    if (cblsHeaderObraControl != null)
+                    {
+                        selectedHeaderObra = cblsHeaderObraControl.SelectedValues;
                     }
 
                     var cblsHeaderBarrioControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderBarrioControl != null)
                     {
-                        filtroHeaderBarrio = cblsHeaderBarrioControl.SelectedValues;
+                        selectedHeaderBarrio = cblsHeaderBarrioControl.SelectedValues;
                     }
 
                     var cblsHeaderProyectoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderProyectoControl != null)
                     {
-                        filtroHeaderProyecto = cblsHeaderProyectoControl.SelectedValues;
+                        selectedHeaderProyecto = cblsHeaderProyectoControl.SelectedValues;
                     }
                     
                     var cblsHeaderEmpresaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaControl != null)
                     {
-                        filtroHeaderEmpresa = cblsHeaderEmpresaControl.SelectedValues;
+                        selectedHeaderEmpresa = cblsHeaderEmpresaControl.SelectedValues;
                     }
 
                     var cblsHeaderCodigoAutorizanteControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderCodigoAutorizanteControl != null)
                     {
-                        filtroHeaderCodigoAutorizante = cblsHeaderCodigoAutorizanteControl.SelectedValues;
+                        selectedHeaderCodigoAutorizante = cblsHeaderCodigoAutorizanteControl.SelectedValues;
                     }
 
                     var cblsHeaderEstadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoControl != null)
                     {
-                        filtroHeaderEstado = cblsHeaderEstadoControl.SelectedValues;
+                        selectedHeaderEstado = cblsHeaderEstadoControl.SelectedValues;
                     }
 
                     var cblsHeaderTipoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderTipoControl != null)
                     {
-                        filtroHeaderTipo = cblsHeaderTipoControl.SelectedValues;
+                        selectedHeaderTipo = cblsHeaderTipoControl.SelectedValues;
                     }
 
                     var cblsHeaderMesCertificadoControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderMesCertificadoControl != null)
                     {
-                        filtroHeaderMesCertificado = cblsHeaderMesCertificadoControl.SelectedValues;
+                        selectedHeaderMesCertificado = cblsHeaderMesCertificadoControl.SelectedValues;
                     }
 
                     var cblsHeaderLineaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderLineaControl != null)
                     {
-                        filtroHeaderLinea = cblsHeaderLineaControl.SelectedValues;
+                        selectedHeaderLinea = cblsHeaderLineaControl.SelectedValues;
                     }
                 }
 
@@ -310,14 +327,37 @@ namespace WebForms
 
                 List<Certificado> listaCompleta;
 
+                //if (forzarRecargaCompleta || Session["certificadosCompleto"] == null)
+                //{
+                //    listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+                //    Session["certificadosCompleto"] = listaCompleta;
+                //}
+                //else
+                //{
+                //    listaCompleta = (List<Certificado>)Session["certificadosCompleto"];
+                //}
+
                 if (forzarRecargaCompleta || Session["certificadosCompleto"] == null)
                 {
                     listaCompleta = calculoRedeterminacionNegocio.listarCertReliq();
+                    if (listaCompleta == null || !listaCompleta.Any())
+                    {
+                        lblMensaje.Text = "No se encontraron certificados en la base de datos.";
+                        lblMensaje.CssClass = "alert alert-warning";
+                        System.Diagnostics.Debug.WriteLine("ATENCIÓN: listarCertReliq() devolvió una lista vacía o nula.");
+                    }
                     Session["certificadosCompleto"] = listaCompleta;
                 }
                 else
                 {
                     listaCompleta = (List<Certificado>)Session["certificadosCompleto"];
+                }
+
+                if (listaCompleta == null || !listaCompleta.Any())
+                {
+                    dgvCertificado.DataSource = null;
+                    dgvCertificado.DataBind();
+                    return;
                 }
 
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
@@ -343,53 +383,57 @@ namespace WebForms
                 }
 
                 // 4. Aplicar filtros de cabecera
-                if (filtroHeaderArea != null && filtroHeaderArea.Any())
+                if (selectedHeaderArea != null && selectedHeaderArea.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Area != null && filtroHeaderArea.Contains(c.Autorizante.Obra.Area.Nombre));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Area != null && selectedHeaderArea.Contains(c.Autorizante.Obra.Area.Nombre));
                 }
 
-                if (filtroHeaderBarrio != null && filtroHeaderBarrio.Any())
+                if (selectedHeaderObra.Any())
+                    listaFiltrada = listaFiltrada.Where(m => m.Autorizante?.Obra != null && selectedHeaderObra.Contains(m.Autorizante.Obra.Id.ToString()));
+
+
+                if (selectedHeaderBarrio != null && selectedHeaderBarrio.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && filtroHeaderBarrio.Contains(c.Autorizante.Obra.Barrio.Id.ToString()));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && selectedHeaderBarrio.Contains(c.Autorizante.Obra.Barrio.Id.ToString()));
                 }
                 
-                if (filtroHeaderProyecto != null && filtroHeaderProyecto.Any())
+                if (selectedHeaderProyecto != null && selectedHeaderProyecto.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && filtroHeaderProyecto.Contains(c.Autorizante.Obra.Proyecto.Id.ToString()));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && selectedHeaderProyecto.Contains(c.Autorizante.Obra.Proyecto.Id.ToString()));
                 }
 
-                if (filtroHeaderEmpresa != null && filtroHeaderEmpresa.Any())
+                if (selectedHeaderEmpresa != null && selectedHeaderEmpresa.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Empresa != null && filtroHeaderEmpresa.Contains(c.Autorizante.Obra.Empresa.Id.ToString()));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Empresa != null && selectedHeaderEmpresa.Contains(c.Autorizante.Obra.Empresa.Id.ToString()));
                 }
 
-                if (filtroHeaderCodigoAutorizante != null && filtroHeaderCodigoAutorizante.Any())
+                if (selectedHeaderCodigoAutorizante != null && selectedHeaderCodigoAutorizante.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.CodigoAutorizante != null && filtroHeaderCodigoAutorizante.Contains(c.Autorizante.CodigoAutorizante));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.CodigoAutorizante != null && selectedHeaderCodigoAutorizante.Contains(c.Autorizante.CodigoAutorizante));
                 }
 
-                if (filtroHeaderEstado != null && filtroHeaderEstado.Any())
+                if (selectedHeaderEstado != null && selectedHeaderEstado.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Estado != null && filtroHeaderEstado.Contains(c.Estado));
+                    listaFiltrada = listaFiltrada.Where(c => c.Estado != null && selectedHeaderEstado.Contains(c.Estado));
                 }
 
-                if (filtroHeaderTipo != null && filtroHeaderTipo.Any())
+                if (selectedHeaderTipo != null && selectedHeaderTipo.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Tipo != null && filtroHeaderTipo.Contains(c.Tipo.Id.ToString()));
+                    listaFiltrada = listaFiltrada.Where(c => c.Tipo != null && selectedHeaderTipo.Contains(c.Tipo.Id.ToString()));
                 }
 
-                if (filtroHeaderLinea != null && filtroHeaderLinea.Any())
+                if (selectedHeaderLinea != null && selectedHeaderLinea.Any())
                 {
-                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.LineaGestion != null && filtroHeaderLinea.Contains(c.Autorizante.Obra.LineaGestion.Id.ToString()));
+                    listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.LineaGestion != null && selectedHeaderLinea.Contains(c.Autorizante.Obra.LineaGestion.Id.ToString()));
                 }
 
-                if (filtroHeaderMesCertificado != null && filtroHeaderMesCertificado.Any())
+                if (selectedHeaderMesCertificado != null && selectedHeaderMesCertificado.Any())
                 {
                     List<DateTime> fechasSeleccionadasDia = new List<DateTime>();
                     List<Tuple<int, int>> mesesAnioSeleccionados = new List<Tuple<int, int>>(); // Año, Mes
                     List<int> aniosSeleccionados = new List<int>();
 
-                    foreach (var sel in filtroHeaderMesCertificado)
+                    foreach (var sel in selectedHeaderMesCertificado)
                     {
                         if (DateTime.TryParseExact(sel, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dtDia))
                         {
@@ -532,21 +576,22 @@ namespace WebForms
             }
         }
 
-        protected void dgvCertificado_DataBound(object sender, EventArgs e)
+        protected void dgvCertificado_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            if (dgvCertificado.HeaderRow != null) 
+            if (e.Row.RowType == DataControlRowType.Header) 
             {
                 List<Certificado> certificadosCompleto = (List<Certificado>)Session["certificadosCompleto"];//calculoRedeterminacionNegocio.listarCertReliq();
 
-                var cblsHeaderArea = dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderBarrio = dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderProyecto = dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderEmpresa = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderCodigoAutorizante = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderEstado = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderTipo = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderMesCertificado = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
-                var cblsHeaderLinea = dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") as WebForms.CustomControls.TreeViewSearch;
+                var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as CustomControls.TreeViewSearch;
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
+                var cblsHeaderBarrio = e.Row.FindControl("cblsHeaderBarrio") as CustomControls.TreeViewSearch;
+                var cblsHeaderProyecto = e.Row.FindControl("cblsHeaderProyecto") as CustomControls.TreeViewSearch;
+                var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as CustomControls.TreeViewSearch;
+                var cblsHeaderCodigoAutorizante = e.Row.FindControl("cblsHeaderCodigoAutorizante") as CustomControls.TreeViewSearch;
+                var cblsHeaderEstado = e.Row.FindControl("cblsHeaderEstado") as CustomControls.TreeViewSearch;
+                var cblsHeaderTipo = e.Row.FindControl("cblsHeaderTipo") as CustomControls.TreeViewSearch;
+                var cblsHeaderMesCertificado = e.Row.FindControl("cblsHeaderMesCertificado") as CustomControls.TreeViewSearch;
+                var cblsHeaderLinea = e.Row.FindControl("cblsHeaderLinea") as CustomControls.TreeViewSearch;
 
                 if (cblsHeaderArea != null)
                 {
@@ -559,6 +604,23 @@ namespace WebForms
 
                     cblsHeaderArea.DataSource = areasUnicas;
                     cblsHeaderArea.DataBind();
+                }
+
+                //var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
+                if (cblsHeaderObra != null)
+                {
+                    var obrasUnicas = certificadosCompleto
+                        .Where(a => a.Autorizante?.Obra != null)
+                        .Select(a => new { Id = a.Autorizante.Obra.Id, Nombre = a.Autorizante.Obra.Descripcion })
+                        .Distinct()
+                        .OrderBy(o => o.Nombre)
+                        .ToList();
+
+                    cblsHeaderObra.DataTextField = "Nombre";
+                    cblsHeaderObra.DataValueField = "Id";
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+
                 }
 
                 if (cblsHeaderBarrio != null)
