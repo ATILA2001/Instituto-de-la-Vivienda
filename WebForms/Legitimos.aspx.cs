@@ -45,6 +45,67 @@ namespace WebForms
         }
 
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "text-warning";
+                    return;
+                }
+
+                // Obtener todos los legítimos abonos del usuario desde la sesión o volver a cargarlos
+                List<Legitimo> legitimos;
+
+                if (Session["legitimosUsuarioCompleto"] != null)
+                {
+                    legitimos = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
+                }
+                else
+                {
+                    // Correct method call based on provided type signatures
+                    legitimos = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["legitimosUsuarioCompleto"] = legitimos;
+                }
+
+                if (legitimos.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+                    {
+                        { "Obra", "Obra.Descripcion" },
+                        { "Empresa", "Empresa" },
+                        { "Código Autorizante", "CodigoAutorizante" },
+                        { "Expediente", "Expediente" },
+                        { "Inicio Ejecución", "InicioEjecucion" },
+                        { "Fin Ejecución", "FinEjecucion" },
+                        { "Certificado", "Certificado" },
+                        { "Mes Aprobación", "MesAprobacion" },
+                        { "Estado", "Estado" },
+                        { "Sigaf", "Sigaf" },
+                        { "Buzon sade", "BuzonSade" },
+                        { "Fecha sade", "FechaSade" }
+                    };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvLegitimos, legitimos, mapeoColumnas, "LegitimosAbonos");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "text-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "text-danger";
+            }
+        }
         protected void Page_PreRender(object sender, EventArgs e)
         {
             // Configure validators if we're in editing mode
