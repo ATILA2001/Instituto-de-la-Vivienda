@@ -18,7 +18,68 @@ namespace WebForms
         {
             CargarListaObras();
         }
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener todas las obras (sin filtro de paginación)
+                List<Obra> obras;
 
+                if (Session["obrasCompleto"] != null)
+                {
+                    obras = (List<Obra>)Session["obrasCompleto"];
+                }
+                else
+                {
+                    obras = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["obrasCompleto"] = obras;
+                }
+
+
+
+                if (obras != null && obras.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Área", "Area.Nombre" },
+                { "Empresa", "Empresa.Nombre" },
+                { "Contrata", "ContrataFormateada" },
+                { "Barrio", "Barrio.Nombre" },
+                { "Nombre de Obra", "Descripcion" },
+                { "Linea de Gestion", "LineaGestion.Nombre" },
+                { "Proyecto", "Proyecto.Proyecto" },
+                { "Disponible Actual", "AutorizadoNuevo" },
+                { "Planificacion 2025", "MontoCertificado" },
+                { "Ejecucion Presupuesto 2025", "Porcentaje" },
+                { "Monto de Obra inicial", "MontoInicial" },
+                { "Monto de Obra actual", "MontoActual" },
+                { "Faltante de Obra", "MontoFaltante" },
+                { "Fecha Inicio", "FechaInicio" },
+                { "Fecha Fin", "FechaFin" },
+                { "Número", "Numero" },
+                { "Año", "Año" }
+            };
+
+                    // Exportar usando el método genérico
+                    ExcelHelper.ExportarDatosGenericos(dgvObra, obras, mapeoColumnas, "Obras");
+
+                    // Opcional: Mensaje de éxito
+                    // lblMensaje.Text = "Exportación completada con éxito";
+                    // lblMensaje.CssClass = "alert alert-success";
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

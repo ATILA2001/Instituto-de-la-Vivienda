@@ -21,6 +21,54 @@ namespace WebForms
             CargarListaCertificados();
         }
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener datos completos
+                List<Certificado> certificados = Session["certificadosCompleto"] as List<Certificado>
+                    ?? calculoRedeterminacionNegocio.listarCertReliq();
+
+                if (certificados != null && certificados.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Obra", "Autorizante.Obra.Descripcion" },
+                { "Contrata", "Autorizante.Obra.Contrata.Nombre" },
+                { "Detalle", "Autorizante.Detalle" },
+                { "Empresa", "Empresa" },
+                { "Código Autorizante", "Autorizante.CodigoAutorizante" },
+                { "Expediente", "ExpedientePago" },
+                { "Estado", "Estado" },
+                { "Tipo", "Tipo.Nombre" },
+                { "Monto Certificado", "MontoTotal" },
+                { "Mes Certificado", "MesAprobacion" },
+                { "Porcentaje", "Porcentaje" },
+                { "Sigaf", "Sigaf" },
+                { "Buzon sade", "BuzonSade" },
+                { "Fecha sade", "FechaSade" },
+                { "Área", "Autorizante.Obra.Area.Nombre" },
+                { "Barrio", "Autorizante.Obra.Barrio.Nombre" },
+                { "Proyecto", "Autorizante.Obra.Proyecto.Proyecto" },
+                { "Línea", "Autorizante.Obra.LineaGestion.Nombre" }
+            };
+
+                    // Exportar usando el método genérico
+                    ExcelHelper.ExportarDatosGenericos(dgvCertificado, certificados, mapeoColumnas, "Certificados");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
