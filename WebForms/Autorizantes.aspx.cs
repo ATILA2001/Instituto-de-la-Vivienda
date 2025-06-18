@@ -13,6 +13,7 @@ namespace WebForms
     public partial class Autorizantes : System.Web.UI.Page
     {
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -23,8 +24,10 @@ namespace WebForms
                 {
                     // Cargar la lista completa de autorizantes para el área del usuario y guardarla en sesión
                     // Se pasan listas vacías para los filtros para obtener todos los del área.
-                    List<Autorizante> listaCompletaUsuario = negocio.listar(usuarioLogueado,
-                        new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //List<Autorizante> listaCompletaUsuario = negocio.listar(usuarioLogueado,
+                    //    new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+
+                    List<Autorizante> listaCompletaUsuario = calculoRedeterminacionNegocio.listarAutRedet(usuarioLogueado);
                     Session["autorizantesUsuarioCompleto"] = listaCompletaUsuario;
                 }
                 else
@@ -115,8 +118,8 @@ namespace WebForms
                     Usuario usuarioLogueado = (Usuario)Session["usuario"];
                     if (usuarioLogueado != null && usuarioLogueado.Area != null)
                     {
-                        listaBase = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        Session["autorizantesUsuarioCompleto"] = listaBase;
+                        listaBase = calculoRedeterminacionNegocio.listarAutRedet(usuarioLogueado);
+                    Session["autorizantesUsuarioCompleto"] = listaBase;
                     }
                     else
                     {

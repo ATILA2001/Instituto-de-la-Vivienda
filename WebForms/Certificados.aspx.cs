@@ -14,6 +14,7 @@ namespace WebForms
     public partial class Certificados : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -115,7 +116,8 @@ namespace WebForms
 
                     if (forzarRecargaCompleta || Session["certificadosUsuarioCompleto"] == null)
                     {
-                        listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        listaCompleta = calculoRedeterminacionNegocio.listarCertReliq(usuarioLogueado);
                         Session["certificadosUsuarioCompleto"] = listaCompleta;
                     }
                     else
