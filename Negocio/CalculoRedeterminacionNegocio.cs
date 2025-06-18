@@ -425,7 +425,7 @@
                                     },
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
-                                    Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
+                                    Tipo = new TipoPago { Id = 3, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
                                     Porcentaje = porcentajeCalculado
                                 };
@@ -732,7 +732,7 @@
                                     },
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
-                                    Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
+                                    Tipo = new TipoPago { Id = 3, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
                                     Porcentaje = porcentajeCalculado
                                 };
