@@ -324,15 +324,18 @@ namespace WebForms
                 }
 
                 if (selectedAreas.Any())
-                    listaFiltrada = listaFiltrada.Where(l => l.Obra?.Area != null && selectedAreas.Contains(l.Obra.Area.Nombre));
+                    listaFiltrada = listaFiltrada.Where(l => selectedAreas.Contains(l.Obra.Area.Nombre ?? ""));
                 if (selectedEmpresas.Any())
-                    listaFiltrada = listaFiltrada.Where(l => !string.IsNullOrEmpty(l.Empresa) && selectedEmpresas.Contains(l.Empresa));
+                    listaFiltrada = listaFiltrada.Where(l => selectedEmpresas.Contains(l.Empresa ?? ""));
                 if (selectedCodigosAutorizante.Any())
-                    listaFiltrada = listaFiltrada.Where(l => !string.IsNullOrEmpty(l.CodigoAutorizante) && selectedCodigosAutorizante.Contains(l.CodigoAutorizante));
+                    listaFiltrada = listaFiltrada.Where(l => selectedCodigosAutorizante.Contains(l.CodigoAutorizante ?? ""));
                 if (selectedEstados.Any())
-                    listaFiltrada = listaFiltrada.Where(l => !string.IsNullOrEmpty(l.Estado) && selectedEstados.Contains(l.Estado));
-                if (selectedLineas.Any())
-                    listaFiltrada = listaFiltrada.Where(l => !string.IsNullOrEmpty(l.Linea) && selectedLineas.Contains(l.Linea));
+                    listaFiltrada = listaFiltrada.Where(l => selectedEstados.Contains(l.Estado ?? ""));
+
+
+                if (selectedLineas.Any())                  
+                    listaFiltrada = listaFiltrada.Where(l => selectedLineas.Contains(l.Linea ?? ""));
+                
 
                 if (selectedMesesAprobacion.Any())
                 {
