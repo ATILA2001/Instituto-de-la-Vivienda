@@ -45,6 +45,71 @@ namespace WebForms
             CargarListaObras();
         }
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener el usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
+
+                // Obtener las obras completas del usuario desde la sesión o volver a cargarlas
+                List<Obra> obrasUsuario;
+                if (Session["obrasUsuarioCompleto"] != null)
+                {
+                    obrasUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
+                }
+                else
+                {
+                    obrasUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = obrasUsuario;
+                }
+
+               
+                if (obrasUsuario.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Área", "Area.Nombre" },
+                { "Area", "Area.Nombre" },
+                { "Empresa", "Empresa.Nombre" },
+                { "Contrata", "ContrataFormateada" },
+                { "Barrio", "Barrio.Nombre" },
+                { "Nombre de Obra", "Descripcion" },
+                { "Descripcion", "Descripcion" },
+                { "Linea de Gestion", "LineaGestion.Nombre" },
+                { "Proyecto", "Proyecto.Proyecto" },
+                { "Disponible Actual", "AutorizadoNuevo" },
+                { "Planificacion 2025", "MontoCertificado" },
+                { "Ejecucion Presupuesto 2025", "Porcentaje" },
+                { "Monto de Obra inicial", "MontoInicial" },
+                { "Monto de Obra actual", "MontoActual" },
+                { "Faltante de Obra", "MontoFaltante" },
+                { "Fecha Inicio", "FechaInicio" },
+                { "Fecha Fin", "FechaFin" }
+            };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvObra, obrasUsuario, mapeoColumnas, "Obras");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
             // Clear any existing data

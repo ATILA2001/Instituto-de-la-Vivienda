@@ -210,13 +210,19 @@
 						</button>
 					</div>
 
+														<div class="form-group mb-2">
+					<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+						data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+    <i class="bi bi-download"></i>
+</asp:LinkButton>
+				</div>
 					<div class="form-group mb-2">
 						<button type="submit" class="btn btn-primary" runat="server" onserverclick="btnShowAddModal_Click">
 							<i class="bi bi-plus-lg"></i>Agregar
 						</button>
 					</div>
 
-
+								
 
 				</div>
 			</div>
