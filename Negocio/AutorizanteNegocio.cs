@@ -194,7 +194,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public List<Autorizante> listar(List<string> areas, List<string> estado, List<string> empresa, List<string> concepto, List<string> obra, string filtro = null)
         {
             List<Autorizante> lista = new List<Autorizante>();
@@ -372,7 +371,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
         public List<Autorizante> listar()
         {
             List<Autorizante> lista = new List<Autorizante>();
@@ -489,8 +487,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
         public bool agregar(Autorizante nuevoAutorizante)
         {
             AccesoDatos datos = new AccesoDatos();

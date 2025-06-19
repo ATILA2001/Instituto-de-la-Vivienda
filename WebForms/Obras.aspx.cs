@@ -39,7 +39,6 @@ namespace WebForms
             }
         }
 
-        // Evento para los filtros de cabecera
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaObras();
@@ -149,7 +148,7 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro = null)
+        private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
@@ -163,9 +162,19 @@ namespace WebForms
                     return;
                 }
 
-                List<Obra> listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
-                
-                Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                List<Obra> listaCompletaUsuario;
+
+                if (forzarRecargaCompleta || Session["obrasUsuarioCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompletaUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
+                }
 
                 IEnumerable<Obra> listaFiltrada = listaCompletaUsuario;
 
@@ -280,7 +289,6 @@ namespace WebForms
 
                     // Clear fields
                     ClearFormFields();
-
                     // Reset the modal title and button text
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
                         "$('#modalAgregar .modal-title').text('Agregar Obra');", true);
@@ -290,8 +298,8 @@ namespace WebForms
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                         "$('#modalAgregar').modal('hide');", true);
 
-                    // Refresh the works list
-                    CargarListaObras();
+                    // Refresh the works list - MODIFIED: force complete reload
+                    CargarListaObras(null, true);
                 }
                 catch (Exception ex)
                 {
@@ -370,7 +378,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -393,7 +400,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaObras(); // Actualizar el GridView
+                    CargarListaObras(null, true);
                 }
             }
             catch (Exception ex)
@@ -496,16 +503,12 @@ namespace WebForms
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
-        }
-
-
-      
+        }      
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();
             CargarListaObras(filtro);
         }
-
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {

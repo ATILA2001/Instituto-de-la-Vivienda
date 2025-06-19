@@ -410,7 +410,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos();
+                    CargarListaLegitimos(null, true);
                     CalcularSubtotal();
 
                 }
@@ -512,7 +512,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the legitimos list
-                    CargarListaLegitimos();
+                    CargarListaLegitimos(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -596,7 +596,7 @@ namespace WebForms
                             new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
                         Session["legitimosUsuarioCompleto"] = listaCompletaUsuario;
                     }
-                    CargarListaLegitimos(txtBuscar.Text.Trim());
+                    CargarListaLegitimos(null, true);
                 }
                 else
                 {

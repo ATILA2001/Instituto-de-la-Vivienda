@@ -133,7 +133,7 @@ namespace WebForms
                     CalcularSubtotal();
                     return;
                 }
-                
+
 
 
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
@@ -150,7 +150,7 @@ namespace WebForms
                 {
                     var cblsHeaderObraControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
                     if (cblsHeaderObraControl != null) selectedHeaderObra = cblsHeaderObraControl.SelectedValues;
-                    
+
 
                     var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
@@ -316,7 +316,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -339,7 +338,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
             }
@@ -450,7 +449,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the certificados list
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -611,7 +610,8 @@ namespace WebForms
                         .Select(c => c.MesAprobacion.Value)
                         .Distinct()
                         .OrderByDescending(d => d)
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             Id = d.ToString("yyyy-MM-dd"), // Formato que el UserControl puede parsear
                             Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")) // Para visualización si es necesario
                         })
@@ -623,7 +623,6 @@ namespace WebForms
                 }
             }
         }
-
 
         private void BindDropDownList()
         {// Clear existing items first
@@ -646,7 +645,7 @@ namespace WebForms
 
             ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
-            ddlAutorizante.DataValueField = "Id"; 
+            ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
         }
         private DataTable ObtenerEmpresas()
@@ -654,7 +653,6 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -677,7 +675,7 @@ namespace WebForms
 
                 // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaCertificados();
+                CargarListaCertificados(null, true);
                 CalcularSubtotal();
 
             }
