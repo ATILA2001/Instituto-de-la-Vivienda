@@ -12,10 +12,7 @@
 
     <!-- En Admin.Master, después del título -->
     <script src="<%= ResolveUrl("~/Scripts/jquery-3.6.0.min.js") %>"></script>
-
-
     <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
     <script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
     <link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
 
