@@ -12,7 +12,8 @@ namespace Dominio
         public int Id { get; set; }
         public Area Area { get; set; }
         public Empresa Empresa { get; set; }
-        public int? Numero { get; set; } 
+        public int? Numero { get; set; }
+        public string ContrataFormateada { get; set; }
         public Contrata Contrata { get; set; } 
         public int? Año { get; set; } 
         public int? Etapa { get; set; } 

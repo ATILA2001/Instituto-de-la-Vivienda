@@ -18,17 +18,75 @@ namespace WebForms
         {
             CargarListaObras();
         }
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener todas las obras (sin filtro de paginación)
+                List<Obra> obras;
 
+                if (Session["obrasCompleto"] != null)
+                {
+                    obras = (List<Obra>)Session["obrasCompleto"];
+                }
+                else
+                {
+                    obras = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["obrasCompleto"] = obras;
+                }
+
+
+
+                if (obras != null && obras.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Área", "Area.Nombre" },
+                { "Empresa", "Empresa.Nombre" },
+                { "Contrata", "ContrataFormateada" },
+                { "Barrio", "Barrio.Nombre" },
+                { "Nombre de Obra", "Descripcion" },
+                { "Linea de Gestion", "LineaGestion.Nombre" },
+                { "Proyecto", "Proyecto.Proyecto" },
+                { "Disponible Actual", "AutorizadoNuevo" },
+                { "Planificacion 2025", "MontoCertificado" },
+                { "Ejecucion Presupuesto 2025", "Porcentaje" },
+                { "Monto de Obra inicial", "MontoInicial" },
+                { "Monto de Obra actual", "MontoActual" },
+                { "Faltante de Obra", "MontoFaltante" },
+                { "Fecha Inicio", "FechaInicio" },
+                { "Fecha Fin", "FechaFin" },
+                { "Número", "Numero" },
+                { "Año", "Año" }
+            };
+
+                    // Exportar usando el método genérico
+                    ExcelHelper.ExportarDatosGenericos(dgvObra, obras, mapeoColumnas, "Obras");
+
+                    // Opcional: Mensaje de éxito
+                    // lblMensaje.Text = "Exportación completada con éxito";
+                    // lblMensaje.CssClass = "alert alert-success";
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                // Cargar la lista completa una vez y guardarla en sesión
-                List<Obra> listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                Session["obrasCompleto"] = listaCompleta;
-
+                // Force complete reload on initial page load
+                CargarListaObras(null, true);
                 BindDropDownList();
-                CargarListaObras();
             }
         }
 
@@ -117,13 +175,23 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro = null)
+        private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Obra> listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                List<Obra> listaCompleta;
 
-                Session["obrasCompleto"] = listaCompleta;
+                if (forzarRecargaCompleta || Session["obrasCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["obrasCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompleta = (List<Obra>)Session["obrasCompleto"];
+                }
 
                 IEnumerable<Obra> listaFiltrada = listaCompleta;
 
@@ -296,7 +364,6 @@ namespace WebForms
             }
         }
 
-
         protected void dgvObra_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -364,7 +431,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -387,7 +453,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaObras(); // Actualizar el GridView
+                    CargarListaObras(null, true);
                 }
             }
             catch (Exception ex)
@@ -499,8 +565,8 @@ namespace WebForms
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                         "$('#modalAgregar').modal('hide');", true);
 
-                    // Refresh the works list
-                    CargarListaObras();
+                    // MODIFIED: Force reload after database change
+                    CargarListaObras(null, true);
                 }
                 catch (Exception ex)
                 {

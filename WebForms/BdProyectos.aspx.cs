@@ -18,13 +18,15 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
+                // Load complete list for filters
+                Session["listaProyectosCompleta"] = bdProyectoNegocio.Listar(null, null, null, null);
+
                 BindDropDownList();
                 CargarListaProyectos();
                 CalcularSubtotal();
             }
         }
         
-        // Usado para el nuevo filtro. Las referencias se encuentran en el ASPX por ahora.
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaProyectos();
@@ -55,7 +57,7 @@ namespace WebForms
             ViewState["EditingObraId"] = null;
         }
 
-        private void CargarListaProyectos(string filtro = null)
+        private void CargarListaProyectos(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
@@ -81,6 +83,14 @@ namespace WebForms
                     filtro = txtBuscar.Text.Trim();
                 }
 
+                // Load complete list for filters if needed
+                if (forzarRecargaCompleta || Session["listaProyectosCompleta"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    Session["listaProyectosCompleta"] = bdProyectoNegocio.Listar(null, null, null, null);
+                }
+
+                // Always fetch filtered list based on current parameters
                 Session["listaProyectos"] = bdProyectoNegocio.Listar(selectedLineas, selectedProyectos, selectedAreas, filtro);
                 dgvBdProyecto.DataSource = Session["listaProyectos"];
                 dgvBdProyecto.DataBind();
@@ -195,7 +205,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -218,7 +227,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Proyecto eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaProyectos();
+                    CargarListaProyectos(null, true); // Force complete reload
                     CalcularSubtotal();
                 }
             }
@@ -383,7 +392,7 @@ namespace WebForms
                     "$('#modalAgregar').modal('hide');", true);
 
                 // Refresh the projects list
-                CargarListaProyectos();
+                CargarListaProyectos(null, true);
                 CalcularSubtotal();
             }
             catch (Exception ex)

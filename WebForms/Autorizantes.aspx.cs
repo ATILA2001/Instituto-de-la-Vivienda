@@ -13,7 +13,78 @@ namespace WebForms
     public partial class Autorizantes : System.Web.UI.Page
     {
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
+
+                // Obtener todos los autorizantes del usuario desde la sesión o volver a cargarlos
+                List<Autorizante> autorizantes;
+
+                if (Session["autorizantesUsuarioCompleto"] != null)
+                {
+                    autorizantes = (List<Autorizante>)Session["autorizantesUsuarioCompleto"];
+                }
+                else
+                {
+                    AutorizanteNegocio negocio = new AutorizanteNegocio();
+                    // Provide the required arguments for the `listar` method
+                    autorizantes = negocio.listar(
+                        usuarioLogueado,
+                        new List<string>(),
+                        new List<string>(), 
+                        new List<string>(),
+                        new List<string>(), 
+                        null                
+                    );
+                    Session["autorizantesUsuarioCompleto"] = autorizantes;
+                }
+
+                if (autorizantes.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+                    {
+                        { "Obra", "Obra.Descripcion" },
+                        { "Contrata", "Obra.Contrata.Nombre" },
+                        { "Empresa", "Empresa" },
+                        { "Código Autorizante", "CodigoAutorizante" },
+                        { "Concepto", "Concepto.Nombre" },
+                        { "Detalle", "Detalle" },
+                        { "Expediente", "Expediente" },
+                        { "Estado", "Estado" },
+                        { "Monto Autorizado", "MontoAutorizado" },
+                        { "Mes Aprobacion", "Fecha" },
+                        { "Mes Base", "MesBase" },
+                        { "Buzon sade", "BuzonSade" },
+                        { "Fecha sade", "FechaSade" }
+                    };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvAutorizante, autorizantes, mapeoColumnas, "Autorizantes");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -23,8 +94,10 @@ namespace WebForms
                 {
                     // Cargar la lista completa de autorizantes para el área del usuario y guardarla en sesión
                     // Se pasan listas vacías para los filtros para obtener todos los del área.
-                    List<Autorizante> listaCompletaUsuario = negocio.listar(usuarioLogueado,
-                        new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //List<Autorizante> listaCompletaUsuario = negocio.listar(usuarioLogueado,
+                    //    new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+
+                    List<Autorizante> listaCompletaUsuario = calculoRedeterminacionNegocio.listarAutRedet(usuarioLogueado);
                     Session["autorizantesUsuarioCompleto"] = listaCompletaUsuario;
                 }
                 else
@@ -105,27 +178,34 @@ namespace WebForms
             txtSubtotal.Text = subtotal.ToString("C");
         }
 
-        private void CargarListaAutorizantes(string filtro = null)
+        private void CargarListaAutorizantes(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
                 List<Autorizante> listaBase;
 
-                    
-                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+                    if (forzarRecargaCompleta || Session["autorizantesUsuarioCompleto"] == null)
                     {
-                        listaBase = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        listaBase = calculoRedeterminacionNegocio.listarAutRedet(usuarioLogueado);
                         Session["autorizantesUsuarioCompleto"] = listaBase;
                     }
                     else
                     {
-                        dgvAutorizante.DataSource = new List<Autorizante>();
-                        dgvAutorizante.DataBind();
-                        CalcularSubtotal();
-                        return;
+                        listaBase = (List<Autorizante>)Session["autorizantesUsuarioCompleto"];
                     }
-                
+                }
+                else
+                {
+                    dgvAutorizante.DataSource = new List<Autorizante>();
+                    dgvAutorizante.DataBind();
+                    CalcularSubtotal();
+                    return;
+                }
+
 
                 IEnumerable<Autorizante> listaFiltrada = listaBase;
 
@@ -268,7 +348,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -291,7 +370,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Autorizante eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaAutorizantes();
+                    CargarListaAutorizantes(null, true); // Force complete reload
                     CalcularSubtotal();
                 }
             }
@@ -416,8 +495,6 @@ namespace WebForms
                 }
             }
         }
-
-
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             if (Page.IsValid)
@@ -485,17 +562,16 @@ namespace WebForms
                     // Clear fields
                     LimpiarFormulario();
 
-                    // Reset the modal title and button text
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
-                        "$('#modalAgregar .modal-title').text('Agregar Autorizante');", true);
+                 "$('#modalAgregar .modal-title').text('Agregar Autorizante');", true);
                     Button1.Text = "Agregar";
 
                     // Hide the modal
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                         "$('#modalAgregar').modal('hide');", true);
 
-                    // Refresh the autorizantes list
-                    CargarListaAutorizantes();
+                    // Refresh the autorizantes list - MODIFIED: Force complete reload
+                    CargarListaAutorizantes(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -554,8 +630,7 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-       
-
+      
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
@@ -602,7 +677,7 @@ namespace WebForms
                         }
 
                         // Recargar la lista filtrada
-                        CargarListaAutorizantes();
+                        CargarListaAutorizantes(null, true); // Force complete reload
 
                         lblMensaje.Text = "Estado actualizado correctamente.";
                         lblMensaje.CssClass = "alert alert-success";
@@ -644,7 +719,7 @@ namespace WebForms
                         Session["autorizantesUsuarioCompleto"] = listaCompletaActualizada;
                     }
 
-                    CargarListaAutorizantes();
+                    CargarListaAutorizantes(null, true); // Force complete reload
                     CalcularSubtotal();
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
@@ -657,7 +732,6 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {

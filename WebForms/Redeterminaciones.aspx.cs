@@ -23,12 +23,9 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                // Cargar la lista completa de redeterminaciones y guardarla en Session
-                List<Redeterminacion> redeterminacionesCompletas = negocio.listar(); // Usar la sobrecarga que trae todos los datos necesarios
-                Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
-
+                // Force complete reload on initial page load
+                CargarListaRedeterminacion(null, true);
                 BindDropDownList();
-                CargarListaRedeterminacion();
             }
         }
 
@@ -122,14 +119,23 @@ namespace WebForms
             }
         }
 
-        private void CargarListaRedeterminacion(string filtro = null)
+        private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Redeterminacion> redeterminacionesCompletas = negocio.listar();
-                
-                Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
-                
+                List<Redeterminacion> redeterminacionesCompletas;
+
+                if (forzarRecargaCompleta || Session["redeterminacionesCompletas"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    redeterminacionesCompletas = negocio.listar();
+                    Session["redeterminacionesCompletas"] = redeterminacionesCompletas;
+                }
+                else
+                {
+                    // Use cached data from session
+                    redeterminacionesCompletas = (List<Redeterminacion>)Session["redeterminacionesCompletas"];
+                }
 
                 if (redeterminacionesCompletas == null)
                 {
@@ -367,7 +373,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Redeterminación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaRedeterminacion();
+                    CargarListaRedeterminacion(null, true);
                 }
             }
             catch (Exception ex)
@@ -472,8 +478,8 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                     "$('#modalAgregar').modal('hide');", true);
 
-                // Refresh the redeterminaciones list
-                CargarListaRedeterminacion();
+                // MODIFIED: Force reload after database change
+                CargarListaRedeterminacion(null, true);
             }
             catch (Exception ex)
             {
@@ -482,7 +488,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             if (dropDown != null && dropDown.Items.Count > 0)
@@ -591,7 +596,7 @@ namespace WebForms
                 redeterminacion.Etapa.Id = int.Parse(ddlEtapas.SelectedValue);
                 RedeterminacionNegocio negocio = new RedeterminacionNegocio();
                 negocio.ActualizarEstado(redeterminacion);
-                CargarListaRedeterminacion();
+                CargarListaRedeterminacion(null, true);
 
                 lblMensaje.Text = "Etapa actualizada correctamente.";
                 lblMensaje.CssClass = "alert alert-success";

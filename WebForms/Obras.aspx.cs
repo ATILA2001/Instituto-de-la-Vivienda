@@ -39,12 +39,76 @@ namespace WebForms
             }
         }
 
-        // Evento para los filtros de cabecera
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaObras();
         }
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener el usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
+
+                // Obtener las obras completas del usuario desde la sesión o volver a cargarlas
+                List<Obra> obrasUsuario;
+                if (Session["obrasUsuarioCompleto"] != null)
+                {
+                    obrasUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
+                }
+                else
+                {
+                    obrasUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = obrasUsuario;
+                }
+
+               
+                if (obrasUsuario.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Área", "Area.Nombre" },
+                { "Area", "Area.Nombre" },
+                { "Empresa", "Empresa.Nombre" },
+                { "Contrata", "ContrataFormateada" },
+                { "Barrio", "Barrio.Nombre" },
+                { "Nombre de Obra", "Descripcion" },
+                { "Descripcion", "Descripcion" },
+                { "Linea de Gestion", "LineaGestion.Nombre" },
+                { "Proyecto", "Proyecto.Proyecto" },
+                { "Disponible Actual", "AutorizadoNuevo" },
+                { "Planificacion 2025", "MontoCertificado" },
+                { "Ejecucion Presupuesto 2025", "Porcentaje" },
+                { "Monto de Obra inicial", "MontoInicial" },
+                { "Monto de Obra actual", "MontoActual" },
+                { "Faltante de Obra", "MontoFaltante" },
+                { "Fecha Inicio", "FechaInicio" },
+                { "Fecha Fin", "FechaFin" }
+            };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvObra, obrasUsuario, mapeoColumnas, "Obras");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
             // Clear any existing data
@@ -84,7 +148,7 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro = null)
+        private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
@@ -98,9 +162,19 @@ namespace WebForms
                     return;
                 }
 
-                List<Obra> listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
-                
-                Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                List<Obra> listaCompletaUsuario;
+
+                if (forzarRecargaCompleta || Session["obrasUsuarioCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompletaUsuario = negocio.listar(usuarioLogueado, new List<string>(), new List<string>(), null);
+                    Session["obrasUsuarioCompleto"] = listaCompletaUsuario;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompletaUsuario = (List<Obra>)Session["obrasUsuarioCompleto"];
+                }
 
                 IEnumerable<Obra> listaFiltrada = listaCompletaUsuario;
 
@@ -215,7 +289,6 @@ namespace WebForms
 
                     // Clear fields
                     ClearFormFields();
-
                     // Reset the modal title and button text
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
                         "$('#modalAgregar .modal-title').text('Agregar Obra');", true);
@@ -225,8 +298,8 @@ namespace WebForms
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                         "$('#modalAgregar').modal('hide');", true);
 
-                    // Refresh the works list
-                    CargarListaObras();
+                    // Refresh the works list - MODIFIED: force complete reload
+                    CargarListaObras(null, true);
                 }
                 catch (Exception ex)
                 {
@@ -305,7 +378,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -328,7 +400,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaObras(); // Actualizar el GridView
+                    CargarListaObras(null, true);
                 }
             }
             catch (Exception ex)
@@ -431,16 +503,12 @@ namespace WebForms
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
-        }
-
-
-      
+        }      
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();
             CargarListaObras(filtro);
         }
-
 
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {

@@ -93,18 +93,28 @@ namespace WebForms
             return unidadMedidaNegocio.listarddl();
         }
 
-        private void CargarListaFormulaciones(string filtro = null)
+        private void CargarListaFormulaciones(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
                 // Obtener el usuario actual
                 Usuario usuarioActual = (Usuario)Session["usuario"];
 
-                // 1. Obtener lista completa desde la sesión
-                List<Formulacion> formulacionesCompletas =  negocio.listar(usuarioActual);
-                
-                Session["formulacionesCompletas"] = formulacionesCompletas;
-                
+                // 1. Obtener lista completa desde la sesión o database si es necesario
+                List<Formulacion> formulacionesCompletas;
+
+                if (forzarRecargaCompleta || Session["formulacionesCompletas"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist
+                    formulacionesCompletas = negocio.listar(usuarioActual);
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+                }
+                else
+                {
+                    // Use cached data from session
+                    formulacionesCompletas = (List<Formulacion>)Session["formulacionesCompletas"];
+                }
+
                 IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
 
                 // 2. Aplicar filtro de texto general (txtBuscar)
@@ -250,7 +260,6 @@ namespace WebForms
             }
         }
 
-        // Método auxiliar para seleccionar un elemento de un DropDownList por su valor
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Limpiar cualquier selección actual
@@ -279,7 +288,7 @@ namespace WebForms
                     List<Formulacion> formulacionesCompletas = negocio.listar(usuarioActual);
                     Session["formulacionesCompletas"] = formulacionesCompletas;
 
-                    CargarListaFormulaciones(); // Actualizar el GridView
+                    CargarListaFormulaciones(null, true);
                 }
             }
             catch (Exception ex)
@@ -402,7 +411,7 @@ namespace WebForms
                     // Actualizar la lista de formulaciones
                     List<Formulacion> formulacionesCompletas = negocio.listar(usuarioActual);
                     Session["formulacionesCompletas"] = formulacionesCompletas;
-                    CargarListaFormulaciones();
+                    CargarListaFormulaciones(null, true);
                 }
                 catch (Exception ex)
                 {

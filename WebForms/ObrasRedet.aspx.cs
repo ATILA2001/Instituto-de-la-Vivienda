@@ -18,12 +18,8 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                // Cargar la lista completa de obras una vez y guardarla en Session.
-                // Se asume que llamar a negocio.listar con todos los filtros null/vacíos devuelve todas las obras.
-                List<Obra> obrasCompletas = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                Session["obrasCompletasRedet"] = obrasCompletas;
-
-                CargarListaObras();
+                // Force complete reload on initial page load
+                CargarListaObras(null, true);
             }
         }
 
@@ -104,14 +100,24 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro = null)
+        private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Obra> obrasCompletas =  negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                
-                Session["obrasCompletasRedet"] = obrasCompletas;
-                
+                List<Obra> obrasCompletas;
+
+                if (forzarRecargaCompleta || Session["obrasCompletasRedet"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    obrasCompletas = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["obrasCompletasRedet"] = obrasCompletas;
+                }
+                else
+                {
+                    // Use cached data from session
+                    obrasCompletas = (List<Obra>)Session["obrasCompletasRedet"];
+                }
+
                 IEnumerable<Obra> listaFiltrada = obrasCompletas;
 
                 // Aplicar filtro de texto general

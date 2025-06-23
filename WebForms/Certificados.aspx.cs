@@ -14,7 +14,73 @@ namespace WebForms
     public partial class Certificados : System.Web.UI.Page
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
+        CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
 
+                // Obtener todos los certificados del usuario desde la sesión o volver a cargarlos
+                List<Certificado> certificados;
+
+                if (Session["certificadosUsuarioCompleto"] != null)
+                {
+                    certificados = (List<Certificado>)Session["certificadosUsuarioCompleto"];
+                }
+                else
+                {
+                    certificados = calculoRedeterminacionNegocio.listarCertReliq(usuarioLogueado);
+                    Session["certificadosUsuarioCompleto"] = certificados;
+                }
+
+
+                if (certificados.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Obra", "Autorizante.Obra.Descripcion" },
+                { "Contrata", "Autorizante.Obra.Contrata.Nombre" },
+                { "Detalle", "Autorizante.Detalle" },
+                { "Empresa", "Empresa" },
+                { "Código Autorizante", "Autorizante.CodigoAutorizante" },
+                { "Codigo Autorizante", "Autorizante.CodigoAutorizante" },
+                { "Expediente", "ExpedientePago" },
+                { "Estado", "Estado" },
+                { "Tipo", "Tipo.Nombre" },
+                { "Monto Certificado", "MontoTotal" },
+                { "Mes Certificado", "MesAprobacion" },
+                { "Porcentaje", "Porcentaje" },
+                { "Sigaf", "Sigaf" },
+                { "Buzon sade", "BuzonSade" },
+                { "Fecha sade", "FechaSade" },
+                { "Área", "Autorizante.Obra.Area.Nombre" },
+                { "Area", "Autorizante.Obra.Area.Nombre" }
+            };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvCertificado, certificados, mapeoColumnas, "Certificados");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -115,7 +181,8 @@ namespace WebForms
 
                     if (forzarRecargaCompleta || Session["certificadosUsuarioCompleto"] == null)
                     {
-                        listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        listaCompleta = calculoRedeterminacionNegocio.listarCertReliq(usuarioLogueado);
                         Session["certificadosUsuarioCompleto"] = listaCompleta;
                     }
                     else
@@ -131,12 +198,13 @@ namespace WebForms
                     CalcularSubtotal();
                     return;
                 }
-                
+
 
 
                 IEnumerable<Certificado> listaFiltrada = listaCompleta;
 
                 // Obtener valores de los filtros de cabecera
+                List<string> selectedHeaderObra = new List<string>();
                 List<string> selectedHeaderEmpresas = new List<string>();
                 List<string> selectedHeaderCodigosAutorizante = new List<string>();
                 List<string> selectedHeaderEstados = new List<string>();
@@ -145,6 +213,10 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow != null)
                 {
+                    var cblsHeaderObraControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
+                    if (cblsHeaderObraControl != null) selectedHeaderObra = cblsHeaderObraControl.SelectedValues;
+
+
                     var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
@@ -179,6 +251,9 @@ namespace WebForms
                 }
 
                 // Aplicar filtros de cabecera
+                if (selectedHeaderObra.Any())
+                    listaFiltrada = listaFiltrada.Where(m => m.Autorizante?.Obra != null && selectedHeaderObra.Contains(m.Autorizante.Obra.Id.ToString()));
+
                 if (selectedHeaderEmpresas.Any())
                     listaFiltrada = listaFiltrada.Where(c => !string.IsNullOrEmpty(c.Empresa) && selectedHeaderEmpresas.Contains(c.Empresa));
 
@@ -306,7 +381,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -329,7 +403,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
             }
@@ -440,7 +514,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the certificados list
-                    CargarListaCertificados();
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -503,6 +577,25 @@ namespace WebForms
             {
                 List<Certificado> certificadosUsuarioCompleto = Session["certificadosUsuarioCompleto"] as List<Certificado>;
                 if (certificadosUsuarioCompleto == null || !certificadosUsuarioCompleto.Any()) return;
+
+
+                // Poblar filtro de Obra
+                var cblsHeaderObra = e.Row.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
+                if (cblsHeaderObra != null)
+                {
+                    var obrasUnicas = certificadosUsuarioCompleto
+                        .Where(a => a.Autorizante?.Obra != null)
+                        .Select(a => new { Id = a.Autorizante.Obra.Id, Nombre = a.Autorizante.Obra.Descripcion })
+                        .Distinct()
+                        .OrderBy(o => o.Nombre)
+                        .ToList();
+
+                    cblsHeaderObra.DataTextField = "Nombre";
+                    cblsHeaderObra.DataValueField = "Id";
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+
+                }
 
                 // Poblar filtro de Empresa
                 var cblsHeaderEmpresa = e.Row.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
@@ -582,7 +675,8 @@ namespace WebForms
                         .Select(c => c.MesAprobacion.Value)
                         .Distinct()
                         .OrderByDescending(d => d)
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             Id = d.ToString("yyyy-MM-dd"), // Formato que el UserControl puede parsear
                             Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")) // Para visualización si es necesario
                         })
@@ -594,7 +688,6 @@ namespace WebForms
                 }
             }
         }
-
 
         private void BindDropDownList()
         {// Clear existing items first
@@ -617,7 +710,7 @@ namespace WebForms
 
             ddlAutorizante.DataSource = ObtenerAutorizantes();
             ddlAutorizante.DataTextField = "Nombre";
-            ddlAutorizante.DataValueField = "Id"; 
+            ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
         }
         private DataTable ObtenerEmpresas()
@@ -625,7 +718,6 @@ namespace WebForms
             EmpresaNegocio empresaNegocio = new EmpresaNegocio();
             return empresaNegocio.listarddl();
         }
-
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -648,7 +740,7 @@ namespace WebForms
 
                 // Mensaje de éxito o retroalimentación opcional
                 lblMensaje.Text = "Expediente actualizado correctamente.";
-                CargarListaCertificados();
+                CargarListaCertificados(null, true);
                 CalcularSubtotal();
 
             }

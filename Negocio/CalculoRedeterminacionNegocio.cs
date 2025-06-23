@@ -246,7 +246,7 @@
                             Concepto = new Concepto { Id = 11, Nombre = "REDETERMINACION" }, // Assign a default concept
                             Detalle = redet.Tipo + " - " + redet.Etapa,
                             Expediente = redet.Expediente,
-                            Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre },
+                            Estado = MapearEstadosRedetAEstadoAutorizante(redet),
                             MontoAutorizado = redet.MontoRedet.HasValue ? redet.MontoRedet.Value : 0,
                             Fecha = redet.Salto,
                             Empresa = redet.Empresa,
@@ -425,7 +425,7 @@
                                     },
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
-                                    Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
+                                    Tipo = new TipoPago { Id = 3, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
                                     Porcentaje = porcentajeCalculado
                                 };
@@ -732,7 +732,7 @@
                                     },
                                     MontoTotal = montoCertificadoRedet,
                                     MesAprobacion = certificadoOriginal.MesAprobacion,
-                                    Tipo = new TipoPago { Id = 2, Nombre = "RELIQUIDACION" },
+                                    Tipo = new TipoPago { Id = 3, Nombre = "RELIQUIDACION" },
                                     Empresa = redet.Empresa,
                                     Porcentaje = porcentajeCalculado
                                 };
