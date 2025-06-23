@@ -479,7 +479,6 @@ namespace WebForms
             }
         }
 
- 
 
         protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -542,7 +541,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -773,7 +771,6 @@ namespace WebForms
             ddlAutorizante.DataBind();
         }
 
-
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
             try
@@ -888,8 +885,6 @@ namespace WebForms
             string filtro = txtBuscar.Text.Trim();
             CargarListaCertificados(filtro);
         }
-
-        
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
@@ -905,8 +900,6 @@ namespace WebForms
 
             txtSubtotal.Text = subtotal.ToString("C");
         }
-
-
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;

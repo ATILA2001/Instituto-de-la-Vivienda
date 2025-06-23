@@ -20,11 +20,8 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                List<Movimiento> listaCompleta = negocio.listar(new List<string>(), null);
-                Session["movimientosCompleto"] = listaCompleta;
-
                 BindDropDownList();
-                CargarListaMovimientos();
+                CargarListaMovimientos(null, true);
             }
         }
         public void OnAcceptChanges(object sender, EventArgs e)
@@ -88,7 +85,6 @@ namespace WebForms
             }
         }
 
-
         protected void Page_PreRender(object sender, EventArgs e)
         {
             // Configure validators if we're in editing mode
@@ -142,13 +138,23 @@ namespace WebForms
                 ddlObra.SelectedIndex = 0;
         }
 
-        private void CargarListaMovimientos(string filtro = null)
+        private void CargarListaMovimientos(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Movimiento> listaCompleta = negocio.listar(new List<string>(), null);
-                
-                Session["movimientosCompleto"] = listaCompleta;
+                List<Movimiento> listaCompleta;
+
+                if (forzarRecargaCompleta || Session["movimientosCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompleta = negocio.listar(new List<string>(), null);
+                    Session["movimientosCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompleta = (List<Movimiento>)Session["movimientosCompleto"];
+                }
 
                 IEnumerable<Movimiento> listaFiltrada = listaCompleta;
 
@@ -211,8 +217,6 @@ namespace WebForms
             }
         }
 
-
-
         protected void dgvMovimiento_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -273,7 +277,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Movimiento eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaMovimientos();
+                    CargarListaMovimientos(null, true);
                 }
             }
             catch (Exception ex)
@@ -365,8 +369,8 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                     "$('#modalAgregar').modal('hide');", true);
 
-                // Refresh the movimientos list
-                CargarListaMovimientos();
+                // MODIFIED: Force reload after database change
+                CargarListaMovimientos(null, true);
             }
             catch (Exception ex)
             {
@@ -394,7 +398,6 @@ namespace WebForms
             ddlObra.Items.Insert(0, new ListItem("Seleccione una obra", ""));
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection

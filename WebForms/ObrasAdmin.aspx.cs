@@ -84,12 +84,9 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                // Cargar la lista completa una vez y guardarla en sesión
-                List<Obra> listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
-                Session["obrasCompleto"] = listaCompleta;
-
+                // Force complete reload on initial page load
+                CargarListaObras(null, true);
                 BindDropDownList();
-                CargarListaObras();
             }
         }
 
@@ -178,13 +175,23 @@ namespace WebForms
             return barrioNegocio.listarddl();
         }
 
-        private void CargarListaObras(string filtro = null)
+        private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Obra> listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                List<Obra> listaCompleta;
 
-                Session["obrasCompleto"] = listaCompleta;
+                if (forzarRecargaCompleta || Session["obrasCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompleta = negocio.listar(new List<string>(), new List<string>(), new List<string>(), null);
+                    Session["obrasCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompleta = (List<Obra>)Session["obrasCompleto"];
+                }
 
                 IEnumerable<Obra> listaFiltrada = listaCompleta;
 
@@ -357,7 +364,6 @@ namespace WebForms
             }
         }
 
-
         protected void dgvObra_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -425,7 +431,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -448,7 +453,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaObras(); // Actualizar el GridView
+                    CargarListaObras(null, true);
                 }
             }
             catch (Exception ex)
@@ -560,8 +565,8 @@ namespace WebForms
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                         "$('#modalAgregar').modal('hide');", true);
 
-                    // Refresh the works list
-                    CargarListaObras();
+                    // MODIFIED: Force reload after database change
+                    CargarListaObras(null, true);
                 }
                 catch (Exception ex)
                 {

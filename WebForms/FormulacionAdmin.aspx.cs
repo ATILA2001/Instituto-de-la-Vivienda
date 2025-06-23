@@ -94,15 +94,25 @@ namespace WebForms
             return unidadMedidaNegocio.listarddl();
         }
 
-        private void CargarListaFormulaciones(string filtro = null)
+        private void CargarListaFormulaciones(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                // 1. Get complete list from session
-                List<Formulacion> formulacionesCompletas = negocio.listar();
-                
-                Session["formulacionesCompletas"] = formulacionesCompletas;
-                
+                // 1. Get complete list from session or database as needed
+                List<Formulacion> formulacionesCompletas;
+
+                if (forzarRecargaCompleta || Session["formulacionesCompletas"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist
+                    formulacionesCompletas = negocio.listar();
+                    Session["formulacionesCompletas"] = formulacionesCompletas;
+                }
+                else
+                {
+                    // Use cached data from session
+                    formulacionesCompletas = (List<Formulacion>)Session["formulacionesCompletas"];
+                }
+
                 IEnumerable<Formulacion> listaFiltrada = formulacionesCompletas;
 
                 // 2. Apply general text filter (txtBuscar)
@@ -242,7 +252,6 @@ namespace WebForms
                             // Mostrar el modal
                             $('#modalAgregar').modal('show');
                         });", true);
-                    CargarListaFormulaciones();
                 }
             }
             catch (Exception ex)
@@ -252,7 +261,6 @@ namespace WebForms
             }
         }
 
-        // Método auxiliar para seleccionar un elemento de un DropDownList por su valor
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Limpiar cualquier selección actual
@@ -276,9 +284,8 @@ namespace WebForms
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
 
-                    // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                    Session["formulacionesCompletas"] = negocio.listar();
-                    CargarListaFormulaciones(); // Actualizar el GridView
+                    CargarListaFormulaciones(null, true); // Force reload after database change
+
                 }
             }
             catch (Exception ex)
@@ -383,17 +390,11 @@ namespace WebForms
                     if (ViewState["EditingFormulacionId"] != null)
                     {
                         negocio.modificar(formulacion);
-                        // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                        Session["formulacionesCompletas"] = negocio.listar();
-                        CargarListaFormulaciones();
                         lblMensaje.Text = "Formulación modificada exitosamente!";
                     }
                     else
                     {
                         negocio.agregar(formulacion);
-                        // Actualizar la lista completa en la sesión ANTES de cargar la grilla
-                        Session["formulacionesCompletas"] = negocio.listar();
-                        CargarListaFormulaciones();
                         lblMensaje.Text = "Formulación agregada exitosamente!";
                     }
 
@@ -406,14 +407,16 @@ namespace WebForms
 
                     // Restablecer UI
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalAndUI", @"
-                $('#modalAgregar .modal-title').text('Agregar Formulación');
-                document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
-                $('.col-12:first').show();
-                $('#modalAgregar').modal('hide');
-            ", true);
+            $('#modalAgregar .modal-title').text('Agregar Formulación');
+            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
+            $('.col-12:first').show();
+            $('#modalAgregar').modal('hide');
+        ", true);
 
                     btnAgregar.Text = "Agregar";
 
+                    // MODIFIED: Use consistent pattern for loading data
+                    CargarListaFormulaciones(null, true); // Force reload after database change
                 }
                 catch (Exception ex)
                 {
@@ -523,7 +526,6 @@ namespace WebForms
             }
         }
 
-
         private void BindDropDownList()
         {
             ddlObra.Items.Clear();
@@ -578,8 +580,6 @@ namespace WebForms
 
             CargarListaFormulaciones();
         }
-
-
 
     }
 }

@@ -20,12 +20,8 @@ namespace WebForms
         {
             if (!IsPostBack)
             {
-                // Cargar la lista completa de autorizantes usando CalculoRedeterminacionNegocio
-                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
-                Session["autorizantesCompletosRedet"] = listaCompleta;
+                CargarListaAutorizantes(null, true);
 
-                CargarListaAutorizantes();
-                // CalcularSubtotal se llama dentro de CargarListaAutorizantes
             }
         }
 
@@ -52,14 +48,23 @@ namespace WebForms
         }
 
 
-        private void CargarListaAutorizantes(string filtro = null)
+        private void CargarListaAutorizantes(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
-                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                List<Autorizante> listaCompleta;
 
-                Session["autorizantesCompletosRedet"] = listaCompleta;
-
+                if (forzarRecargaCompleta || Session["autorizantesCompletosRedet"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                    Session["autorizantesCompletosRedet"] = listaCompleta;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompleta = (List<Autorizante>)Session["autorizantesCompletosRedet"];
+                }
 
                 if (listaCompleta == null)
                 {
@@ -167,18 +172,15 @@ namespace WebForms
         {
             if (e.Row.RowType == DataControlRowType.Header)
             {
-                List<Autorizante> autorizantesCompletos;
-                if (Session["autorizantesCompletosRedet"] == null)
+                List<Autorizante> autorizantesCompletos = (List<Autorizante>)Session["autorizantesCompletosRedet"];
+                if (autorizantesCompletos == null || !autorizantesCompletos.Any())
                 {
+                    // If session data is missing (shouldn't happen if our pattern is followed), 
+                    // load it but this is a fallback
                     autorizantesCompletos = calculoRedeterminacionNegocio.listarAutRedet();
                     Session["autorizantesCompletosRedet"] = autorizantesCompletos;
+                    if (autorizantesCompletos == null || !autorizantesCompletos.Any()) return;
                 }
-                else
-                {
-                    autorizantesCompletos = (List<Autorizante>)Session["autorizantesCompletosRedet"];
-                }
-
-                if (autorizantesCompletos == null || !autorizantesCompletos.Any()) return;
 
                 // Poblar filtro de Área
                 var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
@@ -258,7 +260,6 @@ namespace WebForms
             {
                 dgvAutorizante.PageIndex = e.NewPageIndex;
                 CargarListaAutorizantes();
-                CalcularSubtotal();
             }
             catch (Exception ex)
             {

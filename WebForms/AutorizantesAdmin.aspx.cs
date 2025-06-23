@@ -183,7 +183,7 @@ namespace WebForms
                             lblMensaje.CssClass = "alert alert-success";
 
                             //CargarListaAutorizantes();
-                            CargarListaAutorizantesRedet();
+                            CargarListaAutorizantesRedet(null, true); // Force complete reload
                             CalcularSubtotal();
 
                             // Clear the editing state
@@ -250,13 +250,25 @@ namespace WebForms
             ddlEstado.SelectedIndex = 0;
         }
 
-        private void CargarListaAutorizantesRedet(string filtro = null)
+        private void CargarListaAutorizantesRedet(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
             {
                 // 1. Obtener la lista completa
-                List<Autorizante> listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
-                Session["autorizantesCompleto"] = listaCompleta;
+                List<Autorizante> listaCompleta;
+
+                if (forzarRecargaCompleta || Session["autorizantesCompleto"] == null)
+                {
+                    // Only load from database when forced or data doesn't exist in session
+                    listaCompleta = calculoRedeterminacionNegocio.listarAutRedet();
+                    Session["autorizantesCompleto"] = listaCompleta;
+                }
+                else
+                {
+                    // Use cached data from session
+                    listaCompleta = (List<Autorizante>)Session["autorizantesCompleto"];
+                }
+
                 IEnumerable<Autorizante> listaFiltrada = listaCompleta;
 
                 // Obtener IDs seleccionados desde los controles de cabecera del GridView
@@ -425,7 +437,6 @@ namespace WebForms
             }
         }
 
-        // Helper method to select dropdown item by value
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
             // Clear any current selection
@@ -448,8 +459,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Autorizante eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    //CargarListaAutorizantes();
-                    CargarListaAutorizantesRedet();
+                    CargarListaAutorizantesRedet(null, true); // Force complete reload
                     CalcularSubtotal();
                 }
             }
@@ -511,16 +521,8 @@ namespace WebForms
 
                 if (negocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente))
                 {
-                    // Refrescar la sesión completa del usuario
-                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
-                    {
-                        List<Autorizante> listaCompletaActualizada = negocio.listar(usuarioLogueado,
-                            new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        Session["autorizantesUsuarioCompleto"] = listaCompletaActualizada;
-                    }
 
-                    CargarListaAutorizantesRedet();
+                    CargarListaAutorizantesRedet(null, true); // Force complete reload
                     CalcularSubtotal();
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
@@ -533,6 +535,7 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
+
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
@@ -567,12 +570,8 @@ namespace WebForms
 
                     if (negocio.ActualizarEstado(autorizante))
                     {
-                        // Refrescar la sesión completa de administrador
-                        List<Autorizante> listaCompletaActualizada = calculoRedeterminacionNegocio.listarAutRedet();
-                        Session["autorizantesCompleto"] = listaCompletaActualizada;
-
                         // Recargar la lista filtrada
-                        CargarListaAutorizantesRedet();
+                        CargarListaAutorizantesRedet(null, true); // Force complete reload
 
                         lblMensaje.Text = "Estado actualizado correctamente.";
                         lblMensaje.CssClass = "alert alert-success";
@@ -589,7 +588,6 @@ namespace WebForms
                 lblMensaje.Text = $"Error al actualizar el estado: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
-
         }
         protected void dgvAutorizante_RowDataBound(object sender, GridViewRowEventArgs e)
         {
@@ -701,7 +699,6 @@ namespace WebForms
                 }
             }
         }
-
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
@@ -710,8 +707,6 @@ namespace WebForms
 
             CargarListaAutorizantesRedet();
         }
-
-
         protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
