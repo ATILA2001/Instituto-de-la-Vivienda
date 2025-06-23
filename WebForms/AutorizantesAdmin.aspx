@@ -63,7 +63,7 @@
 									<div class="mb-3">
 										<label for="txtExpediente" class="form-label">Expediente</label>
 										<asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-										
+
 									</div>
 								</div>
 
@@ -210,19 +210,19 @@
 						</button>
 					</div>
 
-														<div class="form-group mb-2">
-					<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
-						data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+					<div class="form-group mb-2">
+						<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+							data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
     <i class="bi bi-download"></i>
 </asp:LinkButton>
-				</div>
+					</div>
 					<div class="form-group mb-2">
 						<button type="submit" class="btn btn-primary" runat="server" onserverclick="btnShowAddModal_Click">
 							<i class="bi bi-plus-lg"></i>Agregar
 						</button>
 					</div>
 
-								
+
 
 				</div>
 			</div>

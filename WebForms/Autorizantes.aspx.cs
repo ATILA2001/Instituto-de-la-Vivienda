@@ -15,6 +15,76 @@ namespace WebForms
         private AutorizanteNegocio negocio = new AutorizanteNegocio();
         CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
 
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
+
+                // Obtener todos los autorizantes del usuario desde la sesión o volver a cargarlos
+                List<Autorizante> autorizantes;
+
+                if (Session["autorizantesUsuarioCompleto"] != null)
+                {
+                    autorizantes = (List<Autorizante>)Session["autorizantesUsuarioCompleto"];
+                }
+                else
+                {
+                    AutorizanteNegocio negocio = new AutorizanteNegocio();
+                    // Provide the required arguments for the `listar` method
+                    autorizantes = negocio.listar(
+                        usuarioLogueado,
+                        new List<string>(),
+                        new List<string>(), 
+                        new List<string>(),
+                        new List<string>(), 
+                        null                
+                    );
+                    Session["autorizantesUsuarioCompleto"] = autorizantes;
+                }
+
+                if (autorizantes.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+                    {
+                        { "Obra", "Obra.Descripcion" },
+                        { "Contrata", "Obra.Contrata.Nombre" },
+                        { "Empresa", "Empresa" },
+                        { "Código Autorizante", "CodigoAutorizante" },
+                        { "Concepto", "Concepto.Nombre" },
+                        { "Detalle", "Detalle" },
+                        { "Expediente", "Expediente" },
+                        { "Estado", "Estado" },
+                        { "Monto Autorizado", "MontoAutorizado" },
+                        { "Mes Aprobacion", "Fecha" },
+                        { "Mes Base", "MesBase" },
+                        { "Buzon sade", "BuzonSade" },
+                        { "Fecha sade", "FechaSade" }
+                    };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvAutorizante, autorizantes, mapeoColumnas, "Autorizantes");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)

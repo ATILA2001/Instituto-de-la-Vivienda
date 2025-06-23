@@ -15,7 +15,72 @@ namespace WebForms
     {
         CertificadoNegocio negocio = new CertificadoNegocio();
         CalculoRedeterminacionNegocio calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocio();
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener usuario logueado
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado == null || usuarioLogueado.Area == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el área del usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
 
+                // Obtener todos los certificados del usuario desde la sesión o volver a cargarlos
+                List<Certificado> certificados;
+
+                if (Session["certificadosUsuarioCompleto"] != null)
+                {
+                    certificados = (List<Certificado>)Session["certificadosUsuarioCompleto"];
+                }
+                else
+                {
+                    certificados = calculoRedeterminacionNegocio.listarCertReliq(usuarioLogueado);
+                    Session["certificadosUsuarioCompleto"] = certificados;
+                }
+
+
+                if (certificados.Any())
+                {
+                    // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
+                    var mapeoColumnas = new Dictionary<string, string>
+            {
+                { "Obra", "Autorizante.Obra.Descripcion" },
+                { "Contrata", "Autorizante.Obra.Contrata.Nombre" },
+                { "Detalle", "Autorizante.Detalle" },
+                { "Empresa", "Empresa" },
+                { "Código Autorizante", "Autorizante.CodigoAutorizante" },
+                { "Codigo Autorizante", "Autorizante.CodigoAutorizante" },
+                { "Expediente", "ExpedientePago" },
+                { "Estado", "Estado" },
+                { "Tipo", "Tipo.Nombre" },
+                { "Monto Certificado", "MontoTotal" },
+                { "Mes Certificado", "MesAprobacion" },
+                { "Porcentaje", "Porcentaje" },
+                { "Sigaf", "Sigaf" },
+                { "Buzon sade", "BuzonSade" },
+                { "Fecha sade", "FechaSade" },
+                { "Área", "Autorizante.Obra.Area.Nombre" },
+                { "Area", "Autorizante.Obra.Area.Nombre" }
+            };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvCertificado, certificados, mapeoColumnas, "Certificados");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
