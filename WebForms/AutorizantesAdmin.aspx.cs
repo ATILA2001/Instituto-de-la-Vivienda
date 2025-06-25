@@ -132,11 +132,11 @@ namespace WebForms
             LimpiarFormulario();
         }
 
-        private DataTable ObtenerAreas()
-        {
-            AreaNegocio areaNegocio = new AreaNegocio();
-            return areaNegocio.listarddl();
-        }
+        //private DataTable ObtenerAreas()
+        //{
+        //    AreaNegocio areaNegocio = new AreaNegocio();
+        //    return areaNegocio.listarddl();
+        //}
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
@@ -501,11 +501,11 @@ namespace WebForms
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
         }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
-        }
+        //private DataTable ObtenerEmpresas()
+        //{
+        //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {

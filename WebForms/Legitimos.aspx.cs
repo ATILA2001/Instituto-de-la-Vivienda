@@ -539,36 +539,36 @@ namespace WebForms
             Usuario usuarioLogueado = (Usuario)Session["usuario"];
             return barrioNegocio.listarddl(usuarioLogueado);
         }
-        private DataTable ObtenerLegitimos()
-        {
-            LegitimoNegocio barrioNegocio = new LegitimoNegocio();
-            Usuario usuarioLogueado = (Usuario)Session["usuario"];
-            return barrioNegocio.listarddl(usuarioLogueado);
-        }
+        //private DataTable ObtenerLegitimos()
+        //{
+        //    LegitimoNegocio barrioNegocio = new LegitimoNegocio();
+        //    Usuario usuarioLogueado = (Usuario)Session["usuario"];
+        //    return barrioNegocio.listarddl(usuarioLogueado);
+        //}
 
-        private DataTable ObtenerEstadosExpedientes()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(int));
-            dt.Columns.Add("NOMBRE", typeof(string));
+        //private DataTable ObtenerEstadosExpedientes()
+        //{
+        //    DataTable dt = new DataTable();
+        //    dt.Columns.Add("ID", typeof(int));
+        //    dt.Columns.Add("NOMBRE", typeof(string));
 
-            DataRow _1 = dt.NewRow();
-            _1["ID"] = 0;
-            _1["NOMBRE"] = "NO INICIADO";
-            dt.Rows.Add(_1);
+        //    DataRow _1 = dt.NewRow();
+        //    _1["ID"] = 0;
+        //    _1["NOMBRE"] = "NO INICIADO";
+        //    dt.Rows.Add(_1);
 
-            DataRow _2 = dt.NewRow();
-            _2["ID"] = 1;
-            _2["NOMBRE"] = "EN TRAMITE";
-            dt.Rows.Add(_2);
+        //    DataRow _2 = dt.NewRow();
+        //    _2["ID"] = 1;
+        //    _2["NOMBRE"] = "EN TRAMITE";
+        //    dt.Rows.Add(_2);
 
-            DataRow _3 = dt.NewRow();
-            _3["ID"] = 2;
-            _3["NOMBRE"] = "DEVENGADO";
-            dt.Rows.Add(_3);
+        //    DataRow _3 = dt.NewRow();
+        //    _3["ID"] = 2;
+        //    _3["NOMBRE"] = "DEVENGADO";
+        //    dt.Rows.Add(_3);
 
-            return dt;
-        }
+        //    return dt;
+        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -641,18 +641,18 @@ namespace WebForms
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
         }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
-        }
-        private DataRow CrearFilaTodos(DataTable table)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = 0;
-            row["Nombre"] = "Todos";
-            return row;
-        }
+        //private DataTable ObtenerEmpresas()
+        //{
+        //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
+        //private DataRow CrearFilaTodos(DataTable table)
+        //{
+        //    DataRow row = table.NewRow();
+        //    row["Id"] = 0;
+        //    row["Nombre"] = "Todos";
+        //    return row;
+        //}
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
 

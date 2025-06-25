@@ -554,19 +554,19 @@ namespace WebForms
             }
         }
 
-        private DataTable ObtenerObras()
-        {
-            ObraNegocio empresaNegocio = new ObraNegocio();
-            return empresaNegocio.listarddl();
-        }
+        //private DataTable ObtenerObras()
+        //{
+        //    ObraNegocio empresaNegocio = new ObraNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
 
-        private DataRow CrearFilaTodos(DataTable table)
-        {
-            DataRow row = table.NewRow();
-            row["Id"] = 0;
-            row["Nombre"] = "Todos";
-            return row;
-        }
+        //private DataRow CrearFilaTodos(DataTable table)
+        //{
+        //    DataRow row = table.NewRow();
+        //    row["Id"] = 0;
+        //    row["Nombre"] = "Todos";
+        //    return row;
+        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
