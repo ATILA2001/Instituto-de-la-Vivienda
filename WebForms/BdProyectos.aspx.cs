@@ -419,7 +419,7 @@ namespace WebForms
 
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";
-            ddlLineaGestion.DataValueField = "Nombre";
+            ddlLineaGestion.DataValueField = "Id";
             ddlLineaGestion.DataBind();
         }
        
