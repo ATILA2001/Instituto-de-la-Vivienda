@@ -118,11 +118,11 @@ namespace WebForms
             CalcularSubtotal();
         }
 
-        private DataTable ObtenerAreas()
-        {
-            AreaNegocio areaNegocio = new AreaNegocio();
-            return areaNegocio.listarddl();
-        }
+        //private DataTable ObtenerAreas()
+        //{
+        //    AreaNegocio areaNegocio = new AreaNegocio();
+        //    return areaNegocio.listarddl();
+        //}
 
         protected void ddlLinea_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -419,7 +419,7 @@ namespace WebForms
 
             ddlLineaGestion.DataSource = ObtenerLineaGestion();
             ddlLineaGestion.DataTextField = "Nombre";
-            ddlLineaGestion.DataValueField = "Nombre";
+            ddlLineaGestion.DataValueField = "Id";
             ddlLineaGestion.DataBind();
         }
        
@@ -428,11 +428,11 @@ namespace WebForms
             ObraNegocio barrioNegocio = new ObraNegocio();
             return barrioNegocio.listarddlProyecto();
         }
-        private DataTable ObtenerProyecto()
-        {
-            BdProyectoNegocio barrioNegocio = new BdProyectoNegocio();
-            return barrioNegocio.listarddl();
-        }
+        //private DataTable ObtenerProyecto()
+        //{
+        //    BdProyectoNegocio barrioNegocio = new BdProyectoNegocio();
+        //    return barrioNegocio.listarddl();
+        //}
         private DataTable ObtenerLineaGestion()
         {
             LineaGestionNegocio barrioNegocio = new LineaGestionNegocio();

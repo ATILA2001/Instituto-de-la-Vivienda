@@ -625,11 +625,11 @@ namespace WebForms
             ddlObra.DataValueField = "Id";
             ddlObra.DataBind();
         }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
-        }
+        //private DataTable ObtenerEmpresas()
+        //{
+        //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
       
         private DataTable ObtenerEstado()
         {
@@ -742,30 +742,30 @@ namespace WebForms
             CargarListaAutorizantes();
         }
 
-        private void ClearHeaderFilter(string controlId)
-        {
-            if (dgvAutorizante.HeaderRow != null)
-            {
-                var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
-                if (control != null)
-                {
-                    control.ClearSelection();
-                    // Lógica para limpiar la sesión/contexto si el control TreeViewSearch lo requiere internamente
-                    // (similar a AutorizantesAdmin.aspx.cs)
-                    string controlInstanceId = control.ID;
-                    string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
-                    if (HttpContext.Current.Session[sessionKey] != null)
-                    {
-                        HttpContext.Current.Session.Remove(sessionKey);
-                    }
-                    string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey))
-                    {
-                        HttpContext.Current.Items.Remove(contextKey);
-                    }
-                }
-            }
-        }
+        //private void ClearHeaderFilter(string controlId)
+        //{
+        //    if (dgvAutorizante.HeaderRow != null)
+        //    {
+        //        var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
+        //        if (control != null)
+        //        {
+        //            control.ClearSelection();
+        //            // Lógica para limpiar la sesión/contexto si el control TreeViewSearch lo requiere internamente
+        //            // (similar a AutorizantesAdmin.aspx.cs)
+        //            string controlInstanceId = control.ID;
+        //            string sessionKey = $"TreeViewSearch_SelectedValues_{controlInstanceId}";
+        //            if (HttpContext.Current.Session[sessionKey] != null)
+        //            {
+        //                HttpContext.Current.Session.Remove(sessionKey);
+        //            }
+        //            string contextKey = $"TreeViewSearch_{controlInstanceId}_ContextSelectedValues";
+        //            if (HttpContext.Current.Items.Contains(contextKey))
+        //            {
+        //                HttpContext.Current.Items.Remove(contextKey);
+        //            }
+        //        }
+        //    }
+        //}
 
     }
 }

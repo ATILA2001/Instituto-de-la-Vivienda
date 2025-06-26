@@ -547,29 +547,29 @@ namespace WebForms
             return autorizanteNegocio.listarddl(usuarioLogueado);
         }
 
-        private DataTable ObtenerEstadosExpedientes()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(int));
-            dt.Columns.Add("NOMBRE", typeof(string));
+        //private DataTable ObtenerEstadosExpedientes()
+        //{
+        //    DataTable dt = new DataTable();
+        //    dt.Columns.Add("ID", typeof(int));
+        //    dt.Columns.Add("NOMBRE", typeof(string));
 
-            DataRow _1 = dt.NewRow();
-            _1["ID"] = 0;
-            _1["NOMBRE"] = "NO INICIADO";
-            dt.Rows.Add(_1);
+        //    DataRow _1 = dt.NewRow();
+        //    _1["ID"] = 0;
+        //    _1["NOMBRE"] = "NO INICIADO";
+        //    dt.Rows.Add(_1);
 
-            DataRow _2 = dt.NewRow();
-            _2["ID"] = 1;
-            _2["NOMBRE"] = "EN TRAMITE";
-            dt.Rows.Add(_2);
+        //    DataRow _2 = dt.NewRow();
+        //    _2["ID"] = 1;
+        //    _2["NOMBRE"] = "EN TRAMITE";
+        //    dt.Rows.Add(_2);
 
-            DataRow _3 = dt.NewRow();
-            _3["ID"] = 2;
-            _3["NOMBRE"] = "DEVENGADO";
-            dt.Rows.Add(_3);
+        //    DataRow _3 = dt.NewRow();
+        //    _3["ID"] = 2;
+        //    _3["NOMBRE"] = "DEVENGADO";
+        //    dt.Rows.Add(_3);
 
-            return dt;
-        }
+        //    return dt;
+        //}
 
         protected void dgvCertificado_RowDataBound(object sender, GridViewRowEventArgs e)
         {
@@ -713,11 +713,11 @@ namespace WebForms
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
         }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
-        }
+        //private DataTable ObtenerEmpresas()
+        //{
+        //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {

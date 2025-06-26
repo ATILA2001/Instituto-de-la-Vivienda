@@ -77,28 +77,28 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-        private DataTable ObtenerEmpresas()
-        {
-            EmpresaNegocio empresaNegocio = new EmpresaNegocio();
-            return empresaNegocio.listarddl();
-        }
-        private DataTable ObtenerAreas()
-        {
-            AreaNegocio areaNegocio = new AreaNegocio();
-            return areaNegocio.listarddl();
-        }
+        //private DataTable ObtenerEmpresas()
+        //{
+        //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
+        //    return empresaNegocio.listarddl();
+        //}
+        //private DataTable ObtenerAreas()
+        //{
+        //    AreaNegocio areaNegocio = new AreaNegocio();
+        //    return areaNegocio.listarddl();
+        //}
 
-        private DataTable ObtenerContratas()
-        {
-            ContrataNegocio contrataNegocio = new ContrataNegocio();
-            return contrataNegocio.listarddl();
-        }
+        //private DataTable ObtenerContratas()
+        //{
+        //    ContrataNegocio contrataNegocio = new ContrataNegocio();
+        //    return contrataNegocio.listarddl();
+        //}
 
-        private DataTable ObtenerBarrios()
-        {
-            BarrioNegocio barrioNegocio = new BarrioNegocio();
-            return barrioNegocio.listarddl();
-        }
+        //private DataTable ObtenerBarrios()
+        //{
+        //    BarrioNegocio barrioNegocio = new BarrioNegocio();
+        //    return barrioNegocio.listarddl();
+        //}
 
         private void CargarListaObras(string filtro = null, bool forzarRecargaCompleta = false)
         {
@@ -236,29 +236,29 @@ namespace WebForms
         }
 
 
-        private void BindDropDownList()
-        {
+        //private void BindDropDownList()
+        //{
 
      
 
-            //cblBarrio.DataSource = ObtenerBarrios();
-            //cblBarrio.DataTextField = "Nombre";
-            //cblBarrio.DataValueField = "Id";
-            //cblBarrio.DataBind();
+        //    //cblBarrio.DataSource = ObtenerBarrios();
+        //    //cblBarrio.DataTextField = "Nombre";
+        //    //cblBarrio.DataValueField = "Id";
+        //    //cblBarrio.DataBind();
 
 
-            //cblEmpresa.DataSource = ObtenerEmpresas();
-            //cblEmpresa.DataTextField = "Nombre";
-            //cblEmpresa.DataValueField = "Id";
-            //cblEmpresa.DataBind();
+        //    //cblEmpresa.DataSource = ObtenerEmpresas();
+        //    //cblEmpresa.DataTextField = "Nombre";
+        //    //cblEmpresa.DataValueField = "Id";
+        //    //cblEmpresa.DataBind();
 
-            //cblArea.DataSource = ObtenerAreas();
-            //cblArea.DataTextField = "Nombre";
-            //cblArea.DataValueField = "Id";
-            //cblArea.DataBind();
+        //    //cblArea.DataSource = ObtenerAreas();
+        //    //cblArea.DataTextField = "Nombre";
+        //    //cblArea.DataValueField = "Id";
+        //    //cblArea.DataBind();
 
 
-        }
+        //}
 
       
         protected void btnFiltrar_Click(object sender, EventArgs e)
