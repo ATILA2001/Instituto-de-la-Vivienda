@@ -14,6 +14,73 @@ namespace WebForms
     public partial class FormulacionUsuario : System.Web.UI.Page
     {
         private FormulacionNegocio negocio = new FormulacionNegocio();
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Verificar que el usuario esté logueado
+                Usuario usuarioActual = (Usuario)Session["usuario"];
+                if (usuarioActual == null)
+                {
+                    lblMensaje.Text = "No se pudo determinar el usuario para exportar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    return;
+                }
+
+                // Obtener datos completos (sin paginación) del usuario
+                List<Formulacion> formulaciones;
+
+                if (Session["formulacionesCompletas"] != null)
+                {
+                    formulaciones = (List<Formulacion>)Session["formulacionesCompletas"];
+                }
+                else
+                {
+                    FormulacionNegocio negocio = new FormulacionNegocio();
+                    formulaciones = negocio.listar(usuarioActual);
+                    Session["formulacionesCompletas"] = formulaciones;
+                }
+
+                if (formulaciones.Any())
+                {
+                    // Definir mapeo de columnas
+                    var mapeoColumnas = new Dictionary<string, string>
+                    {
+                        { "Área", "Obra.Area.Nombre" },
+                        { "Area", "Obra.Area.Nombre" }, // Versión sin acento
+                        { "Empresa", "Obra.Empresa.Nombre" },
+                        { "Contrata", "Obra.Contrata.Nombre" },
+                        { "Barrio", "Obra.Barrio.Nombre" },
+                        { "Nombre de Obra", "Obra.Descripcion" },
+                        { "Linea de Gestión", "Obra.LineaGestion.Nombre" },
+                        { "Línea de Gestión", "Obra.LineaGestion.Nombre" }, // Versión con acento
+                        { "Proyecto", "Obra.Proyecto.Proyecto" },
+                        { "Plurianual (2026,2027,2028)", "Plurianual" },
+                        { "Monto 2026", "Monto_26" },
+                        { "Monto 2027", "Monto_27" },
+                        { "Monto 2028", "Monto_28" },
+                        { "Mes Base", "MesBase" },
+                        { "Unidad de Medida", "UnidadMedida.Nombre" },
+                        { "Valor de Medida", "ValorMedida" },
+                        { "Observaciones", "Observacion" },
+                        { "Prioridad", "Prioridad.Nombre" }
+                    };
+
+                    // Exportar a Excel
+                    ExcelHelper.ExportarDatosGenericos(dgvFormulacion, formulaciones, mapeoColumnas, "Formulaciones");
+                }
+                else
+                {
+                    lblMensaje.Text = "No hay datos para exportar";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
 
         protected void OnAcceptChanges(object sender, EventArgs e)
         {

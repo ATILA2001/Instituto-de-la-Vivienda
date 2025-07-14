@@ -253,6 +253,12 @@
                             <i class="bi bi-funnel"></i>
                         </asp:LinkButton>
                     </div>
+                      <div class="form-group mb-2">
+      <asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+          data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+          <i class="bi bi-download"></i>
+      </asp:LinkButton>
+  </div>
                     <div class="form-group mb-2">
                         <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
                             <i class="bi bi-plus-lg"></i> Agregar
@@ -287,11 +293,9 @@
                     </asp:TemplateField>
 
                     <asp:BoundField HeaderText="Empresa" DataField="Obra.Empresa.Nombre" />
-                    <asp:TemplateField HeaderText="Contrata">
-                        <ItemTemplate>
-                            <%# Eval("Obra.Contrata.Nombre") + " " + Eval("Obra.Numero") + "/" + Eval("Obra.Año") %>
-                        </ItemTemplate>
-                    </asp:TemplateField>
+                    <asp:BoundField HeaderText="Contrata" DataField="Obra.Contrata.Nombre" />
+
+                   
                     <asp:BoundField HeaderText="Barrio" DataField="Obra.Barrio.Nombre" />
                     <asp:BoundField HeaderText="Nombre de Obra" DataField="Obra.Descripcion" />
 
