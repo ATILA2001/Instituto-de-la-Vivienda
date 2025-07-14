@@ -127,20 +127,83 @@ namespace Negocio
                 datos.setearParametros("@Monto26", formulacion.Monto_26);
                 datos.setearParametros("@Monto27", formulacion.Monto_27);
                 datos.setearParametros("@Monto28", formulacion.Monto_28);
-                datos.setearParametros("@Ppi", formulacion.Ppi);
-                datos.setearParametros("@IdUnidadMedida", formulacion.UnidadMedida.Id);
-                datos.setearParametros("@Techos", formulacion.Techos2026);
+
+                if (formulacion.Ppi != null)
+                    datos.setearParametros("@Ppi", formulacion.Ppi);
+                else
+                    datos.setearParametros("@Ppi", DBNull.Value);
+
+                if (formulacion.UnidadMedida != null)
+                    datos.setearParametros("@IdUnidadMedida", formulacion.UnidadMedida.Id);
+                else
+                    datos.setearParametros("@IdUnidadMedida", DBNull.Value);
+
+                if (formulacion.Techos2026 != null)
+                    datos.setearParametros("@Techos", formulacion.Techos2026);
+                else
+                    datos.setearParametros("@Techos", DBNull.Value);
+
                 if (formulacion.MesBase != null)
                     datos.setearParametros("@mes", formulacion.MesBase);
                 else
                     datos.setearParametros("@mes", DBNull.Value);
 
-
                 datos.setearParametros("@ValorMedida", formulacion.ValorMedida);
+
                 if (formulacion.Prioridad != null)
                     datos.setearParametros("@prioridad", formulacion.Prioridad.Id);
                 else
                     datos.setearParametros("@prioridad", DBNull.Value);
+
+                if (formulacion.Observacion != null)
+                    datos.setearParametros("@observacion", formulacion.Observacion);
+                else
+                    datos.setearParametros("@observacion", DBNull.Value);
+
+                datos.ejecutarAccion();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+        public void modificarUser(Formulacion formulacion)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                string consulta = "UPDATE FORMULACION SET MONTO_26 = @Monto26, " +
+                                 "MONTO_27 = @Monto27, MONTO_28 = @Monto28,  " +
+                                 "ID_UNIDAD_MEDIDA = @IdUnidadMedida, VALOR_MEDIDA = @ValorMedida,  MES_BASE = @mes,OBSERVACIONES = @observacion, PRIORIDAD = @prioridad " +
+                                 "WHERE ID = @Id";
+
+                datos.setearConsulta(consulta);
+                datos.setearParametros("@Id", formulacion.Id);
+                datos.setearParametros("@Monto26", formulacion.Monto_26);
+                datos.setearParametros("@Monto27", formulacion.Monto_27);
+                datos.setearParametros("@Monto28", formulacion.Monto_28);
+
+                if (formulacion.UnidadMedida != null)
+                    datos.setearParametros("@IdUnidadMedida", formulacion.UnidadMedida.Id);
+                else
+                    datos.setearParametros("@IdUnidadMedida", DBNull.Value);
+              
+                if (formulacion.MesBase != null)
+                    datos.setearParametros("@mes", formulacion.MesBase);
+                else
+                    datos.setearParametros("@mes", DBNull.Value);
+
+                datos.setearParametros("@ValorMedida", formulacion.ValorMedida);
+
+                if (formulacion.Prioridad != null)
+                    datos.setearParametros("@prioridad", formulacion.Prioridad.Id);
+                else
+                    datos.setearParametros("@prioridad", DBNull.Value);
+
                 if (formulacion.Observacion != null)
                     datos.setearParametros("@observacion", formulacion.Observacion);
                 else
@@ -307,7 +370,7 @@ namespace Negocio
                     aux.Ppi = datos.Lector["PPI"] != DBNull.Value ?
                         Convert.ToInt32(datos.Lector["PPI"]) : 0;
                     aux.Plurianual = datos.Lector["PLURIANUAL"] != DBNull.Value ?
-                        Convert.ToInt32(datos.Lector["PLURIANUAL"]) : 0;
+                        Convert.ToDecimal(datos.Lector["PLURIANUAL"]) : 0;
                     aux.Techos2026 = datos.Lector["TECHOS"] != DBNull.Value ?
                         Convert.ToDecimal(datos.Lector["TECHOS"]) : 0;
                     aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ?

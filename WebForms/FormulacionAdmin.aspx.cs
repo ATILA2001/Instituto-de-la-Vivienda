@@ -385,7 +385,10 @@ namespace WebForms
 
                     // Asignar unidad de medida
                     formulacion.UnidadMedida = new UnidadMedida { Id = int.Parse(ddlUnidadMedida.SelectedValue) };
-
+                    if (!string.IsNullOrEmpty(txtValorMedida.Text))
+                        formulacion.ValorMedida = decimal.Parse(txtValorMedida.Text.Trim());
+                    else
+                        formulacion.ValorMedida = 0;
                     // Ejecutar operación según modo
                     if (ViewState["EditingFormulacionId"] != null)
                     {

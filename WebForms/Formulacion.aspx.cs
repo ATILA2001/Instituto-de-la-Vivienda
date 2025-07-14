@@ -382,7 +382,7 @@ namespace WebForms
                     // Ejecutar operación según modo
                     if (ViewState["EditingFormulacionId"] != null)
                     {
-                        negocio.modificar(formulacion);
+                        negocio.modificarUser(formulacion);
                         lblMensaje.Text = "Formulación modificada exitosamente!";
                     }
                     else
