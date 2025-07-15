@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.3.0\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.3.0\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,6 +14,8 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,7 +35,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -43,30 +53,68 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Area.cs" />
+    <Compile Include="AreaEF.cs" />
     <Compile Include="Autorizante.cs" />
+    <Compile Include="AutorizanteEF.cs" />
     <Compile Include="Barrio.cs" />
+    <Compile Include="BarrioEF.cs" />
+    <Compile Include="BdProyecto.cs" />
+    <Compile Include="DTO\CertificadoDTO.cs" />
+    <Compile Include="ProyectoEF.cs" />
     <Compile Include="Certificado.cs" />
+    <Compile Include="CertificadoEF.cs" />
     <Compile Include="Concepto.cs" />
+    <Compile Include="ConceptoEF.cs" />
     <Compile Include="Contrata.cs" />
+    <Compile Include="ContrataEF.cs" />
     <Compile Include="Devengado.cs" />
+    <Compile Include="DevengadoEF.cs" />
     <Compile Include="Empresa.cs" />
+    <Compile Include="EmpresaEF.cs" />
     <Compile Include="Enums\EstadoExpediente.cs" />
     <Compile Include="EstadoAutorizante.cs" />
+    <Compile Include="EstadoAutorizanteEF.cs" />
     <Compile Include="EstadoRedet.cs" />
+    <Compile Include="EstadoRedetEF.cs" />
     <Compile Include="ExpedienteReliq.cs" />
+    <Compile Include="ExpedienteReliqEF.cs" />
     <Compile Include="Formulacion.cs" />
+    <Compile Include="FormulacionEF.cs" />
+    <Compile Include="IVCdbContext.cs" />
     <Compile Include="Legitimo.cs" />
+    <Compile Include="LegitimoEF.cs" />
     <Compile Include="LineaGestion.cs" />
+    <Compile Include="LineaGestionEF.cs" />
     <Compile Include="LineaGestionFF.cs" />
+    <Compile Include="LineaGestionFFEF.cs" />
     <Compile Include="Movimiento.cs" />
+    <Compile Include="MovimientoEF.cs" />
     <Compile Include="Obra.cs" />
+    <Compile Include="ObraEF.cs" />
+    <Compile Include="PaseSadeEF.cs" />
     <Compile Include="Prioridad.cs" />
+    <Compile Include="PrioridadEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BdProyecto.cs" />
     <Compile Include="Redeterminacion.cs" />
+    <Compile Include="RedeterminacionEF.cs" />
     <Compile Include="TipoPago.cs" />
+    <Compile Include="TipoPagoEF.cs" />
     <Compile Include="UnidadMedida.cs" />
+    <Compile Include="UnidadMedidaEF.cs" />
     <Compile Include="Usuario.cs" />
+    <Compile Include="UsuarioEF.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.3.0\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.3.0\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.3.0\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.3.0\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.3.0\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.3.0\build\EntityFramework.targets')" />
 </Project>

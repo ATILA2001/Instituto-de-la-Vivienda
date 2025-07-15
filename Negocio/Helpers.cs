@@ -1,4 +1,5 @@
 ﻿using Dominio;
+using Dominio.DTO;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -240,7 +241,7 @@ namespace Negocio
     public static class DatosCompartidosHelper
     {
         // Lista de certificados (incluyendo redeterminaciones) en memoria
-        private static List<Certificado> _certificadosEnMemoria = new List<Certificado>();
+        private static List<CertificadoDTO> _certificadosEnMemoria = new List<CertificadoDTO>();
 
         // Lista de legítimos abonos en memoria
         private static List<Legitimo> _legitimosEnMemoria = new List<Legitimo>();
@@ -254,9 +255,9 @@ namespace Negocio
         /// <summary>
         /// Establece la lista de certificados compartidos
         /// </summary>
-        public static void SetCertificados(List<Certificado> certificados)
+        public static void SetCertificados(List<CertificadoDTO> certificados)
         {
-            _certificadosEnMemoria = certificados ?? new List<Certificado>();
+            _certificadosEnMemoria = certificados ?? new List<CertificadoDTO>();
             _certificadosCargados = true;
         }
 
@@ -272,7 +273,7 @@ namespace Negocio
         /// <summary>
         /// Obtiene los certificados compartidos
         /// </summary>
-        public static List<Certificado> GetCertificados()
+        public static List<CertificadoDTO> GetCertificados()
         {
             return _certificadosEnMemoria;
         }
@@ -324,7 +325,7 @@ namespace Negocio
         /// <summary>
         /// Calcula el SIGAF considerando certificados y legítimos abonos de memoria
         /// </summary>
-        public static decimal? CalcularSIGAFCompartido(string expediente, decimal montoActual, bool esCertificado)
+        public static decimal? CalcularSIGAFCompartido(string expediente, decimal montoActual)
         {
             if (string.IsNullOrEmpty(expediente))
                 return null;
@@ -348,16 +349,6 @@ namespace Negocio
                         .ToList();
 
                     montosTotal.AddRange(certificadosMismoExpediente.Select(c => c.MontoTotal));
-                }
-
-                // Agregar montos de los legítimos si están disponibles
-                if (DatosCompartidosHelper.LegitimosCargados)
-                {
-                    var legitimosMismoExpediente = DatosCompartidosHelper.GetLegitimos()
-                        .Where(l => l.Expediente == expediente && l.Certificado.HasValue)
-                        .ToList();
-
-                    montosTotal.AddRange(legitimosMismoExpediente.Select(l => l.Certificado.Value));
                 }
 
                 // Si no hay montos en memoria, consultar la base de datos

@@ -168,221 +168,309 @@ namespace WebForms.CustomControls
 
         }
 
+        /// <summary>
+        /// DataBind unificado: preserva selecciones Y mantiene toda la lógica original
+        /// </summary>
         public override void DataBind()
         {
+            // Paso 1: Guardar selecciones actuales antes de repoblar
+            var seleccionesActuales = GuardarSeleccionesPorValor();
+            
             try
             {
-                bool populateNodes = false;
-                List<string> selectedValuesToRestore = null;
-
-                // Determine if nodes need to be (re)populated and load persisted selections
-                if (!IsPostBack)
+                if (chkList != null)
                 {
-                    // Initial page load
-                    populateNodes = (_dataSource != null);
-                    selectedValuesToRestore = LoadSelectedValuesFromSession();
-                }
-                else // Is PostBack
-                {
-                    string pageName = Page?.GetType().Name ?? "Unknown";
-                    string contextKey = $"TreeViewSearch_{pageName}_{this.ID}_ContextSelectedValues";
-                    if (HttpContext.Current.Items.Contains(contextKey))
-                    {
-                        selectedValuesToRestore = HttpContext.Current.Items[contextKey] as List<string>;
-                    }
-                    else
-                    {
-                        selectedValuesToRestore = LoadSelectedValuesFromSession();
-                    }
-
-
-                    if (chkList.Nodes.Count == 0)
-                    {
-                        populateNodes = (_dataSource != null);
-                    }
-                }
-
-                if (populateNodes)
-                {
+                    // Paso 2: Limpiar y repoblar con la lógica original completa
                     chkList.Nodes.Clear();
-                    TreeNode selectAllNode = new TreeNode("Seleccionar todos", "select-all")
-                    {
-                        SelectAction = TreeNodeSelectAction.None,
-                        ShowCheckBox = true,
-                        Expanded = true // Consider managing expansion state if needed
+                    var selectAllNode = new TreeNode("Seleccionar todos", "selectAll") 
+                    { 
+                        ShowCheckBox = true, 
+                        SelectAction = TreeNodeSelectAction.None 
                     };
                     chkList.Nodes.Add(selectAllNode);
 
                     if (_dataSource != null)
                     {
-                        bool areDates = false;
-
-                        if (!string.IsNullOrEmpty(DataValueField) && _dataSource is IEnumerable<object> enumerableForDateCheck)
+                        // Caso 1: DataSource es una colección de DateTime (filtro "Mes Certificado")
+                        if (_dataSource is IEnumerable<DateTime> dates)
                         {
-                            var firstItem = enumerableForDateCheck.FirstOrDefault();
-                            if (firstItem != null)
+                            PopulateDateNodes(dates.Distinct().ToList(), selectAllNode);
+                        }
+                        // Caso 2: DataSource es una lista plana de strings (filtro "Estado")
+                        else if (_dataSource is IEnumerable<string> stringList)
+                        {
+                            foreach (var item in stringList.Distinct().OrderBy(s => s))
                             {
-                                string sampleValue = GetPropertyValue(firstItem, DataValueField);
-                                if (DateTime.TryParseExact(sampleValue, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                                {
-                                    areDates = true;
-                                }
+                                var node = new TreeNode(item, item) 
+                                { 
+                                    ShowCheckBox = true, 
+                                    SelectAction = TreeNodeSelectAction.None 
+                                };
+                                selectAllNode.ChildNodes.Add(node);
                             }
                         }
-                        else if (_dataSource is DataTable dtForDateCheck && dtForDateCheck.Rows.Count > 0 && !string.IsNullOrEmpty(DataValueField) && dtForDateCheck.Columns.Contains(DataValueField))
-                        {
-                            string sampleValue = dtForDateCheck.Rows[0][DataValueField]?.ToString();
-                            if (DateTime.TryParseExact(sampleValue, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                            {
-                                areDates = true;
-                            }
-                        }
-
-                        if (areDates)
-                        {
-                            var dates = new List<DateTime>();
-                            if (_dataSource is DataTable dtDateSource)
-                            {
-                                if (!string.IsNullOrEmpty(DataValueField) && dtDateSource.Columns.Contains(DataValueField))
-                                {
-                                    foreach (DataRow row in dtDateSource.Rows.Cast<DataRow>())
-                                    {
-                                        string dateStr = GetPropertyValue(row, DataValueField); 
-                                        if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
-                                        {
-                                            dates.Add(parsedDate);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (_dataSource is IEnumerable<object> dateEnumerable)
-                            {
-                                foreach (var item in dateEnumerable)
-                                {
-                                    string dateStr = GetPropertyValue(item, DataValueField);
-                                    if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
-                                    {
-                                        dates.Add(parsedDate);
-                                    }
-                                }
-                            }
-
-                            dates = dates.Distinct().ToList();
-
-                            var yearGroups = dates.GroupBy(d => d.Year).OrderByDescending(g => g.Key);
-                            foreach (var yearGroup in yearGroups)
-                            {
-                                var yearNode = new TreeNode($"{yearGroup.Key}", $"year_{yearGroup.Key}")
-                                { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false }; // Consider persisting/restoring Expanded state
-                                var monthGroups = yearGroup.GroupBy(d => d.Month).OrderBy(g => g.Key);
-                                foreach (var monthGroup in monthGroups)
-                                {
-                                    var monthNode = new TreeNode(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key), $"month_{yearGroup.Key}_{monthGroup.Key}")
-                                    { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false }; // Consider persisting/restoring Expanded state
-                                    foreach (var day in monthGroup.OrderBy(d => d.Day))
-                                    {
-                                        monthNode.ChildNodes.Add(new TreeNode(day.ToString("dd"), day.ToString("yyyy-MM-dd"))
-                                        { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None });
-                                    }
-                                    if (monthNode.ChildNodes.Count > 0) yearNode.ChildNodes.Add(monthNode);
-                                }
-                                if (yearNode.ChildNodes.Count > 0) selectAllNode.ChildNodes.Add(yearNode);
-                            }
-                        }
-                        else // Build flat list
+                        // Caso 3: DataSource es una colección de objetos complejos (caso general)
+                        else
                         {
                             if (_dataSource is DataTable dtSource)
                             {
-                                foreach (DataRow row in dtSource.Rows.Cast<DataRow>())
-                                {
-                                    var text = GetPropertyValue(row, DataTextField) ?? string.Empty;
-                                    var value = (!string.IsNullOrEmpty(DataValueField) && dtSource.Columns.Contains(DataValueField))
-                                                ? GetPropertyValue(row, DataValueField) ?? text
-                                                : text;
-
-                                    var displayText = string.IsNullOrEmpty(text) ? "(Vacías)" : text;
-
-
-                                        selectAllNode.ChildNodes.Add(new TreeNode(displayText, value)
-                                        {
-                                            ShowCheckBox = true,
-                                            SelectAction = TreeNodeSelectAction.None
-                                        });
-                                    
-                                }
+                                _dataSource = dtSource.AsEnumerable();
                             }
-                            else if (_dataSource is IEnumerable<object> enumerableDataSource)
+
+                            if (_dataSource is IEnumerable<object> enumerableDataSource)
                             {
-                                foreach (var item in enumerableDataSource)
+                                // Agrupar elementos por DataTextField
+                                var groupedItems = enumerableDataSource
+                                    .GroupBy(item => GetPropertyValue(item, DataTextField))
+                                    .OrderBy(g => string.IsNullOrEmpty(g.Key) ? 0 : 1)
+                                    .ThenBy(g => g.Key);
+
+                                // Iterar sobre los grupos
+                                foreach (var group in groupedItems)
                                 {
-                                    var text = GetPropertyValue(item, DataTextField) ?? string.Empty;
-                                    var value = !string.IsNullOrEmpty(DataValueField)
-                                                ? GetPropertyValue(item, DataValueField) ?? text
-                                                : text;
+                                    var firstItem = group.First();
 
+                                    // Manejar valores vacíos con "(Vacíos)"
+                                    var text = string.IsNullOrEmpty(group.Key) ? "(Vacíos)" : group.Key;
+                                    var value = GetPropertyValue(firstItem, DataValueField);
 
-                                    var displayText = string.IsNullOrEmpty(text) ? "(Vacías)" : text;
-
-
-                                        selectAllNode.ChildNodes.Add(new TreeNode(displayText, value)
-                                        {
-                                            ShowCheckBox = true,
-                                            SelectAction = TreeNodeSelectAction.None
-                                        });
-                                    
+                                    var node = new TreeNode(text, value) 
+                                    { 
+                                        ShowCheckBox = true, 
+                                        SelectAction = TreeNodeSelectAction.None 
+                                    };
+                                    selectAllNode.ChildNodes.Add(node);
                                 }
                             }
                         }
                     }
                 }
-
-                if (chkList.Nodes.Count > 0)
-                {
-                    foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
-                    {
-                        node.Checked = false;
-                    }
-
-                    if (selectedValuesToRestore != null && selectedValuesToRestore.Any())
-                    {
-                        foreach (TreeNode node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
-                        {
-                            if (selectedValuesToRestore.Contains(node.Value))
-                            {
-                                node.Checked = true;
-                            }
-                        }
-                    }
-
-                    if (chkList.Nodes.Count > 0 && chkList.Nodes[0].Value == "select-all")
-                    {
-                        TreeNode selectAllServerNode = chkList.Nodes[0];
-                        var leafNodes = selectAllServerNode.ChildNodes
-                            .Cast<TreeNode>()
-                            .SelectMany(GetAllNodes)
-                            .Where(n => n.ChildNodes.Count == 0 && n.Value != "select-all")
-                            .ToList();
-
-                        if (leafNodes.Any())
-                        {
-                            selectAllServerNode.Checked = leafNodes.All(n => n.Checked);
-                        }
-                        else
-                        {
-                            selectAllServerNode.Checked = false;
-                        }
-                    }
-                }
-
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[TreeViewSearch] Error in DataBind ({this.ID}): {ex.Message}\nStackTrace: {ex.StackTrace}");
+                Debug.WriteLine("Error en DataBind del TreeViewSearch: " + ex.Message);
             }
-            finally
+
+            // MODIFICADO: Priorizar selecciones guardadas antes del repoblado
+            if (seleccionesActuales != null && seleccionesActuales.Any())
+            {
+                // NUEVO: Restaurar selecciones preservadas del repoblado
+                RestaurarSeleccionesPorValor(seleccionesActuales);
+            }
+            else
+            {
+                // EXISTENTE: Lógica original de restauración desde sesión
+                try
+                {
+                    var selectedValues = LoadSelectedValuesFromSession();
+                    if (selectedValues.Any())
+                    {
+                        foreach (var node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
+                        {
+                            if (selectedValues.Contains(node.Value))
+                            {
+                                node.Checked = true;
+
+                                // Expandir nodos padre
+                                var parent = node.Parent;
+                                while (parent != null)
+                                {
+                                    parent.Expanded = true;
+                                    parent = parent.Parent;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Error restaurando el estado del TreeViewSearch: " + ex.Message);
+                }
+            }
+
+            // Paso 4: Actualizar UI para reflejar el estado final
+            try
             {
                 UpdateTitleAndIcon();
                 UpdateDeselectAllButtonState();
+                
+                if (chkList.Nodes.Count > 0)
+                {
+                    chkList.Nodes[0].Expanded = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error actualizando interfaz: " + ex.Message);
+            }
+        }
+        
+        /// <summary>
+        /// Guarda las selecciones actuales usando el valor del nodo, no su posición
+        /// </summary>
+        private HashSet<string> GuardarSeleccionesPorValor()
+        {
+            var selecciones = new HashSet<string>();
+            
+            try
+            {
+                if (chkList?.Nodes != null)
+                {
+                    // Obtener todos los nodos seleccionados y guardar sus valores
+                    var todosLosNodos = chkList.Nodes.Cast<TreeNode>()
+                        .SelectMany(GetAllNodesRecursive)
+                        .Where(n => n.Checked)
+                        .Select(n => n.Value)
+                        .ToList();
+                    
+                    foreach (var valor in todosLosNodos)
+                    {
+                        selecciones.Add(valor);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error guardando selecciones por valor: {ex.Message}");
+            }
+            
+            return selecciones;
+        }
+        
+        /// <summary>
+        /// Restaura selecciones basándose en valores, independientemente del orden actual
+        /// </summary>
+        private void RestaurarSeleccionesPorValor(HashSet<string> valoresSeleccionados)
+        {
+            if (valoresSeleccionados == null || !valoresSeleccionados.Any()) 
+                return;
+                
+            try
+            {
+                if (chkList?.Nodes != null)
+                {
+                    // Obtener todos los nodos después del repoblado
+                    var todosLosNodosActuales = chkList.Nodes.Cast<TreeNode>()
+                        .SelectMany(GetAllNodesRecursive)
+                        .ToList();
+                    
+                    // Marcar como seleccionados solo los nodos cuyos valores coincidan
+                    foreach (var nodo in todosLosNodosActuales)
+                    {
+                        if (valoresSeleccionados.Contains(nodo.Value))
+                        {
+                            nodo.Checked = true;
+                            
+                            // Expandir nodos padre para hacer visible la selección
+                            var padre = nodo.Parent;
+                            while (padre != null)
+                            {
+                                padre.Expanded = true;
+                                padre = padre.Parent;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error restaurando selecciones por valor: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Obtiene todos los nodos de forma recursiva
+        /// </summary>
+        private IEnumerable<TreeNode> GetAllNodesRecursive(TreeNode nodoRaiz)
+        {
+            yield return nodoRaiz;
+            
+            foreach (TreeNode nodoHijo in nodoRaiz.ChildNodes)
+            {
+                foreach (TreeNode nodoNieto in GetAllNodesRecursive(nodoHijo))
+                {
+                    yield return nodoNieto;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Expande todos los nodos padre de un nodo dado
+        /// </summary>
+        private void ExpandirNodosPadre(TreeNode nodo)
+        {
+            var padre = nodo.Parent;
+            while (padre != null)
+            {
+                padre.Expanded = true;
+                padre = padre.Parent;
+            }
+        }
+        
+        /// <summary>
+        /// Actualiza la interfaz después de restaurar selecciones
+        /// </summary>
+        private void ActualizarInterfazDespuesDeRestaurar()
+        {
+            try
+            {
+                // Actualizar título y contador
+                UpdateTitleAndIcon();
+                
+                // Actualizar estado del botón "Deseleccionar todo"
+                UpdateDeselectAllButtonState();
+                
+                // Expandir nodo raíz si tiene contenido
+                if (chkList.Nodes.Count > 0)
+                {
+                    chkList.Nodes[0].Expanded = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error actualizando interfaz: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Popula el TreeView con nodos de fecha agrupados por año y mes, manteniendo la jerarquía Año -> Mes -> Día.
+        /// Este método mejora la claridad al aislar la lógica de manejo de fechas.
+        /// </summary>
+        /// <param name="dates">Lista de fechas únicas para mostrar.</param>
+        /// <param name="parentNode">El nodo "Seleccionar Todos" al que se agregarán los años.</param>
+        private void PopulateDateNodes(List<DateTime> dates, TreeNode parentNode)
+        {
+            var yearGroups = dates.GroupBy(d => d.Year).OrderByDescending(g => g.Key);
+            foreach (var yearGroup in yearGroups)
+            {
+                var yearNode = new TreeNode($"{yearGroup.Key}", $"year_{yearGroup.Key}")
+                { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false };
+
+                var monthGroups = yearGroup.GroupBy(d => d.Month).OrderBy(g => g.Key);
+                foreach (var monthGroup in monthGroups)
+                {
+                    var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthGroup.Key);
+                    var monthNode = new TreeNode(monthName, $"month_{yearGroup.Key}_{monthGroup.Key}")
+                    { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None, Expanded = false };
+
+                    // Se añaden los días como nodos finales.
+                    foreach (var day in monthGroup.OrderBy(d => d.Day))
+                    {
+                        // El valor del nodo se guarda en un formato estándar para facilitar el parseo posterior.
+                        monthNode.ChildNodes.Add(new TreeNode(day.ToString("dd"), day.ToString("yyyy-MM-dd"))
+                        { ShowCheckBox = true, SelectAction = TreeNodeSelectAction.None });
+                    }
+
+                    if (monthNode.ChildNodes.Count > 0)
+                    {
+                        yearNode.ChildNodes.Add(monthNode);
+                    }
+                }
+
+                if (yearNode.ChildNodes.Count > 0)
+                {
+                    parentNode.ChildNodes.Add(yearNode);
+                }
             }
         }
 
@@ -446,6 +534,39 @@ namespace WebForms.CustomControls
                     }
                 }
                 return values;
+            }
+        }
+
+        public List<string> ExpandedSelectedValues
+        {
+            get
+            {
+                var selectedValues = this.SelectedValues;
+                if (!selectedValues.Any())
+                {
+                    return selectedValues;
+                }
+
+                var expandedList = new HashSet<string>();
+
+                // Obtiene todos los nodos hoja que han sido seleccionados.
+                var selectedNodes = chkList.Nodes
+                    .Cast<TreeNode>()
+                    .SelectMany(GetAllNodes) // Usa el helper para aplanar el árbol.
+                    .Where(n => n.Checked && n.ChildNodes.Count == 0 && n.Value != "select-all")
+                    .ToList();
+
+                foreach (var node in selectedNodes)
+                {
+                    // Separa el string de la propiedad 'Value' para obtener todos los IDs individuales.
+                    var idsFromValue = node.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var id in idsFromValue)
+                    {
+                        expandedList.Add(id);
+                    }
+                }
+
+                return expandedList.ToList();
             }
         }
 
