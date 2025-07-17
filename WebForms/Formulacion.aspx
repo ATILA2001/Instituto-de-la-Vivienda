@@ -219,13 +219,13 @@
 						<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
 							data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
         <i class="bi bi-download"></i>
-    </asp:LinkButton>
+						</asp:LinkButton>
 					</div>
-					<div class="form-group mb-2">
+					<%--<div class="form-group mb-2">
 						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
                             <i class="bi bi-plus-lg"></i> Agregar
 						</asp:LinkButton>
-					</div>
+					</div>--%>
 				</div>
 			</div>
 		</div>
@@ -321,7 +321,7 @@
 						</ItemTemplate>
 					</asp:TemplateField>
 
-					<asp:TemplateField HeaderText="Acciones">
+					<%--<asp:TemplateField HeaderText="Acciones">
 						<ItemTemplate>
 							<div class="d-flex justify-content-center gap-2">
 								<asp:LinkButton ID="btnModificar" runat="server"
@@ -339,7 +339,7 @@
 								</asp:LinkButton>
 							</div>
 						</ItemTemplate>
-					</asp:TemplateField>
+					</asp:TemplateField>--%>
 				</Columns>
 				<EmptyDataTemplate>
 					<div class="text-center m-3">

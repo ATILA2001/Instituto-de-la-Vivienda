@@ -507,7 +507,7 @@
                 }
 
                 // Compartir los certificados resultantes para uso en otros servicios
-                DatosCompartidosHelper.SetCertificados(listaCertificadosResultado);
+                //DatosCompartidosHelper.SetCertificados(listaCertificadosResultado);
 
                 // Crear diccionario de certificados por expediente para el cálculo final
                 var certificadosPorExpediente = listaCertificadosResultado
@@ -814,7 +814,7 @@
                 }
 
                 // Compartir los certificados resultantes para uso en otros servicios
-                DatosCompartidosHelper.SetCertificados(listaCertificadosResultado);
+                //DatosCompartidosHelper.SetCertificados(listaCertificadosResultado);
 
                 // Crear diccionario de certificados por expediente para el cálculo final
                 var certificadosPorExpediente = listaCertificadosResultado
