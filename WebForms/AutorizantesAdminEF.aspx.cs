@@ -1272,6 +1272,8 @@ namespace WebForms
             ActualizarControlesPaginacion();
         }
 
+        #endregion
+
         #region Métodos de paginación externa
 
         protected void lnkFirst_Click(object sender, EventArgs e)
@@ -1361,31 +1363,35 @@ namespace WebForms
 
         private void ConfigurarBotonesNumerados()
         {
-            LinkButton[] pageButtons = { lnkPage1, lnkPage2, lnkPage3, lnkPage4, lnkPage5, lnkPage6 };
+            LinkButton[] pageButtons = { lnkPage1, lnkPage2, lnkPage3, lnkPage4, lnkPage5 };
+            int totalButtons = pageButtons.Length;
             
             // Calcular rango de páginas a mostrar
-            int buttonsToShow = Math.Min(6, totalPages);
+            int buttonsToShow = Math.Min(totalButtons, totalPages);
             int startPage, endPage;
             
-            if (totalPages <= 6)
+            if (totalPages <= totalButtons)
             {
+                // Si hay menos páginas que botones, mostrar todas
                 startPage = 0;
                 endPage = totalPages - 1;
             }
             else
             {
-                int halfButtons = 3;
-                startPage = Math.Max(0, currentPageIndex - halfButtons);
-                endPage = Math.Min(totalPages - 1, startPage + 5);
+                // Lógica de centrado: intentar poner el botón actual en el centro
+                int centerPosition = totalButtons / 2; // Posición central calculada dinámicamente
+                startPage = Math.Max(0, currentPageIndex - centerPosition);
+                endPage = Math.Min(totalPages - 1, startPage + totalButtons - 1);
                 
-                if (endPage - startPage + 1 < 6 && totalPages >= 6)
+                // Ajustar si nos quedamos cortos al final
+                if (endPage - startPage + 1 < totalButtons && totalPages >= totalButtons)
                 {
-                    startPage = Math.Max(0, endPage - 5);
+                    startPage = Math.Max(0, endPage - totalButtons + 1);
                 }
             }
             
             // Configurar cada botón
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < totalButtons; i++)
             {
                 var button = pageButtons[i];
                 int pageIndex = startPage + i;

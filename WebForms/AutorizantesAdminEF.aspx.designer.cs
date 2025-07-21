@@ -15,24 +15,6 @@ namespace WebForms
     {
 
         /// <summary>
-        /// cblsHeaderEstado control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::WebForms.CustomControls.TreeViewSearch cblsHeaderEstado;
-
-        /// <summary>
-        /// ddlEstadoAutorizante control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlEstadoAutorizante;
-
-        /// <summary>
         /// ddlObra control.
         /// </summary>
         /// <remarks>
@@ -292,15 +274,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton lnkPage5;
-
-        /// <summary>
-        /// lnkPage6 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton lnkPage6;
 
         /// <summary>
         /// lnkNext control.

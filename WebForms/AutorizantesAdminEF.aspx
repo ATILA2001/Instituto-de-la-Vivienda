@@ -220,11 +220,11 @@
 			OnRowDeleting="dgvAutorizante_RowDeleting"
 			OnDataBound="dgvAutorizante_DataBound"
 			OnRowDataBound="dgvAutorizante_RowDataBound"
+			OnPageIndexChanging="dgvAutorizante_PageIndexChanging" 
 			ShowHeaderWhenEmpty="true"
 			AutoGenerateColumns="false" 
 			AllowPaging="false" 
 			AllowCustomPaging="false"
-			OnPageIndexChanging="dgvAutorizante_PageIndexChanging" 
 			runat="server">
 			<Columns>
 				
@@ -372,7 +372,7 @@
 				<asp:LinkButton ID="lnkPage3" runat="server" OnClick="lnkPage_Click" CommandArgument="2" CssClass="btn btn-sm btn-outline-primary mx-1" Text="3" ToolTip="Ir a página 3" />
 				<asp:LinkButton ID="lnkPage4" runat="server" OnClick="lnkPage_Click" CommandArgument="3" CssClass="btn btn-sm btn-outline-primary mx-1" Text="4" ToolTip="Ir a página 4" />
 				<asp:LinkButton ID="lnkPage5" runat="server" OnClick="lnkPage_Click" CommandArgument="4" CssClass="btn btn-sm btn-outline-primary mx-1" Text="5" ToolTip="Ir a página 5" />
-				<asp:LinkButton ID="lnkPage6" runat="server" OnClick="lnkPage_Click" CommandArgument="5" CssClass="btn btn-sm btn-outline-primary mx-1" Text="6" ToolTip="Ir a página 6" />
+
 				
 				<!-- Página siguiente -->
 				<asp:LinkButton ID="lnkNext" runat="server" OnClick="lnkNext_Click" 
