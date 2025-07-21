@@ -96,10 +96,12 @@
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="CertificadoNegocioEF.cs" />
     <Compile Include="ConceptoNegocio.cs" />
+    <Compile Include="ConceptoNegocioEF.cs" />
     <Compile Include="ContrataNegocio.cs" />
     <Compile Include="DevengadoNegocio.cs" />
     <Compile Include="EmpresaNegocio.cs" />
     <Compile Include="EstadoAutorizanteNegocio.cs" />
+    <Compile Include="EstadoAutorizanteNegocioEF.cs" />
     <Compile Include="EstadoRedetNegocio.cs" />
     <Compile Include="ExpedienteReliqNegocio.cs" />
     <Compile Include="ExpedienteReliqNegocioEF.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="LineaGestionNegocio.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
+    <Compile Include="ObraNegocioEF.cs" />
     <Compile Include="PrioridadNegocio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedeterminacionNegocio.cs" />

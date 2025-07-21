@@ -151,7 +151,6 @@ namespace WebForms
                 {
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                     CargarGrillaCompleta();
-                    //PoblarFiltrosHeader();
                 }
             }
             catch (Exception ex)

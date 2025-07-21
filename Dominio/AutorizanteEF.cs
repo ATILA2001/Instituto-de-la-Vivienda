@@ -24,19 +24,11 @@ namespace Dominio
         [Column("MONTO_AUTORIZADO")]
         public decimal MontoAutorizado { get; set; }
 
-        // La columna Fecha probablemente tenga otro nombre en la BD, o sea calculada
-        [NotMapped]
-        public DateTime? Fecha { get; set; }
+        [Column("MES")]
+        public DateTime? MesAprobacion { get; set; }
 
         [Column("MES_BASE")]
         public DateTime? MesBase { get; set; }
-
-        // Empresa y BuzonSade probablemente sean campos calculados o de otras tablas
-        [NotMapped]
-        public string Empresa { get; set; }
-
-        [NotMapped]
-        public string BuzonSade { get; set; }
 
         [Column("OBRA")]
         public int ObraId { get; set; }
