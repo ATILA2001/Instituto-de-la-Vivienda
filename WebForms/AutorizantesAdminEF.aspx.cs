@@ -136,9 +136,8 @@ namespace WebForms
             
             if (!IsPostBack)
             {
-                CargarListaAutorizantesRedet();
+                CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
                 ObtenerDropDownLists();
-                CalcularSubtotal();
                 ActualizarControlesPaginacion();
             }
             else
@@ -479,9 +478,11 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                     "$('#modalAgregar').modal('hide');", true);
 
+                // Limpiar cache SADE ya que se agregó un nuevo autorizante
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
                 // Refrescar la lista de autorizantes
-                CargarListaAutorizantesRedet();
-                CalcularSubtotal();
+                CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
             }
             catch (Exception ex)
             {
@@ -1047,11 +1048,6 @@ namespace WebForms
                 {
                     lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"=== SUBTOTAL CALCULADO ===");
-                System.Diagnostics.Debug.WriteLine($"Registros totales después de filtros: {cantidadRegistros}");
-                System.Diagnostics.Debug.WriteLine($"Monto total: {totalMonto:C}");
-                System.Diagnostics.Debug.WriteLine($"Filtro de texto aplicado: '{filtro}'");
             }
             catch (Exception ex)
             {
@@ -1129,8 +1125,10 @@ namespace WebForms
                     lblMensaje.Text = "Autorizante eliminado exitosamente!";
                     lblMensaje.CssClass = "alert alert-success";
                     
-                    CargarListaAutorizantesRedet();
-                    CalcularSubtotal();
+                    // Limpiar cache SADE ya que se eliminó un autorizante
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    
+                    CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
                 }
                 else
                 {
