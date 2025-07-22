@@ -440,6 +440,9 @@ namespace WebForms
                         lblMensaje.Text = "Autorizante modificado exitosamente!";
                         lblMensaje.CssClass = "alert alert-success";
 
+                        // Limpiar cache SADE ya que se modificó un autorizante
+                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
                         // Limpiar el estado de edición
                         Session["EditingAutorizanteId"] = null;
                     }
@@ -1195,6 +1198,9 @@ namespace WebForms
                             autorizanteEnLista.Expediente = nuevoExpediente;
                         }
                     }
+
+                    // Limpiar cache SADE ya que se modificó un expediente (autorizante o redeterminación)
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
