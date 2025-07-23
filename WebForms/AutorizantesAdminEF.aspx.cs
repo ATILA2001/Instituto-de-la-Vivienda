@@ -866,10 +866,13 @@ namespace WebForms
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
             // Configurar paginación
-            dgvAutorizante.VirtualItemCount = datosEnMemoria.Count;
+            int totalFiltrados = datosEnMemoria.Count;
+            dgvAutorizante.VirtualItemCount = totalFiltrados;
+            dgvAutorizante.PageSize = pageSize;
+            dgvAutorizante.PageIndex = currentPageIndex;
             dgvAutorizante.DataSource = datosEnMemoria
-                                        .Skip(dgvAutorizante.PageIndex * dgvAutorizante.PageSize)
-                                        .Take(dgvAutorizante.PageSize)
+                                        .Skip(currentPageIndex * pageSize)
+                                        .Take(pageSize)
                                         .ToList();
             dgvAutorizante.DataBind();
             PoblarFiltrosHeader();

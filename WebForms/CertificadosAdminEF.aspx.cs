@@ -116,7 +116,8 @@ namespace WebForms
                 
                 if (Session["GridData"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
+                    UsuarioEF usuarioActual = ObtenerUsuarioActual();
+                    todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
                     
                     // Guardar en cache
                     Session["GridData"] = todoLosCertificados;
@@ -201,14 +202,22 @@ namespace WebForms
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
             // Configurar paginación - EXACTAMENTE IGUAL que AutorizantesAdminEF
-            dgvCertificado.VirtualItemCount = datosEnMemoria.Count;
+            int totalFiltrados = datosEnMemoria.Count;
+            dgvCertificado.VirtualItemCount = totalFiltrados;
+            dgvCertificado.PageSize = pageSize;
+            dgvCertificado.PageIndex = currentPageIndex;
             dgvCertificado.DataSource = datosEnMemoria
-                                        .Skip(dgvCertificado.PageIndex * dgvCertificado.PageSize)
-                                        .Take(dgvCertificado.PageSize)
+                                        .Skip(currentPageIndex * pageSize)
+                                        .Take(pageSize)
                                         .ToList();
             dgvCertificado.DataBind();
             PoblarFiltrosHeader();
-            
+
+            // Actualizar totalRecords y paginación según los datos filtrados
+            totalRecords = totalFiltrados;
+            ViewState["TotalRecords"] = totalFiltrados;
+            ActualizarControlesPaginacion();
+
             // Recalcular subtotal después de aplicar filtros
             CalcularSubtotal();
         }
@@ -785,7 +794,14 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
-                    cblsHeaderEstado.DataSource = calculoRedeterminacionNegocio.ObtenerEstadosParaFiltro();
+                    // Estados de certificados: usar el texto como ID y como nombre
+                    var estadosCertificados = new[]
+                    {
+                        new { Id = "NO INICIADO", Nombre = "NO INICIADO" },
+                        new { Id = "EN TRAMITE", Nombre = "EN TRAMITE" },
+                        new { Id = "DEVENGADO", Nombre = "DEVENGADO" }
+                    };
+                    cblsHeaderEstado.DataSource = estadosCertificados;
                     cblsHeaderEstado.DataTextField = "Nombre";
                     cblsHeaderEstado.DataValueField = "Id";
                     cblsHeaderEstado.DataBind();
@@ -1139,9 +1155,30 @@ namespace WebForms
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && cblsHeaderBarrio.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.BarrioId.HasValue && getSelectedIds(cblsHeaderBarrio).Contains(c.BarrioId.Value)).ToList();
 
-                // Aplicar filtro por Proyecto
+                // Aplicar filtro por Proyecto (certificados y reliquidaciones)
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
-                    data = data.Where(c => c.ProyectoId.HasValue && getSelectedIds(cblsHeaderProyecto).Contains(c.ProyectoId.Value)).ToList();
+                {
+                    var selectedProyectoIds = getSelectedIds(cblsHeaderProyecto);
+                    
+                    // Obtener todos los nombres de los proyectos seleccionados
+                    using (var context = new IVCdbContext())
+                    {
+                        var selectedProjectNames = context.Proyectos
+                            .Where(p => selectedProyectoIds.Contains(p.Id))
+                            .Select(p => p.Nombre)
+                            .Distinct()
+                            .ToList();
+
+                        // Obtener todos los IDs de proyectos que coincidan con esos nombres
+                        var allMatchingProjectIds = context.Proyectos
+                            .Where(p => selectedProjectNames.Contains(p.Nombre))
+                            .Select(p => p.Id)
+                            .Distinct()
+                            .ToList();
+                        
+                        data = data.Where(c => c.ProyectoId.HasValue && allMatchingProjectIds.Contains(c.ProyectoId.Value)).ToList();
+                    }
+                }
 
                 // Aplicar filtro por Empresa
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
@@ -1151,11 +1188,15 @@ namespace WebForms
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.AutorizanteId.HasValue && getSelectedIds(cblsHeaderCodigoAutorizante).Contains(c.AutorizanteId.Value)).ToList();
 
-                // Aplicar filtro por Estado
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && cblsHeaderEstado.ExpandedSelectedValues.Any())
+                // Aplicar filtro por Estado (ahora por texto, no por ID numérico)
+                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
-                    var selectedGroupIds = getSelectedIds(cblsHeaderEstado);
-                    data = data.Where(c => selectedGroupIds.Contains(calculoRedeterminacionNegocio.MapearEstadoDesdeId(c.EstadoRedetId).Id)).ToList();
+                    var selectedEstados = cblsHeaderEstado.ExpandedSelectedValues;
+                    if (selectedEstados != null && selectedEstados.Any())
+                    {
+                        data = data.Where(c => !string.IsNullOrEmpty(c.Estado) && selectedEstados.Contains(c.Estado)).ToList();
+                    }
+                    // Si no hay filtros seleccionados, no se filtra por estado (se muestran todos)
                 }
 
                 // Aplicar filtro por Tipo

@@ -469,6 +469,15 @@ namespace Negocio
 
                             expedientesReliq.TryGetValue(claveReliq, out string expedienteFinalReliq);
 
+                            // CORRECCIÓN: La reliquidación debe tener los datos del autorizante de la redeterminación, no del certificado afectado
+                            var obraRedet = autorizanteDeRedet.Obra;
+                            var proyectoRedet = obraRedet?.Proyecto;
+                            var empresaRedet = obraRedet?.Empresa;
+                            var areaRedet = obraRedet?.Area;
+                            var barrioRedet = obraRedet?.Barrio;
+                            var contrataRedet = obraRedet?.Contrata;
+                            var lineaGestionRedet = proyectoRedet?.LineaGestionEF;
+
                             listaReliqDTO.Add(new CertificadoDTO
                             {
                                 IdReliquidacion = idReliq++,
@@ -476,24 +485,27 @@ namespace Negocio
                                 MesAprobacion = certAfectado.MesAprobacion,
                                 MontoTotal = montoReliq,
                                 EstadoRedetId = redet.EstadoRedetEFId,
-                                AutorizanteId = certAfectado.AutorizanteId,
+                                AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
                                 CodigoAutorizante = redet.CodigoRedet,
-                                ObraId = certAfectado.ObraId,
-                                ObraDescripcion = certAfectado.ObraDescripcion,
-                                EmpresaId = certAfectado.EmpresaId,
-                                EmpresaNombre = certAfectado.EmpresaNombre,
-                                AreaId = certAfectado.AreaId,
-                                AreaNombre = certAfectado.AreaNombre,
-                                Contrata = certAfectado.Contrata,
-                                BarrioId = certAfectado.BarrioId,
-                                BarrioNombre = certAfectado.BarrioNombre,
-                                ProyectoId = certAfectado.ProyectoId,
-                                ProyectoNombre = certAfectado.ProyectoNombre,
-                                LineaGestionId = certAfectado.LineaGestionId,
-                                LineaGestionNombre = certAfectado.LineaGestionNombre,
+                                // Datos de la obra de la redeterminación (no del certificado afectado)
+                                ObraId = obraRedet?.Id,
+                                ObraDescripcion = obraRedet?.Descripcion,
+                                EmpresaId = obraRedet?.EmpresaId,
+                                EmpresaNombre = empresaRedet?.Nombre,
+                                AreaId = obraRedet?.AreaId,
+                                AreaNombre = areaRedet?.Nombre,
+                                Contrata = contrataRedet != null && obraRedet != null ?
+                                          string.Concat(contrataRedet.Nombre, " ", obraRedet.Numero, "/", obraRedet.Anio) : null,
+                                BarrioId = obraRedet?.BarrioId,
+                                BarrioNombre = barrioRedet?.Nombre,
+                                // CORRECCIÓN PRINCIPAL: ProyectoId de la redeterminación, no del certificado afectado
+                                ProyectoId = proyectoRedet?.Id,
+                                ProyectoNombre = proyectoRedet?.Nombre,
+                                LineaGestionId = lineaGestionRedet?.Id,
+                                LineaGestionNombre = lineaGestionRedet?.Nombre,
                                 TipoPagoId = 3,
                                 TipoPagoNombre = "RELIQUIDACION",
-                                Porcentaje = certAfectado.Porcentaje,
+                                Porcentaje = certAfectado.Porcentaje, // El porcentaje sí viene del certificado afectado
                             });
                         }
                     }
