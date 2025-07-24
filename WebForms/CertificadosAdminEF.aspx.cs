@@ -70,7 +70,7 @@ namespace WebForms
             {
                 CargarListaCertificadosCompleta();
                 BindDropDownList();
-                CalcularSubtotal();
+                //CalcularSubtotal();
                 ActualizarControlesPaginacion();
             }
             else
