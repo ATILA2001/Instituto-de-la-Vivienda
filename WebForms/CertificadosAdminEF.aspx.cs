@@ -158,17 +158,23 @@ namespace WebForms
                 { 
                     Id = usuarioTradicional.Id,
                     Nombre = usuarioTradicional.Nombre,
-                    AreaId = usuarioTradicional.Area?.Id ?? 0
+                    Correo = usuarioTradicional.Correo,
+                    Tipo = usuarioTradicional.Tipo, // true: Administrador, false: Usuario normal
+                    Estado = usuarioTradicional.Estado,
+                    AreaId = usuarioTradicional.Area?.Id ?? 0,
                 };
             }
             
             // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
             // (sin filtro de área)
-            return new UsuarioEF 
-            { 
+            return new UsuarioEF
+            {
                 Id = 0,
-                Nombre = "Usuario por defecto",
-                AreaId = 0 // 0 significa sin filtro de área
+                Nombre = "Usuario null",
+                Correo = null,
+                Tipo = false, // Usuario normal por defecto
+                Estado = false,
+                AreaId = 0, // 0 significa sin filtro de área
             };
         }
 
