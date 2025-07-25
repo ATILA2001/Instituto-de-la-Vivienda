@@ -133,7 +133,7 @@ namespace WebForms
             // Cargar valores de paginación desde ViewState
             currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
             pageSize = (int)(ViewState["PageSize"] ?? 12);
-            
+
             if (!IsPostBack)
             {
                 CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
@@ -146,11 +146,6 @@ namespace WebForms
                 ActualizarControlesPaginacion();
             }
         }
-
-        #endregion
-
-        #region Eventos de Interfaz y Acciones del Usuario
-
         /// <summary>
         /// Manejador genérico para aceptar cambios en filtros TreeViewSearch.
         /// 
@@ -167,6 +162,8 @@ namespace WebForms
         {
             dgvAutorizante.PageIndex = 0;
             BindGrid();
+
+            ActualizarControlesPaginacion();
         }
 
         /// <summary>
@@ -597,7 +594,8 @@ namespace WebForms
                 bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderProyecto", context.Proyectos.AsNoTracking().OrderBy(p => p.Nombre).Select(p => new { p.Id, p.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
+                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(),"CodigoAutorizante","CodigoAutorizante"
+);                bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
                 
                 // Filtro de Concepto con "REDETERMINACION" incluida
                 if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
@@ -798,33 +796,65 @@ namespace WebForms
         {
             try
             {
-                // Obtener usuario actual
-                UsuarioEF usuario = ObtenerUsuarioActual();
+                // Usar la lista completa de la sesión
+                List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantesTotal"] as List<AutorizanteDTO>;
+                if (listaCompleta == null)
+                {
+                    // Recargar si por algún motivo no está en sesión
+                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    listaCompleta = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
+                    Session["GridDataAutorizantesTotal"] = listaCompleta;
+                }
 
-                // PAGINACIÓN REAL: Obtener total de registros
-                int totalRegistros = calculoRedeterminacionNegocio.ContarTotalAutorizantes(usuario);
-                
-                // Guardar total en ViewState
-                ViewState["TotalRecords"] = totalRegistros;
-                totalRecords = totalRegistros;
-                
-                // Cargar solo los datos de la página actual usando las variables externas
-                List<AutorizanteDTO> autorizantesPagina = calculoRedeterminacionNegocio.ListarAutorizantesPaginados(
-                    usuario, 
-                    currentPageIndex, 
-                    pageSize
-                );
-                
-                // Guardar en sesión para uso en filtros (solo los datos actuales)
-                Session["GridDataAutorizantes"] = autorizantesPagina;
-                Session["TotalRegistros"] = totalRegistros;
+                // LOG: cantidad total antes de filtros
+                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Total registros cargados (autorizantes + redeterminaciones): {listaCompleta.Count}");
 
-                // Vincular datos al GridView (sin paginación automática)
-                dgvAutorizante.DataSource = autorizantesPagina;
+                // Aplicar filtro de búsqueda
+                string filtro = txtBuscar.Text.Trim().ToLower();
+                var datosFiltrados = listaCompleta;
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    datosFiltrados = datosFiltrados.Where(a =>
+                        (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
+                        (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
+                        (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
+                        (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
+                        (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
+                    ).ToList();
+                }
+
+                // LOG: cantidad después de filtro de búsqueda
+                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Registros después de filtro de búsqueda: {datosFiltrados.Count}");
+
+                // Aplicar filtros de TreeView
+                datosFiltrados = AplicarFiltrosTreeViewEnMemoria(datosFiltrados);
+
+                // LOG: cantidad después de filtros de TreeView
+                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Registros después de filtros TreeView: {datosFiltrados.Count}");
+
+                // Guardar en sesión la lista filtrada (para la página actual)
+                Session["GridDataAutorizantes"] = datosFiltrados;
+                Session["TotalRegistros"] = datosFiltrados.Count;
+
+                // Paginación manual
+                int totalFiltrados = datosFiltrados.Count;
+                totalRecords = totalFiltrados;
+                ViewState["TotalRecords"] = totalFiltrados;
+
+                var paginaActual = datosFiltrados
+                    .Skip(currentPageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                dgvAutorizante.DataSource = paginaActual;
                 dgvAutorizante.DataBind();
-                
+
                 PoblarFiltrosHeader();
-                
+
                 // Calcular subtotal después de cargar datos
                 CalcularSubtotal();
             }
@@ -878,7 +908,7 @@ namespace WebForms
             PoblarFiltrosHeader();
             
             // Recalcular subtotal después de aplicar filtros
-            CalcularSubtotal();
+            //CalcularSubtotal();
         }
 
         /// <summary>
@@ -910,6 +940,15 @@ namespace WebForms
                 {
                     var empresasSeleccionadas = cblsHeaderEmpresa.SelectedValues.Select(int.Parse).ToList();
                     autorizantes = autorizantes.Where(a => a.EmpresaId.HasValue && empresasSeleccionadas.Contains(a.EmpresaId.Value)).ToList();
+                }
+
+                // Aplicar filtro de Código Autorizante
+                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.SelectedValues?.Any() == true)
+                {
+                    var codigosSeleccionados = cblsHeaderCodigoAutorizante.SelectedValues;
+                    autorizantes = autorizantes
+                        .Where(a => codigosSeleccionados.Contains(a.CodigoAutorizante))
+                        .ToList();
                 }
 
                 // Aplicar filtro de Concepto
@@ -996,17 +1035,23 @@ namespace WebForms
                 { 
                     Id = usuarioTradicional.Id,
                     Nombre = usuarioTradicional.Nombre,
-                    AreaId = usuarioTradicional.Area?.Id ?? 0
+                    Correo = usuarioTradicional.Correo,
+                    Tipo = usuarioTradicional.Tipo,
+                    Estado = usuarioTradicional.Estado,
+                    AreaId = usuarioTradicional.Area?.Id ?? 0,
                 };
             }
             
             // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
             // (sin filtro de área)
             return new UsuarioEF 
-            { 
+            {
                 Id = 0,
-                Nombre = "Usuario por defecto",
-                AreaId = 0 // 0 significa sin filtro de área
+                Nombre = "Usuario null",
+                Correo = null,
+                Tipo = false, // Usuario normal por defecto
+                Estado = false,
+                AreaId = 0, // 0 significa sin filtro de área
             };
         }
 
@@ -1014,13 +1059,19 @@ namespace WebForms
         {
             try
             {
-                // Obtener usuario actual
-                UsuarioEF usuario = ObtenerUsuarioActual();
-                
-                // Obtener TODOS los registros base (autorizantes + redeterminaciones)
-                List<AutorizanteDTO> todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
-                
-                // Aplicar filtro de texto general si existe
+                // Siempre usar la lista completa (no la paginada)
+                List<AutorizanteDTO> todosLosRegistros;
+                if (Session["GridDataAutorizantesTotal"] != null)
+                {
+                    todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantesTotal"];
+                }
+                else
+                {
+                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
+                }
+
+                // Aplicar filtro de búsqueda (txtBuscar)
                 string filtro = txtBuscar.Text.Trim().ToLower();
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -1045,11 +1096,6 @@ namespace WebForms
                 int cantidadRegistros = todosLosRegistros.Count;
 
                 // Actualizar etiquetas de subtotal
-                //if (lblSubtotal != null)
-                //{
-                //    lblSubtotal.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
-                //}
-                
                 if (lblSubtotalPaginacion != null)
                 {
                     lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
@@ -1058,13 +1104,6 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error en CalcularSubtotal: {ex.Message}");
-                
-                // En caso de error, mostrar información básica
-                //if (lblSubtotal != null)
-                //{
-                //    lblSubtotal.Text = "Total: Error al calcular";
-                //}
-                
                 if (lblSubtotalPaginacion != null)
                 {
                     lblSubtotalPaginacion.Text = "Total: Error al calcular";
@@ -1346,37 +1385,70 @@ namespace WebForms
             // Obtener valores actuales
             totalRecords = (int)(ViewState["TotalRecords"] ?? 0);
             totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
-            
-            // Actualizar información de página
-            lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {totalPages}";
-            
-            // Actualizar dropdown de tamaño de página
-            ddlPageSizeExternal.SelectedValue = pageSize.ToString();
-            
+
+            // Buscar y actualizar controles dinámicamente hasta que se regenere el designer
+            var lblPaginaInfo = FindControlRecursive(this, "lblPaginaInfo") as Label;
+            if (lblPaginaInfo != null)
+            {
+                lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {totalPages}";
+            }
+
+            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
+            if (ddlPageSizeExternal != null)
+            {
+                ddlPageSizeExternal.SelectedValue = pageSize.ToString();
+            }
+
+            // Actualizar el label de subtotal en la paginación si existe
+            // NOTA: No calcular subtotal aquí porque solo tenemos los datos de la página actual.
+            // El subtotal correcto se calcula en CalcularSubtotal() que usa todos los registros.
+
             // Controlar visibilidad y estado de botones
-            lnkFirst.Enabled = currentPageIndex > 0;
-            lnkPrev.Enabled = currentPageIndex > 0;
-            lnkNext.Enabled = currentPageIndex < totalPages - 1;
-            lnkLast.Enabled = currentPageIndex < totalPages - 1;
-            
-            lnkFirst.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            lnkPrev.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            lnkNext.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            lnkLast.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            
+            var lnkFirst = FindControlRecursive(this, "lnkFirst") as LinkButton;
+            if (lnkFirst != null)
+            {
+                lnkFirst.Enabled = currentPageIndex > 0;
+                lnkFirst.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+
+            var lnkPrev = FindControlRecursive(this, "lnkPrev") as LinkButton;
+            if (lnkPrev != null)
+            {
+                lnkPrev.Enabled = currentPageIndex > 0;
+                lnkPrev.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+
+            var lnkNext = FindControlRecursive(this, "lnkNext") as LinkButton;
+            if (lnkNext != null)
+            {
+                lnkNext.Enabled = currentPageIndex < totalPages - 1;
+                lnkNext.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+
+            var lnkLast = FindControlRecursive(this, "lnkLast") as LinkButton;
+            if (lnkLast != null)
+            {
+                lnkLast.Enabled = currentPageIndex < totalPages - 1;
+                lnkLast.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+
             // Configurar botones numerados
             ConfigurarBotonesNumerados();
         }
 
+        /// <summary>
+        /// Configura los botones numerados de paginación.
+        /// Actualizado para funcionar dinámicamente con cualquier cantidad de botones.
+        /// </summary>
         private void ConfigurarBotonesNumerados()
         {
-            LinkButton[] pageButtons = { lnkPage1, lnkPage2, lnkPage3, lnkPage4, lnkPage5 };
-            int totalButtons = pageButtons.Length;
-            
+            string[] pageButtonIds = { "lnkPage1", "lnkPage2", "lnkPage3", "lnkPage4", "lnkPage5" };
+            int totalButtons = pageButtonIds.Length;
+
             // Calcular rango de páginas a mostrar
             int buttonsToShow = Math.Min(totalButtons, totalPages);
             int startPage, endPage;
-            
+
             if (totalPages <= totalButtons)
             {
                 // Si hay menos páginas que botones, mostrar todas
@@ -1389,43 +1461,62 @@ namespace WebForms
                 int centerPosition = totalButtons / 2; // Posición central calculada dinámicamente
                 startPage = Math.Max(0, currentPageIndex - centerPosition);
                 endPage = Math.Min(totalPages - 1, startPage + totalButtons - 1);
-                
+
                 // Ajustar si nos quedamos cortos al final
                 if (endPage - startPage + 1 < totalButtons && totalPages >= totalButtons)
                 {
                     startPage = Math.Max(0, endPage - totalButtons + 1);
                 }
             }
-            
+
             // Configurar cada botón
             for (int i = 0; i < totalButtons; i++)
             {
-                var button = pageButtons[i];
-                int pageIndex = startPage + i;
-                
-                if (i < buttonsToShow && pageIndex <= endPage && pageIndex < totalPages)
+                var pageButton = FindControlRecursive(this, pageButtonIds[i]) as LinkButton;
+                if (pageButton != null)
                 {
-                    button.Visible = true;
-                    button.Text = (pageIndex + 1).ToString();
-                    button.CommandArgument = pageIndex.ToString();
-                    button.ToolTip = $"Ir a página {pageIndex + 1}";
-                    
-                    if (pageIndex == currentPageIndex)
+                    int pageIndex = startPage + i;
+
+                    if (i < buttonsToShow && pageIndex <= endPage && pageIndex < totalPages)
                     {
-                        button.CssClass = "btn btn-sm btn-primary mx-1";
-                        button.Enabled = false;
+                        pageButton.Text = (pageIndex + 1).ToString();
+                        pageButton.CommandArgument = pageIndex.ToString();
+                        pageButton.Visible = true;
+
+                        if (pageIndex == currentPageIndex)
+                        {
+                            pageButton.CssClass = "btn btn-sm btn-primary mx-1";
+                        }
+                        else
+                        {
+                            pageButton.CssClass = "btn btn-sm btn-outline-primary mx-1";
+                        }
                     }
                     else
                     {
-                        button.CssClass = "btn btn-sm btn-outline-primary mx-1";
-                        button.Enabled = true;
+                        pageButton.Visible = false;
                     }
                 }
-                else
-                {
-                    button.Visible = false;
-                }
             }
+        }
+
+        /// <summary>
+        /// Busca un control recursivamente en la jerarquía de controles.
+        /// Método auxiliar para trabajar sin designer regenerado.
+        /// </summary>
+        private Control FindControlRecursive(Control root, string id)
+        {
+            if (root.ID == id)
+                return root;
+
+            foreach (Control control in root.Controls)
+            {
+                Control found = FindControlRecursive(control, id);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
         }
 
         protected void ddlEstadoAutorizante_SelectedIndexChanged(object sender, EventArgs e)
