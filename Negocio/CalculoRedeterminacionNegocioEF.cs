@@ -60,6 +60,34 @@ namespace Negocio
     /// </summary>
     public class CalculoRedeterminacionNegocioEF
     {
+
+        // Desestimado = "35, 36"
+        // No iniciado = 37, 38
+        // Aprobado = 12, 22, 33, 39
+        // En tramite todos los demas
+
+        private readonly int[] idsDesestimado = { 35, 36 }; // Rechazada, Fuera de Plazo
+        private readonly int[] idsNoIniciado = { 37, 38 }; // Pendiente, No presentada
+        private readonly int[] idsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
+
+        // Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre }, /////////////////////////////////////////////////////////////////////////////////
+        private EstadoAutorizante MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
+        {
+            if (idsDesestimado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizante { Id = 3, Nombre = "DESESTIMADO" };
+
+            if (idsNoIniciado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizante { Id = 4, Nombre = "NO INICIADO" };
+
+            if (idsAprobado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizante { Id = 1, Nombre = "APROBADO" };
+
+            return new EstadoAutorizante { Id = 2, Nombre = "EN TRAMITE" };
+        }
+
+
+
+
         /// <summary>
         /// Devuelve todos los autorizantes y redeterminaciones como DTOs, sin paginación ni filtros complejos.
         /// Replica la lógica de ListarCertificadosYReliquidaciones pero para autorizantes y redeterminaciones.
@@ -184,8 +212,6 @@ namespace Negocio
                             MontoAutorizado = auth.MontoAutorizado,
                             MesAprobacion = auth.MesAprobacion,
                             MesBase = auth.MesBase,
-                            //BuzonSade = (!string.IsNullOrEmpty(auth.Expediente) && datosSade.ContainsKey(auth.Expediente))  ? datosSade[auth.Expediente].Buzon  : null,
-                            //FechaSade = (!string.IsNullOrEmpty(auth.Expediente) && datosSade.ContainsKey(auth.Expediente))  ? datosSade[auth.Expediente].Fecha  : (DateTime?)null,
                             BuzonSade = datosSade.TryGetValue(auth.Expediente, out var sadeInfo) ? sadeInfo.Buzon : null,
                             FechaSade = datosSade.TryGetValue(auth.Expediente, out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
 
@@ -201,6 +227,7 @@ namespace Negocio
                         var auth = redet.Autorizante;
                         var obra = auth?.Obra;
 
+                        var estado = MapearEstadoRedetAEstadoAutorizante(redet);
                         var dto = new AutorizanteDTO
                         {
                             IdRedeterminacion = redet.Id,
@@ -213,9 +240,9 @@ namespace Negocio
                             BarrioNombre = obra?.Barrio?.Nombre,
                             EmpresaId = obra?.EmpresaId,
                             EmpresaNombre = obra?.Empresa?.Nombre,
-                            Contrata = $"{obra?.Contrata?.Nombre} {obra.Numero}/{obra.Anio}" ,
-                            EstadoId = redet.EstadoRedetEFId,
-                            EstadoNombre = redet.Etapa?.Nombre,
+                            Contrata = $"{obra?.Contrata?.Nombre} {obra.Numero}/{obra.Anio}",
+                            EstadoId = estado.Id,
+                            EstadoNombre = estado.Nombre,
                             Detalle = $"{redet.Tipo} - {redet.Etapa?.Nombre}",
                             Expediente = redet.Expediente,
                             ConceptoId = 11,
