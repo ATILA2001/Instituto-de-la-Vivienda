@@ -476,16 +476,9 @@ namespace WebForms
         /// </summary>
         public void OnAcceptChanges(object sender, EventArgs e)
         {
-            // Reiniciar a primera página cuando se aplican filtros
-            currentPageIndex = 0;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-            
-            // OPTIMIZACIÓN: No recargar datos desde BD, solo aplicar filtros en memoria
-            // Los datos ya están completos en Session
-            BindGrid();
-            
-            // Actualizar controles de paginación
-            ActualizarControlesPaginacion();
+            currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
+            ViewState["CurrentPageIndex"] = currentPageIndex; // Actualizar ViewState
+            CargarPaginaActual(); // Cargar datos filtrados y paginados
         }
 
         #region Eventos de Navegación de Paginación Externa (replicados desde AutorizantesAdminEF)

@@ -160,10 +160,9 @@ namespace WebForms
         /// </summary>
         protected void OnAcceptChanges(object sender, EventArgs e)
         {
-            dgvAutorizante.PageIndex = 0;
-            BindGrid();
-
-            ActualizarControlesPaginacion();
+            currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
+            ViewState["CurrentPageIndex"] = currentPageIndex; // Actualizar ViewState
+            CargarPaginaActual(); // Cargar datos filtrados y paginados
         }
 
         /// <summary>
