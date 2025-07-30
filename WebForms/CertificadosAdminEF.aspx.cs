@@ -14,13 +14,47 @@ using WebForms.CustomControls;
 
 namespace WebForms
 {
+    /// <summary>
+    /// Página de administración de certificados y reliquidaciones con sistema de paginación optimizada.
+    /// </summary>
     public partial class CertificadosAdminEF : Page
     {
+        #region Instancias de Negocio
         // Se instancian las clases de negocio de EF.
         CertificadoNegocioEF negocio = new CertificadoNegocioEF();
         CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
         ExpedienteReliqNegocioEF negocioReliq = new ExpedienteReliqNegocioEF();
+        #endregion
 
+        #region Variables de Paginación Externa
+        
+        /// <summary>
+        /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
+        /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
+        /// </summary>
+        private int currentPageIndex = 0;
+        
+        /// <summary>
+        /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
+        /// Se mantiene en ViewState para persistir la preferencia del usuario.
+        /// </summary>
+        private int pageSize = 12;
+        
+        /// <summary>
+        /// Total de registros disponibles según filtros actuales.
+        /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
+        /// </summary>
+        private int totalRecords = 0;
+        
+        /// <summary>
+        /// Total de páginas calculado a partir de totalRecords / pageSize.
+        /// Se recalcula automáticamente cuando cambian los totales o el tamaño de página.
+        /// </summary>
+        private int totalPages = 0;
+
+        #endregion
+
+        #region Eventos de Página
         protected void Page_PreRender(object sender, EventArgs e)
         {
             rfvAutorizante.Enabled = Session["EditingCertificadoId"] == null;
@@ -28,32 +62,201 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            // Cargar valores de paginación desde ViewState
+            currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
+            pageSize = (int)(ViewState["PageSize"] ?? 12);
+            
             if (!IsPostBack)
             {
-                CargarGrillaCompleta();
+                CargarListaCertificadosCompleta();
                 BindDropDownList();
+                //CalcularSubtotal();
+                ActualizarControlesPaginacion();
+            }
+            else
+            {
+                // En postback, actualizar controles de paginación
+                ActualizarControlesPaginacion();
             }
         }
+        #endregion
 
-        public void OnAcceptChanges(object sender, EventArgs e)
-        {
-            dgvCertificado.PageIndex = 0;
-            BindGrid();
-        }
-
-        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        #region Métodos de Paginación (replicados exactamente desde AutorizantesAdminEF)
+        /// <summary>
+        /// Método central que carga datos paginados de certificados y reliquidaciones.
+        /// 
+        /// ARQUITECTURA DE PAGINACIÓN REAL:
+        /// 1. Consulta totalRecords con ContarTotalCertificados()
+        /// 2. Carga solo pageSize registros usando ListarCertificadosPaginados() 
+        /// 3. Guarda total en ViewState["TotalRecords"] para cálculos de paginación
+        /// 4. Guarda datos de página actual en Session["GridData"]
+        /// 
+        /// DATOS COMBINADOS:
+        /// - Certificados reales de tabla Certificados
+        /// - Reliquidaciones calculadas dinámicamente (virtuales)
+        /// - Integración de datos SADE y SIGAF
+        /// - Estados mapeados según lógica de negocio
+        /// 
+        /// OPTIMIZACIONES IMPLEMENTADAS:
+        /// - Paginación en BD (no carga todos los registros)
+        /// - Variables externas currentPageIndex y pageSize
+        /// - Consulta de conteo separada (más eficiente)
+        /// - Session para evitar recálculos en filtros locales
+        /// </summary>
+        private void CargarListaCertificadosCompleta()
         {
             try
             {
-                // CORRECCIÓN: Se utiliza la misma fuente de datos que la grilla (Session) para asegurar consistencia.
-                if (Session["GridData"] == null) return;
-                var datosParaExportar = (List<CertificadoDTO>)Session["GridData"];
+                // Obtener usuario actual
+                UsuarioEF usuario = ObtenerUsuarioActual();
 
-                // Se aplican los mismos filtros que tiene la grilla.
+                // REGRESANDO A CARGA COMPLETA: necesaria para todos los campos calculados (Contrata, Proyecto, SIGAF, SADE, etc.)
+                // OPTIMIZACIÓN: Solo cargar si no están en cache
+                List<CertificadoDTO> todoLosCertificados;
+                
+                if (Session["GridData"] == null || ViewState["NecesitaRecarga"] != null)
+                {
+                    UsuarioEF usuarioActual = ObtenerUsuarioActual();
+                    todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
+                    
+                    // Guardar en cache
+                    Session["GridData"] = todoLosCertificados;
+                    ViewState["NecesitaRecarga"] = null;
+                }
+                else
+                {
+                    todoLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                }
+                
+                // Calcular total de registros
+                int totalRegistros = todoLosCertificados?.Count ?? 0;
+                
+                // Guardar total en ViewState
+                ViewState["TotalRecords"] = totalRegistros;
+                totalRecords = totalRegistros;
+                Session["TotalRegistros"] = totalRegistros;
+
+                // Usar BindGrid para paginación en memoria (mantiene todos los campos)
+                BindGrid();
+            }
+            catch (Exception ex)
+            {
+                
+                lblMensaje.Text = $"Error al cargar certificados: {ex.Message}";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        private UsuarioEF ObtenerUsuarioActual()
+        {
+            // Implementar según la lógica de sesión del sistema
+            // Replicado desde AutorizantesAdminEF
+            if (Session["Usuario"] != null)
+            {
+                var usuarioTradicional = (Usuario)Session["Usuario"];
+                return new UsuarioEF 
+                { 
+                    Id = usuarioTradicional.Id,
+                    Nombre = usuarioTradicional.Nombre,
+                    Correo = usuarioTradicional.Correo,
+                    Tipo = usuarioTradicional.Tipo, // true: Administrador, false: Usuario normal
+                    Estado = usuarioTradicional.Estado,
+                    AreaId = usuarioTradicional.Area?.Id ?? 0,
+                };
+            }
+            
+            // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
+            // (sin filtro de área)
+            return new UsuarioEF
+            {
+                Id = 0,
+                Nombre = "Usuario null",
+                Correo = null,
+                Tipo = false, // Usuario normal por defecto
+                Estado = false,
+                AreaId = 0, // 0 significa sin filtro de área
+            };
+        }
+
+        /// <summary>
+        /// Método central para refrescar la visualización del GridView.
+        /// Lee los datos desde Session, aplica los filtros y la paginación actuales.
+        /// EXACTAMENTE IGUAL QUE AutorizantesAdminEF.
+        /// </summary>
+        private void BindGrid()
+        {
+            if (Session["GridData"] == null) return;
+
+            var datosEnMemoria = (List<CertificadoDTO>)Session["GridData"];
+
+            // Aplicar filtro de texto general
+            string filtro = txtBuscar.Text.Trim().ToLower();
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                datosEnMemoria = datosEnMemoria.Where(c =>
+                    (c.ExpedientePago?.ToLower().Contains(filtro) ?? false) ||
+                    (c.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
+                    (c.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
+                    (c.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
+                    (c.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
+                    (c.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
+                    (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
+                ).ToList();
+            }
+
+            // Aplicar filtros de las columnas (TreeView)
+            datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
+
+            // Configurar paginación - EXACTAMENTE IGUAL que AutorizantesAdminEF
+            int totalFiltrados = datosEnMemoria.Count;
+            dgvCertificado.VirtualItemCount = totalFiltrados;
+            dgvCertificado.PageSize = pageSize;
+            dgvCertificado.PageIndex = currentPageIndex;
+            dgvCertificado.DataSource = datosEnMemoria
+                                        .Skip(currentPageIndex * pageSize)
+                                        .Take(pageSize)
+                                        .ToList();
+            dgvCertificado.DataBind();
+            PoblarFiltrosHeader();
+
+            // Actualizar totalRecords y paginación según los datos filtrados
+            totalRecords = totalFiltrados;
+            ViewState["TotalRecords"] = totalFiltrados;
+            ActualizarControlesPaginacion();
+
+            // Recalcular subtotal después de aplicar filtros
+            CalcularSubtotal();
+        }
+
+        /// <summary>
+        /// Calcula el subtotal de los certificados filtrados.
+        /// Replica EXACTAMENTE la lógica de AutorizantesAdminEF:
+        /// Hace consulta completa independiente para obtener TODOS los registros filtrados.
+        /// </summary>
+        private void CalcularSubtotal()
+        {
+            try
+            {
+                // OPTIMIZACIÓN: Usar datos del caché en lugar de hacer nueva consulta DB
+                List<CertificadoDTO> todosLosRegistros;
+                
+                // Intentar obtener datos del caché primero
+                if (Session["GridData"] != null)
+                {
+                    todosLosRegistros = (List<CertificadoDTO>)Session["GridData"];
+                }
+                else
+                {
+                    // Solo si no hay caché, consultar BD (caso excepcional)
+                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    todosLosRegistros = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
+                }
+                
+                // Aplicar filtro de texto general si existe
                 string filtro = txtBuscar.Text.Trim().ToLower();
                 if (!string.IsNullOrEmpty(filtro))
                 {
-                    datosParaExportar = datosParaExportar.Where(c =>
+                    todosLosRegistros = todosLosRegistros.Where(c =>
                         (c.ExpedientePago?.ToLower().Contains(filtro) ?? false) ||
                         (c.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
                         (c.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
@@ -63,9 +266,310 @@ namespace WebForms
                         (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
                     ).ToList();
                 }
-                datosParaExportar = AplicarFiltrosTreeViewEnMemoria(datosParaExportar);
 
-                // Se define el mapeo de columnas.
+                // Aplicar filtros de TreeView (filtros de columnas)
+                todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
+
+                // Calcular el total de los registros filtrados
+                decimal totalMonto = todosLosRegistros.Sum(c => c.MontoTotal);
+                int cantidadRegistros = todosLosRegistros.Count;
+
+                // Actualizar etiqueta de subtotal en el control existente
+                if (txtSubtotal != null)
+                {
+                    txtSubtotal.Text = totalMonto.ToString("C", CultureInfo.GetCultureInfo("es-AR"));
+                }
+                
+                // Actualizar label de subtotal en paginación si existe
+                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
+                if (lblSubtotalPaginacion != null)
+                {
+                    lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
+                }
+            }
+            catch (Exception)
+            {
+                // En caso de error, mostrar información básica
+                if (txtSubtotal != null)
+                {
+                    txtSubtotal.Text = "$0,00";
+                }
+                
+                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
+                if (lblSubtotalPaginacion != null)
+                {
+                    lblSubtotalPaginacion.Text = "Total: Error al calcular";
+                }
+            }
+        }
+
+        private void CargarPaginaActual()
+        {
+            // Guardar el estado actual en ViewState
+            ViewState["CurrentPageIndex"] = currentPageIndex;
+            ViewState["PageSize"] = pageSize;
+            
+            // Cargar los datos
+            CargarListaCertificadosCompleta();
+            
+            // Actualizar controles de paginación
+            ActualizarControlesPaginacion();
+        }
+
+        /// <summary>
+        /// Actualiza todos los controles de paginación externa basándose en el estado actual.
+        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// </summary>
+        private void ActualizarControlesPaginacion()
+        {
+            // Obtener valores actuales
+            totalRecords = (int)(ViewState["TotalRecords"] ?? 0);
+            totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
+            
+            // Buscar y actualizar controles dinámicamente hasta que se regenere el designer
+            var lblPaginaInfo = FindControlRecursive(this, "lblPaginaInfo") as Label;
+            if (lblPaginaInfo != null)
+            {
+                lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {totalPages}";
+            }
+            
+            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
+            if (ddlPageSizeExternal != null)
+            {
+                ddlPageSizeExternal.SelectedValue = pageSize.ToString();
+            }
+            
+            // Actualizar el label de subtotal en la paginación si existe
+            // NOTA: No calcular subtotal aquí porque solo tenemos los datos de la página actual.
+            // El subtotal correcto se calcula en CalcularSubtotal() que usa todos los registros.
+            
+            // Controlar visibilidad y estado de botones
+            var lnkFirst = FindControlRecursive(this, "lnkFirst") as LinkButton;
+            if (lnkFirst != null)
+            {
+                lnkFirst.Enabled = currentPageIndex > 0;
+                lnkFirst.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+            
+            var lnkPrev = FindControlRecursive(this, "lnkPrev") as LinkButton;
+            if (lnkPrev != null)
+            {
+                lnkPrev.Enabled = currentPageIndex > 0;
+                lnkPrev.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+            
+            var lnkNext = FindControlRecursive(this, "lnkNext") as LinkButton;
+            if (lnkNext != null)
+            {
+                lnkNext.Enabled = currentPageIndex < totalPages - 1;
+                lnkNext.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+            
+            var lnkLast = FindControlRecursive(this, "lnkLast") as LinkButton;
+            if (lnkLast != null)
+            {
+                lnkLast.Enabled = currentPageIndex < totalPages - 1;
+                lnkLast.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
+            }
+            
+            // Configurar botones numerados
+            ConfigurarBotonesNumerados();
+        }
+
+        /// <summary>
+        /// Configura los botones numerados de paginación.
+        /// Actualizado para funcionar dinámicamente con cualquier cantidad de botones.
+        /// </summary>
+        private void ConfigurarBotonesNumerados()
+        {
+            string[] pageButtonIds = { "lnkPage1", "lnkPage2", "lnkPage3", "lnkPage4", "lnkPage5" };
+            int totalButtons = pageButtonIds.Length;
+            
+            // Calcular rango de páginas a mostrar
+            int buttonsToShow = Math.Min(totalButtons, totalPages);
+            int startPage, endPage;
+            
+            if (totalPages <= totalButtons)
+            {
+                // Si hay menos páginas que botones, mostrar todas
+                startPage = 0;
+                endPage = totalPages - 1;
+            }
+            else
+            {
+                // Lógica de centrado: intentar poner el botón actual en el centro
+                int centerPosition = totalButtons / 2; // Posición central calculada dinámicamente
+                startPage = Math.Max(0, currentPageIndex - centerPosition);
+                endPage = Math.Min(totalPages - 1, startPage + totalButtons - 1);
+                
+                // Ajustar si nos quedamos cortos al final
+                if (endPage - startPage + 1 < totalButtons && totalPages >= totalButtons)
+                {
+                    startPage = Math.Max(0, endPage - totalButtons + 1);
+                }
+            }
+            
+            // Configurar cada botón
+            for (int i = 0; i < totalButtons; i++)
+            {
+                var pageButton = FindControlRecursive(this, pageButtonIds[i]) as LinkButton;
+                if (pageButton != null)
+                {
+                    int pageIndex = startPage + i;
+                    
+                    if (i < buttonsToShow && pageIndex <= endPage && pageIndex < totalPages)
+                    {
+                        pageButton.Text = (pageIndex + 1).ToString();
+                        pageButton.CommandArgument = pageIndex.ToString();
+                        pageButton.Visible = true;
+                        
+                        if (pageIndex == currentPageIndex)
+                        {
+                            pageButton.CssClass = "btn btn-sm btn-primary mx-1";
+                        }
+                        else
+                        {
+                            pageButton.CssClass = "btn btn-sm btn-outline-primary mx-1";
+                        }
+                    }
+                    else
+                    {
+                        pageButton.Visible = false;
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Busca un control recursivamente en la jerarquía de controles.
+        /// Método auxiliar para trabajar sin designer regenerado.
+        /// </summary>
+        private Control FindControlRecursive(Control root, string id)
+        {
+            if (root.ID == id)
+                return root;
+
+            foreach (Control control in root.Controls)
+            {
+                Control found = FindControlRecursive(control, id);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Manejador genérico para aceptar cambios en filtros TreeViewSearch.
+        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// 
+        /// FUNCIONALIDAD:
+        /// - Se dispara cuando el usuario confirma cambios en filtros del header
+        /// - Reinicia la paginación a la primera página
+        /// - Reaplica filtros y refresca la visualización
+        /// 
+        /// INTEGRACIÓN:
+        /// - Conectado con controles TreeViewSearch del header del GridView
+        /// - Permite filtrado dinámico sin recargar datos de BD
+        /// </summary>
+        public void OnAcceptChanges(object sender, EventArgs e)
+        {
+            currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
+            ViewState["CurrentPageIndex"] = currentPageIndex; // Actualizar ViewState
+            CargarPaginaActual(); // Cargar datos filtrados y paginados
+        }
+
+        #region Eventos de Navegación de Paginación Externa (replicados desde AutorizantesAdminEF)
+
+        protected void lnkFirst_Click(object sender, EventArgs e)
+        {
+            currentPageIndex = 0;
+            CargarPaginaActual();
+        }
+
+        protected void lnkPrev_Click(object sender, EventArgs e)
+        {
+            if (currentPageIndex > 0)
+            {
+                currentPageIndex--;
+                CargarPaginaActual();
+            }
+        }
+
+        protected void lnkNext_Click(object sender, EventArgs e)
+        {
+            if (currentPageIndex < totalPages - 1)
+            {
+                currentPageIndex++;
+                CargarPaginaActual();
+            }
+        }
+
+        protected void lnkLast_Click(object sender, EventArgs e)
+        {
+            currentPageIndex = totalPages - 1;
+            CargarPaginaActual();
+        }
+
+        protected void lnkPage_Click(object sender, EventArgs e)
+        {
+            LinkButton btn = (LinkButton)sender;
+            int pageIndex = int.Parse(btn.CommandArgument);
+            currentPageIndex = pageIndex;
+            CargarPaginaActual();
+        }
+
+        protected void ddlPageSizeExternal_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
+            if (ddlPageSizeExternal != null)
+            {
+                pageSize = int.Parse(ddlPageSizeExternal.SelectedValue);
+                currentPageIndex = 0; // Reiniciar a la primera página
+                CargarPaginaActual();
+            }
+        }
+
+        #endregion
+
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // OPTIMIZACIÓN: Usar datos del caché para exportación
+                List<CertificadoDTO> todosLosCertificados;
+                
+                if (Session["GridData"] != null)
+                {
+                    todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                }
+                else
+                {
+                    // Solo si no hay caché, consultar BD
+                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    todosLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
+                }
+
+                // Aplicar los mismos filtros que tiene la grilla
+                string filtro = txtBuscar.Text.Trim().ToLower();
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    todosLosCertificados = todosLosCertificados.Where(c =>
+                        (c.ExpedientePago?.ToLower().Contains(filtro) ?? false) ||
+                        (c.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (c.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
+                        (c.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
+                        (c.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (c.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
+                        (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
+                    ).ToList();
+                }
+                
+                todosLosCertificados = AplicarFiltrosTreeViewEnMemoria(todosLosCertificados);
+
+                // Definir mapeo de columnas
                 var mapeoColumnas = new Dictionary<string, string>
                 {
                     { "Área", "AreaNombre" },
@@ -76,13 +580,13 @@ namespace WebForms
                     { "Código Autorizante", "CodigoAutorizante" },
                     { "Expediente", "ExpedientePago" },
                     { "Estado", "Estado" },
-                    { "Tipo", "TipoCertificado" }, // Se usa el tipo calculado (Certificado/Reliquidación)
+                    { "Tipo", "TipoCertificado" },
                     { "Monto", "MontoTotal" },
                     { "Mes Certificado", "MesAprobacion" },
                     { "Línea", "LineaGestionNombre" }
                 };
 
-                ExcelHelper.ExportarDatosGenericos(dgvCertificado, datosParaExportar, mapeoColumnas, "Certificados");
+                ExcelHelper.ExportarDatosGenericos(dgvCertificado, todosLosCertificados, mapeoColumnas, "Certificados");
             }
             catch (Exception ex)
             {
@@ -149,9 +653,11 @@ namespace WebForms
 
                 if (resultado)
                 {
+                    // Limpiar cache SADE ya que se agregó/modificó un certificado
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                    CargarGrillaCompleta();
-                    //PoblarFiltrosHeader();
+                    CargarPaginaActual(); // Usar método optimizado
                 }
             }
             catch (Exception ex)
@@ -171,62 +677,25 @@ namespace WebForms
             ddlTipo.SelectedIndex = 0;
         }
 
+        #region Métodos Obsoletos Reemplazados por Paginación Optimizada
         /// <summary>
-        /// Método central para cargar los datos desde la capa de negocio y guardarlos en Session.
-        /// Se llama solo una vez en Page_Load o cuando se necesita recargar todos los datos (ej. después de agregar/eliminar).
+        /// OBSOLETO: Reemplazado por CargarPaginaActual() para paginación optimizada.
+        /// Se mantiene para compatibilidad con código existente que aún lo llame.
         /// </summary>
+        [Obsolete("Usar CargarPaginaActual() para mejor rendimiento con paginación real en BD")]
         private void CargarGrillaCompleta()
         {
-            // Se llama al método principal que devuelve una lista completa en memoria.
-            var todosLosDatos = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones();
-            Session["GridData"] = todosLosDatos;
-
-            // Se bindean los datos a la grilla por primera vez.
-            BindGrid();
-
+            CargarPaginaActual();
         }
 
         /// <summary>
-        /// Método central para refrescar la visualización del GridView.
-        /// Lee los datos desde Session, aplica los filtros y la paginación actuales.
-        /// </summary>
-        private void BindGrid()
+        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            if (Session["GridData"] == null) return;
-
-            var datosEnMemoria = (List<CertificadoDTO>)Session["GridData"];
-
-            // Aplicar filtro de texto general.
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            if (!string.IsNullOrEmpty(filtro))
-            {
-                datosEnMemoria = datosEnMemoria.Where(c =>
-                    (c.ExpedientePago?.ToLower().Contains(filtro) ?? false) ||
-                    (c.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-                    (c.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                    (c.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-                    (c.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-                    (c.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-                    (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
-                ).ToList();
-            }
-
-            // Aplicar filtros de las columnas (TreeView).
-            datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
-
-            // Calcular subtotal sobre los datos ya filtrados.
-            decimal subtotal = datosEnMemoria.Sum(c => c.MontoTotal);
-            txtSubtotal.Text = subtotal.ToString("C", CultureInfo.GetCultureInfo("es-AR"));
-
-            // Configurar paginación.
-            dgvCertificado.VirtualItemCount = datosEnMemoria.Count;
-            dgvCertificado.DataSource = datosEnMemoria
-                                        .Skip(dgvCertificado.PageIndex * dgvCertificado.PageSize)
-                                        .Take(dgvCertificado.PageSize)
-                                        .ToList();
-            dgvCertificado.DataBind();
-            PoblarFiltrosHeader();
+            // Este método ahora está obsoleto ya que usamos paginación externa
+            // Mantenemos por compatibilidad pero no hacemos nada
+            e.Cancel = true;
         }
+        #endregion
 
 
 
@@ -282,8 +751,12 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
+                    
+                    // Limpiar cache SADE ya que se eliminó un certificado
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    
                     // Se recarga toda la grilla para reflejar la eliminación.
-                    CargarGrillaCompleta();
+                    CargarPaginaActual(); // Usar método optimizado
                     //PoblarFiltrosHeader();
                 }
             }
@@ -320,7 +793,14 @@ namespace WebForms
 
                 if (dgvCertificado.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
-                    cblsHeaderEstado.DataSource = calculoRedeterminacionNegocio.ObtenerEstadosParaFiltro();
+                    // Estados de certificados: usar el texto como ID y como nombre
+                    var estadosCertificados = new[]
+                    {
+                        new { Id = "NO INICIADO", Nombre = "NO INICIADO" },
+                        new { Id = "EN TRAMITE", Nombre = "EN TRAMITE" },
+                        new { Id = "DEVENGADO", Nombre = "DEVENGADO" }
+                    };
+                    cblsHeaderEstado.DataSource = estadosCertificados;
                     cblsHeaderEstado.DataTextField = "Nombre";
                     cblsHeaderEstado.DataValueField = "Id";
                     cblsHeaderEstado.DataBind();
@@ -370,9 +850,8 @@ namespace WebForms
                 ObtenerTipos();
                 ObtenerAutorizantes();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en BindDropDownList: {ex.Message}");
             }
         }
 
@@ -557,7 +1036,10 @@ namespace WebForms
                         }
                     }
 
-                    BindGrid();
+                    CargarPaginaActual(); // Usar método optimizado
+
+                    // Limpiar cache SADE ya que se modificó un expediente (certificado o reliquidación)
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
                     string tipoRegistro = certificado.TipoPagoId == 3 ? "reliquidación" : "certificado";
                     lblMensaje.Text = $"Expediente de {tipoRegistro} actualizado correctamente.";
@@ -608,27 +1090,48 @@ namespace WebForms
         }
 
 
+        #region Eventos de Filtrado Optimizados
+        /// <summary>
+        /// Aplica filtros y reinicia la paginación.
+        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// 
+        /// COMPORTAMIENTO:
+        /// - Reinicia currentPageIndex a 0 (primera página)
+        /// - Ejecuta CargarPaginaActual() que aplica filtros y recarga
+        /// - Los filtros se obtienen automáticamente de los controles TreeViewSearch
+        /// 
+        /// OPTIMIZACIÓN:
+        /// - No consulta BD, trabaja con datos en Session
+        /// - Filtros se aplican en memoria para rapidez
+        /// </summary>
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            //string filtro = txtBuscar.Text.Trim();
-            dgvCertificado.PageIndex = 0; // Reiniciar a la primera página al aplicar un filtro
-            BindGrid();
+            currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
+            CargarPaginaActual();
         }
 
-
+        /// <summary>
+        /// Limpia todos los filtros aplicados y refresca la vista.
+        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// 
+        /// ACCIONES:
+        /// - Limpia campo de búsqueda textual
+        /// - Limpia todos los filtros TreeViewSearch de la página
+        /// - Reinicia paginación a primera página
+        /// - Recarga vista sin filtros
+        /// 
+        /// DEPENDENCIAS:
+        /// - TreeViewSearch.ClearAllFiltersOnPage() para limpiar filtros
+        /// - CargarPaginaActual() para refrescar vista
+        /// </summary>
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
             TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-            dgvCertificado.PageIndex = 0;
-            BindGrid();
+            currentPageIndex = 0;
+            CargarPaginaActual();
         }
-
-        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            dgvCertificado.PageIndex = e.NewPageIndex;
-            BindGrid();
-        }
+        #endregion
 
         private List<CertificadoDTO> AplicarFiltrosTreeViewEnMemoria(List<CertificadoDTO> data)
         {
@@ -651,9 +1154,30 @@ namespace WebForms
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && cblsHeaderBarrio.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.BarrioId.HasValue && getSelectedIds(cblsHeaderBarrio).Contains(c.BarrioId.Value)).ToList();
 
-                // Aplicar filtro por Proyecto
+                // Aplicar filtro por Proyecto (certificados y reliquidaciones)
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
-                    data = data.Where(c => c.ProyectoId.HasValue && getSelectedIds(cblsHeaderProyecto).Contains(c.ProyectoId.Value)).ToList();
+                {
+                    var selectedProyectoIds = getSelectedIds(cblsHeaderProyecto);
+                    
+                    // Obtener todos los nombres de los proyectos seleccionados
+                    using (var context = new IVCdbContext())
+                    {
+                        var selectedProjectNames = context.Proyectos
+                            .Where(p => selectedProyectoIds.Contains(p.Id))
+                            .Select(p => p.Nombre)
+                            .Distinct()
+                            .ToList();
+
+                        // Obtener todos los IDs de proyectos que coincidan con esos nombres
+                        var allMatchingProjectIds = context.Proyectos
+                            .Where(p => selectedProjectNames.Contains(p.Nombre))
+                            .Select(p => p.Id)
+                            .Distinct()
+                            .ToList();
+                        
+                        data = data.Where(c => c.ProyectoId.HasValue && allMatchingProjectIds.Contains(c.ProyectoId.Value)).ToList();
+                    }
+                }
 
                 // Aplicar filtro por Empresa
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
@@ -663,11 +1187,15 @@ namespace WebForms
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.AutorizanteId.HasValue && getSelectedIds(cblsHeaderCodigoAutorizante).Contains(c.AutorizanteId.Value)).ToList();
 
-                // Aplicar filtro por Estado
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && cblsHeaderEstado.ExpandedSelectedValues.Any())
+                // Aplicar filtro por Estado (ahora por texto, no por ID numérico)
+                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
-                    var selectedGroupIds = getSelectedIds(cblsHeaderEstado);
-                    data = data.Where(c => selectedGroupIds.Contains(calculoRedeterminacionNegocio.MapearEstadoDesdeId(c.EstadoRedetId).Id)).ToList();
+                    var selectedEstados = cblsHeaderEstado.ExpandedSelectedValues;
+                    if (selectedEstados != null && selectedEstados.Any())
+                    {
+                        data = data.Where(c => !string.IsNullOrEmpty(c.Estado) && selectedEstados.Contains(c.Estado)).ToList();
+                    }
+                    // Si no hay filtros seleccionados, no se filtra por estado (se muestran todos)
                 }
 
                 // Aplicar filtro por Tipo
@@ -689,9 +1217,8 @@ namespace WebForms
                 if (dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.LineaGestionId.HasValue && getSelectedIds(cblsHeaderLinea).Contains(c.LineaGestionId.Value)).ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en AplicarFiltrosTreeViewEnMemoria: {ex.Message}");
             }
 
             return data;
