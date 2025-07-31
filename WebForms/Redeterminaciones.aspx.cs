@@ -570,7 +570,35 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            // TextBox event handler implementation
+            TextBox txtExpediente = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
+
+            int idRedeterminacion = Convert.ToInt32(dgvRedeterminacion.DataKeys[row.RowIndex].Value);
+            string nuevoExpediente = txtExpediente.Text;
+
+            try
+            {
+                RedeterminacionNegocio negocio = new RedeterminacionNegocio();
+
+                if (negocio.ActualizarExpediente(idRedeterminacion, nuevoExpediente))
+                {
+
+                    CargarListaRedeterminacion(null, true); 
+
+                    lblMensaje.Text = "Expediente actualizado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+                }
+                else
+                {
+                    lblMensaje.Text = "Error al actualizar el expediente.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
         }
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
