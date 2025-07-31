@@ -97,6 +97,7 @@
     <Compile Include="CertificadoNegocioEF.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ConceptoNegocioEF.cs" />
+    <Compile Include="ABMPlaniNegocio.cs" />
     <Compile Include="ContrataNegocio.cs" />
     <Compile Include="DevengadoNegocio.cs" />
     <Compile Include="EmpresaNegocio.cs" />
