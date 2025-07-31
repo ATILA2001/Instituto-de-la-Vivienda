@@ -509,4 +509,43 @@ namespace Negocio
             }
         }
     }
+
+
+    public static class UserHelper
+    {
+
+        /// <summary>
+        /// Obtiene el usuario actual completo desde la sesión
+        /// </summary>
+        public static UsuarioEF GetFullCurrentUser()
+        {
+            // Implementar según la lógica de sesión del sistema
+            if (HttpContext.Current?.Session["Usuario"] != null)
+            {
+                var userEntity = (Usuario)HttpContext.Current.Session["Usuario"];
+                return new UsuarioEF 
+                { 
+                    Id = userEntity.Id,
+                    Nombre = userEntity.Nombre,
+                    Correo = userEntity.Correo,
+                    Tipo = userEntity.Tipo, // true: Administrador, false: Usuario normal
+                    Estado = userEntity.Estado,
+                    AreaId = userEntity.Area?.Id ?? 0,
+                };
+            }
+
+            // Si no hay usuario en sesión, devolver un usuario por defecto sin área
+            return new UsuarioEF
+            {
+                Id = 0,
+                Nombre = "Usuario null",
+                Correo = null,
+                Tipo = false, // Usuario normal por defecto
+                Estado = false,
+                AreaId = 0, // 0 significa sin filtro de área
+            };
+        }
+
+    }
+
 }
