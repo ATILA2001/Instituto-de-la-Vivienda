@@ -198,11 +198,11 @@
 </asp:LinkButton>
 				</div>
 
-					<div class="form-group mb-2">
+					<%--<div class="form-group mb-2">
 						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
 						</asp:LinkButton>
-					</div>
+					</div>--%>
 					
 				</div>
 			</div>
@@ -267,7 +267,7 @@
 					<asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
 
-					<asp:TemplateField HeaderText="Acciones">
+					<%--<asp:TemplateField HeaderText="Acciones">
 						<ItemTemplate>
 							<div class="d-flex justify-content-center gap-2">
 								<asp:LinkButton ID="btnModificar" runat="server"
@@ -279,7 +279,7 @@
 
 							</div>
 						</ItemTemplate>
-					</asp:TemplateField>
+					</asp:TemplateField>--%>
 				</Columns>
 				<EmptyDataTemplate>
 					<div class="text-center m-3">
