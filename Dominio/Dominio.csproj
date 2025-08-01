@@ -96,6 +96,7 @@
     <Compile Include="PaseSadeEF.cs" />
     <Compile Include="Prioridad.cs" />
     <Compile Include="PrioridadEF.cs" />
+    <Compile Include="ABMPlaniEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Redeterminacion.cs" />
     <Compile Include="RedeterminacionEF.cs" />

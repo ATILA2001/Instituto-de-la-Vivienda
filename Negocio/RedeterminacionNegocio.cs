@@ -300,6 +300,33 @@ namespace Negocio
             }
         }
 
+        public bool ActualizarExpediente(int id, string expediente)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE REDETERMINACIONES 
+        SET 
+            EXPEDIENTE = @expediente
+           WHERE ID = @id");
+
+                datos.agregarParametro("@expediente", expediente);
+                datos.agregarParametro("@id", id);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error al modificar el expediente de la redeterminación.");
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
         public bool ActualizarEstado(Redeterminacion autorizante)
         {
             var datos = new AccesoDatos();
