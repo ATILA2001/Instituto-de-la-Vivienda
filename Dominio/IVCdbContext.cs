@@ -48,20 +48,10 @@ namespace Dominio
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            // Ejemplo: configuración de relaciones o nombres de tablas
-            // modelBuilder.Entity<Autorizante>().ToTable("Autorizantes");
-            // modelBuilder.Entity<Obra>().HasRequired(o => o.Empresa).WithMany().HasForeignKey(o => o.EmpresaId);
-
-
             // Relación Obra - BdProyecto (0..1 a 1)
             modelBuilder.Entity<ObraEF>()
                 .HasOptional(o => o.Proyecto) // Obra puede tener o no un BdProyecto
                 .WithRequired(bp => bp.ObraEF);   // BdProyecto requiere una Obra
-
-            // Relación Obra - Formulacion (0..1 a 1)
-            modelBuilder.Entity<ObraEF>()
-                .HasOptional(o => o.Formulacion) // Obra puede tener o no una Formulacion
-                .WithRequired(f => f.ObraEF);      // Formulacion requiere una Obra
 
             // Relación Obra - Autorizante (1 a muchos)
             modelBuilder.Entity<ObraEF>()
@@ -93,7 +83,7 @@ namespace Dominio
                 .WithMany(ea => ea.Autorizantes)
                 .HasForeignKey(a => a.EstadoId);
 
-            // REVISAR: La relación entre Autorizante y Certificado se basa en Nro_Autorizante, que es una clave única pero no la clave primaria.
+            // La relación entre Autorizante y Certificado se basa en Nro_Autorizante, que es una clave única pero no la clave primaria.
             // EF6 no soporta relaciones de clave externa a claves únicas que no son primarias (Unique Key Foreign Keys).
             // Por lo tanto, esta relación no se puede mapear directamente con Fluent API.
             // La carga de certificados para un autorizante deberá hacerse manualmente en la capa de negocio.
@@ -106,13 +96,19 @@ namespace Dominio
 
             // Relación Redeterminacion - EstadoRedet (muchos a uno)
             modelBuilder.Entity<RedeterminacionEF>()
-                .HasRequired(r => r.Etapa) // Corregido: Se usa la propiedad de navegación 'Etapa'
+                .HasRequired(r => r.Etapa) // Se usa la propiedad de navegación 'Etapa'
                 .WithMany(er => er.Redeterminaciones)
-                .HasForeignKey(r => r.EstadoRedetEFId);            // Relación Certificado - TipoPago (muchos a uno)
+                .HasForeignKey(r => r.EstadoRedetEFId);// Relación Certificado - TipoPago (muchos a uno)
             modelBuilder.Entity<CertificadoEF>()
-                .HasRequired(c => c.TipoPago) // Corregido de c.Tipo a c.TipoPago
+                .HasRequired(c => c.TipoPago) 
                 .WithMany(tp => tp.Certificados)
                 .HasForeignKey(c => c.TipoPagoId);
+
+            // Relación Obra - Formulacion (1 a muchos)
+            modelBuilder.Entity<ObraEF>()
+                .HasMany(o => o.Formulaciones) // Una Obra puede tener muchas Formulaciones
+                .WithRequired(f => f.ObraEF)   // Cada Formulación requiere una Obra
+                .HasForeignKey(f => f.ObraId); // Clave foránea en Formulación
 
             base.OnModelCreating(modelBuilder);
         }

@@ -16,7 +16,7 @@ namespace Dominio
 
 
         [Column("AREA")]
-        public int AreaId { get; set; }
+        public int? AreaId { get; set; }
         [ForeignKey("AreaId")]
         public virtual AreaEF Area { get; set; }
 
