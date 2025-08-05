@@ -6,6 +6,21 @@ using System.Web.UI.WebControls;
 
 namespace WebForms.CustomControls
 {
+    /// <summary>
+    /// Control de Paginación Reutilizable para GridViews
+    /// 
+    /// CARACTERÍSTICAS:
+    /// - Navegación especial: Los botones << < > >> solo aparecen cuando hay más de 5 páginas
+    /// - Ventana deslizante de 5 botones numerados centrados en la página actual
+    /// - Dropdown integrado para cambiar tamaño de página
+    /// - Subtotales dinámicos (monto + cantidad de registros)
+    /// - Eventos personalizados para comunicación con página padre
+    /// 
+    /// PATRÓN DE USO:
+    /// 1. Page.aspx: Registrar control y agregar tag
+    /// 2. Page.aspx.cs: Implementar handlers paginationControl_PageChanged y paginationControl_PageSizeChanged
+    /// 3. Page.aspx.cs: Llamar ConfigurarPaginationControl() y CalcularSubtotalParaPaginationControl()
+    /// </summary>
     public partial class PaginationControl : UserControl
     {
         #region Eventos Públicos
@@ -79,7 +94,16 @@ namespace WebForms.CustomControls
         }
 
         /// <summary>
-        /// Actualiza la visibilidad y estado de todos los controles de paginación
+        /// MÉTODO PRINCIPAL: Actualiza todos los controles de paginación
+        /// 
+        /// LÓGICA ESPECIAL:
+        /// - Botones de navegación (<<, <, >, >>) solo aparecen cuando hay MÁS DE 5 PÁGINAS
+        /// - Ventana deslizante de 5 botones numerados centrados en página actual
+        /// - Manejo automático de visibilidad cuando no hay datos
+        /// 
+        /// LLAMAR DESDE LA PÁGINA PADRE:
+        /// - Después de configurar TotalRecords, CurrentPageIndex, PageSize
+        /// - En eventos de cambio de página o filtros
         /// </summary>
         public void UpdatePaginationControls()
         {
@@ -129,10 +153,15 @@ namespace WebForms.CustomControls
         }
 
         /// <summary>
-        /// Actualiza el texto del subtotal con el monto y cantidad de registros
+        /// MÉTODO PARA SUBTOTALES: Actualiza el texto del subtotal con monto y cantidad
+        /// 
+        /// PATRÓN DE USO:
+        /// - La página padre calcula el subtotal de TODOS los registros filtrados (no solo la página actual)
+        /// - Se llama desde CalcularSubtotalParaPaginationControl() en la página padre
+        /// - Se muestra en el centro del control de paginación
         /// </summary>
-        /// <param name="totalMonto">Monto total a mostrar</param>
-        /// <param name="cantidadRegistros">Cantidad de registros</param>
+        /// <param name="totalMonto">Monto total a mostrar (filtrado, no solo página actual)</param>
+        /// <param name="cantidadRegistros">Cantidad de registros (filtrados, no solo página actual)</param>
         public void UpdateSubtotal(decimal totalMonto, int cantidadRegistros)
         {
             lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
@@ -298,4 +327,64 @@ namespace WebForms.CustomControls
     }
 
     #endregion
+
+    /*
+    EJEMPLO DE USO COMPLETO:
+    
+    1. EN LA PÁGINA .ASPX:
+    <%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
+    
+    <CustomControls:PaginationControl ID="paginationControl" runat="server" 
+        OnPageChanged="paginationControl_PageChanged" 
+        OnPageSizeChanged="paginationControl_PageSizeChanged" />
+    
+    2. EN LA PÁGINA .ASPX.CS:
+    
+    // Event handlers requeridos
+    protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
+    {
+        currentPageIndex = e.PageIndex;
+        CargarDatos(); // Tu método para recargar datos
+    }
+    
+    protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
+    {
+        pageSize = e.PageSize;
+        currentPageIndex = 0; // Reiniciar a primera página
+        CargarDatos(); // Tu método para recargar datos
+    }
+    
+    // Método para configurar el control
+    private void ConfigurarPaginationControl()
+    {
+        var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+        if (paginationControl != null)
+        {
+            // Configurar las propiedades del control
+            paginationControl.TotalRecords = totalRecords;
+            paginationControl.CurrentPageIndex = currentPageIndex;
+            paginationControl.PageSize = pageSize;
+
+            // Actualizar los controles de paginación
+            paginationControl.UpdatePaginationControls();
+            
+            CalcularSubtotalParaPaginationControl();
+        }
+    }
+    
+    // Método para actualizar subtotales
+    private void CalcularSubtotalParaPaginationControl()
+    {
+        // Calcular subtotal de TODOS los registros filtrados (no solo página actual)
+        var todosLosRegistros = ObtenerTodosLosRegistrosFiltrados();
+        var subtotal = todosLosRegistros.Sum(r => r.Monto);
+        var cantidad = todosLosRegistros.Count;
+        
+        var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+        if (paginationControl != null)
+        {
+            paginationControl.UpdateSubtotal(subtotal, cantidad);
+        }
+    }
+    */
 }

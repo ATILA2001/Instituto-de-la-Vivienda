@@ -1,5 +1,20 @@
 <%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PaginationControl.ascx.cs" Inherits="WebForms.CustomControls.PaginationControl" %>
 
+<%-- 
+    CONTROL DE PAGINACIÓN REUTILIZABLE
+    
+    FUNCIONALIDAD:
+    - Navegación entre páginas con lógica especial (botones solo aparecen cuando hay >5 páginas)
+    - Dropdown para cambiar tamaño de página con valores predefinidos
+    - Muestra subtotales dinámicos (monto total y cantidad de registros)
+    - Eventos personalizados para comunicarse con la página padre
+    
+    USO:
+    1. Registrar: <%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
+    2. Usar: <CustomControls:PaginationControl ID="paginationControl" runat="server" OnPageChanged="handler" OnPageSizeChanged="handler" />
+    3. En code-behind: ConfigurarPaginationControl() y CalcularSubtotalParaPaginationControl()
+--%>
+
 <div class="d-flex justify-content-between align-items-center p-3">
     <!-- Controles de paginación a la izquierda -->
     <div class="d-flex align-items-center gap-1">
