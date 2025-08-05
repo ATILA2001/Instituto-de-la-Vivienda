@@ -102,6 +102,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="CustomControls\PaginationControl\PaginationControl.ascx" />
     <Content Include="CustomControls\TreeViewSearch.ascx" />
     <Content Include="CustomControls\chevron-down.svg" />
     <Content Include="CustomControls\chevron-right.svg" />
@@ -232,6 +233,13 @@
     </Compile>
     <Compile Include="CertificadosEF.aspx.designer.cs">
       <DependentUpon>CertificadosEF.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.designer.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
     </Compile>
     <Compile Include="CustomControls\TreeViewSearch.ascx.cs">
       <DependentUpon>TreeViewSearch.ascx</DependentUpon>
