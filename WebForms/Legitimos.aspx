@@ -213,11 +213,11 @@
         <div class="gridview-scroll-container">
 
 
-            <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
-                OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
-                OnRowDataBound="dgvLegitimos_RowDataBound"
+            <asp:GridView ID="gridviewRegistros" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+                OnRowDeleting="gridviewRegistros_RowDeleting" OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
+                OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
-                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvLegitimos_PageIndexChanging" runat="server">
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="gridviewRegistros_PageIndexChanging" runat="server">
 
                 <Columns>
                     <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />

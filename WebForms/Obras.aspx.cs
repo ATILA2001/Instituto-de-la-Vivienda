@@ -95,7 +95,7 @@ namespace WebForms
             };
 
                     // Exportar a Excel
-                    ExcelHelper.ExportarDatosGenericos(dgvObra, obrasUsuario, mapeoColumnas, "Obras");
+                    ExcelHelper.ExportarDatosGenericos(gridviewRegistros, obrasUsuario, mapeoColumnas, "Obras");
                 }
                 else
                 {
@@ -157,8 +157,8 @@ namespace WebForms
                 {
                     lblMensaje.Text = "No se pudo determinar el área del usuario.";
                     lblMensaje.CssClass = "alert alert-warning";
-                    dgvObra.DataSource = new List<Obra>();
-                    dgvObra.DataBind();
+                    gridviewRegistros.DataSource = new List<Obra>();
+                    gridviewRegistros.DataBind();
                     return;
                 }
 
@@ -182,12 +182,12 @@ namespace WebForms
                 List<string> selectedHeaderEmpresas = new List<string>();
                 List<string> selectedHeaderBarrios = new List<string>();
 
-                if (dgvObra.HeaderRow != null)
+                if (gridviewRegistros.HeaderRow != null)
                 {
-                    var cblsHeaderEmpresaControl = dgvObra.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEmpresaControl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaControl != null) selectedHeaderEmpresas = cblsHeaderEmpresaControl.SelectedValues;
 
-                    var cblsHeaderBarrioControl = dgvObra.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderBarrioControl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderBarrioControl != null) selectedHeaderBarrios = cblsHeaderBarrioControl.SelectedValues;
                 }
 
@@ -216,8 +216,8 @@ namespace WebForms
 
                 List<Obra> resultadoFinal = listaFiltrada.ToList();
                 Session["listaObra"] = resultadoFinal; // Actualizar la sesión con la lista filtrada para el SelectedIndexChanged
-                dgvObra.DataSource = resultadoFinal;
-                dgvObra.DataBind();
+                gridviewRegistros.DataSource = resultadoFinal;
+                gridviewRegistros.DataBind();
             }
             catch (Exception ex)
             {
@@ -321,12 +321,12 @@ namespace WebForms
             ddlBarrio.SelectedIndex = 0;
         }
 
-        protected void dgvObra_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 // Get the ID of the selected row
-                int idObra = Convert.ToInt32(dgvObra.SelectedDataKey.Value);
+                int idObra = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
 
                 // Get the list of obras from session
                 List<Obra> listaObras = (List<Obra>)Session["listaObra"];
@@ -391,11 +391,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvObra_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
+                var id = Convert.ToInt32(gridviewRegistros.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Obra eliminada correctamente.";
@@ -410,7 +410,7 @@ namespace WebForms
             }
         }
 
-        protected void dgvObra_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.Header)
             {
@@ -456,12 +456,12 @@ namespace WebForms
         }
 
 
-        protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
             {
                 // Cambiar el índice de la página
-                dgvObra.PageIndex = e.NewPageIndex;
+                gridviewRegistros.PageIndex = e.NewPageIndex;
 
                 // Refrescar el listado de empresas
                 CargarListaObras();
@@ -521,9 +521,9 @@ namespace WebForms
 
         //private void ClearHeaderFilter(string controlId)
         //{
-        //    if (dgvObra.HeaderRow != null)
+        //    if (gridviewRegistros.HeaderRow != null)
         //    {
-        //        var control = dgvObra.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
+        //        var control = gridviewRegistros.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
         //        if (control != null)
         //        {
         //            control.ClearSelection();

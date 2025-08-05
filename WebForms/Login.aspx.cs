@@ -27,7 +27,7 @@ namespace WebForms
                     Session.Add("Usuario", usuario);
                     if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                     {
-                        Response.Redirect("BdProyectos.aspx", false);
+                        Response.Redirect("AutorizantesEF.aspx", false);
                     }
                     else
                     {
@@ -39,7 +39,7 @@ namespace WebForms
                             }
                             else
                             {
-                                Response.Redirect("Obras.aspx", false);
+                                Response.Redirect("AutorizantesEF.aspx", false);
                             }
                         }
                         else

@@ -210,7 +210,7 @@ namespace WebForms
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView dgvAutorizante;
+        protected global::System.Web.UI.WebControls.GridView gridviewRegistros;
 
         /// <summary>
         /// Control lblMensaje.

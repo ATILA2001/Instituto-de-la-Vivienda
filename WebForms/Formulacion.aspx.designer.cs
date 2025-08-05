@@ -240,6 +240,24 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.LinkButton btnExportarExcel;
 
         /// <summary>
+        /// panelFormulationShowAddButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelFormulationShowAddButton;
+
+        /// <summary>
+        /// btnShowAddModal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnShowAddModal;
+
+        /// <summary>
         /// dgvFormulacion control.
         /// </summary>
         /// <remarks>
