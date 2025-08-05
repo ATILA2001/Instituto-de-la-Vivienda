@@ -6,29 +6,13 @@ using System.Globalization;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using WebForms.CustomControls;
 
 namespace WebForms
 {
     public partial class FormulacionEF : System.Web.UI.Page
     {
         private FormulacionNegocioEF negocio;
-
-        /// <summary>
-        /// Índice de la página actual en el sistema de paginación manual.
-        /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
-        /// </summary>
-        private int currentPageIndex = 0;
-        
-        /// <summary>
-        /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
-        /// Se mantiene en ViewState para persistir la preferencia del usuario.
-        /// </summary>
-        private int pageSize = 12;
-        
-        /// <summary>
-        /// Total de registros filtrados. Se usa para calcular el número de páginas.
-        /// </summary>
-        private int totalRecords = 0;
 
         protected void Page_Init(object sender, EventArgs e)
         {
@@ -37,10 +21,6 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Cargar valores de paginación desde ViewState
-            currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
-            pageSize = (int)(ViewState["PageSize"] ?? 12);
-
             if (!IsPostBack)
             {
                 BindDropDownList();
@@ -315,13 +295,6 @@ namespace WebForms
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"[FormulacionEF] Usuario obtenido:");
-                System.Diagnostics.Debug.WriteLine($"  - ID: {usuarioActual.Id}");
-                System.Diagnostics.Debug.WriteLine($"  - NombreUsuario: {usuarioActual.Nombre}");
-                System.Diagnostics.Debug.WriteLine($"  - Tipo (Es Admin): {usuarioActual.Tipo}");
-                System.Diagnostics.Debug.WriteLine($"  - AreaId: {usuarioActual.AreaId}");
-                System.Diagnostics.Debug.WriteLine($"  - Area es null: {usuarioActual.Area == null}");
-
                 // Si es administrador (Tipo = true), no necesita área
                 if (!usuarioActual.Tipo && usuarioActual.Area == null && !usuarioActual.AreaId.HasValue)
                 {
@@ -334,10 +307,14 @@ namespace WebForms
                 // Guardar usuario en sesión para uso en BindGrid
                 Session["UsuarioLogueado"] = usuarioActual;
 
-                // Reiniciar paginación
-                currentPageIndex = 0;
+                // Obtener total de registros para inicializar paginación
+                string filtroGeneral = txtBuscar?.Text?.Trim();
+                int totalRecords = negocio.ContarPorUsuario(usuarioActual, filtroGeneral);
 
-                // Usar nuevo método de paginación (no cargar todos los datos en memoria)
+                // Inicializar control de paginación
+                paginationControl.Initialize(totalRecords, 0, 12);
+
+                // Cargar primera página
                 BindGrid();
 
                 System.Diagnostics.Debug.WriteLine("[FormulacionEF] CargarListaFormulaciones completado exitosamente con paginación");
@@ -363,8 +340,7 @@ namespace WebForms
         
 
         /// <summary>
-        /// Método central para refrescar la visualización del GridView.
-        /// Utiliza paginación a nivel de base de datos para mejor rendimiento.
+        /// Método simplificado para cargar la grilla usando el control de paginación
         /// </summary>
         private void BindGrid()
         {
@@ -377,26 +353,19 @@ namespace WebForms
                 {
                     var negocio = new FormulacionNegocioEF(context);
 
-                    // Obtener filtros de búsqueda
+                    // Obtener información de paginación del control
+                    var paginationInfo = paginationControl.GetPaginationInfo();
+                    
+                    // Obtener filtro general de búsqueda
                     string filtroGeneral = txtBuscar?.Text?.Trim();
                     
-                    // Contar total de registros con filtros
-                    totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
-
                     // Obtener página actual con paginación a nivel de DB
-                    var formulacionesPagina = negocio.ListarPorUsuarioPaginado(usuario, currentPageIndex, pageSize, filtroGeneral);
-
-                    // Configurar ViewState para mantener el estado
-                    ViewState["TotalRecords"] = totalRecords;
-                    ViewState["CurrentPageIndex"] = currentPageIndex;
-                    ViewState["PageSize"] = pageSize;
+                    var formulacionesPagina = negocio.ListarPorUsuarioPaginado(usuario, 
+                        paginationInfo.CurrentPageIndex, paginationInfo.PageSize, filtroGeneral);
 
                     // Bind a la grilla
                     dgvFormulacion.DataSource = formulacionesPagina;
                     dgvFormulacion.DataBind();
-
-                    // Actualizar controles de paginación
-                    ActualizarControlesPaginacion();
 
                     // Calcular subtotales para la página actual
                     CalcularSubtotal(formulacionesPagina);
@@ -455,11 +424,15 @@ namespace WebForms
         {
             try
             {
-                // Reiniciar paginación al aplicar filtros
-                currentPageIndex = 0;
-                
-                // Llamar a BindGrid que aplicará los filtros automáticamente
-                BindGrid();
+                // Recalcular total y reinicializar paginación
+                var usuario = (UsuarioEF)Session["UsuarioLogueado"];
+                if (usuario != null)
+                {
+                    string filtroGeneral = txtBuscar?.Text?.Trim();
+                    int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                    paginationControl.Initialize(totalRecords, 0, paginationControl.PageSize);
+                    BindGrid();
+                }
             }
             catch (Exception ex)
             {
@@ -471,14 +444,8 @@ namespace WebForms
         protected void BtnClearFilters_Click(object sender, EventArgs e)
         {
             txtBuscar.Text = string.Empty;
-
             CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-
-            // Reiniciar paginación al limpiar filtros
-            currentPageIndex = 0;
-            
-            // Recargar datos sin filtros
-            BindGrid();
+            CargarListaFormulaciones(); // Recargar completamente
         }
 
         protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -521,133 +488,49 @@ namespace WebForms
             }
         }
 
-        #region Métodos de Paginación
-
         /// <summary>
-        /// Actualiza la visibilidad y estado de los controles de paginación
+        /// Calcula subtotales para la página actual y actualiza el control
         /// </summary>
-        private void ActualizarControlesPaginacion()
-        {
-            int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-            
-            // Habilitar/deshabilitar botones de navegación
-            lnkFirst.Enabled = currentPageIndex > 0;
-            lnkPrev.Enabled = currentPageIndex > 0;
-            lnkNext.Enabled = currentPageIndex < totalPages - 1;
-            lnkLast.Enabled = currentPageIndex < totalPages - 1;
-            
-            // Actualizar info de página
-            lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {Math.Max(totalPages, 1)}";
-            
-            // Configurar botones de página
-            ConfigurarBotonesPagina(totalPages);
-        }
-
-        private void ConfigurarBotonesPagina(int totalPages)
-        {
-            var botonesPagina = new[] { lnkPage1, lnkPage2, lnkPage3, lnkPage4, lnkPage5 };
-            
-            // Calcular rango de páginas a mostrar
-            int startPage = Math.Max(0, currentPageIndex - 2);
-            int endPage = Math.Min(totalPages - 1, startPage + 4);
-            
-            // Ajustar startPage si hay menos de 5 páginas al final
-            if (endPage - startPage < 4)
-                startPage = Math.Max(0, endPage - 4);
-            
-            for (int i = 0; i < botonesPagina.Length; i++)
-            {
-                int pageIndex = startPage + i;
-                var boton = botonesPagina[i];
-                
-                if (pageIndex <= endPage && pageIndex < totalPages)
-                {
-                    boton.Visible = true;
-                    boton.Text = (pageIndex + 1).ToString();
-                    boton.CommandArgument = pageIndex.ToString();
-                    boton.CssClass = pageIndex == currentPageIndex 
-                        ? "btn btn-sm btn-primary mx-1" 
-                        : "btn btn-sm btn-outline-primary mx-1";
-                }
-                else
-                {
-                    boton.Visible = false;
-                }
-            }
-        }
-
         private void CalcularSubtotal(List<Dominio.FormulacionEF> formulacionesPagina)
         {
             try
             {
-                decimal totalPluranual = 0;
+                decimal totalMonto26 = 0;
                 int count = formulacionesPagina?.Count ?? 0;
 
                 if (formulacionesPagina != null)
                 {
-                    totalPluranual = formulacionesPagina
-                        .Sum(f => (f.Monto_26 ?? 0) + (f.Monto_27 ?? 0) + (f.Monto_28 ?? 0));
+                    totalMonto26 = formulacionesPagina
+                        .Sum(f => f.Monto_26 ?? 0);
                 }
 
-                lblSubtotalPaginacion.Text = $"Total: {totalPluranual:C} ({count} registros)";
+                var paginationInfo = paginationControl.GetPaginationInfo();
+                paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
             }
             catch (Exception ex)
             {
-                lblSubtotalPaginacion.Text = $"Error en cálculo: {ex.Message}";
+                paginationControl.SubtotalText = $"Error en cálculo: {ex.Message}";
             }
         }
 
-        #endregion
+        #region Eventos del Control de Paginación
 
-        #region Eventos de Paginación
-
-        protected void lnkFirst_Click(object sender, EventArgs e)
+        protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            currentPageIndex = 0;
+            // El control maneja automáticamente el cambio de página
+            paginationControl.UpdatePaginationControls();
             BindGrid();
         }
 
-        protected void lnkPrev_Click(object sender, EventArgs e)
+        protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            if (currentPageIndex > 0)
+            // Recalcular total cuando cambia el tamaño de página
+            var usuario = (UsuarioEF)Session["UsuarioLogueado"];
+            if (usuario != null)
             {
-                currentPageIndex--;
-                BindGrid();
-            }
-        }
-
-        protected void lnkNext_Click(object sender, EventArgs e)
-        {
-            int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-            if (currentPageIndex < totalPages - 1)
-            {
-                currentPageIndex++;
-                BindGrid();
-            }
-        }
-
-        protected void lnkLast_Click(object sender, EventArgs e)
-        {
-            int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-            currentPageIndex = Math.Max(0, totalPages - 1);
-            BindGrid();
-        }
-
-        protected void lnkPage_Click(object sender, EventArgs e)
-        {
-            if (sender is LinkButton btn && int.TryParse(btn.CommandArgument, out int pageIndex))
-            {
-                currentPageIndex = pageIndex;
-                BindGrid();
-            }
-        }
-
-        protected void ddlPageSizeExternal_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(ddlPageSizeExternal.SelectedValue, out int newPageSize))
-            {
-                pageSize = newPageSize;
-                currentPageIndex = 0; // Reiniciar a la primera página
+                string filtroGeneral = txtBuscar?.Text?.Trim();
+                int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                paginationControl.Initialize(totalRecords, 0, e.PageSize);
                 BindGrid();
             }
         }

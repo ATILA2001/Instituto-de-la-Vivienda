@@ -70,12 +70,12 @@ namespace WebForms
             {
                 CargarListaCertificadosCompleta();
                 BindDropDownList();
-                ActualizarControlesPaginacion();
+                ConfigurarPaginationControl();
             }
             else
             {
                 // En postback, actualizar controles de paginación
-                ActualizarControlesPaginacion();
+                ConfigurarPaginationControl();
             }
         }
 
@@ -222,7 +222,7 @@ namespace WebForms
             // Actualizar totalRecords y paginación según los datos filtrados
             totalRecords = totalFiltrados;
             ViewState["TotalRecords"] = totalFiltrados;
-            ActualizarControlesPaginacion();
+            ConfigurarPaginationControl();
 
             // Recalcular subtotal después de aplicar filtros
             CalcularSubtotal();
@@ -312,133 +312,67 @@ namespace WebForms
             // Cargar los datos
             CargarListaCertificadosCompleta();
             
-            // Actualizar controles de paginación
-            ActualizarControlesPaginacion();
+            // Configurar el control de paginación
+            ConfigurarPaginationControl();
         }
 
         /// <summary>
-        /// Actualiza todos los controles de paginación externa basándose en el estado actual.
-        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// Configura el PaginationControl con la información actual de paginación
         /// </summary>
-        private void ActualizarControlesPaginacion()
+        private void ConfigurarPaginationControl()
         {
-            // Obtener valores actuales
             totalRecords = (int)(ViewState["TotalRecords"] ?? 0);
             totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
-            
-            // Buscar y actualizar controles dinámicamente hasta que se regenere el designer
-            var lblPaginaInfo = FindControlRecursive(this, "lblPaginaInfo") as Label;
-            if (lblPaginaInfo != null)
+
+            var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+            if (paginationControl != null)
             {
-                lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {totalPages}";
+                // Configurar las propiedades del control
+                paginationControl.TotalRecords = totalRecords;
+                paginationControl.CurrentPageIndex = currentPageIndex;
+                paginationControl.PageSize = pageSize;
+
+                // Actualizar los controles de paginación
+                paginationControl.UpdatePaginationControls();
+                
+                // Actualizar subtotal para el control
+                CalcularSubtotalParaPaginationControl();
             }
-            
-            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
-            if (ddlPageSizeExternal != null)
-            {
-                ddlPageSizeExternal.SelectedValue = pageSize.ToString();
-            }
-            
-            // Actualizar el label de subtotal en la paginación si existe
-            // NOTA: No calcular subtotal aquí porque solo tenemos los datos de la página actual.
-            // El subtotal correcto se calcula en CalcularSubtotal() que usa todos los registros.
-            
-            // Controlar visibilidad y estado de botones
-            var lnkFirst = FindControlRecursive(this, "lnkFirst") as LinkButton;
-            if (lnkFirst != null)
-            {
-                lnkFirst.Enabled = currentPageIndex > 0;
-                lnkFirst.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkPrev = FindControlRecursive(this, "lnkPrev") as LinkButton;
-            if (lnkPrev != null)
-            {
-                lnkPrev.Enabled = currentPageIndex > 0;
-                lnkPrev.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkNext = FindControlRecursive(this, "lnkNext") as LinkButton;
-            if (lnkNext != null)
-            {
-                lnkNext.Enabled = currentPageIndex < totalPages - 1;
-                lnkNext.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkLast = FindControlRecursive(this, "lnkLast") as LinkButton;
-            if (lnkLast != null)
-            {
-                lnkLast.Enabled = currentPageIndex < totalPages - 1;
-                lnkLast.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            // Configurar botones numerados
-            ConfigurarBotonesNumerados();
         }
 
         /// <summary>
-        /// Configura los botones numerados de paginación.
-        /// Actualizado para funcionar dinámicamente con cualquier cantidad de botones.
+        /// Calcula y actualiza el subtotal en el PaginationControl
         /// </summary>
-        private void ConfigurarBotonesNumerados()
+        private void CalcularSubtotalParaPaginationControl()
         {
-            string[] pageButtonIds = { "lnkPage1", "lnkPage2", "lnkPage3", "lnkPage4", "lnkPage5" };
-            int totalButtons = pageButtonIds.Length;
-            
-            // Calcular rango de páginas a mostrar
-            int buttonsToShow = Math.Min(totalButtons, totalPages);
-            int startPage, endPage;
-            
-            if (totalPages <= totalButtons)
+            try
             {
-                // Si hay menos páginas que botones, mostrar todas
-                startPage = 0;
-                endPage = totalPages - 1;
-            }
-            else
-            {
-                // Lógica de centrado: intentar poner el botón actual en el centro
-                int centerPosition = totalButtons / 2; // Posición central calculada dinámicamente
-                startPage = Math.Max(0, currentPageIndex - centerPosition);
-                endPage = Math.Min(totalPages - 1, startPage + totalButtons - 1);
-                
-                // Ajustar si nos quedamos cortos al final
-                if (endPage - startPage + 1 < totalButtons && totalPages >= totalButtons)
+                var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+                if (paginationControl != null)
                 {
-                    startPage = Math.Max(0, endPage - totalButtons + 1);
-                }
-            }
-            
-            // Configurar cada botón
-            for (int i = 0; i < totalButtons; i++)
-            {
-                var pageButton = FindControlRecursive(this, pageButtonIds[i]) as LinkButton;
-                if (pageButton != null)
-                {
-                    int pageIndex = startPage + i;
-                    
-                    if (i < buttonsToShow && pageIndex <= endPage && pageIndex < totalPages)
+                    if (Session["GridData"] != null)
                     {
-                        pageButton.Text = (pageIndex + 1).ToString();
-                        pageButton.CommandArgument = pageIndex.ToString();
-                        pageButton.Visible = true;
-                        
-                        if (pageIndex == currentPageIndex)
-                        {
-                            pageButton.CssClass = "btn btn-sm btn-primary mx-1";
-                        }
-                        else
-                        {
-                            pageButton.CssClass = "btn btn-sm btn-outline-primary mx-1";
-                        }
+                        var todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                        var subtotal = todosLosCertificados.Sum(c => c.MontoTotal);
+                        var cantidad = todosLosCertificados.Count;
+                        paginationControl.UpdateSubtotal(subtotal, cantidad);
                     }
                     else
                     {
-                        pageButton.Visible = false;
+                        paginationControl.UpdateSubtotal(0m, 0);
                     }
                 }
             }
+            catch
+            {
+                var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+                if (paginationControl != null)
+                {
+                    paginationControl.UpdateSubtotal(0m, 0);
+                }
+            }
         }
+
         
         /// <summary>
         /// Busca un control recursivamente en la jerarquía de controles.
@@ -481,55 +415,19 @@ namespace WebForms
             CargarPaginaActual(); // Cargar datos filtrados y paginados
         }
 
-        #region Eventos de Navegación de Paginación Externa (replicados desde AutorizantesAdminEF)
+        #region Eventos del Control de Paginación
 
-        protected void lnkFirst_Click(object sender, EventArgs e)
+        protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            currentPageIndex = 0;
+            currentPageIndex = e.PageIndex;
             CargarPaginaActual();
         }
 
-        protected void lnkPrev_Click(object sender, EventArgs e)
+        protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            if (currentPageIndex > 0)
-            {
-                currentPageIndex--;
-                CargarPaginaActual();
-            }
-        }
-
-        protected void lnkNext_Click(object sender, EventArgs e)
-        {
-            if (currentPageIndex < totalPages - 1)
-            {
-                currentPageIndex++;
-                CargarPaginaActual();
-            }
-        }
-
-        protected void lnkLast_Click(object sender, EventArgs e)
-        {
-            currentPageIndex = totalPages - 1;
+            pageSize = e.PageSize;
+            currentPageIndex = 0; // Reiniciar a la primera página
             CargarPaginaActual();
-        }
-
-        protected void lnkPage_Click(object sender, EventArgs e)
-        {
-            LinkButton btn = (LinkButton)sender;
-            int pageIndex = int.Parse(btn.CommandArgument);
-            currentPageIndex = pageIndex;
-            CargarPaginaActual();
-        }
-
-        protected void ddlPageSizeExternal_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
-            if (ddlPageSizeExternal != null)
-            {
-                pageSize = int.Parse(ddlPageSizeExternal.SelectedValue);
-                currentPageIndex = 0; // Reiniciar a la primera página
-                CargarPaginaActual();
-            }
         }
 
         #endregion
