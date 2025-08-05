@@ -33,7 +33,9 @@ namespace WebForms
             txtBuscar.Text = string.Empty;
             ClearHeaderFilter("cblsHeaderArea");
             ClearHeaderFilter("cblsHeaderEmpresa");
+            ClearHeaderFilter("cblsHeaderContrata");
             ClearHeaderFilter("cblsHeaderBarrio");
+            ClearHeaderFilter("cblsHeaderNombreObra");
             CargarListaObras();
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
@@ -128,6 +130,7 @@ namespace WebForms
                         (o.Area?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
                         (o.Empresa?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
                         (o.Contrata?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
+                        (o.ContrataFormateada?.ToUpper().Contains(filtroGeneral) ?? false) || // Incluir búsqueda en texto completo
                         (o.Numero?.ToString().Contains(filtroGeneral) ?? false) ||
                         (o.Año?.ToString().Contains(filtroGeneral) ?? false) ||
                         (o.Barrio?.Nombre?.ToUpper().Contains(filtroGeneral) ?? false) ||
@@ -154,11 +157,28 @@ namespace WebForms
                         listaFiltrada = listaFiltrada.Where(o => o.Empresa != null && filtroHeaderEmpresa.Contains(o.Empresa.Id.ToString()));
                     }
 
+                    // Filtro para Contrata (modificado para usar texto completo)
+                    var cblsHeaderContrata = dgvObra.HeaderRow.FindControl("cblsHeaderContrata") as WebForms.CustomControls.TreeViewSearch;
+                    var filtroHeaderContrata = cblsHeaderContrata?.SelectedValues;
+                    if (filtroHeaderContrata != null && filtroHeaderContrata.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(o => !string.IsNullOrEmpty(o.ContrataFormateada) &&
+                            filtroHeaderContrata.Contains(o.ContrataFormateada));
+                    }
+
                     var cblsHeaderBarrio = dgvObra.HeaderRow.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                     var filtroHeaderBarrio = cblsHeaderBarrio?.SelectedValues;
                     if (filtroHeaderBarrio != null && filtroHeaderBarrio.Any())
                     {
                         listaFiltrada = listaFiltrada.Where(o => o.Barrio != null && filtroHeaderBarrio.Contains(o.Barrio.Id.ToString()));
+                    }
+
+                    // Nuevo filtro para Nombre de Obra (Descripcion)
+                    var cblsHeaderNombreObra = dgvObra.HeaderRow.FindControl("cblsHeaderNombreObra") as WebForms.CustomControls.TreeViewSearch;
+                    var filtroHeaderNombreObra = cblsHeaderNombreObra?.SelectedValues;
+                    if (filtroHeaderNombreObra != null && filtroHeaderNombreObra.Any())
+                    {
+                        listaFiltrada = listaFiltrada.Where(o => !string.IsNullOrEmpty(o.Descripcion) && filtroHeaderNombreObra.Contains(o.Descripcion));
                     }
                 }
 
@@ -219,6 +239,22 @@ namespace WebForms
                     cblsHeaderEmpresa.DataBind();
                 }
 
+                // Poblar filtro de Contrata (modificado para usar texto completo)
+                var cblsHeaderContrata = e.Row.FindControl("cblsHeaderContrata") as WebForms.CustomControls.TreeViewSearch;
+                if (cblsHeaderContrata != null)
+                {
+                    var contratasUnicas = obrasCompletas
+                        .Where(o => !string.IsNullOrEmpty(o.ContrataFormateada))
+                        .Select(o => new { ContrataFormateada = o.ContrataFormateada })
+                        .Distinct()
+                        .OrderBy(c => c.ContrataFormateada)
+                        .ToList();
+                    cblsHeaderContrata.DataTextField = "ContrataFormateada";
+                    cblsHeaderContrata.DataValueField = "ContrataFormateada"; // Usar el texto completo como valor
+                    cblsHeaderContrata.DataSource = contratasUnicas;
+                    cblsHeaderContrata.DataBind();
+                }
+
                 // Poblar filtro de Barrio
                 var cblsHeaderBarrio = e.Row.FindControl("cblsHeaderBarrio") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderBarrio != null)
@@ -232,6 +268,20 @@ namespace WebForms
                     cblsHeaderBarrio.DataSource = barriosUnicos;
                     cblsHeaderBarrio.DataBind();
                 }
+
+                // Poblar filtro de Nombre de Obra (nuevo)
+                var cblsHeaderNombreObra = e.Row.FindControl("cblsHeaderNombreObra") as WebForms.CustomControls.TreeViewSearch;
+                if (cblsHeaderNombreObra != null)
+                {
+                    var nombresObrasUnicos = obrasCompletas
+                        .Where(o => !string.IsNullOrEmpty(o.Descripcion))
+                        .Select(o => new { Descripcion = o.Descripcion })
+                        .Distinct()
+                        .OrderBy(n => n.Descripcion)
+                        .ToList();
+                    cblsHeaderNombreObra.DataSource = nombresObrasUnicos;
+                    cblsHeaderNombreObra.DataBind();
+                }
             }
         }
 
@@ -239,7 +289,7 @@ namespace WebForms
         //private void BindDropDownList()
         //{
 
-     
+
 
         //    //cblBarrio.DataSource = ObtenerBarrios();
         //    //cblBarrio.DataTextField = "Nombre";
@@ -260,7 +310,7 @@ namespace WebForms
 
         //}
 
-      
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();
