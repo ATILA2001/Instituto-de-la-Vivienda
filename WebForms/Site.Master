@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Admin.master.cs" Inherits="WebForms.Admin" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="WebForms.Site" %>
 
 <!DOCTYPE html>
 <html>
@@ -47,11 +47,16 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarMenu">
                         <ul class="navbar-nav ms-auto">
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2026</span></a>
+                            </li>
                             <!-- Gestión -->
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown" id="dropdownGestion" runat="server">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span>Gestión</span>
                                 </a>
+
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="BdProyectos.aspx">Proyectos</a></li>
                                     <li><a class="dropdown-item" href="MovimientosGestion.aspx">Movimientos</a></li>
@@ -73,20 +78,34 @@
                                     <span>Planificación</span>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="ObrasAdmin.aspx">Obras</a></li>
+                                    <li><a class="dropdown-item" id="lnkObras" runat="server">Obras</a></li>
                                     <li><a class="dropdown-item" href="AutorizantesEF.aspx">Autorizantes</a></li>
                                     <li><a class="dropdown-item" href="CertificadosEF.aspx">Certificados</a></li>
-                                    <li><a class="dropdown-item" href="LegitimosAdmin.aspx">Legítimos Abonos</a></li>
+                                    <li><a class="dropdown-item" id="lnkLegitimos" runat="server">Legítimos Abonos</a></li>
                                 </ul>
                             </li>
 
                             <!-- Admin -->
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown" id="liAdminNav" runat="server">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span>Admin</span>
                                 </a>
-
                                 <ul class="dropdown-menu">
+
+                                    <li>
+                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+                                            <input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
+                                                onserverchange="chkIsPlanningOpen_ServerChange" />
+                                            <label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+                                            <input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
+                                                onserverchange="chkIsFormulationOpen_ServerChange" />
+                                            <label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
+                                        </div>
+                                    </li>
 
                                     <li>
                                         <a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>

@@ -41,7 +41,7 @@ namespace WebForms
     /// 5. Filtros TreeViewSearch: Se aplican en memoria para filtrado rápido
     /// 6. Estado editable: Se actualiza directamente en BD y se refleja en memoria
     /// </summary>
-    public partial class AutorizantesAdminEF : System.Web.UI.Page
+    public partial class AutorizantesEF : System.Web.UI.Page
     {
         #region Variables y Dependencias
         
@@ -232,7 +232,7 @@ namespace WebForms
                     { "Fecha SADE", "FechaSade" }
                 };
 
-                Negocio.ExcelHelper.ExportarDatosGenericos(dgvAutorizante, datosParaExportar, mapeoColumnas, "Autorizantes");
+                Negocio.ExcelHelper.ExportarDatosGenericos(gridviewRegistros, datosParaExportar, mapeoColumnas, "Autorizantes");
             }
             catch (Exception ex)
             {
@@ -579,7 +579,7 @@ namespace WebForms
             {
                 Action<string, object, string, string> bindFilter = (controlId, dataSource, textField, valueField) =>
                 {
-                    if (dgvAutorizante.HeaderRow?.FindControl(controlId) is TreeViewSearch control)
+                    if (gridviewRegistros.HeaderRow?.FindControl(controlId) is TreeViewSearch control)
                     {
                         control.DataSource = dataSource;
                         control.DataTextField = textField;
@@ -597,7 +597,7 @@ namespace WebForms
 );                bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
                 
                 // Filtro de Concepto con "REDETERMINACION" incluida
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
                 {
                     var conceptos = context.Conceptos.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { Id = c.Id.ToString(), Nombre = c.Nombre }).ToList();
                     // Agregar "REDETERMINACION" como concepto especial
@@ -610,7 +610,7 @@ namespace WebForms
                     cblsHeaderConcepto.DataBind();
                 }
 
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
                     var negocio = new CalculoRedeterminacionNegocioEF();
                     cblsHeaderEstado.DataSource = negocio.ObtenerEstadosParaFiltro();
@@ -619,7 +619,7 @@ namespace WebForms
                     cblsHeaderEstado.DataBind();
                 }
 
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderMesAutorizante") is TreeViewSearch cblsHeaderMesAutorizante)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderMesAutorizante") is TreeViewSearch cblsHeaderMesAutorizante)
                 {
                     var meses = context.Autorizantes.AsNoTracking()
                         .Where(a => a.MesBase.HasValue)
@@ -849,8 +849,8 @@ namespace WebForms
                     .Take(pageSize)
                     .ToList();
 
-                dgvAutorizante.DataSource = paginaActual;
-                dgvAutorizante.DataBind();
+                gridviewRegistros.DataSource = paginaActual;
+                gridviewRegistros.DataBind();
 
                 PoblarFiltrosHeader();
 
@@ -896,14 +896,14 @@ namespace WebForms
 
             // Configurar paginación
             int totalFiltrados = datosEnMemoria.Count;
-            dgvAutorizante.VirtualItemCount = totalFiltrados;
-            dgvAutorizante.PageSize = pageSize;
-            dgvAutorizante.PageIndex = currentPageIndex;
-            dgvAutorizante.DataSource = datosEnMemoria
+            gridviewRegistros.VirtualItemCount = totalFiltrados;
+            gridviewRegistros.PageSize = pageSize;
+            gridviewRegistros.PageIndex = currentPageIndex;
+            gridviewRegistros.DataSource = datosEnMemoria
                                         .Skip(currentPageIndex * pageSize)
                                         .Take(pageSize)
                                         .ToList();
-            dgvAutorizante.DataBind();
+            gridviewRegistros.DataBind();
             PoblarFiltrosHeader();
             
             // Recalcular subtotal después de aplicar filtros
@@ -918,7 +918,7 @@ namespace WebForms
             try
             {
                 // Aplicar filtro de Área
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && 
                     cblsHeaderArea.SelectedValues?.Any() == true)
                 {
                     var areasSeleccionadas = cblsHeaderArea.SelectedValues.Select(int.Parse).ToList();
@@ -926,7 +926,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Obra
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra && 
                     cblsHeaderObra.SelectedValues?.Any() == true)
                 {
                     var obrasSeleccionadas = cblsHeaderObra.SelectedValues.Select(int.Parse).ToList();
@@ -934,7 +934,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Empresa
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && 
                     cblsHeaderEmpresa.SelectedValues?.Any() == true)
                 {
                     var empresasSeleccionadas = cblsHeaderEmpresa.SelectedValues.Select(int.Parse).ToList();
@@ -942,7 +942,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Código Autorizante
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.SelectedValues?.Any() == true)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.SelectedValues?.Any() == true)
                 {
                     var codigosSeleccionados = cblsHeaderCodigoAutorizante.SelectedValues;
                     autorizantes = autorizantes
@@ -951,7 +951,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Concepto
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto && 
                     cblsHeaderConcepto.SelectedValues?.Any() == true)
                 {
                     var conceptosSeleccionados = cblsHeaderConcepto.SelectedValues.ToList();
@@ -975,7 +975,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Estado
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && 
                     cblsHeaderEstado.SelectedValues?.Any() == true)
                 {
                     var estadosSeleccionados = cblsHeaderEstado.SelectedValues.Select(int.Parse).ToList();
@@ -983,7 +983,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Barrio (si existe)
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && 
                     cblsHeaderBarrio.SelectedValues?.Any() == true)
                 {
                     var barriosSeleccionados = cblsHeaderBarrio.SelectedValues.Select(int.Parse).ToList();
@@ -991,7 +991,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Contrata (si existe)
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata && 
                     cblsHeaderContrata.SelectedValues?.Any() == true)
                 {
                     var contratasSeleccionadas = cblsHeaderContrata.SelectedValues.Select(int.Parse).ToList();
@@ -999,7 +999,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Línea de Gestión (si existe)
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion && 
                     cblsHeaderLineaGestion.SelectedValues?.Any() == true)
                 {
                     var lineasGestionSeleccionadas = cblsHeaderLineaGestion.SelectedValues.Select(int.Parse).ToList();
@@ -1007,7 +1007,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Proyecto (si existe)
-                if (dgvAutorizante.HeaderRow?.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && 
                     cblsHeaderProyecto.SelectedValues?.Any() == true)
                 {
                     var proyectosSeleccionados = cblsHeaderProyecto.SelectedValues.Select(int.Parse).ToList();
@@ -1110,11 +1110,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
-                string codigoAutorizante = dgvAutorizante.SelectedDataKey.Value.ToString();
+                string codigoAutorizante = gridviewRegistros.SelectedDataKey.Value.ToString();
                 AutorizanteEF autorizanteSeleccionado;
                 
                 using (var context = new IVCdbContext())
@@ -1158,11 +1158,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                string codigoAutorizante = dgvAutorizante.DataKeys[e.RowIndex].Value.ToString();
+                string codigoAutorizante = gridviewRegistros.DataKeys[e.RowIndex].Value.ToString();
                 
                 if (autorizanteNegocio.Eliminar(codigoAutorizante))
                 {
@@ -1187,7 +1187,7 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             // Este método ahora está obsoleto ya que usamos paginación externa
             // Mantenemos por compatibilidad pero no hacemos nada
@@ -1213,7 +1213,7 @@ namespace WebForms
                     return;
                 }
 
-                int indiceReal = (dgvAutorizante.PageIndex * dgvAutorizante.PageSize) + rowIndex;
+                int indiceReal = (gridviewRegistros.PageIndex * gridviewRegistros.PageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
                     lblMensaje.Text = "Error: Índice fuera del rango de datos.";
@@ -1289,7 +1289,7 @@ namespace WebForms
 
 
 
-        protected void dgvAutorizante_DataBound(object sender, EventArgs e)
+        protected void gridviewRegistros_DataBound(object sender, EventArgs e)
         {
             try
             {
@@ -1307,7 +1307,7 @@ namespace WebForms
         {
             base.OnInit(e);
             // Asegurar que el GridView está configurado correctamente
-            dgvAutorizante.DataBound += dgvAutorizante_DataBound;
+            gridviewRegistros.DataBound += gridviewRegistros_DataBound;
         }
 
         protected override void OnPreRender(EventArgs e)
@@ -1581,7 +1581,7 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {

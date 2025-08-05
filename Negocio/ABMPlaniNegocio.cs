@@ -14,6 +14,15 @@ namespace Negocio
             }
         }
 
+        public static bool GetIsFormulationOpen() 
+        {
+            using (var db = new IVCdbContext())
+            {
+                var plani = db.ABMPlani.FirstOrDefault();
+                return plani != null && plani.IsFormulationOpen;
+            }
+        }
+
         public static void SetIsPlanningOpen(bool isOpen)
         {
             using (var db = new IVCdbContext())
@@ -31,5 +40,24 @@ namespace Negocio
                 db.SaveChanges();
             }
         }
+
+        public static void SetIsFormulationOpen(bool isOpen)
+        {
+            using (var db = new IVCdbContext())
+            {
+                var plani = db.ABMPlani.FirstOrDefault();
+                if (plani != null)
+                {
+                    plani.IsFormulationOpen = isOpen;
+                }
+                else
+                {
+                    plani = new ABMPlaniEF { IsFormulationOpen = isOpen };
+                    db.ABMPlani.Add(plani);
+                }
+                db.SaveChanges();
+            }
+        }
+
     }
 }

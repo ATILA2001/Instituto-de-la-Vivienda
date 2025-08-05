@@ -1,0 +1,466 @@
+﻿<%@ Page Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="FormulacionEF.aspx.cs" Inherits="WebForms.FormulacionEF" %>
+
+<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <!-- Modal -->
+    <div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Formulación</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="ddlObra" class="form-label">Obra</label>
+                                        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvObra"
+                                            ControlToValidate="ddlObra"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Seleccione una obra"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <asp:Panel ID="panelShowTechosAndPpiTextBoxes" runat="server">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label for="txtPpi" class="form-label">PPI</label>
+                                            <asp:TextBox ID="txtPpi" CssClass="form-control" runat="server" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label for="txtTechos" class="form-label">Techos 2026</label>
+                                            <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" />
+                                        </div>
+                                    </div>
+                                </asp:Panel>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMesBase" class="form-label">Mes Base</label>
+                                        <asp:TextBox ID="txtMesBase" CssClass="form-control" runat="server" TextMode="Date" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMonto26" class="form-label">Monto 26</label>
+                                        <asp:TextBox ID="txtMonto26" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                        <asp:RequiredFieldValidator ID="rfvMonto26"
+                                            ControlToValidate="txtMonto26"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese el monto 26"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                        <asp:RegularExpressionValidator ID="revMonto26"
+                                            ControlToValidate="txtMonto26"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese un valor numérico válido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMonto27" class="form-label">Monto 27</label>
+                                        <asp:TextBox ID="txtMonto27" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                        <asp:RequiredFieldValidator ID="rfvMonto27"
+                                            ControlToValidate="txtMonto27"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese el monto 27"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                        <asp:RegularExpressionValidator ID="revMonto27"
+                                            ControlToValidate="txtMonto27"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese un valor numérico válido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMonto28" class="form-label">Monto 28</label>
+                                        <asp:TextBox ID="txtMonto28" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                        <asp:RequiredFieldValidator ID="rfvMonto28"
+                                            ControlToValidate="txtMonto28"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese el monto 28"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                        <asp:RegularExpressionValidator ID="revMonto28"
+                                            ControlToValidate="txtMonto28"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese un valor numérico válido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlUnidadMedida" class="form-label">Unidad de Medida</label>
+                                        <asp:DropDownList ID="ddlUnidadMedida" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una unidad de medida" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvUnidadMedida"
+                                            ControlToValidate="ddlUnidadMedida"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Seleccione una unidad de medida"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtValorMedida" class="form-label">Valor de Medida</label>
+                                        <asp:TextBox ID="txtValorMedida" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                        <asp:RequiredFieldValidator ID="rfvValorMedida"
+                                            ControlToValidate="txtValorMedida"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese el valor de medida"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                        <asp:RegularExpressionValidator ID="revValorMedida"
+                                            ControlToValidate="txtValorMedida"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Ingrese un valor numérico válido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlPrioridades" class="form-label">Prioridad</label>
+                                        <asp:DropDownList ID="ddlPrioridades" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una prioridad" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvPrioridades"
+                                            ControlToValidate="ddlPrioridades"
+                                            ValidationGroup="AgregarFormulacion"
+                                            runat="server"
+                                            ErrorMessage="Seleccione una prioridad"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="txtObservaciones" class="form-label">Observaciones</label>
+                                        <asp:TextBox ID="txtObservaciones" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between px-4">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                    <div class="d-flex gap-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarFormulacion" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal -->
+
+    <div class="row mt-4 mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+                <!-- Contenedor de Filtros alineados a la izquierda -->
+                <div class="d-flex flex-wrap gap-3">
+                </div>
+
+                <!-- Contenedor de Botones alineados a la derecha -->
+                <div class="d-flex gap-3">
+                    <div class="form-group mb-2">
+                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
+                    </div>
+                    <div class="form-group mb-2">
+                        <asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
+                            <i class="bi bi-search"></i>
+                        </asp:LinkButton>
+                    </div>
+                    <div class="form-group mb-2">
+                        <asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Quita todos los filtros">
+                            <i class="bi bi-funnel"></i>
+                        </asp:LinkButton>
+                    </div>
+                    <div class="form-group mb-2">
+                        <asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+        <i class="bi bi-download"></i>
+                        </asp:LinkButton>
+                    </div>
+
+                    <asp:Panel ID="panelFormulationShowAddButton" runat="server">
+                        <div class="form-group mb-2">
+                            <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+                            <i class="bi bi-plus-lg"></i> Agregar
+                            </asp:LinkButton>
+                        </div>
+                    </asp:Panel>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="mb-3" />
+    <div class="gridview-scroll-container">
+
+        <asp:GridView ID="dgvFormulacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover mb-4"
+            OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
+            OnRowDeleting="dgvFormulacion_RowDeleting"
+            OnRowDataBound="dgvFormulacion_DataBound"
+            ShowHeaderWhenEmpty="true"
+            AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
+            <Columns>
+                <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+
+                <asp:TemplateField HeaderText="Área">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
+                            HeaderText="Área"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("ObraEF.Area.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:BoundField HeaderText="Empresa" DataField="ObraEF.Empresa.Nombre" />
+                <asp:BoundField HeaderText="Contrata" DataField="ObraEF.Contrata.Nombre" />
+
+                <asp:BoundField HeaderText="Barrio" DataField="ObraEF.Barrio.Nombre" />
+                <asp:BoundField HeaderText="Nombre de Obra" DataField="ObraEF.Descripcion" />
+
+                <asp:TemplateField HeaderText="Linea de Gestión">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderLineaGestion" runat="server"
+                            HeaderText="Línea de Gestión"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("ObraEF.Proyecto.LineaGestionEF.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="Proyecto">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderProyecto" runat="server"
+                            HeaderText="Proyecto"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("ObraEF.Proyecto.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="Plurianual (2026,2027,2028)">
+                    <ItemTemplate>
+                        <%# CalcularPlurianual(Eval("Monto_26"), Eval("Monto_27"), Eval("Monto_28")) %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="Monto 2026">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderMonto2026" runat="server"
+                            HeaderText="Monto 2026"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Monto_26", "{0:C}") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:BoundField HeaderText="Monto 2027" DataField="Monto_27" DataFormatString="{0:C}" />
+                <asp:BoundField HeaderText="Monto 2028" DataField="Monto_28" DataFormatString="{0:C}" />
+                <asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
+                <asp:BoundField HeaderText="Unidad de Medida" DataField="UnidadMedidaEF.Nombre" />
+                <asp:BoundField HeaderText="Valor de Medida" DataField="ValorMedida" />
+                <asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
+
+                <asp:TemplateField HeaderText="Prioridad">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderPrioridad" runat="server"
+                            HeaderText="Prioridad"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("PrioridadEF.Nombre") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="Acciones">
+                    <ItemTemplate>
+                        <div class="d-flex justify-content-center gap-2">
+                            <asp:LinkButton ID="btnModificar" runat="server"
+                                CommandName="Select"
+                                CssClass="btn btn-sm btn-warning "
+                                ToolTip="Modificar">
+                        <i class="bi bi-pencil-square"></i>
+                            </asp:LinkButton>
+                            <asp:LinkButton ID="btnEliminar" runat="server"
+                                CommandName="Delete"
+                                CssClass="btn btn-sm btn-danger "
+                                ToolTip="Eliminar"
+                                OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                        <i class="bi bi-trash"></i>
+                            </asp:LinkButton>
+                        </div>
+                    </ItemTemplate>
+                </asp:TemplateField>
+            </Columns>
+            <EmptyDataTemplate>
+                <div class="text-center m-3">
+                    <i class="bi bi-info-circle fs-4"></i>
+                    <p class="mb-0">No hay elementos para mostrar o registros que coincidan con los filtros aplicados.</p>
+                </div>
+            </EmptyDataTemplate>
+        </asp:GridView>
+    </div>
+
+    <!-- Controles de paginación independientes -->
+    <div class="pagination-controls-container bg-light p-3 border rounded">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Controles de paginación a la izquierda -->
+            <div class="d-flex align-items-center gap-1">
+                <!-- Primera página -->
+                <asp:LinkButton ID="lnkFirst" runat="server" OnClick="lnkFirst_Click"
+                    CssClass="btn btn-sm btn-outline-primary" ToolTip="Primera página">
+						<i class="bi bi-chevron-double-left"></i>
+                </asp:LinkButton>
+
+                <!-- Página anterior -->
+                <asp:LinkButton ID="lnkPrev" runat="server" OnClick="lnkPrev_Click"
+                    CssClass="btn btn-sm btn-outline-primary" ToolTip="Página anterior">
+						<i class="bi bi-chevron-left"></i>
+                </asp:LinkButton>
+
+                <!-- Botones de páginas estáticas -->
+                <asp:LinkButton ID="lnkPage1" runat="server" OnClick="lnkPage_Click" CommandArgument="0" CssClass="btn btn-sm btn-outline-primary mx-1" Text="1" ToolTip="Ir a página 1" />
+                <asp:LinkButton ID="lnkPage2" runat="server" OnClick="lnkPage_Click" CommandArgument="1" CssClass="btn btn-sm btn-outline-primary mx-1" Text="2" ToolTip="Ir a página 2" />
+                <asp:LinkButton ID="lnkPage3" runat="server" OnClick="lnkPage_Click" CommandArgument="2" CssClass="btn btn-sm btn-outline-primary mx-1" Text="3" ToolTip="Ir a página 3" />
+                <asp:LinkButton ID="lnkPage4" runat="server" OnClick="lnkPage_Click" CommandArgument="3" CssClass="btn btn-sm btn-outline-primary mx-1" Text="4" ToolTip="Ir a página 4" />
+                <asp:LinkButton ID="lnkPage5" runat="server" OnClick="lnkPage_Click" CommandArgument="4" CssClass="btn btn-sm btn-outline-primary mx-1" Text="5" ToolTip="Ir a página 5" />
+
+                <!-- Página siguiente -->
+                <asp:LinkButton ID="lnkNext" runat="server" OnClick="lnkNext_Click"
+                    CssClass="btn btn-sm btn-outline-primary" ToolTip="Página siguiente">
+						<i class="bi bi-chevron-right"></i>
+                </asp:LinkButton>
+
+                <!-- Última página -->
+                <asp:LinkButton ID="lnkLast" runat="server" OnClick="lnkLast_Click"
+                    CssClass="btn btn-sm btn-outline-primary" ToolTip="Última página">
+						<i class="bi bi-chevron-double-right"></i>
+                </asp:LinkButton>
+
+                <!-- Info de página -->
+                <span class="mx-2 small text-muted">
+                    <asp:Label ID="lblPaginaInfo" runat="server" Text="Página 1 de 1" />
+                </span>
+            </div>
+
+            <!-- Centro: Subtotal -->
+            <div class="text-center">
+                <asp:Label ID="lblSubtotalPaginacion" runat="server" Text="Total: $0.00 (0 registros)" CssClass="badge text-dark fs-6" />
+            </div>
+
+            <!-- Dropdown de registros por página a la derecha -->
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 small">Registros por página:</label>
+                <asp:DropDownList ID="ddlPageSizeExternal" runat="server" CssClass="form-select form-select-sm" AutoPostBack="true" OnSelectedIndexChanged="ddlPageSizeExternal_SelectedIndexChanged" Style="width: auto;">
+                    <asp:ListItem Value="12" Text="12" Selected="true"></asp:ListItem>
+                    <asp:ListItem Value="24" Text="24"></asp:ListItem>
+                    <asp:ListItem Value="48" Text="48"></asp:ListItem>
+                    <asp:ListItem Value="96" Text="96"></asp:ListItem>
+                    <asp:ListItem Value="192" Text="192"></asp:ListItem>
+                </asp:DropDownList>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center p-4">
+        <asp:Label ID="lblMensaje" Text="" runat="server" />
+    </div>
+
+
+    <script type="text/javascript">
+        function soloNumerosDecimales(e) {
+            var key = window.event ? e.which : e.keyCode;
+            if (key == 8 || key == 46 || key == 44 || key == 9) return true;
+            if (key >= 48 && key <= 57) return true;
+            if (key == 110 || key == 190) return true;
+            return false;
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('<%= txtMonto26.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto27.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto28.ClientID %>').value = '';
+            document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
+            document.getElementById('<%= txtMesBase.ClientID %>').value = '';
+            document.getElementById('<%= txtObservaciones.ClientID %>').value = '';
+            document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
+        }
+    </script>
+</asp:Content>
+

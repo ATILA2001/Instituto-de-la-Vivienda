@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="AutorizantesAdminEF.aspx.cs" Inherits="WebForms.AutorizantesAdminEF" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="AutorizantesEF.aspx.cs" Inherits="WebForms.AutorizantesEF" %>
 
 <%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
@@ -202,11 +202,14 @@
                         </asp:LinkButton>
                     </div>
 
-                    <div class="form-group mb-2">
-                        <button type="submit" class="btn btn-primary" runat="server" onserverclick="btnShowAddModal_Click">
-                            <i class="bi bi-plus-lg"></i>Agregar
-                        </button>
-                    </div>
+                    <asp:Panel ID="panelShowAddButton" runat="server">
+                        <div class="form-group mb-2">
+                            <button type="submit" class="btn btn-primary" runat="server" onserverclick="btnShowAddModal_Click">
+                                <i class="bi bi-plus-lg"></i>Agregar
+                            </button>
+                        </div>
+                    </asp:Panel>
+
                 </div>
             </div>
         </div>
@@ -215,12 +218,12 @@
     <hr class="mb-3" />
 
     <div class="gridview-scroll-container">
-        <asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1 table-bordered table-hover mb-4"
-            OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
-            OnRowDeleting="dgvAutorizante_RowDeleting"
-            OnDataBound="dgvAutorizante_DataBound"
-            OnRowDataBound="dgvAutorizante_RowDataBound"
-            OnPageIndexChanging="dgvAutorizante_PageIndexChanging"
+        <asp:GridView ID="gridviewRegistros" DataKeyNames="CodigoAutorizante" CssClass="table1 table-bordered table-hover mb-4"
+            OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
+            OnRowDeleting="gridviewRegistros_RowDeleting"
+            OnDataBound="gridviewRegistros_DataBound"
+            OnRowDataBound="gridviewRegistros_RowDataBound"
+            OnPageIndexChanging="gridviewRegistros_PageIndexChanging"
             ShowHeaderWhenEmpty="true"
             AutoGenerateColumns="false"
             AllowPaging="false"
@@ -378,7 +381,7 @@
 					<i class="bi bi-chevron-left"></i>
                 </asp:LinkButton>
 
-                <!-- Botones de páginas estáticos -->
+                <!-- Botones de páginas estáticas -->
                 <asp:LinkButton ID="lnkPage1" runat="server" OnClick="lnkPage_Click" CommandArgument="0" CssClass="btn btn-sm btn-outline-primary mx-1" Text="1" ToolTip="Ir a página 1" />
                 <asp:LinkButton ID="lnkPage2" runat="server" OnClick="lnkPage_Click" CommandArgument="1" CssClass="btn btn-sm btn-outline-primary mx-1" Text="2" ToolTip="Ir a página 2" />
                 <asp:LinkButton ID="lnkPage3" runat="server" OnClick="lnkPage_Click" CommandArgument="2" CssClass="btn btn-sm btn-outline-primary mx-1" Text="3" ToolTip="Ir a página 3" />

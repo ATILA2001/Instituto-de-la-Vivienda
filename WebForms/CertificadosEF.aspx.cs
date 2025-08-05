@@ -17,7 +17,7 @@ namespace WebForms
     /// <summary>
     /// Página de administración de certificados y reliquidaciones con sistema de paginación optimizada.
     /// </summary>
-    public partial class CertificadosAdminEF : Page
+    public partial class CertificadosEF : Page
     {
         #region Instancias de Negocio
         // Se instancian las clases de negocio de EF.
@@ -70,7 +70,6 @@ namespace WebForms
             {
                 CargarListaCertificadosCompleta();
                 BindDropDownList();
-                //CalcularSubtotal();
                 ActualizarControlesPaginacion();
             }
             else
@@ -79,6 +78,7 @@ namespace WebForms
                 ActualizarControlesPaginacion();
             }
         }
+
         #endregion
 
         #region Métodos de Paginación (replicados exactamente desde AutorizantesAdminEF)
@@ -209,14 +209,14 @@ namespace WebForms
 
             // Configurar paginación - EXACTAMENTE IGUAL que AutorizantesAdminEF
             int totalFiltrados = datosEnMemoria.Count;
-            dgvCertificado.VirtualItemCount = totalFiltrados;
-            dgvCertificado.PageSize = pageSize;
-            dgvCertificado.PageIndex = currentPageIndex;
-            dgvCertificado.DataSource = datosEnMemoria
+            gridviewRegistros.VirtualItemCount = totalFiltrados;
+            gridviewRegistros.PageSize = pageSize;
+            gridviewRegistros.PageIndex = currentPageIndex;
+            gridviewRegistros.DataSource = datosEnMemoria
                                         .Skip(currentPageIndex * pageSize)
                                         .Take(pageSize)
                                         .ToList();
-            dgvCertificado.DataBind();
+            gridviewRegistros.DataBind();
             PoblarFiltrosHeader();
 
             // Actualizar totalRecords y paginación según los datos filtrados
@@ -586,7 +586,7 @@ namespace WebForms
                     { "Línea", "LineaGestionNombre" }
                 };
 
-                ExcelHelper.ExportarDatosGenericos(dgvCertificado, todosLosCertificados, mapeoColumnas, "Certificados");
+                ExcelHelper.ExportarDatosGenericos(gridviewRegistros, todosLosCertificados, mapeoColumnas, "Certificados");
             }
             catch (Exception ex)
             {
@@ -689,7 +689,7 @@ namespace WebForms
         }
 
         /// <summary>
-        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             // Este método ahora está obsoleto ya que usamos paginación externa
             // Mantenemos por compatibilidad pero no hacemos nada
@@ -700,11 +700,11 @@ namespace WebForms
 
 
 
-        protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
-                int idCertificado = Convert.ToInt32(dgvCertificado.SelectedDataKey.Value);
+                int idCertificado = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
                 CertificadoEF certificadoSeleccionado;
                 using (var context = new IVCdbContext())
                 {
@@ -742,11 +742,11 @@ namespace WebForms
                 item.Selected = true;
             }
         }
-        protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                var id = Convert.ToInt32(dgvCertificado.DataKeys[e.RowIndex].Value);
+                var id = Convert.ToInt32(gridviewRegistros.DataKeys[e.RowIndex].Value);
                 if (negocio.Eliminar(id))
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
@@ -773,7 +773,7 @@ namespace WebForms
             {
                 Action<string, object, string, string> bindFilter = (controlId, dataSource, textField, valueField) =>
                 {
-                    if (dgvCertificado.HeaderRow?.FindControl(controlId) is TreeViewSearch control)
+                    if (gridviewRegistros.HeaderRow?.FindControl(controlId) is TreeViewSearch control)
                     {
                         control.DataSource = dataSource;
                         control.DataTextField = textField;
@@ -791,7 +791,7 @@ namespace WebForms
                 bindFilter("cblsHeaderTipo", context.TiposPago.AsNoTracking().OrderBy(t => t.Nombre).Select(t => new { t.Id, t.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderLinea", context.LineasGestion.AsNoTracking().OrderBy(l => l.Nombre).Select(l => new { l.Id, l.Nombre }).ToList(), "Nombre", "Id");
 
-                if (dgvCertificado.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
                     // Estados de certificados: usar el texto como ID y como nombre
                     var estadosCertificados = new[]
@@ -806,7 +806,7 @@ namespace WebForms
                     cblsHeaderEstado.DataBind();
                 }
 
-                if (dgvCertificado.HeaderRow?.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado)
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado)
                 {
                     // 1. Se consultan todos los meses de aprobación distintos desde la base de datos.
                     var meses = context.Certificados.AsNoTracking()
@@ -873,7 +873,7 @@ namespace WebForms
                     return;
                 }
 
-                int indiceReal = (dgvCertificado.PageIndex * dgvCertificado.PageSize) + rowIndex;
+                int indiceReal = (gridviewRegistros.PageIndex * gridviewRegistros.PageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
                     lblMensaje.Text = "Error: Índice fuera del rango de datos.";
@@ -1135,7 +1135,7 @@ namespace WebForms
 
         private List<CertificadoDTO> AplicarFiltrosTreeViewEnMemoria(List<CertificadoDTO> data)
         {
-            if (dgvCertificado.HeaderRow == null) return data;
+            if (gridviewRegistros.HeaderRow == null) return data;
 
             try
             {
@@ -1143,19 +1143,19 @@ namespace WebForms
                 Func<TreeViewSearch, List<int>> getSelectedIds = (tv) => tv.ExpandedSelectedValues.Select(s => int.TryParse(s, out int id) ? id : -1).Where(id => id != -1).ToList();
 
                 // Aplicar filtro por Área
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && cblsHeaderArea.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && cblsHeaderArea.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.AreaId.HasValue && getSelectedIds(cblsHeaderArea).Contains(c.AreaId.Value)).ToList();
 
                 // Aplicar filtro por Obra
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra && cblsHeaderObra.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra && cblsHeaderObra.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.ObraId.HasValue && getSelectedIds(cblsHeaderObra).Contains(c.ObraId.Value)).ToList();
 
                 // Aplicar filtro por Barrio
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && cblsHeaderBarrio.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && cblsHeaderBarrio.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.BarrioId.HasValue && getSelectedIds(cblsHeaderBarrio).Contains(c.BarrioId.Value)).ToList();
 
                 // Aplicar filtro por Proyecto (certificados y reliquidaciones)
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
                 {
                     var selectedProyectoIds = getSelectedIds(cblsHeaderProyecto);
                     
@@ -1180,15 +1180,15 @@ namespace WebForms
                 }
 
                 // Aplicar filtro por Empresa
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.EmpresaId.HasValue && getSelectedIds(cblsHeaderEmpresa).Contains(c.EmpresaId.Value)).ToList();
 
                 // Aplicar filtro por Código Autorizante
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") is TreeViewSearch cblsHeaderCodigoAutorizante && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.AutorizanteId.HasValue && getSelectedIds(cblsHeaderCodigoAutorizante).Contains(c.AutorizanteId.Value)).ToList();
 
                 // Aplicar filtro por Estado (ahora por texto, no por ID numérico)
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
                     var selectedEstados = cblsHeaderEstado.ExpandedSelectedValues;
                     if (selectedEstados != null && selectedEstados.Any())
@@ -1199,11 +1199,11 @@ namespace WebForms
                 }
 
                 // Aplicar filtro por Tipo
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") is TreeViewSearch cblsHeaderTipo && cblsHeaderTipo.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderTipo") is TreeViewSearch cblsHeaderTipo && cblsHeaderTipo.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.TipoPagoId.HasValue && getSelectedIds(cblsHeaderTipo).Contains(c.TipoPagoId.Value)).ToList();
 
                 // Aplicar filtro por Mes Certificado
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado && cblsHeaderMesCertificado.SelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado && cblsHeaderMesCertificado.SelectedValues.Any())
                 {
                     // CORRECCIÓN: Se reemplaza DbFunctions.TruncateTime por .Date, que es el equivalente para LINQ to Objects.
                     var selectedDates = cblsHeaderMesCertificado.SelectedValues
@@ -1214,7 +1214,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro por Línea de Gestión
-                if (dgvCertificado.HeaderRow.FindControl("cblsHeaderLinea") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderLinea") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.LineaGestionId.HasValue && getSelectedIds(cblsHeaderLinea).Contains(c.LineaGestionId.Value)).ToList();
             }
             catch (Exception)

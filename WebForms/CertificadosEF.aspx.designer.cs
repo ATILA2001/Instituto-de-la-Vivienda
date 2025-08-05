@@ -11,62 +11,26 @@ namespace WebForms
 {
 
 
-    public partial class AutorizantesAdminEF
+    public partial class CertificadosEF
     {
 
         /// <summary>
-        /// ddlObra control.
+        /// ddlAutorizante control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlObra;
+        protected global::System.Web.UI.WebControls.DropDownList ddlAutorizante;
 
         /// <summary>
-        /// rfvObra control.
+        /// rfvAutorizante control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObra;
-
-        /// <summary>
-        /// txtCodigoAutorizante control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCodigoAutorizante;
-
-        /// <summary>
-        /// rfvCodigoAutorizante control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCodigoAutorizante;
-
-        /// <summary>
-        /// ddlConcepto control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlConcepto;
-
-        /// <summary>
-        /// rfvConcepto control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvConcepto;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAutorizante;
 
         /// <summary>
         /// txtExpediente control.
@@ -78,40 +42,22 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtExpediente;
 
         /// <summary>
-        /// ddlEstado control.
+        /// ddlTipo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlEstado;
+        protected global::System.Web.UI.WebControls.DropDownList ddlTipo;
 
         /// <summary>
-        /// rfvEstado control.
+        /// rfvTipo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEstado;
-
-        /// <summary>
-        /// txtDetalle control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDetalle;
-
-        /// <summary>
-        /// rfvDetalle control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvDetalle;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTipo;
 
         /// <summary>
         /// txtMontoAutorizado control.
@@ -150,31 +96,31 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtFecha;
 
         /// <summary>
-        /// txtMes control.
+        /// rfvFecha control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMes;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvFecha;
 
         /// <summary>
-        /// btnLimpiar control.
+        /// btnAgregar control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiar;
+        protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
-        /// Button1 control.
+        /// txtSubtotal control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button1;
+        protected global::System.Web.UI.WebControls.TextBox txtSubtotal;
 
         /// <summary>
         /// txtBuscar control.
@@ -184,6 +130,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtBuscar;
+
+        /// <summary>
+        /// btnFiltrar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnFiltrar;
 
         /// <summary>
         /// btnLimpiarFiltros control.
@@ -204,13 +159,31 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.LinkButton btnExportarExcel;
 
         /// <summary>
-        /// dgvAutorizante control.
+        /// panelShowAddButton control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView dgvAutorizante;
+        protected global::System.Web.UI.WebControls.Panel panelShowAddButton;
+
+        /// <summary>
+        /// btnShowAddModal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnShowAddModal;
+
+        /// <summary>
+        /// gridviewRegistros control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gridviewRegistros;
 
         /// <summary>
         /// lnkFirst control.
