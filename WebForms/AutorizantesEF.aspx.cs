@@ -865,6 +865,22 @@ namespace WebForms
         {
             try
             {
+                // Obtener información de paginación del control
+                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
+                int actualPageIndex = 0;
+                int actualPageSize = 12;
+                
+                if (paginationControl != null)
+                {
+                    var paginationInfo = paginationControl.GetPaginationInfo();
+                    actualPageIndex = paginationInfo.CurrentPageIndex;
+                    actualPageSize = paginationInfo.PageSize;
+                    
+                    // Sincronizar variables de clase
+                    currentPageIndex = actualPageIndex;
+                    pageSize = actualPageSize;
+                }
+
                 // Usar la lista completa de la sesión
                 List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantesTotal"] as List<AutorizanteDTO>;
                 if (listaCompleta == null)
@@ -874,9 +890,6 @@ namespace WebForms
                     listaCompleta = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantesTotal"] = listaCompleta;
                 }
-
-                // LOG: cantidad total antes de filtros
-                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Total registros cargados (autorizantes + redeterminaciones): {listaCompleta.Count}");
 
                 // Aplicar filtro de búsqueda
                 string filtro = txtBuscar.Text.Trim().ToLower();
@@ -896,36 +909,37 @@ namespace WebForms
                     ).ToList();
                 }
 
-                // LOG: cantidad después de filtro de búsqueda
-                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Registros después de filtro de búsqueda: {datosFiltrados.Count}");
-
                 // Aplicar filtros de TreeView
                 datosFiltrados = AplicarFiltrosTreeViewEnMemoria(datosFiltrados);
 
-                // LOG: cantidad después de filtros de TreeView
-                System.Diagnostics.Debug.WriteLine($"[AutorizantesAdminEF] Registros después de filtros TreeView: {datosFiltrados.Count}");
 
-                // Guardar en sesión la lista filtrada (para la página actual)
+
+                // Guardar en sesión la lista filtrada
                 Session["GridDataAutorizantes"] = datosFiltrados;
                 Session["TotalRegistros"] = datosFiltrados.Count;
 
-                // Paginación manual
+                // Paginación manual usando valores actualizados
                 int totalFiltrados = datosFiltrados.Count;
                 totalRecords = totalFiltrados;
                 ViewState["TotalRecords"] = totalFiltrados;
 
+                // Usar las variables sincronizadas
                 var paginaActual = datosFiltrados
-                    .Skip(currentPageIndex * pageSize)
-                    .Take(pageSize)
+                    .Skip(actualPageIndex * actualPageSize)
+                    .Take(actualPageSize)
                     .ToList();
+
+                // Actualizar el control con el total correcto ANTES del DataBind
+                if (paginationControl != null)
+                {
+                    paginationControl.TotalRecords = totalFiltrados;
+                    paginationControl.UpdatePaginationControls();
+                }
 
                 gridviewRegistros.DataSource = paginaActual;
                 gridviewRegistros.DataBind();
 
                 PoblarFiltrosHeader();
-
-                // Calcular subtotal después de cargar datos
-                //CalcularSubtotal();
                 CalcularSubtotalParaPaginationControl();
             }
             catch (Exception ex)
