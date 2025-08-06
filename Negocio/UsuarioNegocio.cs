@@ -10,6 +10,43 @@ namespace Negocio
     public class UsuarioNegocio
     {
         public UsuarioNegocio() { }
+
+        public bool LogearIntegSecur(string windowsUserName, Usuario usuario)
+        
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USER = windowsUserName ");
+                datos.setearParametros("@correo", usuario.Correo);
+                datos.setearParametros("@pass", usuario.Contrasenia);
+                datos.ejecutarLectura();
+
+                while (datos.Lector.Read())
+                {
+                    usuario.Correo = datos.Lector["CORREO"] as string ?? string.Empty;
+                    usuario.Nombre = datos.Lector["NOMBRE"] as string ?? string.Empty;
+                    usuario.Tipo = datos.Lector["TIPO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["TIPO"]);
+                    usuario.Estado = datos.Lector["ESTADO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["ESTADO"]);
+                    usuario.Area = new Area();
+                    usuario.Area.Id = (int)datos.Lector["IDAREA"];
+                    usuario.Area.Nombre = (string)datos.Lector["AREA"];
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception)
+            {
+                throw; // You might want to log this or provide more context.
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        
         public bool Logear(Usuario usuario)
         {
             AccesoDatos datos = new AccesoDatos();
