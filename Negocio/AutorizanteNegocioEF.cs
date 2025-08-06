@@ -179,7 +179,8 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                return context.Autorizantes.Find(id);
+                // Buscamos por ID con FirstOrDefault en lugar de Find porque en este modelo, el primary key es codigo autorizante.
+                return context.Autorizantes.FirstOrDefault(aef => aef.Id == id);
             }
         }
 
