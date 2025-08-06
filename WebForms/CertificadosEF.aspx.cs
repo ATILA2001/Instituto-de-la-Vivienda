@@ -653,9 +653,21 @@ namespace WebForms
                     // Limpiar cache SADE ya que se eliminó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                     
-                    // Se recarga toda la grilla para reflejar la eliminación.
-                    CargarPaginaActual(); // Usar método optimizado
-                    //PoblarFiltrosHeader();
+                    // Eliminar registro específico del cache
+                    if (Session["GridData"] is List<CertificadoDTO> listaCache)
+                    {
+                        // Remover el registro del cache
+                        listaCache.RemoveAll(c => c.Id == id);
+                        
+                        // Actualizar totales
+                        ViewState["TotalRecords"] = listaCache.Count;
+                        totalRecords = listaCache.Count;
+                        Session["TotalRegistros"] = listaCache.Count;
+                    }
+                    
+                    // Recargar vista con datos actualizados
+                    BindGrid();
+                    ConfigurarPaginationControl();
                 }
             }
             catch (Exception ex)
