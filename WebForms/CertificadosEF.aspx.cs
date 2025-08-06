@@ -250,8 +250,7 @@ namespace WebForms
                 }
 
                 // Actualizar label de subtotal en paginación si existe
-                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
-                if (lblSubtotalPaginacion != null)
+                if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
                     lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
                 }
@@ -263,9 +262,8 @@ namespace WebForms
                 {
                     txtSubtotal.Text = "$0,00";
                 }
-                
-                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
-                if (lblSubtotalPaginacion != null)
+
+                if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
                     lblSubtotalPaginacion.Text = "Total: Error al calcular";
                 }
@@ -332,10 +330,7 @@ namespace WebForms
             catch
             {
                 var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
-                if (paginationControl != null)
-                {
-                    paginationControl.UpdateSubtotal(0m, 0);
-                }
+                paginationControl?.UpdateSubtotal(0m, 0);
             }
         }
 
@@ -349,7 +344,7 @@ namespace WebForms
             if (root.ID == id)
                 return root;
 
-            foreach (Control control in root.Controls)
+            foreach (Control control in root.Controls.Cast<Control>())
             {
                 Control found = FindControlRecursive(control, id);
                 if (found != null)
@@ -491,25 +486,42 @@ namespace WebForms
 
             try
             {
-                CertificadoEF certificado = new CertificadoEF
-                {
-                    ExpedientePago = txtExpediente.Text.Trim(),
-                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim()),
-                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
-                    TipoPagoId = int.Parse(ddlTipo.SelectedValue)
-                };
-
                 bool resultado;
                 if (Session["EditingCertificadoId"] != null)
                 {
-                    certificado.Id = (int)Session["EditingCertificadoId"];
-                    resultado = negocio.Modificar(certificado);
+                    // Recupera el certificado existente y modifica sus propiedades
+                    int certificadoId = (int)Session["EditingCertificadoId"];
+                    CertificadoEF certificadoExistente = negocio.ObtenerPorId(certificadoId);
+                    
+                    if (certificadoExistente == null)
+                    {
+                        lblMensaje.Text = "Error: No se encontró el certificado a modificar.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                        return;
+                    }
+
+                    // Actualiza solo las propiedades editables
+                    certificadoExistente.ExpedientePago = txtExpediente.Text.Trim();
+                    certificadoExistente.MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim());
+                    certificadoExistente.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
+                    certificadoExistente.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
+
+                    resultado = negocio.Modificar(certificadoExistente);
                     lblMensaje.Text = resultado ? "Certificado modificado exitosamente!" : "Hubo un problema al modificar el certificado.";
                 }
                 else
                 {
-                    certificado.CodigoAutorizante = ddlAutorizante.SelectedItem.Text;
-                    resultado = negocio.Agregar(certificado);
+                    // Crea nuevo certificado con todas las propiedades
+                    CertificadoEF nuevoCertificado = new CertificadoEF
+                    {
+                        ExpedientePago = txtExpediente.Text.Trim(),
+                        MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim()),
+                        MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
+                        TipoPagoId = int.Parse(ddlTipo.SelectedValue),
+                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                    };
+
+                    resultado = negocio.Agregar(nuevoCertificado);
                     lblMensaje.Text = resultado ? "Certificado agregado exitosamente!" : "Hubo un problema al agregar el certificado.";
                 }
 
@@ -520,8 +532,12 @@ namespace WebForms
                     // Limpiar cache SADE ya que se agregó/modificó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                     
+                    // Invalida caché para forzar recarga desde BD
+                    Session["GridData"] = null;
+                    ViewState["NecesitaRecarga"] = true;
+                    
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                    CargarPaginaActual(); // Usar método optimizado
+                    CargarPaginaActual(); // Recargará desde BD al no encontrar caché
                 }
             }
             catch (Exception ex)
@@ -578,56 +594,197 @@ namespace WebForms
         /// - Distingue entre certificados (EditingCertificadoId) y reliquidaciones (EditingReliquidacionId)
         /// - Almacena código autorizante para contexto de edición
         /// </summary>
-        [Obsolete("Usar CargarPaginaActual() para mejor rendimiento con paginación real en BD")]
-        private void CargarGrillaCompleta()
-        {
-            CargarPaginaActual();
-        }
-
-        /// <summary>
-        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            // Este método ahora está obsoleto ya que usamos paginación externa
-            // Mantenemos por compatibilidad pero no hacemos nada
-            e.Cancel = true;
-        }
-        #endregion
-
-
-
-
         protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
+
             try
+
             {
-                int idCertificado = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
-                CertificadoEF certificadoSeleccionado;
-                using (var context = new IVCdbContext())
+
+                int rowIndex = gridviewRegistros.SelectedIndex;
+
+
+
+                // Obtener el registro desde los datos filtrados actuales
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+
+                if (datosFiltradosActuales == null || datosFiltradosActuales.Count == 0)
+
                 {
-                    // Se busca el certificado directamente en la base de datos.
-                    certificadoSeleccionado = context.Certificados.Find(idCertificado);
+
+                    lblMensaje.Text = "Error: No hay datos disponibles.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                    return;
+
                 }
 
-                if (certificadoSeleccionado != null)
+
+
+                // Calcular el índice real considerando la página actual
+
+                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
+
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+
                 {
-                    Session["EditingCertificadoId"] = idCertificado;
+
+                    lblMensaje.Text = "Error: Registro no encontrado.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                    return;
+
+                }
+
+
+
+                CertificadoDTO certificadoSeleccionado = datosFiltradosActuales[indiceReal];
+
+
+
+                // Verificar si es reliquidación (TipoPagoId == 3)
+
+                if (certificadoSeleccionado.TipoPagoId == 3)
+
+                {
+
+                    // Configurar para editar reliquidación
+
+                    Session["EditingTipoRegistro"] = "Reliquidacion";
+
+                    Session["EditingReliquidacionId"] = certificadoSeleccionado.IdReliquidacion;
+
+                    Session["EditingCodigoAutorizante"] = certificadoSeleccionado.CodigoAutorizante;
+
+
+
+                    // Cargar datos de la reliquidación
+
                     txtExpediente.Text = certificadoSeleccionado.ExpedientePago;
+
                     txtMontoAutorizado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+
                     txtFecha.Text = certificadoSeleccionado.MesAprobacion?.ToString("yyyy-MM-dd");
+
                     SelectDropDownListByValue(ddlTipo, certificadoSeleccionado.TipoPagoId.ToString());
 
+
+
+                    btnAgregar.Text = "Actualizar";
+
+
+
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
-                    $('#modalAgregar .modal-title').text('Modificar Certificado');
-                    $('#autorizanteContainer').hide();
-                    $('#modalAgregar').modal('show');", true);
+
+                                $(document).ready(function() {
+
+                                    $('#modalAgregar .modal-title').text('Modificar Reliquidación');
+
+                                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+                                    $('#autorizanteContainer').hide();
+
+                                    $('#modalAgregar').modal('show');
+
+                                });", true);
+
+
+
+                    return; // Salir del método después de configurar la reliquidación
+
                 }
+
+
+
+                // Buscar el certificado real en BD para edición
+
+                CertificadoEF certificadoEF;
+
+                using (var context = new IVCdbContext())
+
+                {
+
+                    certificadoEF = context.Certificados.Find(certificadoSeleccionado.Id);
+
+                }
+
+
+
+                if (certificadoEF != null)
+
+                {
+
+                    Session["EditingCertificadoId"] = certificadoSeleccionado.Id;
+
+                    txtExpediente.Text = certificadoEF.ExpedientePago;
+
+                    txtMontoAutorizado.Text = certificadoEF.MontoTotal.ToString("0.00");
+
+                    txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
+
+                    SelectDropDownListByValue(ddlTipo, certificadoEF.TipoPagoId.ToString());
+
+
+
+                    // Actualizar el texto del botón
+
+                    btnAgregar.Text = "Actualizar";
+
+
+
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+
+                                $(document).ready(function() {
+
+                                    // Cambiar título y texto del botón
+
+                                    $('#modalAgregar .modal-title').text('Modificar Certificado');
+
+                                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+                                    
+
+                                    // Ocultar el dropdown de Autorizante y su etiqueta
+
+                                    $('#autorizanteContainer').hide();
+
+                                    
+
+                                    // Mostrar el modal
+
+                                    $('#modalAgregar').modal('show');
+
+                                });", true);
+
+                }
+
+                else
+
+                {
+
+                    lblMensaje.Text = "Error: No se pudo cargar el certificado para edición.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                }
+
             }
+
             catch (Exception ex)
+
             {
+
                 lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
+
                 lblMensaje.CssClass = "alert alert-danger";
+
             }
+
         }
+
 
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
