@@ -81,7 +81,7 @@ namespace WebForms
 
         #endregion
 
-        #region Métodos de Paginación (replicados exactamente desde AutorizantesAdminEF)
+        #region Métodos de Paginación
         /// <summary>
         /// Método central que carga datos paginados de certificados y reliquidaciones.
         /// 
@@ -136,7 +136,7 @@ namespace WebForms
                 totalRecords = totalRegistros;
                 Session["TotalRegistros"] = totalRegistros;
 
-                // Usar BindGrid para paginación en memoria (mantiene todos los campos)
+                // Usar BindGrid para paginación en memoria
                 BindGrid();
             }
             catch (Exception ex)
@@ -207,7 +207,7 @@ namespace WebForms
             // Aplicar filtros de las columnas (TreeView)
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
-            // Configurar paginación - EXACTAMENTE IGUAL que AutorizantesAdminEF
+            // Configurar paginación
             int totalFiltrados = datosEnMemoria.Count;
             gridviewRegistros.VirtualItemCount = totalFiltrados;
             gridviewRegistros.PageSize = pageSize;
@@ -237,7 +237,7 @@ namespace WebForms
         {
             try
             {
-                // OPTIMIZACIÓN: Usar datos del caché en lugar de hacer nueva consulta DB
+                // Usa datos del caché en lugar de hacer nueva consulta DB
                 List<CertificadoDTO> todosLosRegistros;
                 
                 // Intentar obtener datos del caché primero
@@ -247,12 +247,12 @@ namespace WebForms
                 }
                 else
                 {
-                    // Solo si no hay caché, consultar BD (caso excepcional)
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    // Solo si no hay caché, consultar BD
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosRegistros = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
                 
-                // Aplicar filtro de texto general si existe
+                // Aplica filtro de texto general si existe
                 string filtro = txtBuscar.Text.Trim().ToLower();
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -267,7 +267,7 @@ namespace WebForms
                     ).ToList();
                 }
 
-                // Aplicar filtros de TreeView (filtros de columnas)
+                // Aplica filtros de TreeView (filtros de columnas)
                 todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
 
                 // Calcular el total de los registros filtrados
@@ -279,7 +279,7 @@ namespace WebForms
                 {
                     txtSubtotal.Text = totalMonto.ToString("C", CultureInfo.GetCultureInfo("es-AR"));
                 }
-                
+
                 // Actualizar label de subtotal en paginación si existe
                 var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
                 if (lblSubtotalPaginacion != null)
@@ -305,14 +305,12 @@ namespace WebForms
 
         private void CargarPaginaActual()
         {
-            // Guardar el estado actual en ViewState
+            // Guarda el estado actual en ViewState
             ViewState["CurrentPageIndex"] = currentPageIndex;
             ViewState["PageSize"] = pageSize;
             
-            // Cargar los datos
             CargarListaCertificadosCompleta();
             
-            // Configurar el control de paginación
             ConfigurarPaginationControl();
         }
 
@@ -327,12 +325,11 @@ namespace WebForms
             var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
             if (paginationControl != null)
             {
-                // Configurar las propiedades del control
+                // Configura las propiedades del control
                 paginationControl.TotalRecords = totalRecords;
                 paginationControl.CurrentPageIndex = currentPageIndex;
                 paginationControl.PageSize = pageSize;
 
-                // Actualizar los controles de paginación
                 paginationControl.UpdatePaginationControls();
                 
                 // Actualizar subtotal para el control
@@ -436,7 +433,7 @@ namespace WebForms
         {
             try
             {
-                // OPTIMIZACIÓN: Usar datos del caché para exportación
+                // Usa datos del caché para exportación
                 List<CertificadoDTO> todosLosCertificados;
                 
                 if (Session["GridData"] != null)
@@ -575,10 +572,42 @@ namespace WebForms
             ddlTipo.SelectedIndex = 0;
         }
 
-        #region Métodos Obsoletos Reemplazados por Paginación Optimizada
+
         /// <summary>
-        /// OBSOLETO: Reemplazado por CargarPaginaActual() para paginación optimizada.
-        /// Se mantiene para compatibilidad con código existente que aún lo llame.
+        /// Maneja la selección de filas en el GridView para editar certificados y reliquidaciones.
+        /// 
+        /// FUNCIONALIDAD:
+        /// - Permite editar certificados reales (TipoPagoId != 3) obtenidos de BD
+        /// - Permite editar reliquidaciones virtuales (TipoPagoId == 3) calculadas dinámicamente
+        /// - Carga datos del registro seleccionado en el modal de edición
+        /// - Configura la interfaz según el tipo de registro (certificado vs reliquidación)
+        /// 
+        /// FLUJO DE PROCESAMIENTO:
+        /// 1. Obtiene el índice de la fila seleccionada en la página actual del GridView
+        /// 2. Calcula el índice real considerando la paginación (página * tamaño + índice local)
+        /// 3. Recupera el registro desde los datos filtrados en memoria
+        /// 4. Valida si el registro es editable (ID > 0 para certificados, cualquier ID para reliquidaciones)
+        /// 5. Carga los datos en el formulario modal
+        /// 6. Configura la UI según el tipo de registro
+        /// 
+        /// TIPOS DE REGISTRO:
+        /// - Certificados (TipoPagoId != 3): Se obtienen de BD usando CertificadoNegocioEF.ObtenerPorId()
+        /// - Reliquidaciones (TipoPagoId == 3): Se editan directamente desde los datos calculados
+        /// 
+        /// CONFIGURACIÓN DE UI:
+        /// - Certificados: Oculta dropdown de autorizante (no editable), muestra título "Modificar Certificado"
+        /// - Reliquidaciones: Oculta dropdown de autorizante, muestra título "Modificar Reliquidación"
+        /// - Cambia texto del botón a "Actualizar" y título del modal dinámicamente
+        /// 
+        /// VALIDACIONES:
+        /// - Verifica que el índice esté dentro del rango de datos disponibles
+        /// - Solo permite edición de registros válidos (ID > 0 para certificados)
+        /// - Maneja errores de carga y muestra mensajes apropiados
+        /// 
+        /// MANEJO DE SESIÓN:
+        /// - Guarda IDs de edición en Session para uso en btnAgregar_Click
+        /// - Distingue entre certificados (EditingCertificadoId) y reliquidaciones (EditingReliquidacionId)
+        /// - Almacena código autorizante para contexto de edición
         /// </summary>
         [Obsolete("Usar CargarPaginaActual() para mejor rendimiento con paginación real en BD")]
         private void CargarGrillaCompleta()
@@ -747,7 +776,7 @@ namespace WebForms
         {
             AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
             ddlAutorizante.DataSource = autorizanteNegocio.ListarParaDDL();
-            ddlAutorizante.DataTextField = "CodigoAutorizante"; // Corregido: usar CodigoAutorizante en lugar de Nombre
+            ddlAutorizante.DataTextField = "CodigoAutorizante";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
         }        
@@ -912,7 +941,6 @@ namespace WebForms
 
                     if (!string.IsNullOrWhiteSpace(nuevoExpediente))
                         expedientesAfectados.Add(nuevoExpediente);
-
 
 
 
@@ -1115,7 +1143,6 @@ namespace WebForms
                 // Aplicar filtro por Mes Certificado
                 if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado && cblsHeaderMesCertificado.SelectedValues.Any())
                 {
-                    // CORRECCIÓN: Se reemplaza DbFunctions.TruncateTime por .Date, que es el equivalente para LINQ to Objects.
                     var selectedDates = cblsHeaderMesCertificado.SelectedValues
                         .Select(s => DateTime.TryParse(s, out DateTime dt) ? (DateTime?)dt.Date : null)
                         .Where(d => d.HasValue).Select(d => d.Value)
