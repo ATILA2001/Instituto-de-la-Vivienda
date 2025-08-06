@@ -108,7 +108,7 @@ namespace WebForms
             try
             {
                 // Obtener usuario actual
-                UsuarioEF usuario = ObtenerUsuarioActual();
+                UsuarioEF usuario = UserHelper.GetFullCurrentUser();
 
                 // REGRESANDO A CARGA COMPLETA: necesaria para todos los campos calculados (Contrata, Proyecto, SIGAF, SADE, etc.)
                 // OPTIMIZACIÓN: Solo cargar si no están en cache
@@ -116,7 +116,7 @@ namespace WebForms
                 
                 if (Session["GridData"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    UsuarioEF usuarioActual = ObtenerUsuarioActual();
+                    UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                     todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
                     
                     // Guardar en cache
@@ -145,37 +145,6 @@ namespace WebForms
                 lblMensaje.Text = $"Error al cargar certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
-        }
-
-        private UsuarioEF ObtenerUsuarioActual()
-        {
-            // Implementar según la lógica de sesión del sistema
-            // Replicado desde AutorizantesAdminEF
-            if (Session["Usuario"] != null)
-            {
-                var usuarioTradicional = (Usuario)Session["Usuario"];
-                return new UsuarioEF 
-                { 
-                    Id = usuarioTradicional.Id,
-                    Nombre = usuarioTradicional.Nombre,
-                    Correo = usuarioTradicional.Correo,
-                    Tipo = usuarioTradicional.Tipo, // true: Administrador, false: Usuario normal
-                    Estado = usuarioTradicional.Estado,
-                    AreaId = usuarioTradicional.Area?.Id ?? 0,
-                };
-            }
-            
-            // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
-            // (sin filtro de área)
-            return new UsuarioEF
-            {
-                Id = 0,
-                Nombre = "Usuario null",
-                Correo = null,
-                Tipo = false, // Usuario normal por defecto
-                Estado = false,
-                AreaId = 0, // 0 significa sin filtro de área
-            };
         }
 
         /// <summary>
@@ -443,7 +412,7 @@ namespace WebForms
                 else
                 {
                     // Solo si no hay caché, consultar BD
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    UsuarioEF usuario =  UserHelper.GetFullCurrentUser();
                     todosLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
 
