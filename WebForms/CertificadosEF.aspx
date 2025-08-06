@@ -172,7 +172,6 @@
             <asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1  table-bordered table-hover  mb-4"
                 OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
                 OnRowDeleting="gridviewRegistros_RowDeleting"
-                OnPageIndexChanging="gridviewRegistros_PageIndexChanging"
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false"
                 AllowPaging="false"
