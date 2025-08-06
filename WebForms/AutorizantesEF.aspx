@@ -116,7 +116,7 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0.00" />
+                                        <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00" />
                                         <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
                                             ControlToValidate="txtMontoAutorizado"
                                             ValidationGroup="AgregarAutorizante"
@@ -129,7 +129,7 @@
                                             ControlToValidate="txtMontoAutorizado"
                                             ValidationGroup="AgregarAutorizante"
                                             runat="server"
-                                            ValidationExpression="^[0-9]+(\.[0-9]{1,2})?$"
+                                            ValidationExpression="^[0-9]+([,][0-9]{1,2})?$"
                                             ErrorMessage="Solo números positivos con hasta 2 decimales"
                                             Display="Dynamic"
                                             CssClass="text-danger"
