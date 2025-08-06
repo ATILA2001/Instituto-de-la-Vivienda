@@ -17,9 +17,8 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USER = windowsUserName ");
-                datos.setearParametros("@correo", usuario.Correo);
-                datos.setearParametros("@pass", usuario.Contrasenia);
+                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USER = @windowsUserName ");
+                datos.setearParametros("@windowsUserName", windowsUserName);
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())

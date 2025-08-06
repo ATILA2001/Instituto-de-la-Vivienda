@@ -20,12 +20,23 @@ namespace Dominio
 
         public Area Area { get; set; }
 
-        public Usuario() { }
+		public String Domain { get; set; }
 
-        public Usuario( string correo, string contrasenia)
-        {
-            Correo = correo;
-            Contrasenia = contrasenia;
-        }
-    }
+		public String Username { get; set; }
+
+
+		public Usuario() { }
+
+		//public Usuario(string domain, string username)
+		//{
+		//	Domain = domain;
+		//	Username = username;
+		//}
+
+		public Usuario(string correo, string contrasenia)
+		{
+			Correo = correo;
+			Contrasenia = contrasenia;
+		}
+	}
 }

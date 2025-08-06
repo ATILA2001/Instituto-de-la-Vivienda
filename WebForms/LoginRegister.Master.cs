@@ -21,8 +21,21 @@ namespace WebForms
                 UsuarioNegocio negocio = new UsuarioNegocio();
                 try
                 {
-                    usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                    if (negocio.Logear(usuario))
+                    //string fullUserName = HttpContext.Current.User.Identity.Name;
+                    //string[] parts = fullUserName.Split('\\');
+
+                    var fullUserName = HttpContext.Current.User.Identity.Name ?? string.Empty;
+                    var parts = fullUserName.Split(new[] { '\\' }, 2);
+
+                    // If the user is in a domain, the format is DOMAIN\username
+                    string domain = parts.Length == 2 ? parts[0] : string.Empty;
+                    string userName = parts.Length == 2 ? parts[1] : parts[0];
+
+                    //string userName = fullUserName.Contains("\\") ? fullUserName.Split('\\')[1] : fullUserName;
+
+                    usuario = new Usuario(domain, userName);
+
+                    if (negocio.LogearIntegSecur(userName, usuario))
                     {
                         Session.Add("Usuario", usuario);
                         if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
