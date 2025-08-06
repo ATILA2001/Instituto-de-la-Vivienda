@@ -287,6 +287,8 @@ namespace WebForms
 
             // Limpiar cualquier estado de edición
             Session["EditingAutorizanteId"] = null;
+            Session["EditingCodigoAutorizante"] = null;
+
         }
 
         /// <summary>
@@ -429,35 +431,52 @@ namespace WebForms
 
             try
             {
-                // Crear nuevo autorizante EF
-                AutorizanteEF autorizante = new AutorizanteEF();
-                autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
-                autorizante.Expediente = txtExpediente.Text.Trim();
-                autorizante.Detalle = txtDetalle.Text.Trim();
-                autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizado.Text);
-
-                // Parsear fecha si se proporciona
-                if (!string.IsNullOrEmpty(txtFecha.Text))
-                {
-                    autorizante.MesAprobacion = DateTime.Parse(txtFecha.Text);
-                }
-
-                // Parsear mes base si se proporciona
-                if (!string.IsNullOrEmpty(txtMes.Text))
-                {
-                    autorizante.MesBase = DateTime.Parse(txtMes.Text);
-                }
-
-                autorizante.ConceptoId = int.Parse(ddlConcepto.SelectedValue);
-                autorizante.EstadoId = int.Parse(ddlEstado.SelectedValue);
-
                 // Verificar si estamos editando o agregando
                 if (Session["EditingAutorizanteId"] != null)
                 {
-                    // Estamos editando un autorizante existente
-                    autorizante.Id = (int)Session["EditingAutorizanteId"];
+                    // MODO EDITAR: Obtener el autorizante existente de la BD
+                    int autorizanteId = (int)Session["EditingAutorizanteId"];
+                    var autorizanteExistente = autorizanteNegocio.ObtenerPorId(autorizanteId);
+                    
+                    if (autorizanteExistente == null)
+                    {
+                        lblMensaje.Text = "Error: No se encontró el autorizante a modificar.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                        return;
+                    }
 
-                    if (autorizanteNegocio.Modificar(autorizante))
+                    // Actualizar solo los campos que se pueden modificar (NO incluir ObraId)
+                    autorizanteExistente.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
+                    autorizanteExistente.Expediente = txtExpediente.Text.Trim();
+                    autorizanteExistente.Detalle = txtDetalle.Text.Trim();
+                    autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizado.Text);
+
+                    // Parsear fecha si se proporciona
+                    if (!string.IsNullOrEmpty(txtFecha.Text))
+                    {
+                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtFecha.Text);
+                    }
+                    else
+                    {
+                        autorizanteExistente.MesAprobacion = null;
+                    }
+
+                    // Parsear mes base si se proporciona
+                    if (!string.IsNullOrEmpty(txtMes.Text))
+                    {
+                        autorizanteExistente.MesBase = DateTime.Parse(txtMes.Text);
+                    }
+                    else
+                    {
+                        autorizanteExistente.MesBase = null;
+                    }
+
+                    autorizanteExistente.ConceptoId = int.Parse(ddlConcepto.SelectedValue);
+                    autorizanteExistente.EstadoId = int.Parse(ddlEstado.SelectedValue);
+
+                    // NO MODIFICAR autorizanteExistente.ObraId - se mantiene el original
+
+                    if (autorizanteNegocio.Modificar(autorizanteExistente))
                     {
                         lblMensaje.Text = "Autorizante modificado exitosamente!";
                         lblMensaje.CssClass = "alert alert-success";
@@ -476,7 +495,29 @@ namespace WebForms
                 }
                 else
                 {
-                    // Estamos agregando un nuevo autorizante - usar la obra seleccionada
+                    // MODO AGREGAR: Crear nuevo autorizante con todos los campos
+                    AutorizanteEF autorizante = new AutorizanteEF();
+                    autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
+                    autorizante.Expediente = txtExpediente.Text.Trim();
+                    autorizante.Detalle = txtDetalle.Text.Trim();
+                    autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizado.Text);
+
+                    // Parsear fecha si se proporciona
+                    if (!string.IsNullOrEmpty(txtFecha.Text))
+                    {
+                        autorizante.MesAprobacion = DateTime.Parse(txtFecha.Text);
+                    }
+
+                    // Parsear mes base si se proporciona
+                    if (!string.IsNullOrEmpty(txtMes.Text))
+                    {
+                        autorizante.MesBase = DateTime.Parse(txtMes.Text);
+                    }
+
+                    autorizante.ConceptoId = int.Parse(ddlConcepto.SelectedValue);
+                    autorizante.EstadoId = int.Parse(ddlEstado.SelectedValue);
+                    
+                    // Solo al agregar se asigna la obra seleccionada
                     autorizante.ObraId = int.Parse(ddlObra.SelectedValue);
 
                     if (autorizanteNegocio.Agregar(autorizante))
@@ -503,11 +544,14 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                     "$('#modalAgregar').modal('hide');", true);
 
-                // Limpiar cache SADE ya que se agregó un nuevo autorizante
+                // Limpiar cache SADE ya que se agregó/modificó un autorizante
                 CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
+                // Limpiar cache de datos para forzar recarga desde BD
+                Session["GridDataAutorizantesTotal"] = null;
+
                 // Refrescar la lista de autorizantes
-                CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
+                CargarListaAutorizantesRedet(); // Recarga desde BD
             }
             catch (Exception ex)
             {
@@ -881,7 +925,8 @@ namespace WebForms
                 PoblarFiltrosHeader();
 
                 // Calcular subtotal después de cargar datos
-                CalcularSubtotal();
+                //CalcularSubtotal();
+                CalcularSubtotalParaPaginationControl();
             }
             catch (Exception ex)
             {
@@ -956,6 +1001,7 @@ namespace WebForms
         /// <summary>
         /// Método para vincular datos paginados directamente al GridView
         /// No aplica filtros en memoria ya que los datos vienen paginados de la base
+        /// </summary>
         private List<AutorizanteDTO> AplicarFiltrosTreeViewEnMemoria(List<AutorizanteDTO> autorizantes)
         {
             try
@@ -1097,107 +1143,145 @@ namespace WebForms
             };
         }
 
-        private void CalcularSubtotal()
-        {
-            try
-            {
-                // Siempre usar la lista completa (no la paginada)
-                List<AutorizanteDTO> todosLosRegistros;
-                if (Session["GridDataAutorizantesTotal"] != null)
-                {
-                    todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantesTotal"];
-                }
-                else
-                {
-                    UsuarioEF usuario = ObtenerUsuarioActual();
-                    todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
-                }
+        //private void CalcularSubtotal()
+        //{
+        //    try
+        //    {
+        //        // Siempre usar la lista completa (no la paginada)
+        //        List<AutorizanteDTO> todosLosRegistros;
+        //        if (Session["GridDataAutorizantesTotal"] != null)
+        //        {
+        //            todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantesTotal"];
+        //        }
+        //        else
+        //        {
+        //            UsuarioEF usuario = ObtenerUsuarioActual();
+        //            todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
+        //        }
 
-                // Aplicar filtro de búsqueda (txtBuscar)
-                string filtro = txtBuscar.Text.Trim().ToLower();
-                if (!string.IsNullOrEmpty(filtro))
-                {
-                    todosLosRegistros = todosLosRegistros.Where(a =>
-                        (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-                        (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
-                    ).ToList();
-                }
+        //        // Aplicar filtro de búsqueda (txtBuscar)
+        //        string filtro = txtBuscar.Text.Trim().ToLower();
+        //        if (!string.IsNullOrEmpty(filtro))
+        //        {
+        //            todosLosRegistros = todosLosRegistros.Where(a =>
+        //                (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
+        //                (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
+        //            ).ToList();
+        //        }
 
-                // Aplicar filtros de TreeView (filtros de columnas)
-                todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
+        //        // Aplicar filtros de TreeView (filtros de columnas)
+        //        todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
 
-                // Calcular el total de los registros filtrados
-                decimal totalMonto = todosLosRegistros.Sum(a => a.MontoAutorizado);
-                int cantidadRegistros = todosLosRegistros.Count;
+        //        // Calcular el total de los registros filtrados
+        //        decimal totalMonto = todosLosRegistros.Sum(a => a.MontoAutorizado);
+        //        int cantidadRegistros = todosLosRegistros.Count;
 
-                // Actualizar etiquetas de subtotal
-                if (lblSubtotalPaginacion != null)
-                {
-                    lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error en CalcularSubtotal: {ex.Message}");
-                if (lblSubtotalPaginacion != null)
-                {
-                    lblSubtotalPaginacion.Text = "Total: Error al calcular";
-                }
-            }
-        }
+        //        // Actualizar etiquetas de subtotal
+        //        if (lblSubtotalPaginacion != null)
+        //        {
+        //            lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        System.Diagnostics.Debug.WriteLine($"Error en CalcularSubtotal: {ex.Message}");
+        //        if (lblSubtotalPaginacion != null)
+        //        {
+        //            lblSubtotalPaginacion.Text = "Total: Error al calcular";
+        //        }
+        //    }
+        //}
 
         protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 string codigoAutorizante = gridviewRegistros.SelectedDataKey.Value.ToString();
-                AutorizanteEF autorizanteSeleccionado;
                 
-                using (var context = new IVCdbContext())
+                // Obtener datos de la sesión filtrada en lugar de consultar BD directamente
+                List<AutorizanteDTO> autorizantesList = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
+                if (autorizantesList == null)
                 {
-                    autorizanteSeleccionado = context.Autorizantes
-                        .FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
+                    lblMensaje.Text = "Error: No hay datos en memoria.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
                 }
+
+                // Buscar el autorizante seleccionado en la lista filtrada
+                AutorizanteDTO autorizanteSeleccionado = autorizantesList.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
 
                 if (autorizanteSeleccionado != null)
                 {
-                    // Guardar estado de edición
-                    Session["EditingAutorizanteId"] = autorizanteSeleccionado.Id;
+                    // Cambiar texto del botón a "Actualizar"
+                    Button1.Text = "Actualizar";
                     
                     // Cargar datos en el formulario
                     txtCodigoAutorizante.Text = autorizanteSeleccionado.CodigoAutorizante;
                     txtExpediente.Text = autorizanteSeleccionado.Expediente;
                     txtDetalle.Text = autorizanteSeleccionado.Detalle;
                     txtMontoAutorizado.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
-                    txtFecha.Text = autorizanteSeleccionado.MesAprobacion?.ToString("yyyy-MM-dd") ?? "";
-                    txtMes.Text = autorizanteSeleccionado.MesBase?.ToString("yyyy-MM-dd") ?? "";
+                    
+                    if (autorizanteSeleccionado.MesAprobacion.HasValue)
+                        txtFecha.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+                    
+                    if (autorizanteSeleccionado.MesBase.HasValue)
+                        txtMes.Text = autorizanteSeleccionado.MesBase.Value.ToString("yyyy-MM-dd");
 
-                    // Seleccionar valores en dropdowns
-                    if (autorizanteSeleccionado.ConceptoId > 0)
-                        ddlConcepto.SelectedValue = autorizanteSeleccionado.ConceptoId.ToString();
-                    if (autorizanteSeleccionado.EstadoId > 0)
-                        ddlEstado.SelectedValue = autorizanteSeleccionado.EstadoId.ToString();
+                    // Seleccionar valores en dropdowns usando método helper
+                    if (autorizanteSeleccionado.ConceptoId.HasValue)
+                        SelectDropDownListByValue(ddlConcepto, autorizanteSeleccionado.ConceptoId.Value.ToString());
+                    
+                    if (autorizanteSeleccionado.EstadoId.HasValue)
+                        SelectDropDownListByValue(ddlEstado, autorizanteSeleccionado.EstadoId.Value.ToString());
 
-                    // Cambiar título del modal y texto del botón
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
-                        $('#modalAgregar .modal-title').text('Modificar Autorizante');
-                        $('#obraContainer').hide();
-                        $('#modalAgregar').modal('show');", true);
+                    // Guardar estado de edición
+                    Session["EditingAutorizanteId"] = autorizanteSeleccionado.Id;
+                    Session["EditingCodigoAutorizante"] = autorizanteSeleccionado.CodigoAutorizante;
 
-                    Button1.Text = "Modificar";
+                    // Actualizar modal con JavaScript completo similar a AutorizantesAdmin
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                        $(document).ready(function() {
+                            // Cambiar título y texto del botón
+                            $('#modalAgregar .modal-title').text('Modificar Autorizante');
+                            document.getElementById('" + Button1.ClientID + @"').value = 'Actualizar';
+                            
+                            // Ocultar el dropdown de Obra y su etiqueta
+                            $('#obraContainer').hide();
+                            
+                            // Mostrar el modal
+                            $('#modalAgregar').modal('show');
+                        });", true);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
+                lblMensaje.Text = $"Error al cargar los datos del autorizante: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        /// <summary>
+        /// Método helper que selecciona un elemento en un DropDownList por su valor.
+        /// Limpia la selección actual y busca el elemento por el valor dado.
+        /// Si encuentra el elemento, lo selecciona.
+        /// </summary>
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            // Limpiar selección actual
+            dropDown.ClearSelection();
+
+            // Intentar encontrar y seleccionar el elemento
+            ListItem item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
             }
         }
 
