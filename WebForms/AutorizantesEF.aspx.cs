@@ -270,6 +270,8 @@ namespace WebForms
             // Limpiar datos existentes
             LimpiarFormulario();
 
+            txtCodigoAutorizante.Enabled = true; // Habilitar campo de código para nuevos autorizantes
+
             // Reiniciar el título del modal y texto del botón a "Agregar" y mostrar campo Obra
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
                 $(document).ready(function() {
@@ -1235,7 +1237,9 @@ namespace WebForms
                 {
                     // Cambiar texto del botón a "Actualizar"
                     Button1.Text = "Actualizar";
-                    
+
+                    txtCodigoAutorizante.Enabled = false; // Código no editable en edición
+
                     // Cargar datos en el formulario
                     txtCodigoAutorizante.Text = autorizanteSeleccionado.CodigoAutorizante;
                     txtExpediente.Text = autorizanteSeleccionado.Expediente;
