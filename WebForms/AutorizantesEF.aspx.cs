@@ -711,7 +711,6 @@ namespace WebForms
         /// FUNCIONALIDAD:
         /// - Consulta todas las obras usando ObraNegocioEF.ListarParaDDL()
         /// - Configura DataTextField como "Descripcion" y DataValueField como "Id"
-        /// - Agrega opción por defecto "-- Seleccionar Obra --" con valor "0"
         /// 
         /// USO:
         /// - Se ejecuta en inicialización de página (!IsPostBack)
@@ -731,9 +730,6 @@ namespace WebForms
                 ddlObra.DataTextField = "Descripcion";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
-
-                // Agregar opción por defecto
-                ddlObra.Items.Insert(0, new ListItem("-- Seleccionar Obra --", "0"));
             }
             catch (Exception ex)
             {
@@ -748,7 +744,6 @@ namespace WebForms
         /// FUNCIONALIDAD:
         /// - Consulta todos los conceptos usando ConceptoNegocioEF.Listar()
         /// - Configura DataTextField como "Nombre" y DataValueField como "Id"
-        /// - Agrega opción por defecto "-- Seleccionar Concepto --" con valor "0"
         /// 
         /// USO:
         /// - Se ejecuta en inicialización de página (!IsPostBack)
@@ -772,9 +767,6 @@ namespace WebForms
                 ddlConcepto.DataTextField = "Nombre";
                 ddlConcepto.DataValueField = "Id";
                 ddlConcepto.DataBind();
-
-                // Agregar opción por defecto
-                ddlConcepto.Items.Insert(0, new ListItem("-- Seleccionar Concepto --", "0"));
             }
             catch (Exception ex)
             {
@@ -789,7 +781,6 @@ namespace WebForms
         /// FUNCIONALIDAD:
         /// - Consulta todos los estados usando EstadoAutorizanteNegocioEF.Listar()
         /// - Configura DataTextField como "Nombre" y DataValueField como "Id"
-        /// - Agrega opción por defecto "-- Seleccionar Estado --" con valor "0"
         /// 
         /// USO:
         /// - Se ejecuta en inicialización de página (!IsPostBack)
@@ -812,9 +803,6 @@ namespace WebForms
                 ddlEstado.DataTextField = "Nombre";
                 ddlEstado.DataValueField = "Id";
                 ddlEstado.DataBind();
-
-                // Agregar opción por defecto
-                ddlEstado.Items.Insert(0, new ListItem("-- Seleccionar Estado --", "0"));
             }
             catch (Exception ex)
             {
@@ -1245,7 +1233,7 @@ namespace WebForms
                     txtExpediente.Text = autorizanteSeleccionado.Expediente;
                     txtDetalle.Text = autorizanteSeleccionado.Detalle;
                     txtMontoAutorizado.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
-                    
+
                     if (autorizanteSeleccionado.MesAprobacion.HasValue)
                         txtFecha.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
                     
@@ -1519,7 +1507,7 @@ namespace WebForms
                 var totalRegistros = todosLosRegistros.Count;
                 
                 // Configurar el control de paginación
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
+                var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
                 if (paginationControl != null)
                 {
                     paginationControl.TotalRecords = totalRegistros;
