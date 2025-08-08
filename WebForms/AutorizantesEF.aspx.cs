@@ -83,11 +83,6 @@ namespace WebForms
         /// </summary>
         private int totalRecords = 0;
         
-        /// <summary>
-        /// Total de páginas calculado a partir de totalRecords / pageSize.
-        /// Se recalcula automáticamente cuando cambian los totales o el tamaño de página.
-        /// </summary>
-        private int totalPages = 0;
 
         #endregion
 
@@ -434,7 +429,7 @@ namespace WebForms
                 CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
                 // Limpiar cache de datos para forzar recarga desde BD
-                Session["GridDataAutorizantesTotal"] = null;
+                Session["GridDataAutorizantes"] = null;
 
                 // Refrescar la lista de autorizantes
                 CargarListaAutorizantesRedet(); // Recarga desde BD
@@ -515,7 +510,7 @@ namespace WebForms
                 CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
                 // Limpiar cache de datos para forzar recarga desde BD
-                Session["GridDataAutorizantesTotal"] = null;
+                Session["GridDataAutorizantes"] = null;
 
                 // Refrescar la lista de autorizantes
                 CargarListaAutorizantesRedet(); // Recarga desde BD
@@ -845,13 +840,13 @@ namespace WebForms
                 }
 
                 // Usar la lista completa de la sesión
-                List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantesTotal"] as List<AutorizanteDTO>;
+                List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
                 if (listaCompleta == null)
                 {
                     // Recargar si por algún motivo no está en sesión
                     UsuarioEF usuario = ObtenerUsuarioActual();
                     listaCompleta = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
-                    Session["GridDataAutorizantesTotal"] = listaCompleta;
+                    Session["GridDataAutorizantes"] = listaCompleta;
                 }
 
                 // Aplicar filtro de búsqueda
@@ -877,15 +872,8 @@ namespace WebForms
 
 
 
-                // Guardar en sesión la lista filtrada
-                Session["GridDataAutorizantes"] = datosFiltrados;
-                Session["TotalRegistros"] = datosFiltrados.Count;
-
-                // Paginación manual usando valores actualizados
                 int totalFiltrados = datosFiltrados.Count;
                 totalRecords = totalFiltrados;
-                ViewState["TotalRecords"] = totalFiltrados;
-
                 // Usar las variables sincronizadas
                 var paginaActual = datosFiltrados
                     .Skip(actualPageIndex * actualPageSize)
@@ -895,7 +883,7 @@ namespace WebForms
                 // Actualizar el control con el total correcto ANTES del DataBind
                 if (paginationControl != null)
                 {
-                    paginationControl.TotalRecords = totalFiltrados;
+                    paginationControl.TotalRecords = totalRecords;
                     paginationControl.UpdatePaginationControls();
                 }
 
@@ -912,17 +900,14 @@ namespace WebForms
             }
         }
 
-        /// <summary>
-        /// Método central para refrescar la visualización del GridView.
-        /// Lee los datos desde Session, aplica los filtros y la paginación actuales.
-        /// </summary>
+    /// Refresca el GridView: aplica filtros, actualiza totalRecords y configura paginación.
         private void BindGrid()
         {
             if (Session["GridDataAutorizantes"] == null) return;
 
             var datosEnMemoria = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
 
-            // Aplicar filtro de texto general
+            // Filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
             if (!string.IsNullOrEmpty(filtro))
             {
@@ -939,10 +924,13 @@ namespace WebForms
                 ).ToList();
             }
 
-            // Aplicar filtros de las columnas (TreeView)
+            // Filtros avanzados (TreeView)
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
-            // Obtener información de paginación del control
+            // Actualizar totalRecords tras filtrar
+            totalRecords = datosEnMemoria.Count;
+
+            // Configurar paginación
             var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
             if (paginationControl != null)
             {
@@ -1012,7 +1000,10 @@ namespace WebForms
                 {
                     var codigosSeleccionados = cblsHeaderCodigoAutorizante.SelectedValues;
                     autorizantes = autorizantes
-                        .Where(a => codigosSeleccionados.Contains(a.CodigoAutorizante))
+                        .Where(a => codigosSeleccionados.Any(cod =>
+                            a.CodigoAutorizante == cod ||
+                            (a.CodigoAutorizante != null && a.CodigoAutorizante.StartsWith(cod + "-R"))
+                        ))
                         .ToList();
                 }
 
@@ -1120,61 +1111,6 @@ namespace WebForms
             };
         }
 
-        //private void CalcularSubtotal()
-        //{
-        //    try
-        //    {
-        //        // Siempre usar la lista completa (no la paginada)
-        //        List<AutorizanteDTO> todosLosRegistros;
-        //        if (Session["GridDataAutorizantesTotal"] != null)
-        //        {
-        //            todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantesTotal"];
-        //        }
-        //        else
-        //        {
-        //            UsuarioEF usuario = ObtenerUsuarioActual();
-        //            todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
-        //        }
-
-        //        // Aplicar filtro de búsqueda (txtBuscar)
-        //        string filtro = txtBuscar.Text.Trim().ToLower();
-        //        if (!string.IsNullOrEmpty(filtro))
-        //        {
-        //            todosLosRegistros = todosLosRegistros.Where(a =>
-        //                (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
-        //                (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
-        //            ).ToList();
-        //        }
-
-        //        // Aplicar filtros de TreeView (filtros de columnas)
-        //        todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
-
-        //        // Calcular el total de los registros filtrados
-        //        decimal totalMonto = todosLosRegistros.Sum(a => a.MontoAutorizado);
-        //        int cantidadRegistros = todosLosRegistros.Count;
-
-        //        // Actualizar etiquetas de subtotal
-        //        if (lblSubtotalPaginacion != null)
-        //        {
-        //            lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        System.Diagnostics.Debug.WriteLine($"Error en CalcularSubtotal: {ex.Message}");
-        //        if (lblSubtotalPaginacion != null)
-        //        {
-        //            lblSubtotalPaginacion.Text = "Total: Error al calcular";
-        //        }
-        //    }
-        //}
 
         protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1454,29 +1390,16 @@ namespace WebForms
 
         #region Métodos auxiliares de paginación
 
-        /// <summary>
-        /// Configura los valores del control de paginación basándose en los datos actuales
-        /// </summary>
+        /// Configura el control de paginación con los valores actuales.
         private void ConfigurarPaginationControl()
         {
-            var usuario = ObtenerUsuarioActual();
-            if (usuario != null)
+            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
+            if (paginationControl != null)
             {
-                // Obtener total de registros contando la lista completa
-                var todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
-                var totalRegistros = todosLosRegistros.Count;
-                
-                // Configurar el control de paginación
-                var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
-                if (paginationControl != null)
-                {
-                    paginationControl.TotalRecords = totalRegistros;
-                    paginationControl.CurrentPageIndex = 0; // Reiniciar a primera página
-                    paginationControl.PageSize = 12; // Valor por defecto
-                    paginationControl.UpdatePaginationControls();
-                }
-                
-                // Calcular y mostrar subtotal
+                paginationControl.TotalRecords = totalRecords;
+                paginationControl.CurrentPageIndex = currentPageIndex;
+                paginationControl.PageSize = pageSize;
+                paginationControl.UpdatePaginationControls();
                 CalcularSubtotalParaPaginationControl();
             }
         }
@@ -1490,9 +1413,9 @@ namespace WebForms
             {
                 // Usar la misma lógica que CalcularSubtotal() pero actualizar el control de paginación
                 List<AutorizanteDTO> todosLosRegistros;
-                if (Session["GridDataAutorizantesTotal"] != null)
+                if (Session["GridDataAutorizantes"] != null)
                 {
-                    todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantesTotal"];
+                    todosLosRegistros = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
                 }
                 else
                 {
