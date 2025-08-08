@@ -18,17 +18,18 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USER = @windowsUserName ");
+                datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USERNAME = @windowsUserName ");
                 datos.setearParametros("@windowsUserName", userName);
                 datos.ejecutarLectura();
 
-				Debug.WriteLine("usuario.Correo: " + usuario.Correo);
-                Debug.WriteLine("datos.Lector.Read()!!!!!!!!!!!!!!!: " + datos.Lector.Read());
+				Debug.WriteLine("Valor de userName: " + userName);
+				// Debug.WriteLine("datos.Lector.Read()!!!!!!!!!!!!!!!: " + datos.Lector.Read());
+				// Debug.WriteLine(datos.Lector[0].ToString());
 
 				while (datos.Lector.Read())
                 {
-					Debug.WriteLine(datos.Lector[0].ToString());
-					Debug.WriteLine(datos.Lector.GetName(0));
+					// Debug.WriteLine(datos.Lector[0].ToString());
+					// Debug.WriteLine(datos.Lector.GetName(0));
 					usuario.Correo = datos.Lector["CORREO"] as string ?? string.Empty;
                     usuario.Nombre = datos.Lector["NOMBRE"] as string ?? string.Empty;
                     usuario.Tipo = datos.Lector["TIPO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["TIPO"]);
