@@ -163,16 +163,27 @@ namespace Negocio
                     var codigosAutorizante = autorizantes.Select(a => a.CodigoAutorizante).ToList();
                     var redeterminaciones = context.Redeterminaciones.AsNoTracking()
                         .Where(r => codigosAutorizante.Contains(r.CodigoAutorizante))
-                        .Include("Autorizante")
-                        .Include("Autorizante.Obra")
-                        .Include("Autorizante.Obra.Area")
-                        .Include("Autorizante.Obra.Barrio")
-                        .Include("Autorizante.Obra.Empresa")
-                        .Include("Autorizante.Obra.Contrata")
-                        .Include("Autorizante.Estado")
-                        .Include("Autorizante.Concepto")
+                        //.Include("Autorizante")
+                        //.Include("Autorizante.Obra")
+                        //.Include("Autorizante.Obra.Area")
+                        //.Include("Autorizante.Obra.Barrio")
+                        //.Include("Autorizante.Obra.Empresa")
+                        //.Include("Autorizante.Obra.Contrata")
+                        //.Include("Autorizante.Estado")
+                        //.Include("Autorizante.Concepto")
                         .Include("Etapa")
                         .ToList();
+
+                    // 3. Asignar el autorizante y sus relaciones manualmente
+                    foreach (var redet in redeterminaciones)
+                    {
+                        var autorizante = autorizantes.FirstOrDefault(a => a.CodigoAutorizante == redet.CodigoAutorizante);
+                        if (autorizante != null)
+                        {
+                            // Ya tienes obra, área, barrio, empresa, contrata asignados en autorizante
+                            redet.Autorizante = autorizante;
+                        }
+                    }
 
                     // Expedientes de autorizantes y redeterminaciones
                     var expedientesValidos = autorizantes

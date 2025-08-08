@@ -9,10 +9,10 @@ namespace Dominio
     public class AutorizanteEF
     {
         
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }        
 
-        [Key]
         [Column("CODIGO_AUTORIZANTE")]
         public string CodigoAutorizante { get; set; }        
 
