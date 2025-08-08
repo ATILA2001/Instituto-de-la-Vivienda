@@ -201,15 +201,14 @@ namespace WebForms
                 var mapeoColumnas = new Dictionary<string, string>
                 {
                     { "Área", "AreaNombre" },
-                    { "Area", "AreaNombre" }, // Versión sin acento
                     { "Obra", "ObraDescripcion" },
-                    { "Contrata", "ContrataNombre" },
+                    { "Contrata", "Contrata" },
                     { "Empresa", "EmpresaNombre" },
                     { "Código Autorizante", "CodigoAutorizante" },
                     { "Expediente", "Expediente" },
                     { "Detalle", "Detalle" },
                     { "Monto Autorizado", "MontoAutorizado" },
-                    { "Fecha", "Fecha" },
+                    { "Mes Aprobación", "MesAprobacioin" },
                     { "Mes Base", "MesBase" },
                     { "Concepto", "ConceptoNombre" },
                     { "Estado", "EstadoNombre" },
