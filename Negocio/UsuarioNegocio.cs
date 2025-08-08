@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,19 +12,24 @@ namespace Negocio
     {
         public UsuarioNegocio() { }
 
-        public bool LogearIntegSecur(string windowsUserName, Usuario usuario)
+        public bool LogearIntegSecur(Usuario usuario, string userName)
         
         {
             AccesoDatos datos = new AccesoDatos();
             try
             {
                 datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM IVC_TEST.DBO.USUARIOS as u inner join IVC_TEST.DBO.AREAS as a on AREA = a.ID WHERE DOMAIN = 'BUENOSAIRES' AND USER = @windowsUserName ");
-                datos.setearParametros("@windowsUserName", windowsUserName);
+                datos.setearParametros("@windowsUserName", userName);
                 datos.ejecutarLectura();
 
-                while (datos.Lector.Read())
+				Debug.WriteLine("usuario.Correo: " + usuario.Correo);
+                Debug.WriteLine("datos.Lector.Read()!!!!!!!!!!!!!!!: " + datos.Lector.Read());
+
+				while (datos.Lector.Read())
                 {
-                    usuario.Correo = datos.Lector["CORREO"] as string ?? string.Empty;
+					Debug.WriteLine(datos.Lector[0].ToString());
+					Debug.WriteLine(datos.Lector.GetName(0));
+					usuario.Correo = datos.Lector["CORREO"] as string ?? string.Empty;
                     usuario.Nombre = datos.Lector["NOMBRE"] as string ?? string.Empty;
                     usuario.Tipo = datos.Lector["TIPO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["TIPO"]);
                     usuario.Estado = datos.Lector["ESTADO"] != DBNull.Value && Convert.ToBoolean(datos.Lector["ESTADO"]);
@@ -33,7 +39,9 @@ namespace Negocio
                     return true;
                 }
 
-                return false;
+				Debug.WriteLine("usuario.Correo: " + usuario.Correo);
+
+				return false;
             }
             catch (Exception)
             {

@@ -14,6 +14,7 @@ namespace WebForms
             if (Session["error"] != null)
             {
                 lblMensaje.Text = Session["error"].ToString();
+                Session.Remove("error"); // Evita redirecciones repetidas
             }
         }
     }

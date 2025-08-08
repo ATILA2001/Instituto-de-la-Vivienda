@@ -7,15 +7,40 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
+using System.Diagnostics;
+using System.Security.Principal;
+
+
 namespace WebForms
 {
     public partial class LoginRegister : System.Web.UI.MasterPage
     {
         protected void Page_Init(object sender, EventArgs e)
         {
+
+            if (!IsPostBack)
+            {
+                if (Page.User.Identity.IsAuthenticated)
+                {
+                    string username = Page.User.Identity.Name;
+                    // Aquí podés usar el username para lógica de negocio, etc.
+                    Debug.WriteLine("Usuario User.Identity: " + username);
+                }
+                else
+                {
+                    // Redirigir al login si no está autenticado
+                    // Response.Redirect("~/Login.aspx");
+                }
+            }
+
             var authType = HttpContext.Current.User.Identity.AuthenticationType;
+
+            Debug.WriteLine("httpContext authenticated!!!!!!!!!" + HttpContext.Current.User.Identity.IsAuthenticated);
+            Debug.WriteLine("Página cargada: " + DateTime.Now);
+            Debug.WriteLine("Authenticacion levantada: " + authType);
+
             if (HttpContext.Current.User.Identity.IsAuthenticated && 
-                (authType == "NTLM" || authType == "Kerberos"))
+                (authType == "NTLM" || authType == "Kerberos" || authType == "Negotiate"))
             {
                 Usuario usuario;
                 UsuarioNegocio negocio = new UsuarioNegocio();
@@ -33,9 +58,9 @@ namespace WebForms
 
                     //string userName = fullUserName.Contains("\\") ? fullUserName.Split('\\')[1] : fullUserName;
 
-                    usuario = new Usuario(domain, userName);
+                    usuario = Usuario.CreateWithDomain(domain, userName);
 
-                    if (negocio.LogearIntegSecur(userName, usuario))
+                    if (negocio.LogearIntegSecur(usuario, userName))
                     {
                         Session.Add("Usuario", usuario);
                         if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
@@ -72,6 +97,7 @@ namespace WebForms
                 catch (Exception ex)
                 {
 
+                    Debug.WriteLine("Entro al catch exception!!!!!!!!!!!!!!!!!!!!!!");
                     Session.Add("error", ex.ToString());
                     Response.Redirect("Error.aspx");
                 }

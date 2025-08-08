@@ -38,5 +38,16 @@ namespace Dominio
 			Correo = correo;
 			Contrasenia = contrasenia;
 		}
+
+		public static Usuario CreateWithDomain(string domain, string username)
+		{
+			return new Usuario
+			{
+				Domain = domain,
+				Username = username
+			};
+		}
+
+
 	}
 }

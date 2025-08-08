@@ -18,8 +18,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44330</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
+    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -404,7 +404,9 @@
     <Content Include="LoginRegister.Master" />
     <None Include=".editorconfig" />
     <Content Include="libman.json" />
-    <Content Include="connectionStrings.config" />
+    <Content Include="connectionStrings.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Fonts\Archivo-Italic-VariableFont_wdth,wght.ttf" />
     <Content Include="Fonts\Archivo-VariableFont_wdth,wght.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
