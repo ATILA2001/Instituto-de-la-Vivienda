@@ -148,7 +148,7 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <asp:Button Text="Limpiar" ID="btnLimpiarAgregar" OnClick="LimpiarFormularioAgregar" CssClass="btn btn-secondary" runat="server" />
+                    <button type="button" class="btn btn-secondary" ID="btnLimpiarAgregar" onclick="limpiarFormularioAgregar()">Limpiar</button>
                     <div class="d-flex gap-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarAutorizante" />
@@ -276,7 +276,7 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <asp:Button Text="Limpiar" ID="btnLimpiarEditar" OnClick="LimpiarFormularioEditar" CssClass="btn btn-secondary" runat="server" />
+                    <button type="button" class="btn btn-secondary" ID="btnLimpiarEditar" onclick="limpiarFormularioEditar()">Limpiar</button>
                     <div class="d-flex gap-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <asp:Button Text="Editar" ID="btnEditar" OnClick="btnEditar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="EditarAutorizante" />
@@ -496,17 +496,26 @@
         <asp:Label ID="lblMensaje" Text="" runat="server" />
     </div>
 
-    <%--    <script type="text/javascript">
-        function limpiarFormulario() {
-            document.getElementById('<%= txtCodigoAutorizante.ClientID %>').value = '';
-            document.getElementById('<%= txtExpediente.ClientID %>').value = '';
-            document.getElementById('<%= txtDetalle.ClientID %>').value = '';
-            document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
-            document.getElementById('<%= txtFecha.ClientID %>').value = '';
-            document.getElementById('<%= txtMes.ClientID %>').value = '';
-            document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
-            document.getElementById('<%= ddlConcepto.ClientID %>').selectedIndex = 0;
-            document.getElementById('<%= ddlEstado.ClientID %>').selectedIndex = 0;
-        }
-    </script>--%>
+        <script type="text/javascript">
+            function limpiarFormularioAgregar() {
+                document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
+                document.getElementById('<%= txtExpedienteAgregar.ClientID %>').value = '';
+                document.getElementById('<%= txtDetalleAgregar.ClientID %>').value = '';
+                document.getElementById('<%= txtMontoAutorizadoAgregar.ClientID %>').value = '';
+                document.getElementById('<%= txtMesAprobacionAgregar.ClientID %>').value = '';
+                document.getElementById('<%= txtMesBaseAgregar.ClientID %>').value = '';
+                document.getElementById('<%= ddlConceptoAgregar.ClientID %>').selectedIndex = 0;
+                document.getElementById('<%= ddlEstadoAgregar.ClientID %>').selectedIndex = 0;
+            }
+
+            function limpiarFormularioEditar() {
+                document.getElementById('<%= txtExpedienteEditar.ClientID %>').value = '';
+                document.getElementById('<%= txtDetalleEditar.ClientID %>').value = '';
+                document.getElementById('<%= txtMontoAutorizadoEditar.ClientID %>').value = '';
+                document.getElementById('<%= txtMesAprobacionEditar.ClientID %>').value = '';
+                document.getElementById('<%= txtMesBaseEditar.ClientID %>').value = '';
+                document.getElementById('<%= ddlConceptoEditar.ClientID %>').selectedIndex = 0;
+                document.getElementById('<%= ddlEstadoEditar.ClientID %>').selectedIndex = 0;
+            }
+        </script>
 </asp:Content>

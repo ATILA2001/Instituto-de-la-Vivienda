@@ -141,15 +141,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEstadoAgregar;
 
         /// <summary>
-        /// btnLimpiarAgregar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiarAgregar;
-
-        /// <summary>
         /// btnAgregar control.
         /// </summary>
         /// <remarks>
@@ -265,15 +256,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEstadoEditar;
-
-        /// <summary>
-        /// btnLimpiarEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiarEditar;
 
         /// <summary>
         /// btnEditar control.

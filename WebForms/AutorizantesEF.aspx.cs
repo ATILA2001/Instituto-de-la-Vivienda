@@ -523,32 +523,6 @@ namespace WebForms
         }
 
 
-        /// <summary>
-        /// Limpia todos los campos del formulario modal de agregar/editar autorizante.
-        /// 
-        /// CAMPOS LIMPIADOS:
-        /// - Campos de texto: CodigoAutorizante, Expediente, Detalle, MontoAutorizado, Fecha, Mes
-        /// - Dropdowns: Obra, Concepto, Estado (vuelven al índice 0 - opción por defecto)
-        /// 
-        /// USO:
-        /// - Al abrir modal para agregar nuevo autorizante
-        /// - Después de operaciones exitosas (agregar/modificar)
-        /// - Al presionar botón "Limpiar" explícitamente
-        /// - Para resetear estado del formulario
-        /// 
-        /// NOTAS:
-        /// - No afecta el estado de Session["EditingAutorizanteId"]
-        /// - Los dropdowns mantienen sus opciones, solo cambia la selección
-        /// </summary>
-        protected void LimpiarFormularioAgregar(object sender, EventArgs e)
-        {
-            LimpiarFormularioAgregar();
-        }
-        protected void LimpiarFormularioEditar(object sender, EventArgs e)
-        {
-            LimpiarFormularioEditar();
-        }
-
         private void LimpiarFormularioAgregar() 
         {
             txtExpedienteAgregar.Text = string.Empty;
