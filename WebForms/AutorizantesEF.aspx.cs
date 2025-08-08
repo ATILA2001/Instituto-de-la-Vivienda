@@ -94,23 +94,6 @@ namespace WebForms
         #region Eventos del Ciclo de Vida de la Página
 
         /// <summary>
-        /// Evento PreRender: Se ejecuta justo antes de renderizar la página.
-        /// 
-        /// PROPÓSITO:
-        /// - Controla la habilitación de validadores según el estado de edición
-        /// - Evita validaciones innecesarias cuando se está editando un autorizante existente
-        /// 
-        /// LÓGICA:
-        /// - Si Session["EditingAutorizanteId"] tiene valor, estamos editando (no validar Obra)
-        /// - Si es null, estamos agregando un nuevo autorizante (validar Obra obligatoria)
-        /// </summary>
-        protected void Page_PreRender(object sender, EventArgs e)
-        {
-            // Habilitar validadores solo cuando NO estemos editando
-            rfvObraEditar.Enabled = Session["EditingAutorizanteId"] == null;
-        }
-
-        /// <summary>
         /// Evento principal de carga de la página.
         /// 
         /// FLUJO DE INICIALIZACIÓN:
@@ -481,9 +464,9 @@ namespace WebForms
                     autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoEditar.Text);
 
                     // Parsear fecha si se proporciona
-                    if (!string.IsNullOrEmpty(txtFechaEditar.Text))
+                    if (!string.IsNullOrEmpty(txtMesAprobacionEditar.Text))
                     {
-                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtFechaEditar.Text);
+                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtMesAprobacionEditar.Text);
                     }
                     else
                     {
@@ -579,13 +562,11 @@ namespace WebForms
         }
         private void LimpiarFormularioEditar()         
         {
-            txtCodigoAutorizanteEditar.Text = string.Empty;
             txtExpedienteEditar.Text = string.Empty;
             txtDetalleEditar.Text = string.Empty;
             txtMontoAutorizadoEditar.Text = string.Empty;
-            txtFechaEditar.Text = string.Empty;
+            txtMesAprobacionEditar.Text = string.Empty;
             txtMesBaseEditar.Text = string.Empty;
-            ddlObraEditar.SelectedIndex = 0;
             ddlConceptoEditar.SelectedIndex = 0;
             ddlEstadoEditar.SelectedIndex = 0;
         }
@@ -731,11 +712,6 @@ namespace WebForms
                 ddlObraAgregar.DataTextField = "Descripcion";
                 ddlObraAgregar.DataValueField = "Id";
                 ddlObraAgregar.DataBind();
-
-                ddlObraEditar.DataSource = obras;
-                ddlObraEditar.DataTextField = "Descripcion";
-                ddlObraEditar.DataValueField = "Id";
-                ddlObraEditar.DataBind();
             }
             catch (Exception ex)
             {
@@ -1247,13 +1223,12 @@ namespace WebForms
                 if (autorizanteSeleccionado != null)
                 {
                     // Cargar datos en el formulario
-                    txtCodigoAutorizanteEditar.Text = autorizanteSeleccionado.CodigoAutorizante;
                     txtExpedienteEditar.Text = autorizanteSeleccionado.Expediente;
                     txtDetalleEditar.Text = autorizanteSeleccionado.Detalle;
                     txtMontoAutorizadoEditar.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
 
                     if (autorizanteSeleccionado.MesAprobacion.HasValue)
-                        txtFechaEditar.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+                        txtMesAprobacionEditar.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
 
                     if (autorizanteSeleccionado.MesBase.HasValue)
                         txtMesBaseEditar.Text = autorizanteSeleccionado.MesBase.Value.ToString("yyyy-MM-dd");

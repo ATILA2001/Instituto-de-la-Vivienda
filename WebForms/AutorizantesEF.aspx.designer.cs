@@ -159,42 +159,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
-        /// ddlObraEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlObraEditar;
-
-        /// <summary>
-        /// rfvObraEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObraEditar;
-
-        /// <summary>
-        /// txtCodigoAutorizanteEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCodigoAutorizanteEditar;
-
-        /// <summary>
-        /// rfvCodigoAutorizanteEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCodigoAutorizanteEditar;
-
-        /// <summary>
         /// ddlConceptoEditar control.
         /// </summary>
         /// <remarks>
@@ -220,24 +184,6 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtExpedienteEditar;
-
-        /// <summary>
-        /// ddlEstadoEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlEstadoEditar;
-
-        /// <summary>
-        /// rfvEstadoEditar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEstadoEditar;
 
         /// <summary>
         /// txtDetalleEditar control.
@@ -285,13 +231,13 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.RegularExpressionValidator revMontoAutorizadoEditar;
 
         /// <summary>
-        /// txtFechaEditar control.
+        /// txtMesAprobacionEditar control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFechaEditar;
+        protected global::System.Web.UI.WebControls.TextBox txtMesAprobacionEditar;
 
         /// <summary>
         /// txtMesBaseEditar control.
@@ -301,6 +247,24 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtMesBaseEditar;
+
+        /// <summary>
+        /// ddlEstadoEditar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlEstadoEditar;
+
+        /// <summary>
+        /// rfvEstadoEditar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEstadoEditar;
 
         /// <summary>
         /// btnLimpiarEditar control.

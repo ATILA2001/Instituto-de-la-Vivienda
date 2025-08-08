@@ -172,38 +172,6 @@
                     <div class="form-group">
                         <div class="container">
                             <div class="row">
-                                <div id="obraContainerEditarAutorizante" class="col-12">
-                                    <div class="mb-3">
-                                        <label for="ddlObraEditar" class="form-label">Obra</label>
-                                        <asp:DropDownList ID="ddlObraEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvObraEditar"
-                                            ControlToValidate="ddlObraEditar"
-                                            ValidationGroup="EditarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="Seleccione una obra"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            InitialValue="" />
-                                    </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="txtCodigoAutorizanteEditar" class="form-label">Código Autorizante</label>
-                                        <asp:TextBox ID="txtCodigoAutorizanteEditar" CssClass="form-control" runat="server" placeHolder="XXX-XXX-XXXX" />
-                                        <asp:RequiredFieldValidator ID="rfvCodigoAutorizanteEditar"
-                                            ControlToValidate="txtCodigoAutorizanteEditar"
-                                            ValidationGroup="EditarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="El código autorizante es requerido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
-                                    </div>
-                                </div>
 
                                 <div class="col-6">
                                     <div class="mb-3">
@@ -227,24 +195,6 @@
                                     <div class="mb-3">
                                         <label for="txtExpediente" class="form-label">Expediente</label>
                                         <asp:TextBox ID="txtExpedienteEditar" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                    </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="ddlEstadoEditar" class="form-label">Estado</label>
-                                        <asp:DropDownList ID="ddlEstadoEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvEstadoEditar"
-                                            ControlToValidate="ddlEstadoEditar"
-                                            ValidationGroup="EditarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="Seleccione un estado"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            InitialValue="" />
                                     </div>
                                 </div>
 
@@ -285,10 +235,12 @@
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
                                     </div>
+                                </div>
 
+                                <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtFecha" class="form-label">Fecha</label>
-                                        <asp:TextBox ID="txtFechaEditar" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <label for="txtMesAprobacionEditar" class="form-label">Mes Aprobación</label>
+                                        <asp:TextBox ID="txtMesAprobacionEditar" CssClass="form-control" runat="server" TextMode="Date" />
                                     </div>
                                 </div>
 
@@ -298,6 +250,26 @@
                                         <asp:TextBox ID="txtMesBaseEditar" CssClass="form-control" runat="server" TextMode="Date" />
                                     </div>
                                 </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlEstadoEditar" class="form-label">Estado</label>
+                                        <asp:DropDownList ID="ddlEstadoEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvEstadoEditar"
+                                            ControlToValidate="ddlEstadoEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="Seleccione un estado"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -524,7 +496,7 @@
         <asp:Label ID="lblMensaje" Text="" runat="server" />
     </div>
 
-<%--    <script type="text/javascript">
+    <%--    <script type="text/javascript">
         function limpiarFormulario() {
             document.getElementById('<%= txtCodigoAutorizante.ClientID %>').value = '';
             document.getElementById('<%= txtExpediente.ClientID %>').value = '';
