@@ -46,11 +46,6 @@ namespace WebForms
         /// </summary>
         private int totalRecords = 0;
         
-        /// <summary>
-        /// Total de páginas calculado a partir de totalRecords / pageSize.
-        /// Se recalcula automáticamente cuando cambian los totales o el tamaño de página.
-        /// </summary>
-        private int totalPages = 0;
 
         #endregion
 
@@ -132,9 +127,7 @@ namespace WebForms
                 int totalRegistros = todoLosCertificados?.Count ?? 0;
                 
                 // Guardar total en ViewState
-                ViewState["TotalRecords"] = totalRegistros;
                 totalRecords = totalRegistros;
-                Session["TotalRegistros"] = totalRegistros;
 
                 // Usar BindGrid para paginación en memoria
                 BindGrid();
@@ -286,17 +279,14 @@ namespace WebForms
         /// </summary>
         private void ConfigurarPaginationControl()
         {
-            totalRecords = (int)(ViewState["TotalRecords"] ?? 0);
-            totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
 
-            var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
+            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
             if (paginationControl != null)
             {
                 // Configura las propiedades del control
                 paginationControl.TotalRecords = totalRecords;
                 paginationControl.CurrentPageIndex = currentPageIndex;
                 paginationControl.PageSize = pageSize;
-
                 paginationControl.UpdatePaginationControls();
                 
                 // Actualizar subtotal para el control
@@ -817,7 +807,6 @@ namespace WebForms
                         // Actualizar totales
                         ViewState["TotalRecords"] = listaCache.Count;
                         totalRecords = listaCache.Count;
-                        Session["TotalRegistros"] = listaCache.Count;
                     }
                     
                     // Recargar vista con datos actualizados
