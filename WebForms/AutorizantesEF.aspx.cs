@@ -107,7 +107,7 @@ namespace WebForms
         protected void Page_PreRender(object sender, EventArgs e)
         {
             // Habilitar validadores solo cuando NO estemos editando
-            rfvObra.Enabled = Session["EditingAutorizanteId"] == null;
+            rfvObraEditar.Enabled = Session["EditingAutorizanteId"] == null;
         }
 
         /// <summary>
@@ -268,46 +268,18 @@ namespace WebForms
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
             // Limpiar datos existentes
-            LimpiarFormulario();
+            LimpiarFormularioAgregar();
 
-            txtCodigoAutorizante.Enabled = true; // Habilitar campo de código para nuevos autorizantes
-
-            // Reiniciar el título del modal y texto del botón a "Agregar" y mostrar campo Obra
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
+            ScriptManager.RegisterStartupScript(this, GetType(), "ShowAddModal", @"
                 $(document).ready(function() {
-                    $('#modalAgregar .modal-title').text('Agregar Autorizante');
-                    document.getElementById('" + Button1.ClientID + @"').value = 'Agregar';
-                    
-                    // Mostrar el dropdown de Obra y su etiqueta
-                    $('#obraContainer').show();
-                    
                     // Mostrar el modal
-                    $('#modalAgregar').modal('show');
+                    $('#modalAgregarAutorizante').modal('show');
                 });", true);
-
-            Button1.Text = "Agregar";
 
             // Limpiar cualquier estado de edición
             Session["EditingAutorizanteId"] = null;
             Session["EditingCodigoAutorizante"] = null;
 
-        }
-
-        /// <summary>
-        /// Limpia todos los campos del formulario modal.
-        /// 
-        /// CAMPOS AFECTADOS:
-        /// - Campos de texto: código, expediente, detalle, monto, fecha, mes
-        /// - Dropdowns: obra, concepto, estado (vuelven a opción por defecto)
-        /// 
-        /// USO:
-        /// - Al abrir modal de agregar
-        /// - Después de operaciones exitosas
-        /// - Al presionar botón limpiar explícitamente
-        /// </summary>
-        protected void btnLimpiar_Click(object sender, EventArgs e)
-        {
-            LimpiarFormulario();
         }
 
         /// <summary>
@@ -431,11 +403,68 @@ namespace WebForms
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
-            try
-            {
-                // Verificar si estamos editando o agregando
-                if (Session["EditingAutorizanteId"] != null)
-                {
+                    // Crear nuevo autorizante con todos los campos
+                    AutorizanteEF autorizante = new AutorizanteEF();
+                    // autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
+                    autorizante.Expediente = txtExpedienteAgregar.Text.Trim();
+                    autorizante.Detalle = txtDetalleAgregar.Text.Trim();
+                    autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoAgregar.Text);
+
+                    // Parsear fecha si se proporciona
+                    if (!string.IsNullOrEmpty(txtMesAprobacionAgregar.Text))
+                    {
+                        autorizante.MesAprobacion = DateTime.Parse(txtMesAprobacionAgregar.Text);
+                    }
+
+                    // Parsear mes base si se proporciona
+                    if (!string.IsNullOrEmpty(txtMesBaseAgregar.Text))
+                    {
+                        autorizante.MesBase = DateTime.Parse(txtMesBaseAgregar.Text);
+                    }
+
+                    autorizante.ConceptoId = int.Parse(ddlConceptoAgregar.SelectedValue);
+                    autorizante.EstadoId = int.Parse(ddlEstadoAgregar.SelectedValue);
+
+                    // Solo al agregar se asigna la obra seleccionada
+                    autorizante.ObraId = int.Parse(ddlObraAgregar.SelectedValue);
+
+                    if (autorizanteNegocio.Agregar(autorizante))
+                    {
+                        lblMensaje.Text = "Autorizante agregado exitosamente!";
+                        lblMensaje.CssClass = "alert alert-success";
+                    }
+                    else
+                    {
+                        lblMensaje.Text = "Hubo un problema al agregar el autorizante.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
+                
+
+                // Limpiar campos
+                LimpiarFormularioAgregar();
+
+                // Ocultar el modal
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                    "$('#modalAgregarAutorizante').modal('hide');", true);
+
+                // Limpiar cache SADE ya que se agregó/modificó un autorizante
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                // Limpiar cache de datos para forzar recarga desde BD
+                Session["GridDataAutorizantesTotal"] = null;
+
+                // Refrescar la lista de autorizantes
+                CargarListaAutorizantesRedet(); // Recarga desde BD
+
+        }
+
+        protected void btnEditar_Click(object sender, EventArgs e)
+        {
+            // Verificar si la página es válida (todos los validadores pasaron)
+            if (!Page.IsValid) return;
+
+
+
                     // MODO EDITAR: Obtener el autorizante existente de la BD
                     int autorizanteId = (int)Session["EditingAutorizanteId"];
                     var autorizanteExistente = autorizanteNegocio.ObtenerPorId(autorizanteId);
@@ -447,16 +476,14 @@ namespace WebForms
                         return;
                     }
 
-                    // Actualizar solo los campos que se pueden modificar (NO incluir ObraId)
-                    autorizanteExistente.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
-                    autorizanteExistente.Expediente = txtExpediente.Text.Trim();
-                    autorizanteExistente.Detalle = txtDetalle.Text.Trim();
-                    autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizado.Text);
+                    autorizanteExistente.Expediente = txtExpedienteEditar.Text.Trim();
+                    autorizanteExistente.Detalle = txtDetalleEditar.Text.Trim();
+                    autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoEditar.Text);
 
                     // Parsear fecha si se proporciona
-                    if (!string.IsNullOrEmpty(txtFecha.Text))
+                    if (!string.IsNullOrEmpty(txtFechaEditar.Text))
                     {
-                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtFecha.Text);
+                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtFechaEditar.Text);
                     }
                     else
                     {
@@ -464,19 +491,17 @@ namespace WebForms
                     }
 
                     // Parsear mes base si se proporciona
-                    if (!string.IsNullOrEmpty(txtMes.Text))
+                    if (!string.IsNullOrEmpty(txtMesBaseEditar.Text))
                     {
-                        autorizanteExistente.MesBase = DateTime.Parse(txtMes.Text);
+                        autorizanteExistente.MesBase = DateTime.Parse(txtMesBaseEditar.Text);
                     }
                     else
                     {
                         autorizanteExistente.MesBase = null;
                     }
 
-                    autorizanteExistente.ConceptoId = int.Parse(ddlConcepto.SelectedValue);
-                    autorizanteExistente.EstadoId = int.Parse(ddlEstado.SelectedValue);
-
-                    // NO MODIFICAR autorizanteExistente.ObraId - se mantiene el original
+                    autorizanteExistente.ConceptoId = int.Parse(ddlConceptoEditar.SelectedValue);
+                    autorizanteExistente.EstadoId = int.Parse(ddlEstadoEditar.SelectedValue);
 
                     if (autorizanteNegocio.Modificar(autorizanteExistente))
                     {
@@ -494,57 +519,14 @@ namespace WebForms
                         lblMensaje.Text = "Hubo un problema al modificar el autorizante.";
                         lblMensaje.CssClass = "alert alert-danger";
                     }
-                }
-                else
-                {
-                    // MODO AGREGAR: Crear nuevo autorizante con todos los campos
-                    AutorizanteEF autorizante = new AutorizanteEF();
-                    autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
-                    autorizante.Expediente = txtExpediente.Text.Trim();
-                    autorizante.Detalle = txtDetalle.Text.Trim();
-                    autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizado.Text);
 
-                    // Parsear fecha si se proporciona
-                    if (!string.IsNullOrEmpty(txtFecha.Text))
-                    {
-                        autorizante.MesAprobacion = DateTime.Parse(txtFecha.Text);
-                    }
-
-                    // Parsear mes base si se proporciona
-                    if (!string.IsNullOrEmpty(txtMes.Text))
-                    {
-                        autorizante.MesBase = DateTime.Parse(txtMes.Text);
-                    }
-
-                    autorizante.ConceptoId = int.Parse(ddlConcepto.SelectedValue);
-                    autorizante.EstadoId = int.Parse(ddlEstado.SelectedValue);
-                    
-                    // Solo al agregar se asigna la obra seleccionada
-                    autorizante.ObraId = int.Parse(ddlObra.SelectedValue);
-
-                    if (autorizanteNegocio.Agregar(autorizante))
-                    {
-                        lblMensaje.Text = "Autorizante agregado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
-                    }
-                    else
-                    {
-                        lblMensaje.Text = "Hubo un problema al agregar el autorizante.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                    }
-                }
 
                 // Limpiar campos
-                LimpiarFormulario();
-
-                // Reiniciar el título del modal y texto del botón
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
-                    "$('#modalAgregar .modal-title').text('Agregar Autorizante');", true);
-                Button1.Text = "Agregar";
+                LimpiarFormularioEditar();
 
                 // Ocultar el modal
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
-                    "$('#modalAgregar').modal('hide');", true);
+                    "$('#modalEditarAutorizante').modal('hide');", true);
 
                 // Limpiar cache SADE ya que se agregó/modificó un autorizante
                 CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
@@ -554,13 +536,9 @@ namespace WebForms
 
                 // Refrescar la lista de autorizantes
                 CargarListaAutorizantesRedet(); // Recarga desde BD
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
+
         }
+
 
         /// <summary>
         /// Limpia todos los campos del formulario modal de agregar/editar autorizante.
@@ -579,17 +557,37 @@ namespace WebForms
         /// - No afecta el estado de Session["EditingAutorizanteId"]
         /// - Los dropdowns mantienen sus opciones, solo cambia la selección
         /// </summary>
-        private void LimpiarFormulario()
+        protected void LimpiarFormularioAgregar(object sender, EventArgs e)
         {
-            txtCodigoAutorizante.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtDetalle.Text = string.Empty;
-            txtMontoAutorizado.Text = string.Empty;
-            txtFecha.Text = string.Empty;
-            txtMes.Text = string.Empty;
-            ddlObra.SelectedIndex = 0;
-            ddlConcepto.SelectedIndex = 0;
-            ddlEstado.SelectedIndex = 0;
+            LimpiarFormularioAgregar();
+        }
+        protected void LimpiarFormularioEditar(object sender, EventArgs e)
+        {
+            LimpiarFormularioEditar();
+        }
+
+        private void LimpiarFormularioAgregar() 
+        {
+            txtExpedienteAgregar.Text = string.Empty;
+            txtDetalleAgregar.Text = string.Empty;
+            txtMontoAutorizadoAgregar.Text = string.Empty;
+            txtMesAprobacionAgregar.Text = string.Empty;
+            txtMesBaseAgregar.Text = string.Empty;
+            ddlObraAgregar.SelectedIndex = 0;
+            ddlConceptoAgregar.SelectedIndex = 0;
+            ddlEstadoAgregar.SelectedIndex = 0;
+        }
+        private void LimpiarFormularioEditar()         
+        {
+            txtCodigoAutorizanteEditar.Text = string.Empty;
+            txtExpedienteEditar.Text = string.Empty;
+            txtDetalleEditar.Text = string.Empty;
+            txtMontoAutorizadoEditar.Text = string.Empty;
+            txtFechaEditar.Text = string.Empty;
+            txtMesBaseEditar.Text = string.Empty;
+            ddlObraEditar.SelectedIndex = 0;
+            ddlConceptoEditar.SelectedIndex = 0;
+            ddlEstadoEditar.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -723,19 +721,28 @@ namespace WebForms
         /// </summary>
         private void ObtenerObras()
         {
+            ObraNegocioEF obraNegocio = new ObraNegocioEF();
+
             try
             {
-                ObraNegocioEF obraNegocio = new ObraNegocioEF();
-                ddlObra.DataSource = obraNegocio.ListarParaDDL();
-                ddlObra.DataTextField = "Descripcion";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
+                List<ObraEF> obras = obraNegocio.ListarParaDDL();
+
+                ddlObraAgregar.DataSource = obras;
+                ddlObraAgregar.DataTextField = "Descripcion";
+                ddlObraAgregar.DataValueField = "Id";
+                ddlObraAgregar.DataBind();
+
+                ddlObraEditar.DataSource = obras;
+                ddlObraEditar.DataTextField = "Descripcion";
+                ddlObraEditar.DataValueField = "Id";
+                ddlObraEditar.DataBind();
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al cargar obras: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
+
         }
 
         /// <summary>
@@ -760,13 +767,21 @@ namespace WebForms
         /// </summary>
         private void ObtenerConceptos()
         {
+            ConceptoNegocioEF conceptoNegocio = new ConceptoNegocioEF();
+
             try
             {
-                ConceptoNegocioEF conceptoNegocio = new ConceptoNegocioEF();
-                ddlConcepto.DataSource = conceptoNegocio.Listar();
-                ddlConcepto.DataTextField = "Nombre";
-                ddlConcepto.DataValueField = "Id";
-                ddlConcepto.DataBind();
+                List<ConceptoEF> conceptos = conceptoNegocio.Listar();
+
+                ddlConceptoAgregar.DataSource = conceptos;
+                ddlConceptoAgregar.DataTextField = "Nombre";
+                ddlConceptoAgregar.DataValueField = "Id";
+                ddlConceptoAgregar.DataBind();
+
+                ddlConceptoEditar.DataSource = conceptos;
+                ddlConceptoEditar.DataTextField = "Nombre";
+                ddlConceptoEditar.DataValueField = "Id";
+                ddlConceptoEditar.DataBind();
             }
             catch (Exception ex)
             {
@@ -796,13 +811,21 @@ namespace WebForms
         /// </summary>
         private void ObtenerEstados()
         {
+                EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
+
             try
             {
-                EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
-                ddlEstado.DataSource = estadoNegocio.Listar();
-                ddlEstado.DataTextField = "Nombre";
-                ddlEstado.DataValueField = "Id";
-                ddlEstado.DataBind();
+                List<EstadoAutorizanteEF> estados = estadoNegocio.Listar();
+
+                ddlEstadoAgregar.DataSource = estados;
+                ddlEstadoAgregar.DataTextField = "Nombre";
+                ddlEstadoAgregar.DataValueField = "Id";
+                ddlEstadoAgregar.DataBind();
+
+                ddlEstadoEditar.DataSource = estados;
+                ddlEstadoEditar.DataTextField = "Nombre";
+                ddlEstadoEditar.DataValueField = "Id";
+                ddlEstadoEditar.DataBind();
             }
             catch (Exception ex)
             {
@@ -1223,46 +1246,34 @@ namespace WebForms
 
                 if (autorizanteSeleccionado != null)
                 {
-                    // Cambiar texto del botón a "Actualizar"
-                    Button1.Text = "Actualizar";
-
-                    txtCodigoAutorizante.Enabled = false; // Código no editable en edición
-
                     // Cargar datos en el formulario
-                    txtCodigoAutorizante.Text = autorizanteSeleccionado.CodigoAutorizante;
-                    txtExpediente.Text = autorizanteSeleccionado.Expediente;
-                    txtDetalle.Text = autorizanteSeleccionado.Detalle;
-                    txtMontoAutorizado.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
+                    txtCodigoAutorizanteEditar.Text = autorizanteSeleccionado.CodigoAutorizante;
+                    txtExpedienteEditar.Text = autorizanteSeleccionado.Expediente;
+                    txtDetalleEditar.Text = autorizanteSeleccionado.Detalle;
+                    txtMontoAutorizadoEditar.Text = autorizanteSeleccionado.MontoAutorizado.ToString("0.00");
 
                     if (autorizanteSeleccionado.MesAprobacion.HasValue)
-                        txtFecha.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
-                    
+                        txtFechaEditar.Text = autorizanteSeleccionado.MesAprobacion.Value.ToString("yyyy-MM-dd");
+
                     if (autorizanteSeleccionado.MesBase.HasValue)
-                        txtMes.Text = autorizanteSeleccionado.MesBase.Value.ToString("yyyy-MM-dd");
+                        txtMesBaseEditar.Text = autorizanteSeleccionado.MesBase.Value.ToString("yyyy-MM-dd");
 
                     // Seleccionar valores en dropdowns usando método helper
                     if (autorizanteSeleccionado.ConceptoId.HasValue)
-                        SelectDropDownListByValue(ddlConcepto, autorizanteSeleccionado.ConceptoId.Value.ToString());
+                        SelectDropDownListByValue(ddlConceptoEditar, autorizanteSeleccionado.ConceptoId.Value.ToString());
                     
                     if (autorizanteSeleccionado.EstadoId.HasValue)
-                        SelectDropDownListByValue(ddlEstado, autorizanteSeleccionado.EstadoId.Value.ToString());
+                        SelectDropDownListByValue(ddlEstadoEditar, autorizanteSeleccionado.EstadoId.Value.ToString());
 
                     // Guardar estado de edición
                     Session["EditingAutorizanteId"] = autorizanteSeleccionado.Id;
                     Session["EditingCodigoAutorizante"] = autorizanteSeleccionado.CodigoAutorizante;
 
-                    // Actualizar modal con JavaScript completo similar a AutorizantesAdmin
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowEditModal", @"
                         $(document).ready(function() {
-                            // Cambiar título y texto del botón
-                            $('#modalAgregar .modal-title').text('Modificar Autorizante');
-                            document.getElementById('" + Button1.ClientID + @"').value = 'Actualizar';
-                            
-                            // Ocultar el dropdown de Obra y su etiqueta
-                            $('#obraContainer').hide();
-                            
                             // Mostrar el modal
-                            $('#modalAgregar').modal('show');
+                            $('#modalEditarAutorizante').modal('show');
                         });", true);
                 }
             }

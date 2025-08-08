@@ -9,12 +9,12 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
-    <!-- Modal -->
-    <div class="modal fade" id="modalAgregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <!-- Modal agregar autorizante -->
+    <div class="modal fade" id="modalAgregarAutorizante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Agregar Autorizante</h1>
+                    <h1 class="modal-title fs-5">Agregar Autorizante</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -24,12 +24,12 @@
                             <div class="row">
                                 <div id="obraContainer" class="col-12">
                                     <div class="mb-3">
-                                        <label for="ddlObra" class="form-label">Obra</label>
-                                        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                        <label for="ddlObraAgregar" class="form-label">Obra</label>
+                                        <asp:DropDownList ID="ddlObraAgregar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
                                             <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
                                         </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvObra"
-                                            ControlToValidate="ddlObra"
+                                        <asp:RequiredFieldValidator ID="rfvObraAgregar"
+                                            ControlToValidate="ddlObraAgregar"
                                             ValidationGroup="AgregarAutorizante"
                                             runat="server"
                                             ErrorMessage="Seleccione una obra"
@@ -40,29 +40,15 @@
                                     </div>
                                 </div>
 
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="txtCodigoAutorizante" class="form-label">Código Autorizante</label>
-                                        <asp:TextBox ID="txtCodigoAutorizante" CssClass="form-control" runat="server" placeHolder="XXX-XXX-XXXX" />
-                                        <asp:RequiredFieldValidator ID="rfvCodigoAutorizante"
-                                            ControlToValidate="txtCodigoAutorizante"
-                                            ValidationGroup="AgregarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="El código autorizante es requerido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
-                                    </div>
-                                </div>
 
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="ddlConcepto" class="form-label">Concepto</label>
-                                        <asp:DropDownList ID="ddlConcepto" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                        <label for="ddlConceptoAgregar" class="form-label">Concepto</label>
+                                        <asp:DropDownList ID="ddlConceptoAgregar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
                                             <asp:ListItem Value="" Text="Seleccione un concepto" Selected="True"></asp:ListItem>
                                         </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvConcepto"
-                                            ControlToValidate="ddlConcepto"
+                                        <asp:RequiredFieldValidator ID="rfvConceptoAgregar"
+                                            ControlToValidate="ddlConceptoAgregar"
                                             ValidationGroup="AgregarAutorizante"
                                             runat="server"
                                             ErrorMessage="Seleccione un concepto"
@@ -75,35 +61,17 @@
 
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtExpediente" class="form-label">Expediente</label>
-                                        <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                    </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="ddlEstado" class="form-label">Estado</label>
-                                        <asp:DropDownList ID="ddlEstado" CssClass="form-select" runat="server" AppendDataBoundItems="true">
-                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvEstado"
-                                            ControlToValidate="ddlEstado"
-                                            ValidationGroup="AgregarAutorizante"
-                                            runat="server"
-                                            ErrorMessage="Seleccione un estado"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            InitialValue="" />
+                                        <label for="txtExpedienteAgregar" class="form-label">Expediente</label>
+                                        <asp:TextBox ID="txtExpedienteAgregar" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label for="txtDetalle" class="form-label">Detalle</label>
-                                        <asp:TextBox ID="txtDetalle" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
-                                        <asp:RequiredFieldValidator ID="rfvDetalle"
-                                            ControlToValidate="txtDetalle"
+                                        <label for="txtDetalleAgregar" class="form-label">Detalle</label>
+                                        <asp:TextBox ID="txtDetalleAgregar" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
+                                        <asp:RequiredFieldValidator ID="rfvDetalleAgregar"
+                                            ControlToValidate="txtDetalleAgregar"
                                             ValidationGroup="AgregarAutorizante"
                                             runat="server"
                                             ErrorMessage="El detalle es requerido"
@@ -115,19 +83,201 @@
 
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00" />
-                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <label for="txtMontoAutorizadoAgregar" class="form-label">Monto Autorizado</label>
+                                        <asp:TextBox ID="txtMontoAutorizadoAgregar" CssClass="form-control" runat="server" placeHolder="0,00" />
+                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizadoAgregar"
+                                            ControlToValidate="txtMontoAutorizadoAgregar"
                                             ValidationGroup="AgregarAutorizante"
                                             runat="server"
                                             ErrorMessage="El monto es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <asp:RegularExpressionValidator ID="revMontoAutorizadoAgregar"
+                                            ControlToValidate="txtMontoAutorizadoAgregar"
                                             ValidationGroup="AgregarAutorizante"
+                                            runat="server"
+                                            ValidationExpression="^[0-9]+([,][0-9]{1,2})?$"
+                                            ErrorMessage="Solo números positivos con hasta 2 decimales"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMesAprobacionAgregar" class="form-label">Mes Aprobación</label>
+                                        <asp:TextBox ID="txtMesAprobacionAgregar" CssClass="form-control" runat="server" TextMode="Date" />
+                                    </div>
+                                </div>
+
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMesBaseAgregar" class="form-label">Mes Base</label>
+                                        <asp:TextBox ID="txtMesBaseAgregar" CssClass="form-control" runat="server" TextMode="Date" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlEstadoAgregar" class="form-label">Estado</label>
+                                        <asp:DropDownList ID="ddlEstadoAgregar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvEstadoAgregar"
+                                            ControlToValidate="ddlEstadoAgregar"
+                                            ValidationGroup="AgregarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="Seleccione un estado"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer d-flex justify-content-between px-4">
+                    <asp:Button Text="Limpiar" ID="btnLimpiarAgregar" OnClick="LimpiarFormularioAgregar" CssClass="btn btn-secondary" runat="server" />
+                    <div class="d-flex gap-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarAutorizante" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal agregar autorizante-->
+
+    <!-- Modal editar autorizante -->
+    <div class="modal fade" id="modalEditarAutorizante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Editar Autorizante</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <div class="container">
+                            <div class="row">
+                                <div id="obraContainerEditarAutorizante" class="col-12">
+                                    <div class="mb-3">
+                                        <label for="ddlObraEditar" class="form-label">Obra</label>
+                                        <asp:DropDownList ID="ddlObraEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvObraEditar"
+                                            ControlToValidate="ddlObraEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="Seleccione una obra"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtCodigoAutorizanteEditar" class="form-label">Código Autorizante</label>
+                                        <asp:TextBox ID="txtCodigoAutorizanteEditar" CssClass="form-control" runat="server" placeHolder="XXX-XXX-XXXX" />
+                                        <asp:RequiredFieldValidator ID="rfvCodigoAutorizanteEditar"
+                                            ControlToValidate="txtCodigoAutorizanteEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="El código autorizante es requerido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlConceptoEditar" class="form-label">Concepto</label>
+                                        <asp:DropDownList ID="ddlConceptoEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un concepto" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvConceptoEditar"
+                                            ControlToValidate="ddlConceptoEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="Seleccione un concepto"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtExpediente" class="form-label">Expediente</label>
+                                        <asp:TextBox ID="txtExpedienteEditar" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="ddlEstadoEditar" class="form-label">Estado</label>
+                                        <asp:DropDownList ID="ddlEstadoEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione un estado" Selected="True"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvEstadoEditar"
+                                            ControlToValidate="ddlEstadoEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="Seleccione un estado"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true"
+                                            InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="txtDetalleEditar" class="form-label">Detalle</label>
+                                        <asp:TextBox ID="txtDetalleEditar" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
+                                        <asp:RequiredFieldValidator ID="rfvDetalleEditar"
+                                            ControlToValidate="txtDetalleEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="El detalle es requerido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtMontoAutorizadoEditar" class="form-label">Monto Autorizado</label>
+                                        <asp:TextBox ID="txtMontoAutorizadoEditar" CssClass="form-control" runat="server" placeHolder="0,00" />
+                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizadoEditar"
+                                            ControlToValidate="txtMontoAutorizadoEditar"
+                                            ValidationGroup="EditarAutorizante"
+                                            runat="server"
+                                            ErrorMessage="El monto es requerido"
+                                            Display="Dynamic"
+                                            CssClass="text-danger"
+                                            EnableClientScript="true" />
+                                        <asp:RegularExpressionValidator ID="revMontoAutorizadoEditar"
+                                            ControlToValidate="txtMontoAutorizadoEditar"
+                                            ValidationGroup="EditarAutorizante"
                                             runat="server"
                                             ValidationExpression="^[0-9]+([,][0-9]{1,2})?$"
                                             ErrorMessage="Solo números positivos con hasta 2 decimales"
@@ -138,14 +288,14 @@
 
                                     <div class="mb-3">
                                         <label for="txtFecha" class="form-label">Fecha</label>
-                                        <asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <asp:TextBox ID="txtFechaEditar" CssClass="form-control" runat="server" TextMode="Date" />
                                     </div>
                                 </div>
 
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMes" class="form-label">Mes Base</label>
-                                        <asp:TextBox ID="txtMes" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <label for="txtMesBase" class="form-label">Mes Base</label>
+                                        <asp:TextBox ID="txtMesBaseEditar" CssClass="form-control" runat="server" TextMode="Date" />
                                     </div>
                                 </div>
                             </div>
@@ -154,16 +304,16 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <asp:Button Text="Limpiar" ID="btnLimpiar" OnClick="btnLimpiar_Click" CssClass="btn btn-secondary" runat="server" />
+                    <asp:Button Text="Limpiar" ID="btnLimpiarEditar" OnClick="LimpiarFormularioEditar" CssClass="btn btn-secondary" runat="server" />
                     <div class="d-flex gap-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <asp:Button Text="Agregar" ID="Button1" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarAutorizante" />
+                        <asp:Button Text="Editar" ID="btnEditar" OnClick="btnEditar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="EditarAutorizante" />
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- /Modal -->
+    <!-- /Modal editar autorizante-->
 
     <div class="row mt-4 mb-3">
         <div class="col-12">
@@ -366,15 +516,15 @@
     </div>
 
     <!-- Control de paginación reutilizable -->
-    <CustomControls:PaginationControl ID="paginationControl" runat="server" 
-        OnPageChanged="paginationControl_PageChanged" 
+    <CustomControls:PaginationControl ID="paginationControl" runat="server"
+        OnPageChanged="paginationControl_PageChanged"
         OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
     <div class="text-center p-4">
         <asp:Label ID="lblMensaje" Text="" runat="server" />
     </div>
 
-    <script type="text/javascript">
+<%--    <script type="text/javascript">
         function limpiarFormulario() {
             document.getElementById('<%= txtCodigoAutorizante.ClientID %>').value = '';
             document.getElementById('<%= txtExpediente.ClientID %>').value = '';
@@ -386,5 +536,5 @@
             document.getElementById('<%= ddlConcepto.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlEstado.ClientID %>').selectedIndex = 0;
         }
-    </script>
+    </script>--%>
 </asp:Content>
