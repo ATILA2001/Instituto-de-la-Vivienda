@@ -305,26 +305,18 @@ namespace WebForms
         {
             try
             {
-                var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
-                if (paginationControl != null)
+                if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
                 {
-                    if (Session["GridData"] != null)
-                    {
-                        var todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
-                        var subtotal = todosLosCertificados.Sum(c => c.MontoTotal);
-                        var cantidad = todosLosCertificados.Count;
-                        paginationControl.UpdateSubtotal(subtotal, cantidad);
-                    }
-                    else
-                    {
-                        paginationControl.UpdateSubtotal(0m, 0);
-                    }
+                    List<CertificadoDTO> datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                    var subtotal = datosFiltradosActuales.Sum(c => c.MontoTotal);
+                    var cantidad = datosFiltradosActuales.Count;
+
+                    paginationControl.UpdateSubtotal(subtotal, cantidad);
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                var paginationControl = FindControlRecursive(this, "paginationControl") as dynamic;
-                paginationControl?.UpdateSubtotal(0m, 0);
+                System.Diagnostics.Debug.WriteLine("Error al calcular subtotal para PaginationControl: " + ex.Message);
             }
         }
 
