@@ -386,19 +386,16 @@ namespace WebForms
                 ddlObra.DataTextField = "Descripcion";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
-                ddlObra.Items.Insert(0, new ListItem("-- Seleccione una obra --", ""));
 
                 ddlUnidadMedida.DataSource = new UnidadMedidaNegocioEF().Listar();
                 ddlUnidadMedida.DataTextField = "Nombre";
                 ddlUnidadMedida.DataValueField = "Id";
                 ddlUnidadMedida.DataBind();
-                ddlUnidadMedida.Items.Insert(0, new ListItem("-- Seleccione una unidad --", ""));
 
                 ddlPrioridades.DataSource = new PrioridadNegocioEF().Listar();
                 ddlPrioridades.DataTextField = "Nombre";
                 ddlPrioridades.DataValueField = "Id";
                 ddlPrioridades.DataBind();
-                ddlPrioridades.Items.Insert(0, new ListItem("-- Seleccione una prioridad --", ""));
             }
             catch (Exception ex)
             {
