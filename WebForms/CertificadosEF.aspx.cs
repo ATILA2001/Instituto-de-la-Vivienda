@@ -70,7 +70,11 @@ namespace WebForms
             else
             {
                 // En postback, actualizar controles de paginación
-                ConfigurarPaginationControl();
+                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
+                if (paginationControl != null)
+                {
+                    paginationControl.UpdatePaginationControls();
+                }
             }
         }
 
@@ -377,6 +381,7 @@ namespace WebForms
         protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
             pageSize = e.PageSize;
+            ViewState["PageSize"] = pageSize; // Guardar el nuevo tamaño de página en ViewState
             currentPageIndex = 0; // Reiniciar a la primera página
             CargarPaginaActual();
         }
