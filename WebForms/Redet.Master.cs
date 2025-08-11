@@ -28,7 +28,7 @@ namespace WebForms
         protected void btnCerrarSession_Click(object sender, EventArgs e)
         {
             Session.Clear();
-            Response.Redirect("Login.aspx", false);
+            Response.Redirect("~/Logout.aspx", false);
         }
 
     }
