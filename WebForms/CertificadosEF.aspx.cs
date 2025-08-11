@@ -478,7 +478,7 @@ namespace WebForms
 
                     // Actualiza solo las propiedades editables
                     certificadoExistente.ExpedientePago = txtExpediente.Text.Trim();
-                    certificadoExistente.MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim());
+                    certificadoExistente.MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim());
                     certificadoExistente.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
                     certificadoExistente.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
 
@@ -491,7 +491,7 @@ namespace WebForms
                     CertificadoEF nuevoCertificado = new CertificadoEF
                     {
                         ExpedientePago = txtExpediente.Text.Trim(),
-                        MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim()),
+                        MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim()),
                         MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
                         TipoPagoId = int.Parse(ddlTipo.SelectedValue),
                         CodigoAutorizante = ddlAutorizante.SelectedItem.Text
@@ -527,7 +527,7 @@ namespace WebForms
         private void LimpiarFormulario()
         {
             txtExpediente.Text = string.Empty;
-            txtMontoAutorizado.Text = string.Empty;
+            txtMontoCertificado.Text = string.Empty;
             txtFecha.Text = string.Empty;
             ddlAutorizante.SelectedIndex = 0;
             ddlTipo.SelectedIndex = 0;
@@ -641,7 +641,7 @@ namespace WebForms
 
                     txtExpediente.Text = certificadoSeleccionado.ExpedientePago;
 
-                    txtMontoAutorizado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+                    txtMontoCertificado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
 
                     txtFecha.Text = certificadoSeleccionado.MesAprobacion?.ToString("yyyy-MM-dd");
 
@@ -697,7 +697,7 @@ namespace WebForms
 
                     txtExpediente.Text = certificadoEF.ExpedientePago;
 
-                    txtMontoAutorizado.Text = certificadoEF.MontoTotal.ToString("0.00");
+                    txtMontoCertificado.Text = certificadoEF.MontoTotal.ToString("0.00");
 
                     txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
 

@@ -62,18 +62,18 @@
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00" />
-                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <label for="txtMontoCertificado" class="form-label">Monto Certificado</label>
+                                        <asp:TextBox ID="txtMontoCertificado" CssClass="form-control" runat="server" placeHolder="0,00" />
+                                        <asp:RequiredFieldValidator ID="rfvMontoCertificado"
+                                            ControlToValidate="txtMontoCertificado"
                                             ValidationGroup="AgregarCertificado"
                                             runat="server"
                                             ErrorMessage="El monto es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <asp:RegularExpressionValidator ID="revMontoCertificado"
+                                            ControlToValidate="txtMontoCertificado"
                                             ValidationGroup="AgregarCertificado"
                                             runat="server"
                                             ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
@@ -358,7 +358,7 @@
     <script type="text/javascript">
         function limpiarFormulario() {
             document.getElementById('<%= txtExpediente.ClientID %>').value = '';
-            document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
+            document.getElementById('<%= txtMontoCertificado.ClientID %>').value = '';
             document.getElementById('<%= txtFecha.ClientID %>').value = '';
             document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;

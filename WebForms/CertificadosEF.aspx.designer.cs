@@ -60,31 +60,31 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTipo;
 
         /// <summary>
-        /// txtMontoAutorizado control.
+        /// txtMontoCertificado control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMontoAutorizado;
+        protected global::System.Web.UI.WebControls.TextBox txtMontoCertificado;
 
         /// <summary>
-        /// rfvMontoAutorizado control.
+        /// rfvMontoCertificado control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMontoAutorizado;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMontoCertificado;
 
         /// <summary>
-        /// revMontoAutorizado control.
+        /// revMontoCertificado control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMontoAutorizado;
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMontoCertificado;
 
         /// <summary>
         /// txtFecha control.
