@@ -37,17 +37,19 @@
                                 </div>
 
                                 <asp:Panel ID="panelShowTechosAndPpiTextBoxes" runat="server">
-                                    <div class="col-6">
-                                        <div class="mb-3">
-                                            <label for="txtPpi" class="form-label">PPI</label>
-                                            <asp:TextBox ID="txtPpi" CssClass="form-control" runat="server" />
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="mb-3">
+                                                <label for="txtPpi" class="form-label">PPI</label>
+                                                <asp:TextBox ID="txtPpi" CssClass="form-control" runat="server" />
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6">
-                                        <div class="mb-3">
-                                            <label for="txtTechos" class="form-label">Techos 2026</label>
-                                            <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" />
+                                        <div class="col-6">
+                                            <div class="mb-3">
+                                                <label for="txtTechos" class="form-label">Techos 2026</label>
+                                                <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" />
+                                            </div>
                                         </div>
                                     </div>
                                 </asp:Panel>
