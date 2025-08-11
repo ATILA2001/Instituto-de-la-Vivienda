@@ -115,15 +115,7 @@
 
     <div class="row mt-4 mb-3">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
-                <!-- Contenedor de Filtros alineados a la izquierda -->
-                <div class="d-flex flex-wrap gap-3">
-
-                    <div class="form-group mb-2">
-                        <label class="form-label ms-2 mb-0" for="txtSubtotal">Subtotal:</label>
-                        <asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
-                    </div>
-                </div>
+            <div class="d-flex justify-content-end align-items-end flex-wrap gap-3">
 
                 <!-- Contenedor de Botones alineados a la derecha -->
                 <div class="d-flex gap-3">

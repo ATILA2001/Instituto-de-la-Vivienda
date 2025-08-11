@@ -27,25 +27,25 @@ namespace WebForms
         #endregion
 
         #region Variables de Paginación Externa
-        
+
         /// <summary>
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
         private int currentPageIndex = 0;
-        
+
         /// <summary>
         /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
         /// Se mantiene en ViewState para persistir la preferencia del usuario.
         /// </summary>
         private int pageSize = 12;
-        
+
         /// <summary>
         /// Total de registros disponibles según filtros actuales.
         /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
         /// </summary>
         private int totalRecords = 0;
-        
+
 
         #endregion
 
@@ -60,7 +60,7 @@ namespace WebForms
             // Cargar valores de paginación desde ViewState
             currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
             pageSize = (int)(ViewState["PageSize"] ?? 12);
-            
+
             if (!IsPostBack)
             {
                 CargarListaCertificadosCompleta();
@@ -112,12 +112,12 @@ namespace WebForms
                 // REGRESANDO A CARGA COMPLETA: necesaria para todos los campos calculados (Contrata, Proyecto, SIGAF, SADE, etc.)
                 // OPTIMIZACIÓN: Solo cargar si no están en cache
                 List<CertificadoDTO> todoLosCertificados;
-                
+
                 if (Session["GridData"] == null || ViewState["NecesitaRecarga"] != null)
                 {
                     UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                     todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
-                    
+
                     // Guardar en cache
                     Session["GridData"] = todoLosCertificados;
                     ViewState["NecesitaRecarga"] = null;
@@ -126,10 +126,10 @@ namespace WebForms
                 {
                     todoLosCertificados = (List<CertificadoDTO>)Session["GridData"];
                 }
-                
+
                 // Calcular total de registros
                 int totalRegistros = todoLosCertificados?.Count ?? 0;
-                
+
                 // Guardar total en ViewState
                 totalRecords = totalRegistros;
 
@@ -138,7 +138,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                
+
                 lblMensaje.Text = $"Error al cargar certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
@@ -205,7 +205,7 @@ namespace WebForms
             {
                 // Usa datos del caché en lugar de hacer nueva consulta DB
                 List<CertificadoDTO> todosLosRegistros;
-                
+
                 // Intentar obtener datos del caché primero
                 if (Session["GridData"] != null)
                 {
@@ -217,7 +217,7 @@ namespace WebForms
                     UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosRegistros = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
-                
+
                 // Aplica filtro de texto general si existe
                 string filtro = txtBuscar.Text.Trim().ToLower();
                 if (!string.IsNullOrEmpty(filtro))
@@ -240,12 +240,6 @@ namespace WebForms
                 decimal totalMonto = todosLosRegistros.Sum(c => c.MontoTotal);
                 int cantidadRegistros = todosLosRegistros.Count;
 
-                // Actualizar etiqueta de subtotal en el control existente
-                if (txtSubtotal != null)
-                {
-                    txtSubtotal.Text = totalMonto.ToString("C", CultureInfo.GetCultureInfo("es-AR"));
-                }
-
                 // Actualizar label de subtotal en paginación si existe
                 if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
@@ -254,11 +248,6 @@ namespace WebForms
             }
             catch (Exception)
             {
-                // En caso de error, mostrar información básica
-                if (txtSubtotal != null)
-                {
-                    txtSubtotal.Text = "$0,00";
-                }
 
                 if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
@@ -272,9 +261,9 @@ namespace WebForms
             // Guarda el estado actual en ViewState
             ViewState["CurrentPageIndex"] = currentPageIndex;
             ViewState["PageSize"] = pageSize;
-            
+
             CargarListaCertificadosCompleta();
-            
+
             ConfigurarPaginationControl();
         }
 
@@ -292,7 +281,7 @@ namespace WebForms
                 paginationControl.CurrentPageIndex = currentPageIndex;
                 paginationControl.PageSize = pageSize;
                 paginationControl.UpdatePaginationControls();
-                
+
                 // Actualizar subtotal para el control
                 CalcularSubtotalParaPaginationControl();
             }
@@ -314,13 +303,13 @@ namespace WebForms
                     paginationControl.UpdateSubtotal(subtotal, cantidad);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error al calcular subtotal para PaginationControl: " + ex.Message);
             }
         }
 
-        
+
         /// <summary>
         /// Busca un control recursivamente en la jerarquía de controles.
         /// Método auxiliar para trabajar sin designer regenerado.
@@ -386,7 +375,7 @@ namespace WebForms
             {
                 // Usa datos del caché para exportación
                 List<CertificadoDTO> todosLosCertificados;
-                
+
                 if (Session["GridData"] != null)
                 {
                     todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
@@ -394,7 +383,7 @@ namespace WebForms
                 else
                 {
                     // Solo si no hay caché, consultar BD
-                    UsuarioEF usuario =  UserHelper.GetFullCurrentUser();
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
 
@@ -412,7 +401,7 @@ namespace WebForms
                         (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
                     ).ToList();
                 }
-                
+
                 todosLosCertificados = AplicarFiltrosTreeViewEnMemoria(todosLosCertificados);
 
                 // Definir mapeo de columnas
@@ -479,7 +468,7 @@ namespace WebForms
                     // Recupera el certificado existente y modifica sus propiedades
                     int certificadoId = (int)Session["EditingCertificadoId"];
                     CertificadoEF certificadoExistente = negocio.ObtenerPorId(certificadoId);
-                    
+
                     if (certificadoExistente == null)
                     {
                         lblMensaje.Text = "Error: No se encontró el certificado a modificar.";
@@ -518,11 +507,11 @@ namespace WebForms
                 {
                     // Limpiar cache SADE ya que se agregó/modificó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    
+
                     // Invalida caché para forzar recarga desde BD
                     Session["GridData"] = null;
                     ViewState["NecesitaRecarga"] = true;
-                    
+
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                     CargarPaginaActual(); // Recargará desde BD al no encontrar caché
                 }
@@ -791,21 +780,21 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    
+
                     // Limpiar cache SADE ya que se eliminó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    
+
                     // Eliminar registro específico del cache
                     if (Session["GridData"] is List<CertificadoDTO> listaCache)
                     {
                         // Remover el registro del cache
                         listaCache.RemoveAll(c => c.Id == id);
-                        
+
                         // Actualizar totales
                         ViewState["TotalRecords"] = listaCache.Count;
                         totalRecords = listaCache.Count;
                     }
-                    
+
                     // Recargar vista con datos actualizados
                     BindGrid();
                     ConfigurarPaginationControl();
@@ -882,8 +871,8 @@ namespace WebForms
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-        }        
-        
+        }
+
         private void ObtenerAutorizantes()
         {
             AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
@@ -891,8 +880,8 @@ namespace WebForms
             ddlAutorizante.DataTextField = "CodigoAutorizante";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
-        }        
-        
+        }
+
         private void BindDropDownList()
         {
             try
@@ -938,7 +927,7 @@ namespace WebForms
                 List<CertificadoDTO> listaCompleta = Session["GridData"] as List<CertificadoDTO>;
 
                 bool resultado = false;
-                
+
                 // --- Lógica para expediente vacío ---
                 if (string.IsNullOrWhiteSpace(nuevoExpediente))
                 {
@@ -1041,7 +1030,7 @@ namespace WebForms
                         }
                     }
                 }
-            
+
 
                 if (resultado)
                 {
@@ -1057,10 +1046,10 @@ namespace WebForms
 
 
                     // Recalcular todos los certificados afectados y guardar en BD
-                     calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(
-                        expedientesAfectados, 
-                        listaCompleta,
-                        persistirEnBD: false);
+                    calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(
+                       expedientesAfectados,
+                       listaCompleta,
+                       persistirEnBD: false);
 
                     // AQUI DEBEMOS ACTUALIZAR EL Session GridData con los certificados recalculados
 
@@ -1208,7 +1197,7 @@ namespace WebForms
                 if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
                 {
                     var selectedProyectoIds = getSelectedIds(cblsHeaderProyecto);
-                    
+
                     // Obtener todos los nombres de los proyectos seleccionados
                     using (var context = new IVCdbContext())
                     {
@@ -1224,7 +1213,7 @@ namespace WebForms
                             .Select(p => p.Id)
                             .Distinct()
                             .ToList();
-                        
+
                         data = data.Where(c => c.ProyectoId.HasValue && allMatchingProjectIds.Contains(c.ProyectoId.Value)).ToList();
                     }
                 }
