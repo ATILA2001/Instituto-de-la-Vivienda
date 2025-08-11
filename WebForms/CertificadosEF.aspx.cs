@@ -807,6 +807,19 @@ namespace WebForms
             }
         }
 
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                var certificado = (CertificadoDTO)e.Row.DataItem;
+                if (certificado.IdReliquidacion > 0)
+                {
+                    if (e.Row.FindControl("btnModificar") is LinkButton btnEditar) btnEditar.Visible = false;
+                    if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = false;
+                }
+            }
+        }
+
         private void PoblarFiltrosHeader()
         {
             using (var context = new IVCdbContext())

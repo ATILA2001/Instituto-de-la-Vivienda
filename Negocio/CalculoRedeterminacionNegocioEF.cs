@@ -691,7 +691,7 @@ namespace Negocio
 
                             listaReliqDTO.Add(new CertificadoDTO
                             {
-                                IdReliquidacion = idReliq++,
+                                IdReliquidacion = ++idReliq,
                                 ExpedientePago = expedienteFinalReliq,
                                 MesAprobacion = certAfectado.MesAprobacion,
                                 MontoTotal = montoReliq,
