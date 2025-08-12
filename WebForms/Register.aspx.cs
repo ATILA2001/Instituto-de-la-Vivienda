@@ -78,17 +78,17 @@ namespace WebForms
                     
 
                     if (nuevo.Tipo) { 
-                    Response.Redirect("HomeAdmin.aspx", false);
+                    Response.Redirect("BdProyectos.aspx", false);
                     }else
                     {
                         if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
                         {
-                            Response.Redirect("HomeUser.aspx", false);
+                            Response.Redirect("Obras.aspx", false);
                         }
                         else
                         {
-                            Session.Add("error", "Usuario no habilitado a ingresar");
-                            Response.Redirect("Error.aspx", false);
+                            lblMensaje.Text = "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.";
+                            lblMensaje.CssClass = "alert alert-danger";
                         }
                     }
                 }
@@ -104,27 +104,34 @@ namespace WebForms
 
         protected void txtEmailRep_TextChanged(object sender, EventArgs e)
         {
-            if (txtEmailRep.Text.Trim() != txtEmail.Text.Trim())
+            // En el evento txtEmailRep_TextChanged
+            if (txtEmail.Text != txtEmailRep.Text)
             {
-                lblErrorMail.Text = "No coinciden los Mails";
-                lblErrorMail.CssClass = "text-danger";
+                lblErrorMail.Text = "Los correos electrónicos no coinciden";
+                panelErrorMail.Visible = true;
+                txtEmailRep.CssClass = "form-control is-invalid";
             }
             else
             {
-                lblErrorMail.Text = string.Empty; lblErrorMail.CssClass = string.Empty;
+                lblErrorMail.Text = "";
+                panelErrorMail.Visible = false;
+                txtEmailRep.CssClass = "form-control";
             }
         }
 
         protected void txtPassRep_TextChanged(object sender, EventArgs e)
         {
-            if (txtPass.Text.Trim() != txtPassRep.Text.Trim())
+            if (txtPass.Text != txtPassRep.Text)
             {
-                lblErrorPass.Text = "No coinciden las contraseñas";
-                lblErrorPass.CssClass = "text-danger";
+                lblErrorPass.Text = "Las contraseñas no coinciden";
+                panelErrorPass.Visible = true;
+                txtPassRep.CssClass = "form-control is-invalid";
             }
             else
             {
-                lblErrorPass.Text = string.Empty; lblErrorPass.CssClass = string.Empty;
+                lblErrorPass.Text = "";
+                panelErrorPass.Visible = false;
+                txtPassRep.CssClass = "form-control";
             }
         }
 

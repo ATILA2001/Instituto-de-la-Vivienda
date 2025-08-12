@@ -20,7 +20,7 @@
 <body>
     <form id="form1" runat="server">
         <div>
-            <div class="container-fluid">
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh; background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Images/1- IVC.jpg'); background-size: cover; background-position: bottom;">
                 <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
             </div>
 
