@@ -118,14 +118,12 @@ namespace WebForms.CustomControls
             // Actualizar información de página
             lblPaginaInfo.Text = $"Página {CurrentPageIndex + 1} de {Math.Max(TotalPages, 1)}";
             
-            // LÓGICA ESPECIAL: Los botones de navegación solo se activan si hay más de 5 páginas
-            bool hasMoreThan5Pages = TotalPages > 5;
             
             // Habilitar/deshabilitar botones de navegación
-            lnkFirst.Enabled = hasMoreThan5Pages && CurrentPageIndex > 0;
-            lnkPrev.Enabled = hasMoreThan5Pages && CurrentPageIndex > 0;
-            lnkNext.Enabled = hasMoreThan5Pages && CurrentPageIndex < TotalPages - 1;
-            lnkLast.Enabled = hasMoreThan5Pages && CurrentPageIndex < TotalPages - 1;
+            lnkFirst.Enabled = CurrentPageIndex > 0;
+            lnkPrev.Enabled = CurrentPageIndex > 0;
+            lnkNext.Enabled = CurrentPageIndex < TotalPages - 1;
+            lnkLast.Enabled = CurrentPageIndex < TotalPages - 1;
             
             // Aplicar estilos visuales según estado
             lnkFirst.CssClass = lnkFirst.Enabled ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
@@ -239,7 +237,7 @@ namespace WebForms.CustomControls
 
         protected void lnkFirst_Click(object sender, EventArgs e)
         {
-            if (TotalPages > 5) // Solo funciona si hay más de 5 páginas
+            if (TotalPages > 1) // Solo funciona si hay más de 5 páginas
             {
                 CurrentPageIndex = 0;
                 UpdatePaginationControls();
@@ -249,7 +247,7 @@ namespace WebForms.CustomControls
 
         protected void lnkPrev_Click(object sender, EventArgs e)
         {
-            if (TotalPages > 5 && CurrentPageIndex > 0) // Solo funciona si hay más de 5 páginas
+            if (CurrentPageIndex > 0) // Solo funciona si hay más de 5 páginas
             {
                 CurrentPageIndex--;
                 UpdatePaginationControls();
@@ -259,7 +257,7 @@ namespace WebForms.CustomControls
 
         protected void lnkNext_Click(object sender, EventArgs e)
         {
-            if (TotalPages > 5 && CurrentPageIndex < TotalPages - 1) // Solo funciona si hay más de 5 páginas
+            if (CurrentPageIndex < TotalPages - 1) // Solo funciona si hay más de 5 páginas
             {
                 CurrentPageIndex++;
                 UpdatePaginationControls();
@@ -269,7 +267,7 @@ namespace WebForms.CustomControls
 
         protected void lnkLast_Click(object sender, EventArgs e)
         {
-            if (TotalPages > 5) // Solo funciona si hay más de 5 páginas
+            if (TotalPages > 1) // Solo funciona si hay más de 5 páginas
             {
                 CurrentPageIndex = Math.Max(0, TotalPages - 1);
                 UpdatePaginationControls();
