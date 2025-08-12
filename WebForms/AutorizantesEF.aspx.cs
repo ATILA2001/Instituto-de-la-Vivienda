@@ -1258,18 +1258,35 @@ namespace WebForms
                 if (resultado)
                 {
                     // Actualizar también en la lista completa de Session
-                    List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
-                    if (listaCompleta != null)
+                    if (Session["GridDataAutorizantes"] is List<AutorizanteDTO> listaCompleta)
                     {
                         var autorizanteEnLista = listaCompleta.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
                         if (autorizanteEnLista != null)
                         {
                             autorizanteEnLista.Expediente = nuevoExpediente;
+                            // Recalcular BuzonSade y FechaSade sólo para este registro
+                            if (string.IsNullOrWhiteSpace(nuevoExpediente))
+                            {
+                                autorizanteEnLista.BuzonSade = null;
+                                autorizanteEnLista.FechaSade = null;
+                            }
+                            else
+                            {
+                                var (FechaUltimoPase, BuzonDestino) = SADEHelper.ObtenerInfoSADE(nuevoExpediente);
+                                autorizanteEnLista.BuzonSade = BuzonDestino;
+                                autorizanteEnLista.FechaSade = FechaUltimoPase;
+                            }
+                            // También reflejar en el objeto usado en esta operación
+                            autorizante.BuzonSade = autorizanteEnLista.BuzonSade;
+                            autorizante.FechaSade = autorizanteEnLista.FechaSade;
                         }
                     }
 
                     // Limpiar cache SADE ya que se modificó un expediente (autorizante o redeterminación)
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                    // Rebind para que el GridView muestre inmediatamente el nuevo Buzon/Fecha
+                    BindGrid();
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
