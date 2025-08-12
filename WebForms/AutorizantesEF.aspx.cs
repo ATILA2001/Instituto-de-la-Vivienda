@@ -114,15 +114,14 @@ namespace WebForms
 
             if (!IsPostBack)
             {
-                CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
+                CargarListaAutorizantesRedet();
                 ObtenerDropDownLists();
                 ConfigurarPaginationControl();
             }
             else
             {
                 // En postback, actualizar controles de paginación
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
+                if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
                 {
                     paginationControl.UpdatePaginationControls();
                 }
@@ -142,14 +141,9 @@ namespace WebForms
         /// </summary>
         protected void OnAcceptChanges(object sender, EventArgs e)
         {
-            // Reiniciar a la primera página al aplicar filtros
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
-            {
-                paginationControl.CurrentPageIndex = 0;
-                paginationControl.UpdatePaginationControls();
-            }
-            BindGrid(); // Cargar datos filtrados y paginados
+            currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = currentPageIndex;
+            CargarPaginaActual();
         }
 
         /// <summary>
@@ -274,8 +268,7 @@ namespace WebForms
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             // Reiniciar a la primera página al aplicar filtros
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
+            if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
                 paginationControl.UpdatePaginationControls();
@@ -301,8 +294,7 @@ namespace WebForms
             txtBuscar.Text = string.Empty;
             TreeViewSearch.ClearAllFiltersOnPage(this.Page);
             // Reiniciar a la primera página
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
+            if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
                 paginationControl.UpdatePaginationControls();
@@ -326,11 +318,9 @@ namespace WebForms
         {
             // Este método ahora está obsoleto, se usa ddlPageSizeExternal_SelectedIndexChanged
             // Mantenemos por compatibilidad pero redirigimos al nuevo método
-            DropDownList ddl = sender as DropDownList;
-            if (ddl != null)
+            if (sender is DropDownList ddl)
             {
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
+                if (FindControlRecursive(this, "paginationControl") is CustomControls.PaginationControl paginationControl)
                 {
                     paginationControl.PageSize = int.Parse(ddl.SelectedValue);
                     paginationControl.CurrentPageIndex = 0; // Reiniciar a la primera página
@@ -430,8 +420,9 @@ namespace WebForms
                 // Limpiar cache de datos para forzar recarga desde BD
                 Session["GridDataAutorizantes"] = null;
 
-                // Refrescar la lista de autorizantes
-                CargarListaAutorizantesRedet(); // Recarga desde BD
+                // Invalida cache y fuerza recarga
+                ViewState["NecesitaRecarga"] = true;
+                CargarPaginaActual();
 
         }
 
@@ -505,14 +496,14 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                     "$('#modalEditarAutorizante').modal('hide');", true);
 
-                // Limpiar cache SADE ya que se agregó/modificó un autorizante
-                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                // (Cache SADE ya se limpió arriba en caso de modificación exitosa)
 
                 // Limpiar cache de datos para forzar recarga desde BD
                 Session["GridDataAutorizantes"] = null;
 
-                // Refrescar la lista de autorizantes
-                CargarListaAutorizantesRedet(); // Recarga desde BD
+                // Invalida cache y fuerza recarga
+                ViewState["NecesitaRecarga"] = true;
+                CargarPaginaActual();
 
         }
 
@@ -820,77 +811,24 @@ namespace WebForms
         /// </summary>
         private void CargarListaAutorizantesRedet()
         {
+            //ólo asegura cache completo y delega paginación/filtrado a BindGrid()
             try
             {
-                // Obtener información de paginación del control
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                int actualPageIndex = 0;
-                int actualPageSize = 12;
-                
-                if (paginationControl != null)
+                List<AutorizanteDTO> todos;
+                if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    var paginationInfo = paginationControl.GetPaginationInfo();
-                    actualPageIndex = paginationInfo.CurrentPageIndex;
-                    actualPageSize = paginationInfo.PageSize;
-                    
-                    // Sincronizar variables de clase
-                    currentPageIndex = actualPageIndex;
-                    pageSize = actualPageSize;
-                }
-
-                // Usar la lista completa de la sesión
-                List<AutorizanteDTO> listaCompleta = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
-                if (listaCompleta == null)
-                {
-                    // Recargar si por algún motivo no está en sesión
                     UsuarioEF usuario = ObtenerUsuarioActual();
-                    listaCompleta = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
-                    Session["GridDataAutorizantes"] = listaCompleta;
+                    todos = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
+                    Session["GridDataAutorizantes"] = todos;
+                    ViewState["NecesitaRecarga"] = null;
                 }
-
-                // Aplicar filtro de búsqueda
-                string filtro = txtBuscar.Text.Trim().ToLower();
-                var datosFiltrados = listaCompleta;
-                if (!string.IsNullOrEmpty(filtro))
+                else
                 {
-                    datosFiltrados = datosFiltrados.Where(a =>
-                        (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-                        (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
-                    ).ToList();
+                    todos = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
                 }
 
-                // Aplicar filtros de TreeView
-                datosFiltrados = AplicarFiltrosTreeViewEnMemoria(datosFiltrados);
-
-
-
-                int totalFiltrados = datosFiltrados.Count;
-                totalRecords = totalFiltrados;
-                // Usar las variables sincronizadas
-                var paginaActual = datosFiltrados
-                    .Skip(actualPageIndex * actualPageSize)
-                    .Take(actualPageSize)
-                    .ToList();
-
-                // Actualizar el control con el total correcto ANTES del DataBind
-                if (paginationControl != null)
-                {
-                    paginationControl.TotalRecords = totalRecords;
-                    paginationControl.UpdatePaginationControls();
-                }
-
-                gridviewRegistros.DataSource = paginaActual;
-                gridviewRegistros.DataBind();
-
-                PoblarFiltrosHeader();
-                CalcularSubtotalParaPaginationControl();
+                totalRecords = todos?.Count ?? 0;
+                BindGrid();
             }
             catch (Exception ex)
             {
@@ -899,14 +837,21 @@ namespace WebForms
             }
         }
 
-    /// Refresca el GridView: aplica filtros, actualiza totalRecords y configura paginación.
+        private void CargarPaginaActual()
+        {
+            ViewState["CurrentPageIndex"] = currentPageIndex;
+            ViewState["PageSize"] = pageSize;
+            CargarListaAutorizantesRedet();
+            ConfigurarPaginationControl();
+        }
+
+        // Refresca grid desde cache aplicando filtros y paginación basada en currentPageIndex/pageSize
         private void BindGrid()
         {
             if (Session["GridDataAutorizantes"] == null) return;
 
             var datosEnMemoria = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
 
-            // Filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
             if (!string.IsNullOrEmpty(filtro))
             {
@@ -923,42 +868,22 @@ namespace WebForms
                 ).ToList();
             }
 
-            // Filtros avanzados (TreeView)
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
-            // Actualizar totalRecords tras filtrar
-            totalRecords = datosEnMemoria.Count;
-
-            // Configurar paginación
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
-            {
-                var paginationInfo = paginationControl.GetPaginationInfo();
-                
-                // Configurar paginación en el GridView
-                int totalFiltrados = datosEnMemoria.Count;
-                gridviewRegistros.VirtualItemCount = totalFiltrados;
-                gridviewRegistros.PageSize = paginationInfo.PageSize;
-                gridviewRegistros.PageIndex = paginationInfo.CurrentPageIndex;
-                gridviewRegistros.DataSource = datosEnMemoria
-                                            .Skip(paginationInfo.Skip)
-                                            .Take(paginationInfo.Take)
-                                            .ToList();
-                
-                // Actualizar total de registros en el control
-                paginationControl.TotalRecords = totalFiltrados;
-                paginationControl.UpdatePaginationControls();
-            }
-            else
-            {
-                // Fallback si no se encuentra el control
-                gridviewRegistros.DataSource = datosEnMemoria.Take(12).ToList();
-            }
-            
+            int totalFiltrados = datosEnMemoria.Count;
+            gridviewRegistros.VirtualItemCount = totalFiltrados;
+            gridviewRegistros.PageSize = pageSize;
+            gridviewRegistros.PageIndex = currentPageIndex;
+            gridviewRegistros.DataSource = datosEnMemoria
+                .Skip(currentPageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
             gridviewRegistros.DataBind();
             PoblarFiltrosHeader();
-            
-            // Recalcular subtotal después de aplicar filtros
+
+            totalRecords = totalFiltrados;
+            ViewState["TotalRecords"] = totalFiltrados;
+            ConfigurarPaginationControl();
             CalcularSubtotalParaPaginationControl();
         }
 
@@ -1115,19 +1040,29 @@ namespace WebForms
         {
             try
             {
-                string codigoAutorizante = gridviewRegistros.SelectedDataKey.Value.ToString();
-                
-                // Obtener datos de la sesión filtrada en lugar de consultar BD directamente
-                List<AutorizanteDTO> autorizantesList = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
-                if (autorizantesList == null)
+                int id = 0;
+                string codigoAutorizante = null;
+                if (gridviewRegistros.SelectedDataKey != null)
+                {
+                    var values = gridviewRegistros.SelectedDataKey.Values;
+                    if (values != null)
+                    {
+                        if (values["Id"] != null) int.TryParse(values["Id"].ToString(), out id);
+                        if (values["CodigoAutorizante"] != null) codigoAutorizante = values["CodigoAutorizante"].ToString();
+                    }
+                }
+
+                if (!(Session["GridDataAutorizantes"] is List<AutorizanteDTO> autorizantesList))
                 {
                     lblMensaje.Text = "Error: No hay datos en memoria.";
                     lblMensaje.CssClass = "alert alert-danger";
                     return;
                 }
 
-                // Buscar el autorizante seleccionado en la lista filtrada
-                AutorizanteDTO autorizanteSeleccionado = autorizantesList.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
+                AutorizanteDTO autorizanteSeleccionado = null;
+                if (id > 0) autorizanteSeleccionado = autorizantesList.FirstOrDefault(a => a.Id == id);
+                if (autorizanteSeleccionado == null && !string.IsNullOrEmpty(codigoAutorizante))
+                    autorizanteSeleccionado = autorizantesList.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
 
                 if (autorizanteSeleccionado != null)
                 {
@@ -1190,21 +1125,51 @@ namespace WebForms
         {
             try
             {
-                string codigoAutorizante = gridviewRegistros.DataKeys[e.RowIndex].Value.ToString();
-                
-                if (autorizanteNegocio.Eliminar(codigoAutorizante))
+                if (gridviewRegistros.DataKeys == null || gridviewRegistros.DataKeys.Count <= e.RowIndex)
                 {
-                    lblMensaje.Text = "Autorizante eliminado exitosamente!";
-                    lblMensaje.CssClass = "alert alert-success";
-                    
-                    // Limpiar cache SADE ya que se eliminó un autorizante
+                    lblMensaje.Text = "No se pudo identificar el registro.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                var dataKey = gridviewRegistros.DataKeys[e.RowIndex];
+                int id = 0; string codigoAutorizante = null;
+                if (dataKey.Values["Id"] != null) int.TryParse(dataKey.Values["Id"].ToString(), out id);
+                if (dataKey.Values["CodigoAutorizante"] != null) codigoAutorizante = dataKey.Values["CodigoAutorizante"].ToString();
+
+
+                if (id <= 0)
+                {
+                    lblMensaje.Text = "No se puede eliminar: Id inválido.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                bool eliminado = autorizanteNegocio.Eliminar(id);
+
+                if (eliminado)
+                {
+                    // Actualizar cache en sesión retirando el elemento
+                    if (Session["GridDataAutorizantes"] is List<AutorizanteDTO> lista)
+                    {
+                        lista.RemoveAll(a => a.Id == id);
+                        Session["GridDataAutorizantes"] = lista;
+                    }
+
+                    // Limpiar cache SADE
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    
-                    CargarListaAutorizantesRedet(); // Ya calcula subtotal internamente
+
+                    lblMensaje.Text = "Autorizante eliminado correctamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+
+                    // Actualizar totales y rebind
+                    totalRecords = (Session["GridDataAutorizantes"] as List<AutorizanteDTO>)?.Count ?? 0;
+                    ViewState["TotalRecords"] = totalRecords;
+                    BindGrid();
                 }
                 else
                 {
-                    lblMensaje.Text = "Hubo un problema al eliminar el autorizante.";
+                    lblMensaje.Text = "No se pudo eliminar (puede tener dependencias).";
                     lblMensaje.CssClass = "alert alert-danger";
                 }
             }
@@ -1339,11 +1304,8 @@ namespace WebForms
             try
             {
                 // Actualizar controles de paginación externa después del DataBind
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
-                {
-                    paginationControl.UpdatePaginationControls();
-                }
+                var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
+                paginationControl?.UpdatePaginationControls();
             }
             catch (Exception ex)
             {
@@ -1363,11 +1325,8 @@ namespace WebForms
         {
             base.OnPreRender(e);
             // Actualizar controles de paginación externa antes del render
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
-            {
-                paginationControl.UpdatePaginationControls();
-            }
+            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
+            paginationControl?.UpdatePaginationControls();
         }
 
         #endregion
@@ -1376,30 +1335,16 @@ namespace WebForms
 
         protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            // El control maneja automáticamente el cambio de página
-            var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-            if (paginationControl != null)
-            {
-                paginationControl.UpdatePaginationControls();
-            }
-            CargarListaAutorizantesRedet();
+            currentPageIndex = e.PageIndex;
+            CargarPaginaActual();
         }
 
         protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            // Recalcular total cuando cambia el tamaño de página
-            var usuario = ObtenerUsuarioActual();
-            if (usuario != null)
-            {
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
-                {
-                    var todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
-                    paginationControl.TotalRecords = todosLosRegistros.Count;
-                    paginationControl.UpdatePaginationControls();
-                }
-                CargarListaAutorizantesRedet();
-            }
+            pageSize = e.PageSize;
+            ViewState["PageSize"] = pageSize;
+            currentPageIndex = 0;
+            CargarPaginaActual();
         }
 
         #endregion
@@ -1409,8 +1354,7 @@ namespace WebForms
         /// Configura el control de paginación con los valores actuales.
         private void ConfigurarPaginationControl()
         {
-            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
-            if (paginationControl != null)
+            if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.TotalRecords = totalRecords;
                 paginationControl.CurrentPageIndex = currentPageIndex;
@@ -1427,7 +1371,6 @@ namespace WebForms
         {
             try
             {
-                // Usar la misma lógica que CalcularSubtotal() pero actualizar el control de paginación
                 List<AutorizanteDTO> todosLosRegistros;
                 if (Session["GridDataAutorizantes"] != null)
                 {
@@ -1465,16 +1408,12 @@ namespace WebForms
 
                 // Actualizar el subtotal en el control de paginación
                 var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
-                {
-                    paginationControl.UpdateSubtotal(totalMonto, cantidadRegistros);
-                }
+                paginationControl?.UpdateSubtotal(totalMonto, cantidadRegistros);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error en CalcularSubtotalParaPaginationControl: {ex.Message}");
-                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
-                if (paginationControl != null)
+                if (FindControlRecursive(this, "paginationControl") is CustomControls.PaginationControl paginationControl)
                 {
                     paginationControl.UpdateSubtotal(0, 0);
                 }
@@ -1542,9 +1481,6 @@ namespace WebForms
                         autorizanteDTO.EstadoNombre = estadoSeleccionado.Nombre;
                     }
                     
-                    // Los cambios se reflejan automáticamente por referencia
-                    // Session["GridDataAutorizantes"] = listaAutorizantes; // Línea innecesaria
-                    
                     lblMensaje.Text = "Estado actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
                     
@@ -1574,10 +1510,8 @@ namespace WebForms
                 DropDownList ddlEstadoAutorizante = (DropDownList)e.Row.FindControl("ddlEstadoAutorizante");
                 if (ddlEstadoAutorizante != null)
                 {
-                    // Cargar estados
-                    EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
+                    var estadoNegocio = new EstadoAutorizanteNegocioEF();
                     var estados = estadoNegocio.Listar();
-                    
                     ddlEstadoAutorizante.DataSource = estados;
                     ddlEstadoAutorizante.DataTextField = "Nombre";
                     ddlEstadoAutorizante.DataValueField = "Id";
@@ -1592,6 +1526,15 @@ namespace WebForms
                         {
                             ddlEstadoAutorizante.SelectedValue = autorizante.EstadoId.ToString();
                         }
+                    }
+
+                    // Si es redeterminación virtual (IdRedeterminacion > 0) ocultar acciones
+                    if (autorizante != null && autorizante.IdRedeterminacion > 0)
+                    {
+                        if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = false;
+                        if (e.Row.FindControl("btnModificar") is LinkButton btnModificar) btnModificar.Visible = false;
+
+                        ddlEstadoAutorizante.Enabled = false;
                     }
                 }
             }

@@ -9,61 +9,11 @@ using System.Threading.Tasks;
 
 namespace Negocio
 {
-    /// <summary>
-    /// Clase de negocio para operaciones CRUD de autorizantes utilizando Entity Framework.
-    /// 
-    /// RESPONSABILIDADES:
-    /// - Operaciones básicas: Crear, Leer, Actualizar, Eliminar autorizantes
-    /// - Consultas especializadas para dropdowns y búsquedas específicas
-    /// - Actualizaciones parciales optimizadas (solo campo específico)
-    /// - Soporte dual para autorizantes y redeterminaciones
-    /// 
-    /// DISEÑO:
-    /// - Patrón Repository simplificado sin interfaces adicionales
-    /// - Cada método maneja su propio DbContext (using pattern)
-    /// - Entity Framework Code First para mapeo OR/M
-    /// - Validaciones a nivel de base de datos y aplicación
-    /// 
-    /// TABLES MANEJADAS:
-    /// - Autorizantes: Tabla principal de autorizantes
-    /// - Redeterminaciones: Tabla relacionada con códigos especiales
-    /// - Obras: Tabla relacionada para filtros por área de usuario
-    /// 
-    /// INTEGRACIONES:
-    /// - IVCdbContext: Contexto principal de Entity Framework
-    /// - AutorizanteEF: Entidad principal de autorizantes
-    /// - UsuarioEF: Para filtros de seguridad por área
-    /// 
-    /// PATRÓN DE USO:
-    /// 1. Instanciar clase en página o servicio
-    /// 2. Llamar método específico con parámetros requeridos
-    /// 3. Manejar resultado booleano o entidad devuelta
-    /// 4. Context se dispone automáticamente (using pattern)
-    /// </summary>
     public class AutorizanteNegocioEF
     {
-        #region Consultas de Datos (READ)
-
+        #region Consultas
         /// <summary>
-        /// Obtiene una lista completa de autorizantes para uso en dropdown lists.
-        /// 
-        /// USO TÍPICO:
-        /// - Poblar dropdowns de selección de autorizantes
-        /// - Interfaces de búsqueda y selección
-        /// - Reportes que necesitan lista completa
-        /// 
-        /// OPTIMIZACIÓN:
-        /// - AsNoTracking() para consultas de solo lectura
-        /// - No incluye navegación a entidades relacionadas
-        /// - Carga mínima de propiedades necesarias
-        /// 
-        /// RETORNO:
-        /// - Lista completa de AutorizanteEF sin tracking de cambios
-        /// - Incluye todos los autorizantes sin filtros
-        /// 
-        /// CONSIDERACIONES:
-        /// - Para grandes volúmenes considerar paginación
-        /// - No incluye redeterminaciones (solo autorizantes reales)
+        /// Lista completa para dropdown (sin tracking).
         /// </summary>
         public List<AutorizanteEF> ListarParaDDL()
         {
@@ -108,9 +58,7 @@ namespace Negocio
             {
                 return context.Autorizantes
                     .AsNoTracking()
-                    .Where(a => context.Obras
-                        .Where(o => o.AreaId == usuario.AreaId && a.ObraId == o.Id)
-                        .Any())
+                    .Where(a => context.Obras.Any(o => o.AreaId == usuario.AreaId && a.ObraId == o.Id))
                     .ToList();
             }
         }
@@ -144,9 +92,7 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                return context.Autorizantes
-                    .AsNoTracking()
-                    .FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
+                return context.Autorizantes.AsNoTracking().FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
             }
         }
 
@@ -179,8 +125,7 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                // Buscamos por ID con FirstOrDefault en lugar de Find porque en este modelo, el primary key es codigo autorizante.
-                return context.Autorizantes.FirstOrDefault(aef => aef.Id == id);
+                return context.Autorizantes.FirstOrDefault(a => a.Id == id);
             }
         }
 
@@ -277,53 +222,21 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Elimina un autorizante específico por su código.
-        /// 
-        /// OPERACIÓN DELETE:
-        /// 1. Busca autorizante por CodigoAutorizante
-        /// 2. Si existe, lo marca para eliminación
-        /// 3. SaveChanges() ejecuta DELETE en BD
-        /// 
-        /// VALIDACIONES:
-        /// - Verifica existencia antes de eliminar
-        /// - Constraints FK pueden prevenir eliminación
-        /// - Referencias desde otras tablas deben resolverse primero
-        /// 
-        /// CONSIDERACIONES DE INTEGRIDAD:
-        /// - Si hay certificados vinculados, la eliminación fallará
-        /// - Considerar "soft delete" para datos históricos importantes
-        /// - Algunos autorizantes pueden requerir retención por auditoria
-        /// 
-        /// PARÁMETROS:
-        /// - codigoAutorizante: string - Código del autorizante a eliminar
-        /// 
-        /// RETORNO:
-        /// - true: Autorizante eliminado correctamente
-        /// - false: Autorizante no encontrado o error en eliminación
-        /// 
-        /// USO TÍPICO:
-        /// - Limpieza de datos de prueba
-        /// - Eliminación de autorizantes erróneamente creados
-        /// - Procesos de mantenimiento de datos
-        /// 
-        /// ALTERNATIVAS:
-        /// - Considerar desactivación en lugar de eliminación física
-        /// - Implementar soft delete para mantener historial
-        /// </summary>
-        public bool Eliminar(string codigoAutorizante)
+
+        public bool Eliminar(int id)
         {
             using (var context = new IVCdbContext())
             {
-                var autorizante = context.Autorizantes
-                    .FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
-                
-                if (autorizante != null)
-                {
-                    context.Autorizantes.Remove(autorizante);
-                    return context.SaveChanges() > 0;
-                }
-                return false;
+                var autorizante = context.Autorizantes.FirstOrDefault(a => a.Id == id);
+                if (autorizante == null) return false;
+                // Evitar intentar borrar si hay dependencias (certificados o redeterminaciones)
+                bool tieneCertificados = context.Certificados.Any(c => c.CodigoAutorizante == autorizante.CodigoAutorizante);
+                if (tieneCertificados) return false;
+                bool tieneRedeterminaciones = context.Redeterminaciones.Any(r => r.CodigoAutorizante == autorizante.CodigoAutorizante);
+                if (tieneRedeterminaciones) return false;
+
+                context.Autorizantes.Remove(autorizante);
+                try { return context.SaveChanges() > 0; } catch { return false; }
             }
         }
 
@@ -386,27 +299,18 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                // Primero intentar buscar en autorizantes
-                var autorizante = context.Autorizantes
-                    .FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
-                
+                var autorizante = context.Autorizantes.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
                 if (autorizante != null)
                 {
                     autorizante.EstadoId = estadoId;
                     return context.SaveChanges() > 0;
                 }
-                
-                // Si no se encuentra en autorizantes, buscar en redeterminaciones
-                // Las redeterminaciones tienen códigos como "XXX-XXX-XXXX-R1"
-                var redeterminacion = context.Redeterminaciones
-                    .FirstOrDefault(r => r.CodigoRedet  == codigoAutorizante);
-                
-                if (redeterminacion != null)
+                var redet = context.Redeterminaciones.FirstOrDefault(r => r.CodigoRedet == codigoAutorizante);
+                if (redet != null)
                 {
-                    redeterminacion.EstadoRedetEFId = estadoId;
+                    redet.EstadoRedetEFId = estadoId;
                     return context.SaveChanges() > 0;
                 }
-                
                 return false;
             }
         }
@@ -458,18 +362,12 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                var autorizante = context.Autorizantes
-                    .FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
-                
-                if (autorizante != null)
-                {
-                    autorizante.Expediente = expediente;
-                    return context.SaveChanges() > 0;
-                }
-                return false;
+                var autorizante = context.Autorizantes.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
+                if (autorizante == null) return false;
+                autorizante.Expediente = expediente;
+                return context.SaveChanges() > 0;
             }
         }
-
         #endregion
     }
 }
