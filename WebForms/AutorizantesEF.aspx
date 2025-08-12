@@ -110,7 +110,8 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtMesAprobacionAgregar" class="form-label">Mes Aprobación</label>
-                                        <asp:TextBox ID="txtMesAprobacionAgregar" CssClass="form-control" runat="server" TextMode="Date" />
+                                            <asp:TextBox ID="txtMesAprobacionAgregar" CssClass="form-control" runat="server" TextMode="Date" />
+                                            <asp:RequiredFieldValidator ID="rfvMesAprobacionAgregar" runat="server" ControlToValidate="txtMesAprobacionAgregar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="AgregarAutorizante" />
                                     </div>
                                 </div>
 
@@ -240,7 +241,8 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtMesAprobacionEditar" class="form-label">Mes Aprobación</label>
-                                        <asp:TextBox ID="txtMesAprobacionEditar" CssClass="form-control" runat="server" TextMode="Date" />
+                                            <asp:TextBox ID="txtMesAprobacionEditar" CssClass="form-control" runat="server" TextMode="Date" />
+                                            <asp:RequiredFieldValidator ID="rfvMesAprobacionEditar" runat="server" ControlToValidate="txtMesAprobacionEditar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="EditarAutorizante" />
                                     </div>
                                 </div>
 
