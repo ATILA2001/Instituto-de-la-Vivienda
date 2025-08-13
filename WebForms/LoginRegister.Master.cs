@@ -42,9 +42,8 @@ namespace WebForms
 
             var authType = HttpContext.Current.User.Identity.AuthenticationType;
 
-            Debug.WriteLine("httpContext authenticated!!!!!!!!!" + HttpContext.Current.User.Identity.IsAuthenticated);
+            Debug.WriteLine("httpContext authenticated!!! contexto " + HttpContext.Current.User.Identity.IsAuthenticated);
             Debug.WriteLine("Página cargada: " + DateTime.Now);
-            Debug.WriteLine("Authenticacion levantada: " + authType);
 
             if (HttpContext.Current.User.Identity.IsAuthenticated && 
                 (authType == "NTLM" || authType == "Kerberos" || authType == "Negotiate"))
@@ -72,6 +71,7 @@ namespace WebForms
                         Session.Add("Usuario", usuario);
                         if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                         {
+                            Debug.WriteLine("Next page BdProyectos.aspx: " + DateTime.Now);
                             Response.Redirect("BdProyectos.aspx", false);
                         }
                         else
@@ -80,10 +80,13 @@ namespace WebForms
                             {
                                 if (((Dominio.Usuario)Session["Usuario"]).Area != null && ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
                                 {
+                                    Debug.WriteLine("Next page Redeterminaciones.aspx: " + DateTime.Now);
+
                                     Response.Redirect("Redeterminaciones.aspx", false);
                                 }
                                 else
                                 {
+                                    Debug.WriteLine("Next page Obras.aspx: " + DateTime.Now);
                                     Response.Redirect("Obras.aspx", false);
                                 }
                             }

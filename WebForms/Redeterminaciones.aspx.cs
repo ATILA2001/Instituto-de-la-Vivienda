@@ -3,6 +3,7 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -21,12 +22,14 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            Debug.WriteLine("Página Redeterminacion cargada: " + DateTime.Now);
             if (!IsPostBack)
             {
                 // Force complete reload on initial page load
                 CargarListaRedeterminacion(null, true);
                 BindDropDownList();
             }
+            
         }
 
         protected void Page_PreRender(object sender, EventArgs e)
