@@ -8,7 +8,7 @@
 		<div class="card" style="width: 100%; max-width: 1200px;">
 			<div class="row g-0 h-100">
 				<!-- Left panel -->
-				<div class="col-md-4 text-white bg-dark d-flex flex-column justify-content-center">
+				<div class="col-md-4 text-white bg-dark d-flex flex-column justify-content-center rounded-2">
 					<div class="p-4 p-md-5 text-center">
 						<div class="mb-5 d-flex justify-content-center align-items-center">
 							<img src="Images/IVC-Blanco.png" alt="Logo" class="img-fluid" />
