@@ -17,6 +17,13 @@ namespace WebForms
     {
         protected void Page_Init(object sender, EventArgs e)
         {
+            // Skip authentication for certain pages
+            string currentPage = System.IO.Path.GetFileName(Request.Url.AbsolutePath);
+            if (currentPage.Equals("LogoutConfirmation.aspx", StringComparison.OrdinalIgnoreCase) ||
+                currentPage.Equals("Error.aspx", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
 
             if (!IsPostBack)
             {

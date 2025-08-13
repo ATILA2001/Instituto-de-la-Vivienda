@@ -5,7 +5,7 @@ using System.Web.UI;
 
 namespace WebForms
 {
-    public partial class Logout : System.Web.UI.Page
+    public partial class LogoutConfirmation : System.Web.UI.Page  // Changed from Logout
     {
         protected void Page_Load(object sender, EventArgs e)
         {
