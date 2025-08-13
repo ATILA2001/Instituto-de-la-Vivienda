@@ -22,7 +22,6 @@
                     <div class="p-4 p-md-5">
                         <h2 class="mb-4">Registro de usuario</h2>
                         <asp:Panel runat="server">
-                            <ContentTemplate>
                                 <div class="row" style="max-height: 450px; overflow-y: auto;">
                                     <div class="col-md-6 mb-3">
                                         <div class="form-label-container">
@@ -41,12 +40,7 @@
                                             CssClass="text-danger small"
                                             Display="Dynamic"
                                             runat="server" />
-                                        <asp:RegularExpressionValidator
-                                            ID="revNombre"
-                                            ControlToValidate="txtNombre"
-                                            CssClass="text-danger small"
-                                            Display="Dynamic"
-                                            runat="server" />
+                                        
                                     </div>
 
                                     <div class="col-md-6 mb-3">
@@ -88,12 +82,7 @@
                                             CssClass="text-danger small"
                                             Display="Dynamic"
                                             runat="server" />
-                                        <asp:RegularExpressionValidator
-                                            ID="revEmail"
-                                            ControlToValidate="txtEmail"
-                                            CssClass="text-danger small"
-                                            Display="Dynamic"
-                                            runat="server" />
+                                       
                                     </div>
 
                                     <div class="col-md-6 mb-3">
@@ -143,12 +132,7 @@
                                             CssClass="text-danger small"
                                             Display="Dynamic"
                                             runat="server" />
-                                        <asp:RegularExpressionValidator
-                                            ID="revContrasenia"
-                                            ControlToValidate="txtPass"
-                                            CssClass="text-danger small"
-                                            Display="Dynamic"
-                                            runat="server" />
+                                       
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
@@ -190,7 +174,6 @@
                                     <a href="Login.aspx" class="access" style="margin-right: auto;">Volver a iniciar sesión</a>
                                     <asp:Button ID="Button2" Text="Registrar" runat="server" OnClick="btnRegistrar_Click" CssClass="btn btn-primary"/>
                                 </div>
-                            </ContentTemplate>
                         </asp:Panel>
                     </div>
                 </div>

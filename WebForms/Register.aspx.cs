@@ -45,7 +45,7 @@ namespace WebForms
                 negocio.Logear(nuevo);
                 Session["usuario"] = nuevo;
 
-                if (nuevo.Tipo) 
+                if (nuevo.Tipo & nuevo.Estado) 
                 { 
                     Response.Redirect("BdProyectos.aspx", false);
                 }
@@ -57,14 +57,14 @@ namespace WebForms
                     }
                     else
                     {
-                        lblMensaje.Text = "Usuario registrado exitosamente, pero no está habilitado para ingresar. Solicite acceso al área correspondiente.";
+                        lblMensaje.Text = "Usuario registrado. Pendiente de habilitación.";
                         lblMensaje.CssClass = "alert alert-info";
                     }
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al registrar el usuario. Por favor intente nuevamente.";
+                lblMensaje.Text = "Error al registrar el usuario. Por favor intente nuevamente." + ex;
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
@@ -81,7 +81,7 @@ namespace WebForms
                 ddlAreas.DataValueField = "Id";
                 ddlAreas.DataBind();
 
-                ddlAreas.Items.Insert(0, new ListItem("-- Seleccionar Área --", "0"));
+                ddlAreas.Items.Insert(0, new ListItem("Seleccione un área", "0"));
             }
             catch (Exception ex)
             {
