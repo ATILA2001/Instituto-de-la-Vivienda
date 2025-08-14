@@ -34,8 +34,8 @@
                 ShowCheckBoxes="All"
                 ShowLines="false"
                 CssClass="date-tree-view"
-                CollapseImageUrl="~/CustomControls/chevron-down.svg"
-                ExpandImageUrl="~/CustomControls/chevron-right.svg">
+                CollapseImageUrl="~/CustomControls/TreeViewSearch/chevron-down.svg"
+                ExpandImageUrl="~/CustomControls/TreeViewSearch/chevron-right.svg">
             </asp:TreeView>
 
         </div>

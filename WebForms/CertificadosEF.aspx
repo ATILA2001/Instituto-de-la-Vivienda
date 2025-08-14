@@ -1,6 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="CertificadosEF.aspx.cs" Inherits="WebForms.CertificadosEF" %>
 
-<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -61,18 +62,18 @@
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMontoAutorizado" class="form-label">Monto Autorizado</label>
-                                        <asp:TextBox ID="txtMontoAutorizado" CssClass="form-control" runat="server" placeHolder="0,00" />
-                                        <asp:RequiredFieldValidator ID="rfvMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <label for="txtMontoCertificado" class="form-label">Monto Certificado</label>
+                                        <asp:TextBox ID="txtMontoCertificado" CssClass="form-control" runat="server" placeHolder="0,00" />
+                                        <asp:RequiredFieldValidator ID="rfvMontoCertificado"
+                                            ControlToValidate="txtMontoCertificado"
                                             ValidationGroup="AgregarCertificado"
                                             runat="server"
                                             ErrorMessage="El monto es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMontoAutorizado"
-                                            ControlToValidate="txtMontoAutorizado"
+                                        <asp:RegularExpressionValidator ID="revMontoCertificado"
+                                            ControlToValidate="txtMontoCertificado"
                                             ValidationGroup="AgregarCertificado"
                                             runat="server"
                                             ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
@@ -114,15 +115,7 @@
 
     <div class="row mt-4 mb-3">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
-                <!-- Contenedor de Filtros alineados a la izquierda -->
-                <div class="d-flex flex-wrap gap-3">
-
-                    <div class="form-group mb-2">
-                        <label class="form-label ms-2 mb-0" for="txtSubtotal">Subtotal:</label>
-                        <asp:TextBox ID="txtSubtotal" runat="server" CssClass="form-control form-control-uniform" ReadOnly="true" />
-                    </div>
-                </div>
+            <div class="d-flex justify-content-end align-items-end flex-wrap gap-3">
 
                 <!-- Contenedor de Botones alineados a la derecha -->
                 <div class="d-flex gap-3">
@@ -171,7 +164,7 @@
             <asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1  table-bordered table-hover  mb-4"
                 OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
                 OnRowDeleting="gridviewRegistros_RowDeleting"
-                OnPageIndexChanging="gridviewRegistros_PageIndexChanging"
+                OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false"
                 AllowPaging="false"
@@ -352,68 +345,10 @@
             </asp:GridView>
         </div>
 
-        <!-- Controles de paginación independientes -->
-        <div class="pagination-controls-container bg-light p-3 border rounded">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Controles de paginación a la izquierda -->
-                <div class="d-flex align-items-center gap-1">
-                    <!-- Primera página -->
-                    <asp:LinkButton ID="lnkFirst" runat="server" OnClick="lnkFirst_Click"
-                        CssClass="btn btn-sm btn-outline-primary" ToolTip="Primera página">
-					<i class="bi bi-chevron-double-left"></i>
-                    </asp:LinkButton>
-
-                    <!-- Página anterior -->
-                    <asp:LinkButton ID="lnkPrev" runat="server" OnClick="lnkPrev_Click"
-                        CssClass="btn btn-sm btn-outline-primary" ToolTip="Página anterior">
-					<i class="bi bi-chevron-left"></i>
-                    </asp:LinkButton>
-
-                    <!-- Botones de páginas estáticos -->
-                    <asp:LinkButton ID="lnkPage1" runat="server" OnClick="lnkPage_Click" CommandArgument="0" CssClass="btn btn-sm btn-outline-primary mx-1" Text="1" ToolTip="Ir a página 1" />
-                    <asp:LinkButton ID="lnkPage2" runat="server" OnClick="lnkPage_Click" CommandArgument="1" CssClass="btn btn-sm btn-outline-primary mx-1" Text="2" ToolTip="Ir a página 2" />
-                    <asp:LinkButton ID="lnkPage3" runat="server" OnClick="lnkPage_Click" CommandArgument="2" CssClass="btn btn-sm btn-outline-primary mx-1" Text="3" ToolTip="Ir a página 3" />
-                    <asp:LinkButton ID="lnkPage4" runat="server" OnClick="lnkPage_Click" CommandArgument="3" CssClass="btn btn-sm btn-outline-primary mx-1" Text="4" ToolTip="Ir a página 4" />
-                    <asp:LinkButton ID="lnkPage5" runat="server" OnClick="lnkPage_Click" CommandArgument="4" CssClass="btn btn-sm btn-outline-primary mx-1" Text="5" ToolTip="Ir a página 5" />
-
-
-                    <!-- Página siguiente -->
-                    <asp:LinkButton ID="lnkNext" runat="server" OnClick="lnkNext_Click"
-                        CssClass="btn btn-sm btn-outline-primary" ToolTip="Página siguiente">
-					<i class="bi bi-chevron-right"></i>
-                    </asp:LinkButton>
-
-                    <!-- Última página -->
-                    <asp:LinkButton ID="lnkLast" runat="server" OnClick="lnkLast_Click"
-                        CssClass="btn btn-sm btn-outline-primary" ToolTip="Última página">
-					<i class="bi bi-chevron-double-right"></i>
-                    </asp:LinkButton>
-
-                    <!-- Info de página -->
-                    <span class="mx-2 small text-muted">
-                        <asp:Label ID="lblPaginaInfo" runat="server" Text="Página 1 de 1" />
-                    </span>
-                </div>
-
-                <!-- Centro: Subtotal -->
-                <div class="text-center">
-                    <asp:Label ID="lblSubtotalPaginacion" runat="server" Text="Total: $0.00 (0 registros)" CssClass="badge text-dark fs-6" />
-                </div>
-
-                <!-- Dropdown de registros por página a la derecha -->
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 small">Registros por página:</label>
-                    <asp:DropDownList ID="ddlPageSizeExternal" runat="server" CssClass="form-select form-select-sm" AutoPostBack="true" OnSelectedIndexChanged="ddlPageSizeExternal_SelectedIndexChanged" Style="width: auto;">
-                        <asp:ListItem Value="12" Text="12" Selected="true"></asp:ListItem>
-                        <asp:ListItem Value="24" Text="24"></asp:ListItem>
-                        <asp:ListItem Value="25" Text="25"></asp:ListItem>
-                        <asp:ListItem Value="48" Text="48"></asp:ListItem>
-                        <asp:ListItem Value="96" Text="96"></asp:ListItem>
-                        <asp:ListItem Value="192" Text="192"></asp:ListItem>
-                    </asp:DropDownList>
-                </div>
-            </div>
-        </div>
+        <!-- Control de paginación reutilizable -->
+        <CustomControls:PaginationControl ID="paginationControl" runat="server" 
+            OnPageChanged="paginationControl_PageChanged" 
+            OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
         <div class="text-center p-4">
             <asp:Label ID="lblMensaje" Text="" runat="server" />
@@ -424,7 +359,7 @@
     <script type="text/javascript">
         function limpiarFormulario() {
             document.getElementById('<%= txtExpediente.ClientID %>').value = '';
-            document.getElementById('<%= txtMontoAutorizado.ClientID %>').value = '';
+            document.getElementById('<%= txtMontoCertificado.ClientID %>').value = '';
             document.getElementById('<%= txtFecha.ClientID %>').value = '';
             document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlTipo.ClientID %>').selectedIndex = 0;

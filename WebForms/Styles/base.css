@@ -1,15 +1,18 @@
 :root {
-/*	colores institucionales*/
-	--inst-blue: #153244;
-	--inst-cyan: #8DE2D6;
-	--inst-white: #FCFCFC;
-	--inst-yellow: #FFCC00;
-	--inst-gray: #3C3C3B;
+    /*	colores institucionales*/
+    --inst-blue: #153244;
+    --inst-cyan: #8DE2D6;
+    --inst-white: #FCFCFC;
+    --inst-yellow: #FFCC00;
+    --inst-gray: #3C3C3B;
 
-/*	colores de botones de bootstrap*/
+    /* --- Colores base --- */
     --bs-primary: var(--inst-blue);
-	--bs-secondary: var(--inst-cyan);
+    --bs-secondary: var(--inst-cyan);
+
 }
+
+
 
 /* Iconos de Bootstrap */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");

@@ -102,11 +102,12 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="CustomControls\TreeViewSearch.ascx" />
-    <Content Include="CustomControls\chevron-down.svg" />
-    <Content Include="CustomControls\chevron-right.svg" />
-    <Content Include="CustomControls\TreeViewSearch.css" />
-    <Content Include="CustomControls\TreeViewSearch.js" />
+    <Content Include="CustomControls\PaginationControl\PaginationControl.ascx" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.ascx" />
+    <Content Include="CustomControls\TreeViewSearch\chevron-down.svg" />
+    <Content Include="CustomControls\TreeViewSearch\chevron-right.svg" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.css" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
     <Content Include="Formulacion.aspx" />
     <Content Include="FormulacionAdmin.aspx" />
@@ -234,7 +235,14 @@
     <Compile Include="CertificadosEF.aspx.designer.cs">
       <DependentUpon>CertificadosEF.aspx</DependentUpon>
     </Compile>
-    <Compile Include="CustomControls\TreeViewSearch.ascx.cs">
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.designer.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\TreeViewSearch\TreeViewSearch.ascx.cs">
       <DependentUpon>TreeViewSearch.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

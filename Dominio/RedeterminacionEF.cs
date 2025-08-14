@@ -10,16 +10,7 @@ namespace Dominio
     {
         [Key]
         public int Id { get; set; }
-
-
-
-
-        // CORRECCIÓN: Se elimina la propiedad de navegación directa a Obra.
-        // Esta propiedad es redundante (se puede acceder a través de Redeterminacion.Autorizante.Obra)
-        // y su falta de una clave foránea explícita causaba un conflicto en la generación del modelo de EF.
-        // public virtual ObraEF Obra { get; set; }
         
-        [ForeignKey("CodigoAutorizante")]
         public virtual AutorizanteEF Autorizante { get; set; }
 
         [Column("CODIGO_AUTORIZANTE")]

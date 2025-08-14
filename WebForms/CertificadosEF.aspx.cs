@@ -27,30 +27,25 @@ namespace WebForms
         #endregion
 
         #region Variables de Paginación Externa
-        
+
         /// <summary>
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
         private int currentPageIndex = 0;
-        
+
         /// <summary>
         /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
         /// Se mantiene en ViewState para persistir la preferencia del usuario.
         /// </summary>
         private int pageSize = 12;
-        
+
         /// <summary>
         /// Total de registros disponibles según filtros actuales.
         /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
         /// </summary>
         private int totalRecords = 0;
-        
-        /// <summary>
-        /// Total de páginas calculado a partir de totalRecords / pageSize.
-        /// Se recalcula automáticamente cuando cambian los totales o el tamaño de página.
-        /// </summary>
-        private int totalPages = 0;
+
 
         #endregion
 
@@ -65,23 +60,27 @@ namespace WebForms
             // Cargar valores de paginación desde ViewState
             currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
             pageSize = (int)(ViewState["PageSize"] ?? 12);
-            
+
             if (!IsPostBack)
             {
                 CargarListaCertificadosCompleta();
                 BindDropDownList();
-                ActualizarControlesPaginacion();
+                ConfigurarPaginationControl();
             }
             else
             {
                 // En postback, actualizar controles de paginación
-                ActualizarControlesPaginacion();
+                var paginationControl = FindControlRecursive(this, "paginationControl") as CustomControls.PaginationControl;
+                if (paginationControl != null)
+                {
+                    paginationControl.UpdatePaginationControls();
+                }
             }
         }
 
         #endregion
 
-        #region Métodos de Paginación (replicados exactamente desde AutorizantesAdminEF)
+        #region Métodos de Paginación
         /// <summary>
         /// Método central que carga datos paginados de certificados y reliquidaciones.
         /// 
@@ -108,17 +107,17 @@ namespace WebForms
             try
             {
                 // Obtener usuario actual
-                UsuarioEF usuario = ObtenerUsuarioActual();
+                UsuarioEF usuario = UserHelper.GetFullCurrentUser();
 
                 // REGRESANDO A CARGA COMPLETA: necesaria para todos los campos calculados (Contrata, Proyecto, SIGAF, SADE, etc.)
                 // OPTIMIZACIÓN: Solo cargar si no están en cache
                 List<CertificadoDTO> todoLosCertificados;
-                
+
                 if (Session["GridData"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    UsuarioEF usuarioActual = ObtenerUsuarioActual();
+                    UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                     todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
-                    
+
                     // Guardar en cache
                     Session["GridData"] = todoLosCertificados;
                     ViewState["NecesitaRecarga"] = null;
@@ -127,55 +126,22 @@ namespace WebForms
                 {
                     todoLosCertificados = (List<CertificadoDTO>)Session["GridData"];
                 }
-                
+
                 // Calcular total de registros
                 int totalRegistros = todoLosCertificados?.Count ?? 0;
-                
-                // Guardar total en ViewState
-                ViewState["TotalRecords"] = totalRegistros;
-                totalRecords = totalRegistros;
-                Session["TotalRegistros"] = totalRegistros;
 
-                // Usar BindGrid para paginación en memoria (mantiene todos los campos)
+                // Guardar total en ViewState
+                totalRecords = totalRegistros;
+
+                // Usar BindGrid para paginación en memoria
                 BindGrid();
             }
             catch (Exception ex)
             {
-                
+
                 lblMensaje.Text = $"Error al cargar certificados: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
             }
-        }
-
-        private UsuarioEF ObtenerUsuarioActual()
-        {
-            // Implementar según la lógica de sesión del sistema
-            // Replicado desde AutorizantesAdminEF
-            if (Session["Usuario"] != null)
-            {
-                var usuarioTradicional = (Usuario)Session["Usuario"];
-                return new UsuarioEF 
-                { 
-                    Id = usuarioTradicional.Id,
-                    Nombre = usuarioTradicional.Nombre,
-                    Correo = usuarioTradicional.Correo,
-                    Tipo = usuarioTradicional.Tipo, // true: Administrador, false: Usuario normal
-                    Estado = usuarioTradicional.Estado,
-                    AreaId = usuarioTradicional.Area?.Id ?? 0,
-                };
-            }
-            
-            // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
-            // (sin filtro de área)
-            return new UsuarioEF
-            {
-                Id = 0,
-                Nombre = "Usuario null",
-                Correo = null,
-                Tipo = false, // Usuario normal por defecto
-                Estado = false,
-                AreaId = 0, // 0 significa sin filtro de área
-            };
         }
 
         /// <summary>
@@ -207,7 +173,7 @@ namespace WebForms
             // Aplicar filtros de las columnas (TreeView)
             datosEnMemoria = AplicarFiltrosTreeViewEnMemoria(datosEnMemoria);
 
-            // Configurar paginación - EXACTAMENTE IGUAL que AutorizantesAdminEF
+            // Configurar paginación
             int totalFiltrados = datosEnMemoria.Count;
             gridviewRegistros.VirtualItemCount = totalFiltrados;
             gridviewRegistros.PageSize = pageSize;
@@ -222,7 +188,7 @@ namespace WebForms
             // Actualizar totalRecords y paginación según los datos filtrados
             totalRecords = totalFiltrados;
             ViewState["TotalRecords"] = totalFiltrados;
-            ActualizarControlesPaginacion();
+            ConfigurarPaginationControl();
 
             // Recalcular subtotal después de aplicar filtros
             CalcularSubtotal();
@@ -237,9 +203,9 @@ namespace WebForms
         {
             try
             {
-                // OPTIMIZACIÓN: Usar datos del caché en lugar de hacer nueva consulta DB
+                // Usa datos del caché en lugar de hacer nueva consulta DB
                 List<CertificadoDTO> todosLosRegistros;
-                
+
                 // Intentar obtener datos del caché primero
                 if (Session["GridData"] != null)
                 {
@@ -247,12 +213,12 @@ namespace WebForms
                 }
                 else
                 {
-                    // Solo si no hay caché, consultar BD (caso excepcional)
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    // Solo si no hay caché, consultar BD
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosRegistros = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
-                
-                // Aplicar filtro de texto general si existe
+
+                // Aplica filtro de texto general si existe
                 string filtro = txtBuscar.Text.Trim().ToLower();
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -267,36 +233,23 @@ namespace WebForms
                     ).ToList();
                 }
 
-                // Aplicar filtros de TreeView (filtros de columnas)
+                // Aplica filtros de TreeView (filtros de columnas)
                 todosLosRegistros = AplicarFiltrosTreeViewEnMemoria(todosLosRegistros);
 
                 // Calcular el total de los registros filtrados
                 decimal totalMonto = todosLosRegistros.Sum(c => c.MontoTotal);
                 int cantidadRegistros = todosLosRegistros.Count;
 
-                // Actualizar etiqueta de subtotal en el control existente
-                if (txtSubtotal != null)
-                {
-                    txtSubtotal.Text = totalMonto.ToString("C", CultureInfo.GetCultureInfo("es-AR"));
-                }
-                
                 // Actualizar label de subtotal en paginación si existe
-                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
-                if (lblSubtotalPaginacion != null)
+                if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
                     lblSubtotalPaginacion.Text = $"Total: {totalMonto:C} ({cantidadRegistros} registros)";
                 }
             }
             catch (Exception)
             {
-                // En caso de error, mostrar información básica
-                if (txtSubtotal != null)
-                {
-                    txtSubtotal.Text = "$0,00";
-                }
-                
-                var lblSubtotalPaginacion = FindControlRecursive(this, "lblSubtotalPaginacion") as Label;
-                if (lblSubtotalPaginacion != null)
+
+                if (FindControlRecursive(this, "lblSubtotalPaginacion") is Label lblSubtotalPaginacion)
                 {
                     lblSubtotalPaginacion.Text = "Total: Error al calcular";
                 }
@@ -305,141 +258,58 @@ namespace WebForms
 
         private void CargarPaginaActual()
         {
-            // Guardar el estado actual en ViewState
+            // Guarda el estado actual en ViewState
             ViewState["CurrentPageIndex"] = currentPageIndex;
             ViewState["PageSize"] = pageSize;
-            
-            // Cargar los datos
+
             CargarListaCertificadosCompleta();
-            
-            // Actualizar controles de paginación
-            ActualizarControlesPaginacion();
+
+            ConfigurarPaginationControl();
         }
 
         /// <summary>
-        /// Actualiza todos los controles de paginación externa basándose en el estado actual.
-        /// Replicado exactamente desde AutorizantesAdminEF.
+        /// Configura el PaginationControl con la información actual de paginación
         /// </summary>
-        private void ActualizarControlesPaginacion()
+        private void ConfigurarPaginationControl()
         {
-            // Obtener valores actuales
-            totalRecords = (int)(ViewState["TotalRecords"] ?? 0);
-            totalPages = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / pageSize) : 1;
-            
-            // Buscar y actualizar controles dinámicamente hasta que se regenere el designer
-            var lblPaginaInfo = FindControlRecursive(this, "lblPaginaInfo") as Label;
-            if (lblPaginaInfo != null)
+
+            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
+            if (paginationControl != null)
             {
-                lblPaginaInfo.Text = $"Página {currentPageIndex + 1} de {totalPages}";
+                // Configura las propiedades del control
+                paginationControl.TotalRecords = totalRecords;
+                paginationControl.CurrentPageIndex = currentPageIndex;
+                paginationControl.PageSize = pageSize;
+                paginationControl.UpdatePaginationControls();
+
+                // Actualizar subtotal para el control
+                CalcularSubtotalParaPaginationControl();
             }
-            
-            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
-            if (ddlPageSizeExternal != null)
-            {
-                ddlPageSizeExternal.SelectedValue = pageSize.ToString();
-            }
-            
-            // Actualizar el label de subtotal en la paginación si existe
-            // NOTA: No calcular subtotal aquí porque solo tenemos los datos de la página actual.
-            // El subtotal correcto se calcula en CalcularSubtotal() que usa todos los registros.
-            
-            // Controlar visibilidad y estado de botones
-            var lnkFirst = FindControlRecursive(this, "lnkFirst") as LinkButton;
-            if (lnkFirst != null)
-            {
-                lnkFirst.Enabled = currentPageIndex > 0;
-                lnkFirst.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkPrev = FindControlRecursive(this, "lnkPrev") as LinkButton;
-            if (lnkPrev != null)
-            {
-                lnkPrev.Enabled = currentPageIndex > 0;
-                lnkPrev.CssClass = currentPageIndex > 0 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkNext = FindControlRecursive(this, "lnkNext") as LinkButton;
-            if (lnkNext != null)
-            {
-                lnkNext.Enabled = currentPageIndex < totalPages - 1;
-                lnkNext.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            var lnkLast = FindControlRecursive(this, "lnkLast") as LinkButton;
-            if (lnkLast != null)
-            {
-                lnkLast.Enabled = currentPageIndex < totalPages - 1;
-                lnkLast.CssClass = currentPageIndex < totalPages - 1 ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            }
-            
-            // Configurar botones numerados
-            ConfigurarBotonesNumerados();
         }
 
         /// <summary>
-        /// Configura los botones numerados de paginación.
-        /// Actualizado para funcionar dinámicamente con cualquier cantidad de botones.
+        /// Calcula y actualiza el subtotal en el PaginationControl
         /// </summary>
-        private void ConfigurarBotonesNumerados()
+        private void CalcularSubtotalParaPaginationControl()
         {
-            string[] pageButtonIds = { "lnkPage1", "lnkPage2", "lnkPage3", "lnkPage4", "lnkPage5" };
-            int totalButtons = pageButtonIds.Length;
-            
-            // Calcular rango de páginas a mostrar
-            int buttonsToShow = Math.Min(totalButtons, totalPages);
-            int startPage, endPage;
-            
-            if (totalPages <= totalButtons)
+            try
             {
-                // Si hay menos páginas que botones, mostrar todas
-                startPage = 0;
-                endPage = totalPages - 1;
-            }
-            else
-            {
-                // Lógica de centrado: intentar poner el botón actual en el centro
-                int centerPosition = totalButtons / 2; // Posición central calculada dinámicamente
-                startPage = Math.Max(0, currentPageIndex - centerPosition);
-                endPage = Math.Min(totalPages - 1, startPage + totalButtons - 1);
-                
-                // Ajustar si nos quedamos cortos al final
-                if (endPage - startPage + 1 < totalButtons && totalPages >= totalButtons)
+                if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
                 {
-                    startPage = Math.Max(0, endPage - totalButtons + 1);
+                    List<CertificadoDTO> datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                    var subtotal = datosFiltradosActuales.Sum(c => c.MontoTotal);
+                    var cantidad = datosFiltradosActuales.Count;
+
+                    paginationControl.UpdateSubtotal(subtotal, cantidad);
                 }
             }
-            
-            // Configurar cada botón
-            for (int i = 0; i < totalButtons; i++)
+            catch (Exception ex)
             {
-                var pageButton = FindControlRecursive(this, pageButtonIds[i]) as LinkButton;
-                if (pageButton != null)
-                {
-                    int pageIndex = startPage + i;
-                    
-                    if (i < buttonsToShow && pageIndex <= endPage && pageIndex < totalPages)
-                    {
-                        pageButton.Text = (pageIndex + 1).ToString();
-                        pageButton.CommandArgument = pageIndex.ToString();
-                        pageButton.Visible = true;
-                        
-                        if (pageIndex == currentPageIndex)
-                        {
-                            pageButton.CssClass = "btn btn-sm btn-primary mx-1";
-                        }
-                        else
-                        {
-                            pageButton.CssClass = "btn btn-sm btn-outline-primary mx-1";
-                        }
-                    }
-                    else
-                    {
-                        pageButton.Visible = false;
-                    }
-                }
+                System.Diagnostics.Debug.WriteLine("Error al calcular subtotal para PaginationControl: " + ex.Message);
             }
         }
-        
+
+
         /// <summary>
         /// Busca un control recursivamente en la jerarquía de controles.
         /// Método auxiliar para trabajar sin designer regenerado.
@@ -449,7 +319,7 @@ namespace WebForms
             if (root.ID == id)
                 return root;
 
-            foreach (Control control in root.Controls)
+            foreach (Control control in root.Controls.Cast<Control>())
             {
                 Control found = FindControlRecursive(control, id);
                 if (found != null)
@@ -481,55 +351,20 @@ namespace WebForms
             CargarPaginaActual(); // Cargar datos filtrados y paginados
         }
 
-        #region Eventos de Navegación de Paginación Externa (replicados desde AutorizantesAdminEF)
+        #region Eventos del Control de Paginación
 
-        protected void lnkFirst_Click(object sender, EventArgs e)
+        protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            currentPageIndex = 0;
+            currentPageIndex = e.PageIndex;
             CargarPaginaActual();
         }
 
-        protected void lnkPrev_Click(object sender, EventArgs e)
+        protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            if (currentPageIndex > 0)
-            {
-                currentPageIndex--;
-                CargarPaginaActual();
-            }
-        }
-
-        protected void lnkNext_Click(object sender, EventArgs e)
-        {
-            if (currentPageIndex < totalPages - 1)
-            {
-                currentPageIndex++;
-                CargarPaginaActual();
-            }
-        }
-
-        protected void lnkLast_Click(object sender, EventArgs e)
-        {
-            currentPageIndex = totalPages - 1;
+            pageSize = e.PageSize;
+            ViewState["PageSize"] = pageSize; // Guardar el nuevo tamaño de página en ViewState
+            currentPageIndex = 0; // Reiniciar a la primera página
             CargarPaginaActual();
-        }
-
-        protected void lnkPage_Click(object sender, EventArgs e)
-        {
-            LinkButton btn = (LinkButton)sender;
-            int pageIndex = int.Parse(btn.CommandArgument);
-            currentPageIndex = pageIndex;
-            CargarPaginaActual();
-        }
-
-        protected void ddlPageSizeExternal_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var ddlPageSizeExternal = FindControlRecursive(this, "ddlPageSizeExternal") as DropDownList;
-            if (ddlPageSizeExternal != null)
-            {
-                pageSize = int.Parse(ddlPageSizeExternal.SelectedValue);
-                currentPageIndex = 0; // Reiniciar a la primera página
-                CargarPaginaActual();
-            }
         }
 
         #endregion
@@ -538,9 +373,9 @@ namespace WebForms
         {
             try
             {
-                // OPTIMIZACIÓN: Usar datos del caché para exportación
+                // Usa datos del caché para exportación
                 List<CertificadoDTO> todosLosCertificados;
-                
+
                 if (Session["GridData"] != null)
                 {
                     todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
@@ -548,7 +383,7 @@ namespace WebForms
                 else
                 {
                     // Solo si no hay caché, consultar BD
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuario);
                 }
 
@@ -566,7 +401,7 @@ namespace WebForms
                         (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
                     ).ToList();
                 }
-                
+
                 todosLosCertificados = AplicarFiltrosTreeViewEnMemoria(todosLosCertificados);
 
                 // Definir mapeo de columnas
@@ -627,25 +462,42 @@ namespace WebForms
 
             try
             {
-                CertificadoEF certificado = new CertificadoEF
-                {
-                    ExpedientePago = txtExpediente.Text.Trim(),
-                    MontoTotal = decimal.Parse(txtMontoAutorizado.Text.Trim()),
-                    MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
-                    TipoPagoId = int.Parse(ddlTipo.SelectedValue)
-                };
-
                 bool resultado;
                 if (Session["EditingCertificadoId"] != null)
                 {
-                    certificado.Id = (int)Session["EditingCertificadoId"];
-                    resultado = negocio.Modificar(certificado);
+                    // Recupera el certificado existente y modifica sus propiedades
+                    int certificadoId = (int)Session["EditingCertificadoId"];
+                    CertificadoEF certificadoExistente = negocio.ObtenerPorId(certificadoId);
+
+                    if (certificadoExistente == null)
+                    {
+                        lblMensaje.Text = "Error: No se encontró el certificado a modificar.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                        return;
+                    }
+
+                    // Actualiza solo las propiedades editables
+                    certificadoExistente.ExpedientePago = txtExpediente.Text.Trim();
+                    certificadoExistente.MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim());
+                    certificadoExistente.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
+                    certificadoExistente.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
+
+                    resultado = negocio.Modificar(certificadoExistente);
                     lblMensaje.Text = resultado ? "Certificado modificado exitosamente!" : "Hubo un problema al modificar el certificado.";
                 }
                 else
                 {
-                    certificado.CodigoAutorizante = ddlAutorizante.SelectedItem.Text;
-                    resultado = negocio.Agregar(certificado);
+                    // Crea nuevo certificado con todas las propiedades
+                    CertificadoEF nuevoCertificado = new CertificadoEF
+                    {
+                        ExpedientePago = txtExpediente.Text.Trim(),
+                        MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim()),
+                        MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
+                        TipoPagoId = int.Parse(ddlTipo.SelectedValue),
+                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                    };
+
+                    resultado = negocio.Agregar(nuevoCertificado);
                     lblMensaje.Text = resultado ? "Certificado agregado exitosamente!" : "Hubo un problema al agregar el certificado.";
                 }
 
@@ -655,9 +507,13 @@ namespace WebForms
                 {
                     // Limpiar cache SADE ya que se agregó/modificó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    
+
+                    // Invalida caché para forzar recarga desde BD
+                    Session["GridData"] = null;
+                    ViewState["NecesitaRecarga"] = true;
+
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                    CargarPaginaActual(); // Usar método optimizado
+                    CargarPaginaActual(); // Recargará desde BD al no encontrar caché
                 }
             }
             catch (Exception ex)
@@ -671,67 +527,240 @@ namespace WebForms
         private void LimpiarFormulario()
         {
             txtExpediente.Text = string.Empty;
-            txtMontoAutorizado.Text = string.Empty;
+            txtMontoCertificado.Text = string.Empty;
             txtFecha.Text = string.Empty;
             ddlAutorizante.SelectedIndex = 0;
             ddlTipo.SelectedIndex = 0;
         }
 
-        #region Métodos Obsoletos Reemplazados por Paginación Optimizada
+
         /// <summary>
-        /// OBSOLETO: Reemplazado por CargarPaginaActual() para paginación optimizada.
-        /// Se mantiene para compatibilidad con código existente que aún lo llame.
+        /// Maneja la selección de filas en el GridView para editar certificados y reliquidaciones.
+        /// 
+        /// FUNCIONALIDAD:
+        /// - Permite editar certificados reales (TipoPagoId != 3) obtenidos de BD
+        /// - Permite editar reliquidaciones virtuales (TipoPagoId == 3) calculadas dinámicamente
+        /// - Carga datos del registro seleccionado en el modal de edición
+        /// - Configura la interfaz según el tipo de registro (certificado vs reliquidación)
+        /// 
+        /// FLUJO DE PROCESAMIENTO:
+        /// 1. Obtiene el índice de la fila seleccionada en la página actual del GridView
+        /// 2. Calcula el índice real considerando la paginación (página * tamaño + índice local)
+        /// 3. Recupera el registro desde los datos filtrados en memoria
+        /// 4. Valida si el registro es editable (ID > 0 para certificados, cualquier ID para reliquidaciones)
+        /// 5. Carga los datos en el formulario modal
+        /// 6. Configura la UI según el tipo de registro
+        /// 
+        /// TIPOS DE REGISTRO:
+        /// - Certificados (TipoPagoId != 3): Se obtienen de BD usando CertificadoNegocioEF.ObtenerPorId()
+        /// - Reliquidaciones (TipoPagoId == 3): Se editan directamente desde los datos calculados
+        /// 
+        /// CONFIGURACIÓN DE UI:
+        /// - Certificados: Oculta dropdown de autorizante (no editable), muestra título "Modificar Certificado"
+        /// - Reliquidaciones: Oculta dropdown de autorizante, muestra título "Modificar Reliquidación"
+        /// - Cambia texto del botón a "Actualizar" y título del modal dinámicamente
+        /// 
+        /// VALIDACIONES:
+        /// - Verifica que el índice esté dentro del rango de datos disponibles
+        /// - Solo permite edición de registros válidos (ID > 0 para certificados)
+        /// - Maneja errores de carga y muestra mensajes apropiados
+        /// 
+        /// MANEJO DE SESIÓN:
+        /// - Guarda IDs de edición en Session para uso en btnAgregar_Click
+        /// - Distingue entre certificados (EditingCertificadoId) y reliquidaciones (EditingReliquidacionId)
+        /// - Almacena código autorizante para contexto de edición
         /// </summary>
-        [Obsolete("Usar CargarPaginaActual() para mejor rendimiento con paginación real en BD")]
-        private void CargarGrillaCompleta()
-        {
-            CargarPaginaActual();
-        }
-
-        /// <summary>
-        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            // Este método ahora está obsoleto ya que usamos paginación externa
-            // Mantenemos por compatibilidad pero no hacemos nada
-            e.Cancel = true;
-        }
-        #endregion
-
-
-
-
         protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
+
             try
+
             {
-                int idCertificado = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
-                CertificadoEF certificadoSeleccionado;
-                using (var context = new IVCdbContext())
+
+                int rowIndex = gridviewRegistros.SelectedIndex;
+
+
+
+                // Obtener el registro desde los datos filtrados actuales
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+
+                if (datosFiltradosActuales == null || datosFiltradosActuales.Count == 0)
+
                 {
-                    // Se busca el certificado directamente en la base de datos.
-                    certificadoSeleccionado = context.Certificados.Find(idCertificado);
+
+                    lblMensaje.Text = "Error: No hay datos disponibles.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                    return;
+
                 }
 
-                if (certificadoSeleccionado != null)
+
+
+                // Calcular el índice real considerando la página actual
+
+                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
+
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+
                 {
-                    Session["EditingCertificadoId"] = idCertificado;
+
+                    lblMensaje.Text = "Error: Registro no encontrado.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                    return;
+
+                }
+
+
+
+                CertificadoDTO certificadoSeleccionado = datosFiltradosActuales[indiceReal];
+
+
+
+                // Verificar si es reliquidación (TipoPagoId == 3)
+
+                if (certificadoSeleccionado.TipoPagoId == 3)
+
+                {
+
+                    // Configurar para editar reliquidación
+
+                    Session["EditingTipoRegistro"] = "Reliquidacion";
+
+                    Session["EditingReliquidacionId"] = certificadoSeleccionado.IdReliquidacion;
+
+                    Session["EditingCodigoAutorizante"] = certificadoSeleccionado.CodigoAutorizante;
+
+
+
+                    // Cargar datos de la reliquidación
+
                     txtExpediente.Text = certificadoSeleccionado.ExpedientePago;
-                    txtMontoAutorizado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+
+                    txtMontoCertificado.Text = certificadoSeleccionado.MontoTotal.ToString("0.00");
+
                     txtFecha.Text = certificadoSeleccionado.MesAprobacion?.ToString("yyyy-MM-dd");
+
                     SelectDropDownListByValue(ddlTipo, certificadoSeleccionado.TipoPagoId.ToString());
 
+
+
+                    btnAgregar.Text = "Actualizar";
+
+
+
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
-                    $('#modalAgregar .modal-title').text('Modificar Certificado');
-                    $('#autorizanteContainer').hide();
-                    $('#modalAgregar').modal('show');", true);
+
+                                $(document).ready(function() {
+
+                                    $('#modalAgregar .modal-title').text('Modificar Reliquidación');
+
+                                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+                                    $('#autorizanteContainer').hide();
+
+                                    $('#modalAgregar').modal('show');
+
+                                });", true);
+
+
+
+                    return; // Salir del método después de configurar la reliquidación
+
                 }
+
+
+
+                // Buscar el certificado real en BD para edición
+
+                CertificadoEF certificadoEF;
+
+                using (var context = new IVCdbContext())
+
+                {
+
+                    certificadoEF = context.Certificados.Find(certificadoSeleccionado.Id);
+
+                }
+
+
+
+                if (certificadoEF != null)
+
+                {
+
+                    Session["EditingCertificadoId"] = certificadoSeleccionado.Id;
+
+                    txtExpediente.Text = certificadoEF.ExpedientePago;
+
+                    txtMontoCertificado.Text = certificadoEF.MontoTotal.ToString("0.00");
+
+                    txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
+
+                    SelectDropDownListByValue(ddlTipo, certificadoEF.TipoPagoId.ToString());
+
+
+
+                    // Actualizar el texto del botón
+
+                    btnAgregar.Text = "Actualizar";
+
+
+
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+
+                                $(document).ready(function() {
+
+                                    // Cambiar título y texto del botón
+
+                                    $('#modalAgregar .modal-title').text('Modificar Certificado');
+
+                                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+                                    
+
+                                    // Ocultar el dropdown de Autorizante y su etiqueta
+
+                                    $('#autorizanteContainer').hide();
+
+                                    
+
+                                    // Mostrar el modal
+
+                                    $('#modalAgregar').modal('show');
+
+                                });", true);
+
+                }
+
+                else
+
+                {
+
+                    lblMensaje.Text = "Error: No se pudo cargar el certificado para edición.";
+
+                    lblMensaje.CssClass = "alert alert-danger";
+
+                }
+
             }
+
             catch (Exception ex)
+
             {
+
                 lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
+
                 lblMensaje.CssClass = "alert alert-danger";
+
             }
+
         }
+
 
         private void SelectDropDownListByValue(DropDownList dropDown, string value)
         {
@@ -751,19 +780,43 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    
+
                     // Limpiar cache SADE ya que se eliminó un certificado
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    
-                    // Se recarga toda la grilla para reflejar la eliminación.
-                    CargarPaginaActual(); // Usar método optimizado
-                    //PoblarFiltrosHeader();
+
+                    // Eliminar registro específico del cache
+                    if (Session["GridData"] is List<CertificadoDTO> listaCache)
+                    {
+                        // Remover el registro del cache
+                        listaCache.RemoveAll(c => c.Id == id);
+
+                        // Actualizar totales
+                        ViewState["TotalRecords"] = listaCache.Count;
+                        totalRecords = listaCache.Count;
+                    }
+
+                    // Recargar vista con datos actualizados
+                    BindGrid();
+                    ConfigurarPaginationControl();
                 }
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al eliminar el certificado: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                var certificado = (CertificadoDTO)e.Row.DataItem;
+                if (certificado.IdReliquidacion > 0)
+                {
+                    if (e.Row.FindControl("btnModificar") is LinkButton btnEditar) btnEditar.Visible = false;
+                    if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = false;
+                }
             }
         }
 
@@ -831,17 +884,17 @@ namespace WebForms
             ddlTipo.DataTextField = "Nombre";
             ddlTipo.DataValueField = "Id";
             ddlTipo.DataBind();
-        }        
-        
+        }
+
         private void ObtenerAutorizantes()
         {
             AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
             ddlAutorizante.DataSource = autorizanteNegocio.ListarParaDDL();
-            ddlAutorizante.DataTextField = "CodigoAutorizante"; // Corregido: usar CodigoAutorizante en lugar de Nombre
+            ddlAutorizante.DataTextField = "CodigoAutorizante";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
-        }        
-        
+        }
+
         private void BindDropDownList()
         {
             try
@@ -887,7 +940,7 @@ namespace WebForms
                 List<CertificadoDTO> listaCompleta = Session["GridData"] as List<CertificadoDTO>;
 
                 bool resultado = false;
-                
+
                 // --- Lógica para expediente vacío ---
                 if (string.IsNullOrWhiteSpace(nuevoExpediente))
                 {
@@ -990,7 +1043,7 @@ namespace WebForms
                         }
                     }
                 }
-            
+
 
                 if (resultado)
                 {
@@ -1005,12 +1058,11 @@ namespace WebForms
 
 
 
-
                     // Recalcular todos los certificados afectados y guardar en BD
-                     calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(
-                        expedientesAfectados, 
-                        listaCompleta,
-                        persistirEnBD: false);
+                    calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(
+                       expedientesAfectados,
+                       listaCompleta,
+                       persistirEnBD: false);
 
                     // AQUI DEBEMOS ACTUALIZAR EL Session GridData con los certificados recalculados
 
@@ -1158,7 +1210,7 @@ namespace WebForms
                 if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && cblsHeaderProyecto.ExpandedSelectedValues.Any())
                 {
                     var selectedProyectoIds = getSelectedIds(cblsHeaderProyecto);
-                    
+
                     // Obtener todos los nombres de los proyectos seleccionados
                     using (var context = new IVCdbContext())
                     {
@@ -1174,7 +1226,7 @@ namespace WebForms
                             .Select(p => p.Id)
                             .Distinct()
                             .ToList();
-                        
+
                         data = data.Where(c => c.ProyectoId.HasValue && allMatchingProjectIds.Contains(c.ProyectoId.Value)).ToList();
                     }
                 }
@@ -1205,7 +1257,6 @@ namespace WebForms
                 // Aplicar filtro por Mes Certificado
                 if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesCertificado") is TreeViewSearch cblsHeaderMesCertificado && cblsHeaderMesCertificado.SelectedValues.Any())
                 {
-                    // CORRECCIÓN: Se reemplaza DbFunctions.TruncateTime por .Date, que es el equivalente para LINQ to Objects.
                     var selectedDates = cblsHeaderMesCertificado.SelectedValues
                         .Select(s => DateTime.TryParse(s, out DateTime dt) ? (DateTime?)dt.Date : null)
                         .Where(d => d.HasValue).Select(d => d.Value)
@@ -1217,8 +1268,9 @@ namespace WebForms
                 if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderLinea") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
                     data = data.Where(c => c.LineaGestionId.HasValue && getSelectedIds(cblsHeaderLinea).Contains(c.LineaGestionId.Value)).ToList();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine($"Error aplicando filtros en memoria: {e}");
             }
 
             return data;

@@ -1,25 +1,54 @@
+
 .btn-primary {
-	--bs-btn-bg: var(--bs-primary); /*Color del relleno*/
-	--bs-btn-border-color: var(--bs-primary); /*Color del bordea*/
-	--bs-btn-color: var(--inst-white); /* Color del texto */
-	--bs-btn-hover-bg: var(--bs-secondary); /* Color al pasar el mouse */
-	--bs-btn-hover-border-color: var(--bs-primary);
-	--bs-btn-hover-color: var(--bs-primary); /* Color del texto al pasar el mouse */
-	--bs-btn-active-bg: #0f2430; /* Color al hacer clic */
-	--bs-btn-active-border-color: #0f2430;
-	font-weight: bold;
+	--bs-btn-color: var(--inst-white);
+	--bs-btn-bg: var(--bs-primary);
+	--bs-btn-border-color: var(--bs-primary);
+	--bs-btn-hover-color: var(--inst-blue);
+	--bs-btn-hover-bg: var(--inst-cyan);
+	--bs-btn-hover-border-color: var(--inst-blue);
+	--bs-btn-active-color: var(--inst-blue);
+	--bs-btn-active-bg: var(--inst-white);
+	--bs-btn-active-border-color: var(--inst-blue);
+	--bs-btn-disabled-color: var(--inst-white);
+	--bs-btn-disabled-bg: var(--bs-primary);
+	--bs-btn-disabled-border-color: var(--bs-primary);
 }
 
 .btn-secondary {
+	--bs-btn-color: var(--inst-blue);
 	--bs-btn-bg: var(--bs-secondary);
+	--bs-btn-border-color: var(--bs-secondary);
+	--bs-btn-hover-color: var(--inst-white);
+	--bs-btn-hover-bg: var(--inst-blue);
+	--bs-btn-hover-border-color: var(--inst-blue);
+	--bs-btn-active-color: var(--inst-gray);
+	--bs-btn-active-bg: var(--inst-white);
+	--bs-btn-active-border-color: var(--inst-cyan);
+	--bs-btn-disabled-color: var(--inst-blue);
+	--bs-btn-disabled-bg: var(--bs-secondary);
+	--bs-btn-disabled-border-color: var(--bs-secondary);
+}
+
+.btn-outline-primary {
+	--bs-btn-color: var(--bs-primary);
 	--bs-btn-border-color: var(--bs-primary);
-	--bs-btn-color: var(--bs-primary); /* Color del texto */
-	--bs-btn-hover-bg: var(--bs-primary); /* Color al pasar el mouse */
-	--bs-btn-hover-border-color: var(--bs-primary);
-	--bs-btn-hover-color: var(--inst-white); /* Color del texto al pasar el mouse */
-	--bs-btn-active-bg: #0f2430; /* Color al hacer clic */
-	--bs-btn-active-border-color: #0f2430;
-	font-weight: bold;
+	--bs-btn-hover-color: var(--inst-blue);
+	--bs-btn-hover-bg: var(--inst-cyan);
+	--bs-btn-hover-border-color: var(--inst-blue);
+	--bs-btn-active-color: var(--inst-white);
+	--bs-btn-active-bg: var(--inst-blue);
+	--bs-btn-active-border-color: var(--inst-blue);
+}
+
+.btn-outline-secondary {
+	--bs-btn-color: var(--bs-secondary);
+	--bs-btn-border-color: var(--bs-secondary);
+	--bs-btn-hover-color: var(--inst-white);
+	--bs-btn-hover-bg: var(--inst-blue);
+	--bs-btn-hover-border-color: var(--inst-blue);
+	--bs-btn-active-color: var(--inst-white);
+	--bs-btn-active-bg: var(--inst-blue);
+	--bs-btn-active-border-color: var(--inst-blue);
 }
 
 .navbar-3d {

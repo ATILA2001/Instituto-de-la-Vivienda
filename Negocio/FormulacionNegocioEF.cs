@@ -8,22 +8,11 @@ namespace Negocio
 {
     public class FormulacionNegocioEF
     {
-        private readonly IVCdbContext _context;
-
-        public FormulacionNegocioEF(IVCdbContext context)
-        {
-            _context = context;
-        }
-
         public List<FormulacionEF> ListarPorUsuario(UsuarioEF usuario)
         {
-            try
+            using (var context = new IVCdbContext())
             {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Iniciando ListarPorUsuario para usuario: {usuario?.Nombre}");
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Tipo (Es Admin): {usuario?.Tipo}");
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] AreaId del usuario: {usuario?.AreaId}");
-
-                var query = _context.Formulaciones
+                var query = context.Formulaciones
                     .Include(f => f.ObraEF)
                     .Include(f => f.ObraEF.Area)
                     .Include(f => f.ObraEF.Empresa)
@@ -54,44 +43,40 @@ namespace Negocio
                     System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Usuario administrador - Mostrando todas las formulaciones");
                 }
 
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Query LINQ construida, ejecutando...");
-
                 var resultado = query.ToList();
-                
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Query ejecutada exitosamente. Registros encontrados: {resultado.Count}");
-                
+
                 return resultado;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] ERROR en ListarPorUsuario: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] StackTrace: {ex.StackTrace}");
-                if (ex.InnerException != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] InnerException: {ex.InnerException.Message}");
-                }
-                throw;
-            }
+
         }
 
         public void Agregar(FormulacionEF formulacion)
         {
-            _context.Formulaciones.Add(formulacion);
-            _context.SaveChanges();
+            using (var context = new IVCdbContext())
+            {
+                context.Formulaciones.Add(formulacion);
+                context.SaveChanges();
+            }
         }
 
         public void Modificar(FormulacionEF formulacion)
         {
-            _context.Entry(formulacion).State = EntityState.Modified;
-            _context.SaveChanges();
+            using (var context = new IVCdbContext())
+            {
+                context.Entry(formulacion).State = EntityState.Modified;
+                context.SaveChanges();
+            }
         }
 
         public bool Eliminar(int id)
         {
-            var entity = _context.Formulaciones.Find(id);
-            if (entity == null) return false;
-            _context.Formulaciones.Remove(entity);
-            _context.SaveChanges();
+            using (var context = new IVCdbContext())
+            {
+                var entity = context.Formulaciones.Find(id);
+                if (entity == null) return false;
+                context.Formulaciones.Remove(entity);
+                context.SaveChanges();
+            }
             return true;
         }
 
@@ -102,9 +87,9 @@ namespace Negocio
         /// </summary>
         public int ContarPorUsuario(UsuarioEF usuario, string filtroGeneral = null)
         {
-            try
+            using (var context = new IVCdbContext())
             {
-                var query = _context.Formulaciones
+                var query = context.Formulaciones
                     .Include(f => f.ObraEF)
                     .Include(f => f.ObraEF.Empresa)
                     .Include(f => f.ObraEF.Contrata)
@@ -122,7 +107,7 @@ namespace Negocio
                 // Aplicar filtro general de búsqueda
                 if (!string.IsNullOrEmpty(filtroGeneral))
                 {
-                    query = query.Where(f => 
+                    query = query.Where(f =>
                         f.ObraEF.Descripcion.Contains(filtroGeneral) ||
                         f.ObraEF.Empresa.Nombre.Contains(filtroGeneral) ||
                         f.ObraEF.Contrata.Nombre.Contains(filtroGeneral) ||
@@ -132,24 +117,18 @@ namespace Negocio
 
                 return query.Count();
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] ERROR en ContarPorUsuario: {ex.Message}");
-                throw;
-            }
+
         }
 
         /// <summary>
         /// Obtiene una página específica de formulaciones para un usuario con filtros opcionales
         /// </summary>
-        public List<FormulacionEF> ListarPorUsuarioPaginado(UsuarioEF usuario, int pageIndex, int pageSize,
-            string filtroGeneral = null)
+        public List<FormulacionEF> ListarPorUsuarioPaginado(UsuarioEF usuario, int pageIndex, int pageSize, string filtroGeneral = null)
         {
-            try
+            using (var context = new IVCdbContext())
             {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] ListarPorUsuarioPaginado - Página: {pageIndex}, Tamaño: {pageSize}");
 
-                var query = _context.Formulaciones
+                var query = context.Formulaciones
                     .Include(f => f.ObraEF)
                     .Include(f => f.ObraEF.Area)
                     .Include(f => f.ObraEF.Empresa)
@@ -172,7 +151,7 @@ namespace Negocio
                 // Aplicar filtro general de búsqueda
                 if (!string.IsNullOrEmpty(filtroGeneral))
                 {
-                    query = query.Where(f => 
+                    query = query.Where(f =>
                         f.ObraEF.Descripcion.Contains(filtroGeneral) ||
                         f.ObraEF.Empresa.Nombre.Contains(filtroGeneral) ||
                         f.ObraEF.Contrata.Nombre.Contains(filtroGeneral) ||
@@ -187,15 +166,107 @@ namespace Negocio
                     .Take(pageSize)
                     .ToList();
 
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Página obtenida exitosamente. Registros: {resultado.Count}");
-                
                 return resultado;
             }
-            catch (Exception ex)
+
+        }
+
+        /// <summary>
+        /// Versión extendida: aplica además filtros discretos por listas de IDs y montos.
+        /// Mantiene la firma original separada para no romper código existente.
+        /// </summary>
+        public int ContarPorUsuarioConFiltros(UsuarioEF usuario, string filtroGeneral,
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+        {
+            using (var context = new IVCdbContext())
             {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] ERROR en ListarPorUsuarioPaginado: {ex.Message}");
-                throw;
+                var query = BuildBaseQuery(context, usuario);
+
+                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos26, prioridades);
+
+                return query.Count();
             }
+        }
+
+        /// <summary>
+        /// Versión extendida paginada con filtros discretos.
+        /// </summary>
+        public List<FormulacionEF> ListarPorUsuarioPaginadoConFiltros(UsuarioEF usuario, int pageIndex, int pageSize, string filtroGeneral,
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var query = BuildBaseQuery(context, usuario);
+                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos26, prioridades);
+
+                return query
+                    .OrderBy(f => f.ObraEF.Descripcion)
+                    .Skip(pageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Construye el query base con includes y restricción por usuario.
+        /// </summary>
+        private IQueryable<FormulacionEF> BuildBaseQuery(IVCdbContext context, UsuarioEF usuario)
+        {
+            var query = context.Formulaciones
+                    .Include(f => f.ObraEF)
+                    .Include(f => f.ObraEF.Area)
+                    .Include(f => f.ObraEF.Empresa)
+                    .Include(f => f.ObraEF.Contrata)
+                    .Include(f => f.ObraEF.Barrio)
+                    .Include(f => f.ObraEF.Proyecto)
+                    .Include(f => f.ObraEF.Proyecto.LineaGestionEF)
+                    .Include(f => f.UnidadMedidaEF)
+                    .Include(f => f.PrioridadEF)
+                    .AsQueryable();
+
+            if (!usuario.Tipo)
+            {
+                if (usuario.AreaId.HasValue)
+                    query = query.Where(f => f.ObraEF.AreaId == usuario.AreaId);
+                else if (usuario.Area != null)
+                    query = query.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Aplica filtros opcionales sobre el query.
+        /// </summary>
+        private IQueryable<FormulacionEF> ApplyOptionalFilters(IQueryable<FormulacionEF> query, string filtroGeneral,
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+        {
+            if (!string.IsNullOrWhiteSpace(filtroGeneral))
+            {
+                query = query.Where(f =>
+                    f.ObraEF.Descripcion.Contains(filtroGeneral) ||
+                    f.ObraEF.Empresa.Nombre.Contains(filtroGeneral) ||
+                    f.ObraEF.Contrata.Nombre.Contains(filtroGeneral) ||
+                    f.ObraEF.Barrio.Nombre.Contains(filtroGeneral) ||
+                    (f.Observaciones != null && f.Observaciones.Contains(filtroGeneral)) ||
+                    (f.PrioridadEF != null && f.PrioridadEF.Nombre.Contains(filtroGeneral)) ||
+                    (f.ObraEF.Proyecto != null && f.ObraEF.Proyecto.Nombre.Contains(filtroGeneral)) ||
+                    (f.ObraEF.Proyecto.LineaGestionEF != null && f.ObraEF.Proyecto.LineaGestionEF.Nombre.Contains(filtroGeneral))
+                );
+            }
+
+            if (areas != null && areas.Any())
+                query = query.Where(f => f.ObraEF.Area != null && areas.Contains(f.ObraEF.Area.Id));
+            if (lineasGestion != null && lineasGestion.Any())
+                query = query.Where(f => f.ObraEF.Proyecto.LineaGestionEF != null && lineasGestion.Contains(f.ObraEF.Proyecto.LineaGestionEF.Id));
+            if (proyectos != null && proyectos.Any())
+                query = query.Where(f => f.ObraEF.Proyecto != null && proyectos.Contains(f.ObraEF.Proyecto.Id));
+            if (montos26 != null && montos26.Any())
+                query = query.Where(f => f.Monto_26.HasValue && montos26.Contains(f.Monto_26.Value));
+            if (prioridades != null && prioridades.Any())
+                query = query.Where(f => f.PrioridadEF != null && prioridades.Contains(f.PrioridadEF.Id));
+
+            return query;
         }
 
         #endregion
