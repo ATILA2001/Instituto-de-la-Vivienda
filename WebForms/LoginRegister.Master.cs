@@ -36,82 +36,82 @@ namespace WebForms
                 else
                 {
                     // Redirigir al login si no está autenticado
-                    // Response.Redirect("~/Login.aspx");
+                    Response.Redirect("/Login.aspx");
                 }
             }
 
-            var authType = HttpContext.Current.User.Identity.AuthenticationType;
+            //var authType = HttpContext.Current.User.Identity.AuthenticationType;
 
-            Debug.WriteLine("httpContext authenticated!!! contexto " + HttpContext.Current.User.Identity.IsAuthenticated);
-            Debug.WriteLine("Página cargada: " + DateTime.Now);
+            //Debug.WriteLine("httpContext authenticated!!! contexto " + HttpContext.Current.User.Identity.IsAuthenticated);
+            //Debug.WriteLine("Página cargada: " + DateTime.Now);
 
-            if (HttpContext.Current.User.Identity.IsAuthenticated && 
-                (authType == "NTLM" || authType == "Kerberos" || authType == "Negotiate"))
-            {
-                Usuario usuario;
-                UsuarioNegocio negocio = new UsuarioNegocio();
-                try
-                {
-                    //string fullUserName = HttpContext.Current.User.Identity.Name;
-                    //string[] parts = fullUserName.Split('\\');
+            //if (HttpContext.Current.User.Identity.IsAuthenticated && 
+            //    (authType == "NTLM" || authType == "Kerberos" || authType == "Negotiate"))
+            //{
+            //    Usuario usuario;
+            //    UsuarioNegocio negocio = new UsuarioNegocio();
+            //    try
+            //    {
+            //        //string fullUserName = HttpContext.Current.User.Identity.Name;
+            //        //string[] parts = fullUserName.Split('\\');
 
-                    var fullUserName = HttpContext.Current.User.Identity.Name ?? string.Empty;
-                    var parts = fullUserName.Split(new[] { '\\' }, 2);
+            //        var fullUserName = HttpContext.Current.User.Identity.Name ?? string.Empty;
+            //        var parts = fullUserName.Split(new[] { '\\' }, 2);
 
-                    // If the user is in a domain, the format is DOMAIN\username
-                    string domain = parts.Length == 2 ? parts[0] : string.Empty;
-                    string userName = parts.Length == 2 ? parts[1] : parts[0];
+            //        // If the user is in a domain, the format is DOMAIN\username
+            //        string domain = parts.Length == 2 ? parts[0] : string.Empty;
+            //        string userName = parts.Length == 2 ? parts[1] : parts[0];
 
-                    //string userName = fullUserName.Contains("\\") ? fullUserName.Split('\\')[1] : fullUserName;
+            //        //string userName = fullUserName.Contains("\\") ? fullUserName.Split('\\')[1] : fullUserName;
 
-                    usuario = Usuario.CreateWithDomain(domain, userName);
+            //        usuario = Usuario.CreateWithDomain(domain, userName);
 
-                    if (negocio.LogearIntegSecur(usuario, userName))
-                    {
-                        Session.Add("Usuario", usuario);
-                        if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
-                        {
-                            Debug.WriteLine("Next page BdProyectos.aspx: " + DateTime.Now);
-                            Response.Redirect("BdProyectos.aspx", false);
-                        }
-                        else
-                        {
-                            if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
-                            {
-                                if (((Dominio.Usuario)Session["Usuario"]).Area != null && ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
-                                {
-                                    Debug.WriteLine("Next page Redeterminaciones.aspx: " + DateTime.Now);
+            //        if (negocio.LogearIntegSecur(usuario, userName))
+            //        {
+            //            Session.Add("Usuario", usuario);
+            //            if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
+            //            {
+            //                Debug.WriteLine("Next page BdProyectos.aspx: " + DateTime.Now);
+            //                Response.Redirect("BdProyectos.aspx", false);
+            //            }
+            //            else
+            //            {
+            //                if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
+            //                {
+            //                    if (((Dominio.Usuario)Session["Usuario"]).Area != null && ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
+            //                    {
+            //                        Debug.WriteLine("Next page Redeterminaciones.aspx: " + DateTime.Now);
 
-                                    Response.Redirect("Redeterminaciones.aspx", false);
-                                }
-                                else
-                                {
-                                    Debug.WriteLine("Next page Obras.aspx: " + DateTime.Now);
-                                    Response.Redirect("Obras.aspx", false);
-                                }
-                            }
-                            else
-                            {
-                                Session.Add("error", "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
-                                Response.Redirect("Error.aspx", false);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Session.Add("error", "Usuario o Contraseña Incorrectos");
-                        Response.Redirect("Error.aspx", false);
-                    }
+            //                        Response.Redirect("Redeterminaciones.aspx", false);
+            //                    }
+            //                    else
+            //                    {
+            //                        Debug.WriteLine("Next page Obras.aspx: " + DateTime.Now);
+            //                        Response.Redirect("Obras.aspx", false);
+            //                    }
+            //                }
+            //                else
+            //                {
+            //                    Session.Add("error", "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
+            //                    Response.Redirect("Error.aspx", false);
+            //                }
+            //            }
+            //        }
+            //        else
+            //        {
+            //            Session.Add("error", "Usuario o Contraseña Incorrectos");
+            //            Response.Redirect("Error.aspx", false);
+            //        }
 
-                }
-                catch (Exception ex)
-                {
+            //    }
+            //    catch (Exception ex)
+            //    {
 
-                    Debug.WriteLine("Entro al catch exception!!!!!!!!!!!!!!!!!!!!!!");
-                    Session.Add("error", ex.ToString());
-                    Response.Redirect("Error.aspx");
-                }
-            }
+            //        Debug.WriteLine("Entro al catch exception!!!!!!!!!!!!!!!!!!!!!!");
+            //        Session.Add("error", ex.ToString());
+            //        Response.Redirect("Error.aspx");
+            //    }
+            //}
 
         }
         protected string GetRandomBackgroundImage()

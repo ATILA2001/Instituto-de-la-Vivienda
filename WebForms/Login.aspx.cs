@@ -2,10 +2,13 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Text.RegularExpressions;
 
 namespace WebForms
 {
@@ -15,54 +18,81 @@ namespace WebForms
         {
 
         }
+
         protected void btnIniciar_Click(object sender, EventArgs e)
         {
             Usuario usuario;
             UsuarioNegocio negocio = new UsuarioNegocio();
             try
             {
-                usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                if (negocio.Logear(usuario))
+                // Validar si las credenciales son correctas
+
+                using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, "BUENOSAIRES"))
                 {
-                    Session.Add("Usuario", usuario);
-                    if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
+
+                    bool isValid = pc.ValidateCredentials(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                    if (isValid)
                     {
-                        Response.Redirect("AutorizantesEF.aspx", false);
-                    }
-                    else
-                    {
-                        if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
+                        var emailPattern = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
+                        var cuilPattern = new Regex(@"^(20|23|27|30|33)\d{8}\d$");
+
+                        if (emailPattern.IsMatch(txtEmail.Text.Trim()))
                         {
-                            if (((Dominio.Usuario)Session["Usuario"]).Area != null && ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
-                            {
-                                Response.Redirect("Redeterminaciones.aspx", false);
-                            }
-                            else
+                            usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                        }
+                        else if (cuilPattern.IsMatch(txtEmail.Text.Trim()))
+                        {
+                            // CreateWithDomain
+                            usuario = Usuario.CreateWithDomain(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                        }
+
+                        if (
+                        //negocio.Logear(usuario)
+                      )
+
+                        {
+                            Session.Add("Usuario", usuario);
+                            if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                             {
                                 Response.Redirect("AutorizantesEF.aspx", false);
                             }
+                            else
+                            {
+                                if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
+                                {
+                                    if (((Dominio.Usuario)Session["Usuario"]).Area != null &&
+                                        ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
+                                    {
+                                        Response.Redirect("Redeterminaciones.aspx", false);
+                                    }
+                                    else
+                                    {
+                                        Response.Redirect("AutorizantesEF.aspx", false);
+                                    }
+                                }
+                                else
+                                {
+                                    Session.Add("error",
+                                        "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
+                                    Response.Redirect("Error.aspx", false);
+                                }
+                            }
+                        } else {
+                                Session.Add("error", "Usuario o Contraseña Incorrectos");
+                                Response.Redirect("Error.aspx", false);
                         }
-                        else
-                        {
-                            Session.Add("error", "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
-                            Response.Redirect("Error.aspx", false);
-                        }
+
                     }
                 }
-                else
-                {
-                    Session.Add("error", "Usuario o Contraseña Incorrectos");
-                    Response.Redirect("Error.aspx", false);
-                }
 
             }
-            catch (Exception ex)
-            {
 
-                Session.Add("error", ex.ToString());
-                Response.Redirect("Error.aspx");
+            catch (Exception ex) {
+
+                        Session.Add("error", ex.ToString());
+                        Response.Redirect("Error.aspx");
             }
+            
         }
-
     }
 }
