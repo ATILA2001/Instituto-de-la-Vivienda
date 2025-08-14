@@ -114,6 +114,15 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.TextBox txtMesAprobacionAgregar;
 
         /// <summary>
+        /// rfvMesAprobacionAgregar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMesAprobacionAgregar;
+
+        /// <summary>
         /// txtMesBaseAgregar control.
         /// </summary>
         /// <remarks>
@@ -229,6 +238,15 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtMesAprobacionEditar;
+
+        /// <summary>
+        /// rfvMesAprobacionEditar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMesAprobacionEditar;
 
         /// <summary>
         /// txtMesBaseEditar control.

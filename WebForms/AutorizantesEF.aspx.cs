@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Web;
@@ -1508,6 +1509,8 @@ namespace WebForms
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 DropDownList ddlEstadoAutorizante = (DropDownList)e.Row.FindControl("ddlEstadoAutorizante");
+                TextBox txtExpediente = e.Row.FindControl("txtExpediente") as TextBox;
+
                 if (ddlEstadoAutorizante != null)
                 {
                     var estadoNegocio = new EstadoAutorizanteNegocioEF();
@@ -1534,7 +1537,16 @@ namespace WebForms
                         if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = false;
                         if (e.Row.FindControl("btnModificar") is LinkButton btnModificar) btnModificar.Visible = false;
 
+                        // Deshabilitar controles y ajustar estilos para redeterminación virtual
+                        txtExpediente.Enabled = false;
+                        txtExpediente.CssClass = "form-control text-center";
+                        txtExpediente.BorderStyle = BorderStyle.None;
+                        txtExpediente.BackColor = Color.Transparent;
+
                         ddlEstadoAutorizante.Enabled = false;
+                        ddlEstadoAutorizante.CssClass = "form-control text-center";
+                        ddlEstadoAutorizante.BorderStyle = BorderStyle.None;
+                        ddlEstadoAutorizante.BackColor = Color.Transparent;
                     }
                 }
             }

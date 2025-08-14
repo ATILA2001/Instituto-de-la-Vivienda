@@ -431,7 +431,7 @@
                 <asp:TemplateField HeaderText="Expediente">
                     <ItemTemplate>
                         <asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-                            OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm">
+                            OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm w-auto text-center">
                         </asp:TextBox>
                     </ItemTemplate>
                 </asp:TemplateField>
@@ -447,8 +447,7 @@
                     <ItemTemplate>
                         <asp:DropDownList ID="ddlEstadoAutorizante" runat="server" AutoPostBack="true"
                             OnSelectedIndexChanged="ddlEstadoAutorizante_SelectedIndexChanged"
-                            CssClass="btn btn-sm dropdown-toggle"
-                            Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+                            CssClass="form-select form-select-sm w-auto text-center">
                         </asp:DropDownList>
                     </ItemTemplate>
                 </asp:TemplateField>
