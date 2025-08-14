@@ -81,7 +81,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true"
-                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -104,7 +104,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true"
-                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -127,7 +127,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true"
-                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -167,7 +167,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true"
-                                            ValidationExpression="^\d+(\,\d{1,2})?$" />
+                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -256,10 +256,10 @@
     <hr class="mb-3" />
     <div class="gridview-scroll-container">
 
-        <asp:GridView ID="dgvFormulacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover mb-4"
+    <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
             OnRowDeleting="dgvFormulacion_RowDeleting"
-            OnRowDataBound="dgvFormulacion_DataBound"
+            OnDataBound="dgvFormulacion_DataBound"
             ShowHeaderWhenEmpty="true"
             AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
             <Columns>

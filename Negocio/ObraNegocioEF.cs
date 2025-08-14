@@ -29,6 +29,42 @@ namespace Negocio
         }
 
         /// <summary>
+        /// Lista obras para dropdown excluyendo las que ya tienen Formulación.
+        /// Permite incluir explícitamente una obra (por ejemplo, al editar) y filtrar por área del usuario no admin.
+        /// </summary>
+        /// <param name="includeObraId">ID de obra a incluir aunque ya esté en Formulación (útil al editar).</param>
+        /// <param name="usuario">Usuario actual; si no es admin y tiene área, filtra por área.</param>
+        public List<ObraEF> ListarParaDDLNoEnFormulacion(int? includeObraId = null, UsuarioEF usuario = null)
+        {
+            try
+            {
+                using (var context = new IVCdbContext())
+                {
+                    var query = context.Obras.AsNoTracking().Where(o =>
+                        !context.Formulaciones.Any(f => f.ObraId == o.Id) ||
+                        (includeObraId.HasValue && o.Id == includeObraId.Value));
+
+                    // Si el usuario no es admin, filtrar por su área (si la tiene)
+                    if (usuario != null && !usuario.Tipo)
+                    {
+                        if (usuario.AreaId.HasValue)
+                            query = query.Where(o => o.AreaId == usuario.AreaId.Value);
+                        else if (usuario.Area != null)
+                            query = query.Where(o => o.AreaId == usuario.Area.Id);
+                    }
+
+                    return query
+                        .OrderBy(o => o.Descripcion)
+                        .ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error al obtener las obras disponibles para Formulación", ex);
+            }
+        }
+
+        /// <summary>
         /// Lista todas las obras con información completa
         /// </summary>
         public List<ObraEF> Listar()

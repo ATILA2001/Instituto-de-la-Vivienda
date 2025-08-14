@@ -12,19 +12,14 @@ namespace WebForms
 {
     public partial class FormulacionEF : System.Web.UI.Page
     {
-        private FormulacionNegocioEF negocio;
-
-        protected void Page_Init(object sender, EventArgs e)
-        {
-            negocio = new FormulacionNegocioEF(new IVCdbContext());
-        }
+        private FormulacionNegocioEF negocio = new FormulacionNegocioEF();
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
                 BindDropDownList();
-                CargarListaFormulaciones();
+                BindGrid();
             }
         }
 
@@ -35,7 +30,7 @@ namespace WebForms
                 var lista = Session["formulacionesCompletas"] as List<Dominio.FormulacionEF>;
                 if (lista == null)
                 {
-                    CargarListaFormulaciones();
+                    BindGrid();
                     lista = Session["formulacionesCompletas"] as List<Dominio.FormulacionEF>;
                 }
 
@@ -74,7 +69,12 @@ namespace WebForms
 
         protected void OnAcceptChanges(object sender, EventArgs e)
         {
-            CargarListaFormulaciones();
+            // Reiniciar a la primera página al aplicar filtros
+
+            paginationControl.CurrentPageIndex = 0;
+            paginationControl.UpdatePaginationControls();
+
+            BindGrid(); // Cargar datos filtrados y paginados
         }
 
         protected void dgvFormulacion_DataBound(object sender, EventArgs e)
@@ -184,13 +184,13 @@ namespace WebForms
                 var formulacion = new Dominio.FormulacionEF
                 {
                     ObraId = int.Parse(ddlObra.SelectedValue),
-                    Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text),
-                    Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text),
-                    Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text),
+                    Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ',')),
+                    Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ',')),
+                    Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ',')),
                     MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text),
                     Observaciones = txtObservaciones.Text,
                     UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue),
-                    ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text),
+                    ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ',')),
                     PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue)
                 };
 
@@ -210,7 +210,9 @@ namespace WebForms
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingFormulacionEFId"] = null;
-                CargarListaFormulaciones();
+                Session["formulacionesCompletas"] = null; // clear cache so selection sees fresh data
+                BindDropDownList(); // refresh ddlObra options
+                BindGrid();
             }
             catch (Exception ex)
             {
@@ -227,24 +229,39 @@ namespace WebForms
                 int id = Convert.ToInt32(dgvFormulacion.SelectedDataKey.Value);
                 var lista = Session["formulacionesCompletas"] as List<Dominio.FormulacionEF>;
                 var formulacion = lista?.FirstOrDefault(f => f.Id == id);
+                if (formulacion == null)
+                {
+                    var usuario = UserHelper.GetFullCurrentUser();
+                    if (usuario != null)
+                    {
+                        lista = negocio.ListarPorUsuario(usuario);
+                        Session["formulacionesCompletas"] = lista;
+                        formulacion = lista?.FirstOrDefault(f => f.Id == id);
+                    }
+                }
                 if (formulacion != null)
                 {
-                    ddlObra.SelectedValue = formulacion.ObraId.ToString();
+                    // Re-bind dropdown to include the current obra in edit mode
+                    Session["EditingFormulacionEFId"] = formulacion.Id;
+                    BindDropDownList();
+                    SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
                     txtMonto26.Text = formulacion.Monto_26?.ToString() ?? "";
                     txtMonto27.Text = formulacion.Monto_27?.ToString() ?? "";
                     txtMonto28.Text = formulacion.Monto_28?.ToString() ?? "";
                     txtMesBase.Text = formulacion.MesBase?.ToString("yyyy-MM-dd") ?? "";
-                    ddlUnidadMedida.SelectedValue = formulacion.UnidadMedidaId?.ToString() ?? "";
+                    SelectDropDownListByValue(ddlUnidadMedida, formulacion.UnidadMedidaId?.ToString());
                     txtValorMedida.Text = formulacion.ValorMedida?.ToString() ?? "";
                     txtObservaciones.Text = formulacion.Observaciones ?? "";
-                    ddlPrioridades.SelectedValue = formulacion.PrioridadId?.ToString() ?? "";
+                    SelectDropDownListByValue(ddlPrioridades, formulacion.PrioridadId?.ToString());
 
-                    Session["EditingFormulacionEFId"] = formulacion.Id;
+                    // Mantener el Id en sesión hasta guardar/cancelar
 
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
-                        $('#modalAgregar .modal-title').text('Modificar Formulación');
-                        $('.col-12:first').hide();
-                        $('#modalAgregar').modal('show');", true);
+                        $(document).ready(function() {
+                            $('#modalAgregar .modal-title').text('Modificar Formulación');
+                            $('.col-12:first').hide();
+                            $('#modalAgregar').modal('show');
+                        });", true);
 
                     btnAgregar.Text = "Modificar";
                 }
@@ -253,6 +270,18 @@ namespace WebForms
             {
                 lblMensaje.Text = $"Error al cargar los datos: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        {
+            if (dropDown == null) return;
+            dropDown.ClearSelection();
+            if (string.IsNullOrWhiteSpace(value)) return;
+            var item = dropDown.Items.FindByValue(value);
+            if (item != null)
+            {
+                item.Selected = true;
             }
         }
 
@@ -265,7 +294,8 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaFormulaciones();
+                    BindDropDownList();
+                    BindGrid();
                 }
                 else
                 {
@@ -280,65 +310,6 @@ namespace WebForms
             }
         }
 
-        private void CargarListaFormulaciones()
-        {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine("[FormulacionEF] Iniciando CargarListaFormulaciones");
-                
-                UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
-                if (usuarioActual == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("[FormulacionEF] ERROR: usuarioActual es null");
-                    lblMensaje.Text = "Error: No se pudo obtener el usuario actual";
-                    lblMensaje.CssClass = "alert alert-danger";
-                    return;
-                }
-
-                // Si es administrador (Tipo = true), no necesita área
-                if (!usuarioActual.Tipo && usuarioActual.Area == null && !usuarioActual.AreaId.HasValue)
-                {
-                    System.Diagnostics.Debug.WriteLine("[FormulacionEF] ERROR: Usuario no administrador sin área asignada");
-                    lblMensaje.Text = "Error: El usuario no tiene área asignada y no es administrador";
-                    lblMensaje.CssClass = "alert alert-danger";
-                    return;
-                }
-
-                // Guardar usuario en sesión para uso en BindGrid
-                Session["UsuarioLogueado"] = usuarioActual;
-
-                // Obtener total de registros para inicializar paginación
-                string filtroGeneral = txtBuscar?.Text?.Trim();
-                int totalRecords = negocio.ContarPorUsuario(usuarioActual, filtroGeneral);
-
-                // Inicializar control de paginación
-                paginationControl.Initialize(totalRecords, 0, 12);
-
-                // Cargar primera página
-                BindGrid();
-
-                System.Diagnostics.Debug.WriteLine("[FormulacionEF] CargarListaFormulaciones completado exitosamente con paginación");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[FormulacionEF] ERROR en CargarListaFormulaciones: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"[FormulacionEF] StackTrace: {ex.StackTrace}");
-                if (ex.InnerException != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[FormulacionEF] InnerException: {ex.InnerException.Message}");
-                }
-                
-                lblMensaje.Text = $"Error al cargar las formulaciones: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-                
-                // En caso de error, limpiar la grilla
-                dgvFormulacion.DataSource = new List<Dominio.FormulacionEF>();
-                dgvFormulacion.DataBind();
-            }
-        }
-            
-        
-
         /// <summary>
         /// Método simplificado para cargar la grilla usando el control de paginación
         /// </summary>
@@ -346,30 +317,83 @@ namespace WebForms
         {
             try
             {
-                var usuario = (UsuarioEF)Session["UsuarioLogueado"];
+                var usuario = UserHelper.GetFullCurrentUser();
                 if (usuario == null) return;
 
-                using (var context = new IVCdbContext())
+                // Filtro texto
+                string filtroGeneral = txtBuscar?.Text?.Trim();
+
+                // Filtros discretos desde los TreeViewSearch
+                var selAreas = GetSelectedValues("cblsHeaderArea").Select(int.Parse).ToList();
+                var selLineas = GetSelectedValues("cblsHeaderLineaGestion").Select(int.Parse).ToList();
+                var selProyectos = GetSelectedValues("cblsHeaderProyecto").Select(int.Parse).ToList();
+                var selMontos26 = GetSelectedValues("cblsHeaderMonto2026").Select(s => decimal.Parse(s, CultureInfo.InvariantCulture)).ToList();
+                var selPrioridades = GetSelectedValues("cblsHeaderPrioridad").Select(int.Parse).ToList();
+
+                int pageIndex = paginationControl.CurrentPageIndex;
+                int pageSize = paginationControl.PageSize;
+
+                // Total filtrado en BD
+                int total = negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+
+                // Ajustar paginación si necesario
+                if (pageIndex * pageSize >= Math.Max(1, total))
                 {
-                    var negocio = new FormulacionNegocioEF(context);
-
-                    // Obtener información de paginación del control
-                    var paginationInfo = paginationControl.GetPaginationInfo();
-                    
-                    // Obtener filtro general de búsqueda
-                    string filtroGeneral = txtBuscar?.Text?.Trim();
-                    
-                    // Obtener página actual con paginación a nivel de DB
-                    var formulacionesPagina = negocio.ListarPorUsuarioPaginado(usuario, 
-                        paginationInfo.CurrentPageIndex, paginationInfo.PageSize, filtroGeneral);
-
-                    // Bind a la grilla
-                    dgvFormulacion.DataSource = formulacionesPagina;
-                    dgvFormulacion.DataBind();
-
-                    // Calcular subtotales para la página actual
-                    CalcularSubtotal(formulacionesPagina);
+                    pageIndex = 0;
+                    paginationControl.CurrentPageIndex = 0;
                 }
+                paginationControl.TotalRecords = total;
+                paginationControl.UpdatePaginationControls();
+
+                // Página actual desde BD
+                var pagina = negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+
+                dgvFormulacion.DataSource = pagina;
+                dgvFormulacion.DataBind();
+
+                // Calcular subtotal global (requiere suma total filtrada) -> eficiencia: si se necesita exacto hacer una consulta específica
+                decimal totalMonto26Global = 0;
+                if (total > 0)
+                {
+                    // Consulta rápida para subtotal (se podría optimizar combinando con el conteo si se usa proyección)
+                    // Para simplicidad se reusa BuildBaseQuery y filtros: ideal mover a un método en negocio si se usa frecuentemente
+                    using (var context = new IVCdbContext())
+                    {
+                        var querySubtotal = context.Formulaciones.AsQueryable();
+                        // Reaplicar filtros mínimos (duplicado ligero respecto a negocio; factorizable)
+                        if (!usuario.Tipo)
+                        {
+                            if (usuario.AreaId.HasValue)
+                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId == usuario.AreaId);
+                            else if (usuario.Area != null)
+                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+                        }
+                        if (!string.IsNullOrWhiteSpace(filtroGeneral))
+                        {
+                            querySubtotal = querySubtotal.Where(f =>
+                                f.ObraEF.Descripcion.Contains(filtroGeneral) ||
+                                f.ObraEF.Empresa.Nombre.Contains(filtroGeneral) ||
+                                f.ObraEF.Contrata.Nombre.Contains(filtroGeneral) ||
+                                f.ObraEF.Barrio.Nombre.Contains(filtroGeneral) ||
+                                (f.Observaciones != null && f.Observaciones.Contains(filtroGeneral)) ||
+                                (f.PrioridadEF != null && f.PrioridadEF.Nombre.Contains(filtroGeneral)) ||
+                                (f.ObraEF.Proyecto != null && f.ObraEF.Proyecto.Nombre.Contains(filtroGeneral)) ||
+                                (f.ObraEF.Proyecto.LineaGestionEF != null && f.ObraEF.Proyecto.LineaGestionEF.Nombre.Contains(filtroGeneral))
+                            );
+                        }
+                        if (selAreas.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Area != null && selAreas.Contains(f.ObraEF.Area.Id));
+                        if (selLineas.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Proyecto.LineaGestionEF != null && selLineas.Contains(f.ObraEF.Proyecto.LineaGestionEF.Id));
+                        if (selProyectos.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Proyecto != null && selProyectos.Contains(f.ObraEF.Proyecto.Id));
+                        if (selMontos26.Any()) querySubtotal = querySubtotal.Where(f => f.Monto_26.HasValue && selMontos26.Contains(f.Monto_26.Value));
+                        if (selPrioridades.Any()) querySubtotal = querySubtotal.Where(f => f.PrioridadEF != null && selPrioridades.Contains(f.PrioridadEF.Id));
+
+                        totalMonto26Global = querySubtotal.Sum(f => (decimal?)f.Monto_26) ?? 0m;
+                    }
+                }
+
+                paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26Global:C} ({total} registros)";
+                CalcularSubtotal(pagina);
+
             }
             catch (Exception ex)
             {
@@ -378,11 +402,34 @@ namespace WebForms
             }
         }
 
+        /// <summary>
+        /// Obtiene los valores seleccionados de un TreeViewSearch en la cabecera del GridView.
+        /// Devuelve lista vacía si no existe o aún no se ha renderizado.
+        /// </summary>
+        private List<string> GetSelectedValues(string controlId)
+        {
+            if (dgvFormulacion.HeaderRow == null) return new List<string>();
+            var ctl = dgvFormulacion.HeaderRow.FindControl(controlId) as TreeViewSearch;
+            return ctl?.SelectedValues ?? new List<string>();
+        }
+
         private void BindDropDownList()
         {
             try
             {
-                ddlObra.DataSource = new ObraNegocioEF().ListarParaDDL();
+                // ddlObra: listar solo obras que no están en Formulación (y filtrar por área si corresponde)
+                UsuarioEF usuario = UserHelper.GetFullCurrentUser();
+                int? obraEnEdicion = null;
+                if (Session["EditingFormulacionEFId"] is int editId)
+                {
+                    // obtener la obra asociada a la formulación en edición para incluirla en el combo
+                    using (var ctx = new IVCdbContext())
+                    {
+                        var form = ctx.Formulaciones.AsNoTracking().FirstOrDefault(f => f.Id == editId);
+                        obraEnEdicion = form?.ObraId;
+                    }
+                }
+                ddlObra.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
                 ddlObra.DataTextField = "Descripcion";
                 ddlObra.DataValueField = "Id";
                 ddlObra.DataBind();
@@ -422,7 +469,7 @@ namespace WebForms
             try
             {
                 // Recalcular total y reinicializar paginación
-                var usuario = (UsuarioEF)Session["UsuarioLogueado"];
+                var usuario = UserHelper.GetFullCurrentUser();
                 if (usuario != null)
                 {
                     string filtroGeneral = txtBuscar?.Text?.Trim();
@@ -442,7 +489,7 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
             CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-            CargarListaFormulaciones(); // Recargar completamente
+            BindGrid(); // Recargar completamente
         }
 
         protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -450,7 +497,7 @@ namespace WebForms
             try
             {
                 dgvFormulacion.PageIndex = e.NewPageIndex;
-                CargarListaFormulaciones();
+                BindGrid();
             }
             catch (Exception ex)
             {
@@ -467,16 +514,16 @@ namespace WebForms
             try
             {
                 decimal total = 0;
-                
+
                 if (monto26 != null && monto26 != DBNull.Value)
                     total += Convert.ToDecimal(monto26);
-                    
+
                 if (monto27 != null && monto27 != DBNull.Value)
                     total += Convert.ToDecimal(monto27);
-                    
+
                 if (monto28 != null && monto28 != DBNull.Value)
                     total += Convert.ToDecimal(monto28);
-                
+
                 return total.ToString("C");
             }
             catch
@@ -490,24 +537,19 @@ namespace WebForms
         /// </summary>
         private void CalcularSubtotal(List<Dominio.FormulacionEF> formulacionesPagina)
         {
-            try
-            {
-                decimal totalMonto26 = 0;
-                int count = formulacionesPagina?.Count ?? 0;
 
-                if (formulacionesPagina != null)
-                {
-                    totalMonto26 = formulacionesPagina
-                        .Sum(f => f.Monto_26 ?? 0);
-                }
+            decimal totalMonto26 = 0;
+            int count = formulacionesPagina?.Count ?? 0;
 
-                var paginationInfo = paginationControl.GetPaginationInfo();
-                paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
-            }
-            catch (Exception ex)
+            if (formulacionesPagina != null)
             {
-                paginationControl.SubtotalText = $"Error en cálculo: {ex.Message}";
+                totalMonto26 = formulacionesPagina
+                    .Sum(f => f.Monto_26 ?? 0);
             }
+
+            var paginationInfo = paginationControl.GetPaginationInfo();
+            paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
+
         }
 
         #region Eventos del Control de Paginación
@@ -522,7 +564,7 @@ namespace WebForms
         protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
             // Recalcular total cuando cambia el tamaño de página
-            var usuario = (UsuarioEF)Session["UsuarioLogueado"];
+            var usuario = UserHelper.GetFullCurrentUser();
             if (usuario != null)
             {
                 string filtroGeneral = txtBuscar?.Text?.Trim();
