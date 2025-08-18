@@ -211,7 +211,7 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingFormulacionEFId"] = null;
                 Session["formulacionesCompletas"] = null; // clear cache so selection sees fresh data
-                BindDropDownList(); // refresh ddlObra options
+       
                 BindGrid();
             }
             catch (Exception ex)
@@ -243,7 +243,7 @@ namespace WebForms
                 {
                     // Re-bind dropdown to include the current obra in edit mode
                     Session["EditingFormulacionEFId"] = formulacion.Id;
-                    BindDropDownList();
+                    
                     SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
                     txtMonto26.Text = formulacion.Monto_26?.ToString() ?? "";
                     txtMonto27.Text = formulacion.Monto_27?.ToString() ?? "";
@@ -294,7 +294,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    BindDropDownList();
+
                     BindGrid();
                 }
                 else
