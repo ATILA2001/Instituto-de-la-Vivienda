@@ -159,15 +159,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revValorMedida"
-                                            ControlToValidate="txtValorMedida"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese un valor numérico válido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                        
                                     </div>
                                 </div>
                                 <div class="col-6">
