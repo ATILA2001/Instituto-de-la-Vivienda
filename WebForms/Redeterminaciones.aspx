@@ -207,16 +207,16 @@
                 AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
                 <Columns>
                     <asp:TemplateField HeaderText="Usuario">
-    <HeaderTemplate>
-        <CustomControls:TreeViewSearch ID="cblsHeaderUsuario" runat="server"
-            HeaderText="Usuario" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-    </HeaderTemplate>
-    <ItemTemplate>
-        <asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
-            OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
-        </asp:DropDownList>
-    </ItemTemplate>
-</asp:TemplateField>
+                        <HeaderTemplate>
+                            <CustomControls:TreeViewSearch ID="cblsHeaderUsuario" runat="server"
+                                HeaderText="Usuario" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
+                                OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+                            </asp:DropDownList>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
                     <asp:TemplateField HeaderText="Obra">
                         <HeaderTemplate>
@@ -264,7 +264,17 @@
                     <asp:BoundField HeaderText="Área" DataField="Area" />
                     <asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
                     <asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
-
+                    <asp:TemplateField HeaderText="Días x Buzón">
+                        <ItemTemplate>
+                            <%# 
+            (Eval("FechaSade") != DBNull.Value && Eval("FechaSade") != null && 
+            Eval("Etapa.Id") != null && 
+            !new List<int>{12, 22, 33, 34, 35, 36, 37, 38, 39}.Contains((int)Eval("Etapa.Id"))) ? 
+            FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
+            string.Empty 
+        %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">

@@ -119,6 +119,27 @@ namespace WebForms
             }
         }
 
+        protected string FormatDaysWithColor(double days)
+        {
+            int dayCount = (int)Math.Floor(days);
+            string color;
+
+            if (dayCount < 7)
+            {
+                color = "green"; // Verde para menos de 7 días
+            }
+            else if (dayCount >= 7 && dayCount <= 14)
+            {
+                color = "orange"; // Amarillo para entre 7 y 14 días
+            }
+            else
+            {
+                color = "red"; // Rojo para más de 14 días
+            }
+
+            return $"<span style='color: {color}; font-weight: bold;'>{dayCount}</span>";
+        }
+
         private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
