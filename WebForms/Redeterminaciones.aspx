@@ -245,7 +245,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
-                                OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+                                OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle">
                             </asp:DropDownList>
                         </ItemTemplate>
                     </asp:TemplateField>

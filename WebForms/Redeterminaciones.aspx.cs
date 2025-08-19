@@ -139,6 +139,51 @@ namespace WebForms
 
             return $"<span style='color: {color}; font-weight: bold;'>{dayCount}</span>";
         }
+        protected string GetDropDownStyleBasedOnBuzon(string etapaNombre, string buzonSade)
+        {
+            if (string.IsNullOrEmpty(etapaNombre) || string.IsNullOrEmpty(buzonSade))
+                return "background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;";
+
+            // Diccionario de correspondencias entre etapas y buzones
+            var correspondencias = new Dictionary<string, List<string>>
+    {
+        {"RD-01/11-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+        {"RD-02/11-Análisis Tecnica", new List<string>{
+            "IVC-3300 GO PLANEAMIENTO Y EVALUACIÓN",
+            "IVC-3430 DEPTO OBRAS 1",
+            "IVC-3400 GO INSPECCIION Y AUDITORIA DE OBRAS",
+            "11000",
+            "IVC-2600 GO PLANIFICACION Y CONTROL",
+            "VLMOHAREM",
+            "IVC-12400 GO LOGISTICA",
+            "IVC-3000 DG OBRAS",
+            "IVC-3420 DEPTO AUDITORIA 2",
+            "IVC-9500 GO MODERNIZACION"
+        }},
+        // Continuar con todas las correspondencias...
+        {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+        {"RD-04/11-Dgtal-Dictamen", new List<string>{
+            "IVC-5210 DEPTO OBRAS PUBLICAS",
+            "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
+            "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
+        }},
+        // Y así sucesivamente con todas las demás correspondencias...
+    };
+
+            // Verificar si el buzón corresponde a la etapa
+            if (correspondencias.ContainsKey(etapaNombre))
+            {
+                bool coincide = correspondencias[etapaNombre].Any(b => buzonSade.Contains(b));
+
+                if (coincide)
+                    return "background-color: #d4edda !important; color: #155724 !important; font-weight: normal; padding: 8px 12px; font-size: 14px; border-color: #c3e6cb;";
+                else
+                    return "background-color: #f8d7da !important; color: #721c24 !important; font-weight: normal; padding: 8px 12px; font-size: 14px; border-color: #f5c6cb;";
+            }
+
+            // Estilo por defecto
+            return "background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;";
+        }
 
         private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
         {
@@ -259,6 +304,14 @@ namespace WebForms
                         if (item != null)
                         {
                             ddlEtapas.SelectedValue = redetItem.Etapa.Id.ToString();
+                        }
+                        if (!string.IsNullOrEmpty(redetItem.BuzonSade))
+                        {
+                            string etapaNombre = redetItem.Etapa.Nombre;
+                            string buzonSade = redetItem.BuzonSade;
+
+                            // Aplicar el estilo al dropdown
+                            ddlEtapas.Attributes["style"] = GetDropDownStyleBasedOnBuzon(etapaNombre, buzonSade);
                         }
                     }
                 }
