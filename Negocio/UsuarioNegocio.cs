@@ -1,7 +1,9 @@
 ﻿using Dominio;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -210,5 +212,42 @@ namespace Negocio
 
         }
 
+        public DataTable listarDdlRedet()
+        {
+            DataTable dt = new DataTable();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE 
+                                       FROM USUARIOS u
+                                       INNER JOIN AREAS a ON u.AREA = a.ID 
+                                       WHERE u.ESTADO = 1 AND a.ID = 16
+                                       ORDER BY u.NOMBRE");
+                datos.ejecutarLectura();
+
+                // Definir las columnas del DataTable.
+                dt.Columns.Add("ID", typeof(int));
+                dt.Columns.Add("NOMBRE", typeof(string));
+
+                while (datos.Lector.Read())
+                {
+                    DataRow row = dt.NewRow();
+                    row["ID"] = (int)datos.Lector["ID"];
+                    row["NOMBRE"] = (string)datos.Lector["NOMBRE"];
+                    dt.Rows.Add(row);
+                }
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al listar usuarios para ddl Redet", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

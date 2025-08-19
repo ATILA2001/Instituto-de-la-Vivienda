@@ -227,7 +227,9 @@ namespace Negocio
                     E.NOMBRE AS ETAPA_NOMBRE,
                     R.PORCENTAJE_PONDERACION AS PORCENTAJE,
                     PS.[BUZON DESTINO], 
-                    PS.[FECHA ULTIMO PASE]
+                    PS.[FECHA ULTIMO PASE],
+                    R.ID_USUARIO,
+                U.NOMBRE AS USUARIO_NOMBRE
                 FROM 
                     REDETERMINACIONES AS R
                 INNER JOIN 
@@ -238,10 +240,11 @@ namespace Negocio
                 INNER JOIN AREAS AS AR ON O.AREA = AR.ID
                 LEFT JOIN CONTRATA AS C ON O.CONTRATA = C.ID
                 LEFT JOIN PASES_SADE PS ON R.EXPEDIENTE = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS
+                LEFT JOIN USUARIOS U ON R.ID_USUARIO = U.ID
                 WHERE 1=1 ";
 
                 query += " ORDER BY R.CODIGO_AUTORIZANTE,R.NRO ";
-                
+
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 
@@ -282,7 +285,13 @@ namespace Negocio
                         {
                             Id = (int)datos.Lector["ETAPA_ID"],
                             Nombre = datos.Lector["ETAPA_NOMBRE"] as string
-                        }
+                        },
+                        Usuario = datos.Lector["ID_USUARIO"] != DBNull.Value ?
+                    new Usuario
+                    {
+                        Id = (int)datos.Lector["ID_USUARIO"],
+                        Nombre = datos.Lector["USUARIO_NOMBRE"] as string
+                    } : null
                     };
 
                     lista.Add(aux);
@@ -391,6 +400,34 @@ namespace Negocio
             catch (Exception ex)
             {
                 throw new ApplicationException("Hubo un problema al intentar modificar la redeterminación.", ex);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public bool ActualizarUsuario(Redeterminacion redeterminacion)
+        {
+            var datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta(@"
+        UPDATE REDETERMINACIONES 
+        SET 
+            ID_USUARIO = @usuario 
+           WHERE ID = @id");
+
+                datos.agregarParametro("@usuario", redeterminacion.Usuario.Id);
+                datos.agregarParametro("@id", redeterminacion.Id);
+
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al modificar la redeterminacion.", ex);
             }
             finally
             {

@@ -25,6 +25,7 @@ namespace Dominio
         public string BuzonSade { get; set; }
 
         public decimal? MontoRedet { get; set; }
+        public Usuario Usuario { get; set; }
 
         public Redeterminacion() { }
     }

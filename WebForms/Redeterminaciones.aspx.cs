@@ -242,6 +242,46 @@ namespace WebForms
                     }
                 }
             }
+
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                // Lógica existente para poblar el DropDownList de Etapas en cada fila
+                DropDownList ddlUsuario = (DropDownList)e.Row.FindControl("ddlUsuario");
+                if (ddlUsuario != null)
+                {
+                    DataTable usuarios = ObtenerUsuarios(); // Este método ya existe y obtiene los estados
+                    ddlUsuario.DataSource = usuarios;
+                    ddlUsuario.DataTextField = "Nombre";
+                    ddlUsuario.DataValueField = "Id";
+                    ddlUsuario.DataBind();
+
+                    // Añadir opción "Sin Usuario" si no existe
+                    if (!ddlUsuario.Items.Cast<ListItem>().Any(x => x.Value == "-1"))
+                    {
+                        ddlUsuario.Items.Insert(0, new ListItem("Sin Usuario", "-1"));
+                    }
+
+                    // Establecer el valor seleccionado para el DropDownList de la fila
+                    Redeterminacion redetItem = e.Row.DataItem as Redeterminacion;
+                    if (redetItem != null)
+                    {
+                        if (redetItem.Usuario != null)
+                        {
+                            ListItem item = ddlUsuario.Items.FindByValue(redetItem.Usuario.Id.ToString());
+                            if (item != null)
+                            {
+                                ddlUsuario.SelectedValue = redetItem.Usuario.Id.ToString();
+                            }
+                        }
+                        else
+                        {
+                            // Si no hay usuario, seleccionar la opción "Sin Usuario"
+                            ddlUsuario.SelectedValue = "-1";
+                        }
+                    }
+                }
+            }
+
             else if (e.Row.RowType == DataControlRowType.Header)
             {
                 // Poblar los TreeViewSearch en la cabecera
@@ -294,6 +334,11 @@ namespace WebForms
             }
         }
 
+        private DataTable ObtenerUsuarios()
+        {
+            UsuarioNegocio usuarios = new UsuarioNegocio();
+            return usuarios.listarDdlRedet();
+        }
 
         protected void dgvRedeterminacion_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -554,19 +599,7 @@ namespace WebForms
             }
         }
 
-        //private DataTable ObtenerObras()
-        //{
-        //    ObraNegocio empresaNegocio = new ObraNegocio();
-        //    return empresaNegocio.listarddl();
-        //}
 
-        //private DataRow CrearFilaTodos(DataTable table)
-        //{
-        //    DataRow row = table.NewRow();
-        //    row["Id"] = 0;
-        //    row["Nombre"] = "Todos";
-        //    return row;
-        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -583,7 +616,7 @@ namespace WebForms
                 if (negocio.ActualizarExpediente(idRedeterminacion, nuevoExpediente))
                 {
 
-                    CargarListaRedeterminacion(null, true); 
+                    CargarListaRedeterminacion(null, true);
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
@@ -627,6 +660,41 @@ namespace WebForms
                 CargarListaRedeterminacion(null, true);
 
                 lblMensaje.Text = "Etapa actualizada correctamente.";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+        }
+
+        protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddlUsuario = (DropDownList)sender;
+            GridViewRow row = (GridViewRow)ddlUsuario.NamingContainer;
+
+            List<Redeterminacion> listaRedeterminaciones = (List<Redeterminacion>)Session["listaRedeterminacion"];
+            int id = int.Parse(dgvRedeterminacion.DataKeys[row.RowIndex].Value.ToString());
+            Redeterminacion redeterminacion = listaRedeterminaciones.Find(r => r.Id == id);
+
+            if (redeterminacion != null)
+            {
+                if (ddlUsuario.SelectedValue == "-1")
+                {
+                    // Si se selecciona "Sin Usuario", asignar null al usuario
+                    redeterminacion.Usuario = null;
+                }
+                else
+                {
+                    // Asegurarse que el objeto Usuario existe
+                    if (redeterminacion.Usuario == null)
+                    {
+                        redeterminacion.Usuario = new Usuario();
+                    }
+                    redeterminacion.Usuario.Id = int.Parse(ddlUsuario.SelectedValue);
+                }
+
+                RedeterminacionNegocio negocio = new RedeterminacionNegocio();
+                negocio.ActualizarUsuario(redeterminacion);
+                CargarListaRedeterminacion(null, true);
+
+                lblMensaje.Text = "Usuario actualizado correctamente.";
                 lblMensaje.CssClass = "alert alert-success";
             }
         }

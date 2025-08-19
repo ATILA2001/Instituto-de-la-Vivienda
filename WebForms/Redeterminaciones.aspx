@@ -206,6 +206,17 @@
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
                 <Columns>
+                    <asp:TemplateField HeaderText="Usuario">
+    <HeaderTemplate>
+        <CustomControls:TreeViewSearch ID="cblsHeaderUsuario" runat="server"
+            HeaderText="Usuario" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+    </HeaderTemplate>
+    <ItemTemplate>
+        <asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
+            OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+        </asp:DropDownList>
+    </ItemTemplate>
+</asp:TemplateField>
                     <asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
                     <asp:TemplateField HeaderText="Obra">
                         <HeaderTemplate>
