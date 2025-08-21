@@ -71,6 +71,21 @@ namespace WebForms
             {
                 panelShowTechosAndPpiTextBoxes.Visible = isVisible;
             }
+
+            // Controlar visibilidad de columnas en el GridView dgvFormulacion
+            // En vista admin (isVisible == true) mostramos PPI y Techos; en usuario normal mostramos solo Techos.
+            if (content.FindControl("dgvFormulacion") is GridView gv)
+            {
+                var ppiColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "PPI", StringComparison.OrdinalIgnoreCase));
+                var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techos 2026", StringComparison.OrdinalIgnoreCase));
+
+                    if (ppiColumn != null)
+                        ppiColumn.Visible = isVisible; // Admin ve PPI, User no
+
+                    if (techosColumn != null)
+                        techosColumn.Visible = true; // Visible para ambos
+
+            }
         }
 
         protected void ShowOrHideUserControlsByPlanningOrFormulationStatus()
