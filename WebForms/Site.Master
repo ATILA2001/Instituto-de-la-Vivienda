@@ -93,19 +93,21 @@
                                 <ul class="dropdown-menu">
 
                                     <li>
-                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-                                            <input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
-                                                onserverchange="chkIsPlanningOpen_ServerChange" />
-                                            <label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-                                            <input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
-                                                onserverchange="chkIsFormulationOpen_ServerChange" />
-                                            <label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
-                                        </div>
-                                    </li>
+    <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+        <input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
+            onserverchange="chkIsPlanningOpen_ServerChange" 
+            onchange="__doPostBack('<%= chkIsPlanningOpen.UniqueID %>', '')" />
+        <label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
+    </div>
+</li>
+<li>
+    <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+        <input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
+            onserverchange="chkIsFormulationOpen_ServerChange" 
+            onchange="__doPostBack('<%= chkIsFormulationOpen.UniqueID %>', '')" />
+        <label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
+    </div>
+</li>
 
                                     <li>
                                         <a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
