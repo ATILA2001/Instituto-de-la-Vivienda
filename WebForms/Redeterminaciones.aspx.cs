@@ -139,10 +139,21 @@ namespace WebForms
 
             return $"<span style='color: {color}; font-weight: bold;'>{dayCount}</span>";
         }
-        protected string GetDropDownStyleBasedOnBuzon(string etapaNombre, string buzonSade)
+        protected void BtnToggleMismatch_ServerChange(object sender, EventArgs e)
+        {
+            ShowOnlyMismatchedRecords = chkShowMismatchOnly.Checked;
+            CargarListaRedeterminacion();
+        }
+
+        protected bool ShowOnlyMismatchedRecords
+        {
+            get { return ViewState["ShowOnlyMismatchedRecords"] as bool? ?? false; }
+            set { ViewState["ShowOnlyMismatchedRecords"] = value; }
+        }
+        protected bool IsBuzonEtapaMismatch(string etapaNombre, string buzonSade)
         {
             if (string.IsNullOrEmpty(etapaNombre) || string.IsNullOrEmpty(buzonSade))
-                return "background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;";
+                return false;
 
             // Diccionario de correspondencias entre etapas y buzones
             var correspondencias = new Dictionary<string, List<string>>
@@ -160,29 +171,23 @@ namespace WebForms
             "IVC-3420 DEPTO AUDITORIA 2",
             "IVC-9500 GO MODERNIZACION"
         }},
-        // Continuar con todas las correspondencias...
         {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
         {"RD-04/11-Dgtal-Dictamen", new List<string>{
             "IVC-5210 DEPTO OBRAS PUBLICAS",
             "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
             "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
         }},
-        // Y así sucesivamente con todas las demás correspondencias...
+        // Mantener las demás correspondencias...
     };
 
             // Verificar si el buzón corresponde a la etapa
             if (correspondencias.ContainsKey(etapaNombre))
             {
                 bool coincide = correspondencias[etapaNombre].Any(b => buzonSade.Contains(b));
-
-                if (coincide)
-                    return "background-color: #d4edda !important; color: #155724 !important; font-weight: normal; padding: 8px 12px; font-size: 14px; border-color: #c3e6cb;";
-                else
-                    return "background-color: #f8d7da !important; color: #721c24 !important; font-weight: normal; padding: 8px 12px; font-size: 14px; border-color: #f5c6cb;";
+                return !coincide; // Retorna true si NO coincide (hay mismatch)
             }
 
-            // Estilo por defecto
-            return "background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;";
+            return false;
         }
 
         private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
@@ -214,6 +219,12 @@ namespace WebForms
 
                 IEnumerable<Redeterminacion> listaFiltrada = redeterminacionesCompletas;
 
+                // Filtrar por mismatch si el toggle está activo
+                if (ShowOnlyMismatchedRecords)
+                {
+                    listaFiltrada = listaFiltrada.Where(r =>
+                        IsBuzonEtapaMismatch(r.Etapa?.Nombre, r.BuzonSade));
+                }
                 // Aplicar filtro de texto general (txtBuscar)
                 string filtroGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
                 if (!string.IsNullOrEmpty(filtroGeneral))
@@ -310,8 +321,6 @@ namespace WebForms
                             string etapaNombre = redetItem.Etapa.Nombre;
                             string buzonSade = redetItem.BuzonSade;
 
-                            // Aplicar el estilo al dropdown
-                            ddlEtapas.Attributes["style"] = GetDropDownStyleBasedOnBuzon(etapaNombre, buzonSade);
                         }
                     }
                 }
