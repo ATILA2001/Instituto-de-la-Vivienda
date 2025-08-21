@@ -43,6 +43,9 @@ namespace WebForms
                         { "Contrata", "ObraEF.Contrata.Nombre" },
                         { "Barrio", "ObraEF.Barrio.Nombre" },
                         { "Nombre de Obra", "ObraEF.Descripcion" },
+                        { "Proyecto", "ObraEF.Proyecto.Nombre" },
+                        { "PPI", "Ppi" },
+                        { "Techos 2026", "Techos" },
                         { "Monto 2026", "Monto_26" },
                         { "Monto 2027", "Monto_27" },
                         { "Monto 2028", "Monto_28" },
@@ -189,6 +192,8 @@ namespace WebForms
                     Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ',')),
                     MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text),
                     Observaciones = txtObservaciones.Text,
+                    Ppi = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text),
+                    Techos = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ',')),
                     UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue),
                     ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ',')),
                     PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue)
@@ -248,6 +253,8 @@ namespace WebForms
                     txtMonto26.Text = formulacion.Monto_26?.ToString() ?? "";
                     txtMonto27.Text = formulacion.Monto_27?.ToString() ?? "";
                     txtMonto28.Text = formulacion.Monto_28?.ToString() ?? "";
+                    txtPpi.Text = formulacion.Ppi?.ToString() ?? "";
+                    txtTechos.Text = formulacion.Techos?.ToString() ?? "";
                     txtMesBase.Text = formulacion.MesBase?.ToString("yyyy-MM-dd") ?? "";
                     SelectDropDownListByValue(ddlUnidadMedida, formulacion.UnidadMedidaId?.ToString());
                     txtValorMedida.Text = formulacion.ValorMedida?.ToString() ?? "";
@@ -455,6 +462,8 @@ namespace WebForms
         {
             ddlObra.SelectedIndex = 0;
             txtMonto26.Text = "";
+            txtPpi.Text = "";
+            txtTechos.Text = "";
             txtMonto27.Text = "";
             txtMonto28.Text = "";
             txtMesBase.Text = "";

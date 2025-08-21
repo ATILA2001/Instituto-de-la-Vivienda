@@ -302,6 +302,10 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
+                <asp:BoundField HeaderText="PPI" DataField="Ppi" />
+
+                <asp:BoundField HeaderText="Techos 2026" DataField="Techos" DataFormatString="{0:C}" />
+
                 <asp:TemplateField HeaderText="Plurianual (2026,2027,2028)">
                     <ItemTemplate>
                         <%# CalcularPlurianual(Eval("Monto_26"), Eval("Monto_27"), Eval("Monto_28")) %>
@@ -393,6 +397,8 @@
             document.getElementById('<%= txtMonto26.ClientID %>').value = '';
             document.getElementById('<%= txtMonto27.ClientID %>').value = '';
             document.getElementById('<%= txtMonto28.ClientID %>').value = '';
+            document.getElementById('<%= txtPpi.ClientID %>').value = '';
+            document.getElementById('<%= txtTechos.ClientID %>').value = '';
             document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
             document.getElementById('<%= txtMesBase.ClientID %>').value = '';
             document.getElementById('<%= txtObservaciones.ClientID %>').value = '';
