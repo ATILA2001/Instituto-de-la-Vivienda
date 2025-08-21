@@ -372,10 +372,15 @@ namespace WebForms
             try
             {
                 bool resultado;
-                if (Session["EditingCertificadoId"] != null)
+                string expedienteAnterior = null;
+                string nuevoExpediente = txtExpediente.Text.Trim();
+
+                int? editingId = Session["EditingCertificadoId"] as int?;
+                int certificadoId = editingId ?? 0; // si hay edición, será el id real
+
+                if (editingId != null)
                 {
                     // Recupera el certificado existente y modifica sus propiedades
-                    int certificadoId = (int)Session["EditingCertificadoId"];
                     CertificadoEF certificadoExistente = negocio.ObtenerPorId(certificadoId);
 
                     if (certificadoExistente == null)
@@ -385,8 +390,11 @@ namespace WebForms
                         return;
                     }
 
+                    // Guardar expediente anterior para recalculo
+                    expedienteAnterior = certificadoExistente.ExpedientePago;
+
                     // Actualiza solo las propiedades editables
-                    certificadoExistente.ExpedientePago = txtExpediente.Text.Trim();
+                    certificadoExistente.ExpedientePago = nuevoExpediente;
                     certificadoExistente.MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim());
                     certificadoExistente.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
                     certificadoExistente.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
@@ -399,7 +407,7 @@ namespace WebForms
                     // Crea nuevo certificado con todas las propiedades
                     CertificadoEF nuevoCertificado = new CertificadoEF
                     {
-                        ExpedientePago = txtExpediente.Text.Trim(),
+                        ExpedientePago = nuevoExpediente,
                         MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim()),
                         MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
                         TipoPagoId = int.Parse(ddlTipo.SelectedValue),
@@ -414,14 +422,61 @@ namespace WebForms
 
                 if (resultado)
                 {
-                    // Limpiar cache SADE ya que se agregó/modificó un certificado
-                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    // Preparar cache en memoria (si no existe)
+                    if (Session["GridData"] == null)
+                        CargarListaCertificadosCompleta();
 
-                    // Invalida caché para forzar recarga desde BD
-                    Session["GridData"] = null;
+                    var listaCache = Session["GridData"] as List<CertificadoDTO>;
+
+                    // Construir lista de expedientes afectados (anterior y nuevo)
+                    var expedientesAfectados = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(expedienteAnterior)) expedientesAfectados.Add(expedienteAnterior);
+                    if (!string.IsNullOrWhiteSpace(nuevoExpediente)) expedientesAfectados.Add(nuevoExpediente);
+
+                    if (editingId == null)
+                    {
+                        // Add: el nuevo registro puede no estar presente en la cache -> recargar desde BD
+                        Session["GridData"] = null;
+                        CargarListaCertificadosCompleta();
+                        listaCache = Session["GridData"] as List<CertificadoDTO>;
+                    }
+                    else
+                    {
+                        // Update: reflejar cambios editables en el DTO en memoria antes del recálculo
+                        if (listaCache != null)
+                        {
+                            var dto = listaCache.FirstOrDefault(c => c.Id == certificadoId);
+                            if (dto != null)
+                            {
+                                dto.ExpedientePago = nuevoExpediente;
+                                dto.MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim());
+                                dto.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
+                                dto.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
+                                // Opcional: actualizar texto del tipo/campos derivados si tu DTO lo contiene
+                            }
+                        }
+                    }
+
+                    if (expedientesAfectados.Any() && listaCache != null)
+                    {
+                        // Recalcula en memoria y recarga la vista
+                        RecalcularYActualizarCache(expedientesAfectados, listaCache, persistirEnBD: false, recargarVista: true);
+                    }
+                    else
+                    {
+                        // Si no hay expedientes afectados o no hay cache disponible, invalidar para forzar recarga desde BD
+                        Session["GridData"] = null;
+                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                        CargarPaginaActual();
+                    }
+
+                    // Limpiar claves de edición de certificado (si aplica)
+                    Session["EditingCertificadoId"] = null;
+
+                    // Asegurar filtrado inválido para forzar recálculo en vista
+                    Session["FilteredGridData"] = null;
 
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                    CargarPaginaActual(); // Recargará desde BD al no encontrar caché
                 }
             }
             catch (Exception ex)
@@ -599,21 +654,32 @@ namespace WebForms
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
 
-                    // Limpiar cache SADE ya que se eliminó un certificado
-                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-
-                    // Eliminar registro específico del cache
+                    // Obtener cache actual
                     if (Session["GridData"] is List<CertificadoDTO> listaCache)
                     {
+                        // Buscar el certificado en el cache antes de eliminar para conocer expedientes afectados
+                        var certificadoEliminado = listaCache.FirstOrDefault(c => c.Id == id);
+                        List<string> expedientesAfectados = new List<string>();
+
+                        if (certificadoEliminado != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(certificadoEliminado.ExpedientePago))
+                                expedientesAfectados.Add(certificadoEliminado.ExpedientePago);
+                        }
+
                         // Remover el registro del cache
                         listaCache.RemoveAll(c => c.Id == id);
 
-                        // Actualizar totales
-                        totalRecords = listaCache.Count;
+                        // Recalcular y recargar vista si corresponde
+                        RecalcularYActualizarCache(expedientesAfectados, listaCache, persistirEnBD: false, recargarVista: true);
                     }
-
-                    // Recargar vista con datos actualizados
-                    BindGrid();
+                    else
+                    {
+                        // Si no hay cache en memoria, limpiar cache SADE y recargar desde BD
+                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                        Session["GridData"] = null;
+                        CargarPaginaActual();
+                    }
                 }
             }
             catch (Exception ex)
@@ -873,42 +939,11 @@ namespace WebForms
                     if (!string.IsNullOrWhiteSpace(nuevoExpediente))
                         expedientesAfectados.Add(nuevoExpediente);
 
-
-
-                    // Recalcular todos los certificados afectados y guardar en BD
-                    calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(
-                       expedientesAfectados,
-                       listaCompleta,
-                       persistirEnBD: false);
-
-                    // AQUI DEBEMOS ACTUALIZAR EL Session GridData con los certificados recalculados
-
-                    if (listaCompleta != null && datosFiltradosActuales != null)
-                    {
-                        foreach (var certModificado in datosFiltradosActuales)
-                        {
-                            CertificadoDTO certEnListaCompleta = null;
-                            if (certModificado.TipoPagoId == 3) // Reliquidación
-                            {
-                                certEnListaCompleta = listaCompleta.FirstOrDefault(c =>
-                                    c.IdReliquidacion == certModificado.IdReliquidacion);
-                            }
-                            else // Certificado normal
-                            {
-                                certEnListaCompleta = listaCompleta.FirstOrDefault(c => c.Id == certModificado.Id);
-                            }
-
-                            if (certEnListaCompleta != null)
-                            {
-                                certEnListaCompleta.Sigaf = certModificado.Sigaf;
-                            }
-                        }
-                    }
-
-                    CargarPaginaActual(); // Usar método optimizado
+                    // Recalcular en memoria y recargar la vista
+                    RecalcularYActualizarCache(expedientesAfectados, listaCompleta, persistirEnBD: false, recargarVista: true);
 
                     // Limpiar cache SADE ya que se modificó un expediente (certificado o reliquidación)
-                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    // (Queda incluida en RecalcularYActualizarCache)
 
                     string tipoRegistro = certificado.TipoPagoId == 3 ? "reliquidación" : "certificado";
                     lblMensaje.Text = $"Expediente de {tipoRegistro} actualizado correctamente.";
@@ -924,6 +959,69 @@ namespace WebForms
             {
                 lblMensaje.Text = $"Error al actualizar el expediente: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        /// <summary>
+        /// Recalcula SIGAF, actualiza BuzonSade y FechaSade para los expedientes indicados,
+        /// actualiza Session["GridData"], limpia cache SADE y recarga la vista si corresponde.
+        /// - expedientesAfectados: lista de números de expediente (anterior y/o nuevo)
+        /// - listaCache: si se pasa, se usa la lista en memoria; si es null se carga desde Session
+        /// - persistirEnBD: si true, el calculo debe persistir cambios en BD; si false solo en memoria
+        /// - recargarVista: si true se llamará a CargarPaginaActual() al final
+        /// </summary>
+        private void RecalcularYActualizarCache(List<string> expedientesAfectados, List<CertificadoDTO> listaCache = null, bool persistirEnBD = false, bool recargarVista = true)
+        {
+            if (expedientesAfectados == null) return;
+
+            // Filtrar nulos/vacíos y deduplicar
+            expedientesAfectados = expedientesAfectados
+                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                            .Select(s => s.Trim())
+                            .Distinct()
+                            .ToList();
+
+            if (!expedientesAfectados.Any()) return;
+
+            try
+            {
+                // Asegurar que exista la lista en memoria
+                if (listaCache == null)
+                {
+                    if (Session["GridData"] == null)
+                        CargarListaCertificadosCompleta();
+
+                    listaCache = Session["GridData"] as List<CertificadoDTO>;
+                    if (listaCache == null) return;
+                }
+
+                // Ejecutar recalculo: se espera que CalcularCertificadosPorExpedientes
+                // actualice en la lista los campos Sigaf, BuzonSade y FechaSade (y demás)
+                calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(expedientesAfectados, listaCache, persistirEnBD);
+
+                // Asegurar que los cambios queden en el cache de sesión
+                Session["GridData"] = listaCache;
+                Session["FilteredGridData"] = null; // <-- invalidar caché de filtrado
+                totalRecords = listaCache.Count;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Error al recalcular SIGAF/buzón/fecha SADE: " + ex);
+            }
+            finally
+            {
+                // Limpiar cache SADE siempre que hubo cambios
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                // Opcional: volver a la primera página para evitar índices fuera de rango
+                currentPageIndex = 0;
+                ViewState["CurrentPageIndex"] = currentPageIndex;
+
+                if (recargarVista)
+                {
+                    // Recargar página actual para que la grilla muestre los valores recalculados
+                    CargarPaginaActual();
+                }
             }
         }
 
