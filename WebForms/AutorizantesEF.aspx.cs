@@ -1451,50 +1451,131 @@ namespace WebForms
 
             try
             {
-                // Obtener el índice de la fila actual
-                int rowIndex = row.RowIndex;
-                
-                // Obtener los datos de la sesión
-                List<AutorizanteDTO> listaAutorizantes = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
-                if (listaAutorizantes == null || rowIndex >= listaAutorizantes.Count)
+                // Preferir identificar por DataKeys: Id (autorizante) o IdRedeterminacion (redet)
+                int nuevoEstadoId = int.Parse(ddlEstadoAutorizante.SelectedValue);
+
+                int id = 0;
+                int idRedeterminacion = 0;
+                if (gridviewRegistros.DataKeys != null && gridviewRegistros.DataKeys.Count > row.RowIndex)
                 {
-                    lblMensaje.Text = "Error: No se pudieron obtener los datos del autorizante.";
+                    var dataKey = gridviewRegistros.DataKeys[row.RowIndex];
+                    if (dataKey != null && dataKey.Values != null)
+                    {
+                        if (dataKey.Values["Id"] != null) int.TryParse(dataKey.Values["Id"].ToString(), out id);
+                        if (dataKey.Values["IdRedeterminacion"] != null) int.TryParse(dataKey.Values["IdRedeterminacion"].ToString(), out idRedeterminacion);
+                    }
+                }
+
+                var listaCompleta = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
+                if (listaCompleta == null)
+                {
+                    lblMensaje.Text = "Error: No hay datos en memoria.";
                     lblMensaje.CssClass = "alert alert-danger";
                     return;
                 }
-                
-                AutorizanteDTO autorizanteDTO = listaAutorizantes[rowIndex];
-                int nuevoEstadoId = int.Parse(ddlEstadoAutorizante.SelectedValue);
-                
-                // Actualizar el estado en la base de datos
-                AutorizanteNegocioEF negocio = new AutorizanteNegocioEF();
-                if (negocio.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId))
+
+                AutorizanteDTO autorizanteDTO = null;
+
+                // Si tenemos Id (autorizante real) buscar por Id
+                if (id > 0)
                 {
-                    // Actualizar el DTO en memoria
+                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.Id == id);
+                }
+
+                // Si no se encontró y existe IdRedeterminacion, buscar por IdRedeterminacion
+                if (autorizanteDTO == null && idRedeterminacion > 0)
+                {
+                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.IdRedeterminacion == idRedeterminacion);
+                }
+
+                // Fallback: si DataKeys no estaban disponibles o no localizaron, mapear usando lista filtrada y pageIndex
+                if (autorizanteDTO == null)
+                {
+                    var filtrados = ObtenerDatosFiltradosActuales();
+                    if (filtrados != null)
+                    {
+                        int pageIndex = currentPageIndex;
+                        int pageSizeLocal = pageSize;
+                        int rowIndex = row.RowIndex;
+                        int indiceReal = pageIndex * pageSizeLocal + rowIndex;
+                        if (indiceReal >= 0 && indiceReal < filtrados.Count)
+                        {
+                            var dtoEnFiltrados = filtrados[indiceReal];
+                            if (dtoEnFiltrados != null)
+                            {
+                                // Buscar en la lista completa por Id preferentemente
+                                if (dtoEnFiltrados.Id > 0)
+                                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.Id == dtoEnFiltrados.Id);
+                                if (autorizanteDTO == null && !string.IsNullOrEmpty(dtoEnFiltrados.CodigoAutorizante))
+                                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.CodigoAutorizante == dtoEnFiltrados.CodigoAutorizante);
+                            }
+                        }
+                    }
+                }
+
+                if (autorizanteDTO == null)
+                {
+                    lblMensaje.Text = "Error: no se pudo localizar el autorizante a actualizar.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                // Ejecutar la actualización: preferir métodos por Id si existen
+                bool actualizado = false;
+                // Si es una redeterminación (IdRedeterminacion > 0) y existe negocio para redeterminaciones por Id
+                if (autorizanteDTO.IdRedeterminacion > 0)
+                {
+                    // Utilizar RedeterminacionNegocio para actualizar por Id
+                    var redNeg = new RedeterminacionNegocio();
+                    var red = new Dominio.Redeterminacion { Id = autorizanteDTO.IdRedeterminacion, Etapa = new Dominio.EstadoRedet { Id = nuevoEstadoId } };
+                    actualizado = redNeg.ActualizarEstado(red);
+                }
+                else if (autorizanteDTO.Id > 0)
+                {
+                    // Autorizante normal: usar AutorizanteNegocioEF.ObtenerPorId + Modificar o crear método especializado
+                    var authNeg = new AutorizanteNegocioEF();
+                    var entidad = authNeg.ObtenerPorId(autorizanteDTO.Id);
+                    if (entidad != null)
+                    {
+                        entidad.EstadoId = nuevoEstadoId;
+                        actualizado = authNeg.Modificar(entidad);
+                    }
+                    else
+                    {
+                        // Fallback a método por código si la entidad no existe por Id
+                        actualizado = authNeg.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId);
+                    }
+                }
+                else
+                {
+                    // Último recurso: usar el método existente que acepta codigoAutorizante
+                    var authNeg = new AutorizanteNegocioEF();
+                    actualizado = authNeg.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId);
+                }
+
+                if (actualizado)
+                {
+                    // Actualizar DTO en memoria
                     autorizanteDTO.EstadoId = nuevoEstadoId;
-                    
-                    // Obtener el nombre del estado para actualizar también en memoria
-                    EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
+                    var estadoNegocio = new EstadoAutorizanteNegocioEF();
                     var estados = estadoNegocio.Listar();
                     var estadoSeleccionado = estados.FirstOrDefault(estado => estado.Id == nuevoEstadoId);
                     if (estadoSeleccionado != null)
                     {
                         autorizanteDTO.EstadoNombre = estadoSeleccionado.Nombre;
                     }
-                    
+
                     lblMensaje.Text = "Estado actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    
-                    // Recargar solo si es necesario (para mantener la paginación actual)
+                    // Invalidate caches if needed
+                    Session["GridDataAutorizantes"] = listaCompleta;
+                    ViewState["NecesitaRecarga"] = null;
                     BindGrid();
                 }
                 else
                 {
                     lblMensaje.Text = "Error al actualizar el estado.";
                     lblMensaje.CssClass = "alert alert-danger";
-                    
-                    // Restaurar el valor anterior en el desplegable
-                    ddlEstadoAutorizante.SelectedValue = autorizanteDTO.EstadoId.ToString();
                 }
             }
             catch (Exception ex)
