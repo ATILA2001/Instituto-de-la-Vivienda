@@ -168,9 +168,6 @@ namespace WebForms.CustomControls
 
         }
 
-        /// <summary>
-        /// DataBind unificado: preserva selecciones Y mantiene toda la lógica original
-        /// </summary>
         public override void DataBind()
         {
             // Paso 1: Guardar selecciones actuales antes de repoblar
@@ -182,7 +179,7 @@ namespace WebForms.CustomControls
                 {
                     // Paso 2: Limpiar y repoblar con la lógica original completa
                     chkList.Nodes.Clear();
-                    var selectAllNode = new TreeNode("Seleccionar todos", "selectAll") 
+                    var selectAllNode = new TreeNode("Seleccionar todos", "select-all") 
                     { 
                         ShowCheckBox = true, 
                         SelectAction = TreeNodeSelectAction.None 
@@ -251,15 +248,15 @@ namespace WebForms.CustomControls
                 Debug.WriteLine("Error en DataBind del TreeViewSearch: " + ex.Message);
             }
 
-            // MODIFICADO: Priorizar selecciones guardadas antes del repoblado
+            // Prioriza selecciones guardadas antes del repoblado
             if (seleccionesActuales != null && seleccionesActuales.Any())
             {
-                // NUEVO: Restaurar selecciones preservadas del repoblado
+                // Restaura selecciones preservadas del repoblado
                 RestaurarSeleccionesPorValor(seleccionesActuales);
             }
             else
             {
-                // EXISTENTE: Lógica original de restauración desde sesión
+
                 try
                 {
                     var selectedValues = LoadSelectedValuesFromSession();
@@ -331,7 +328,7 @@ namespace WebForms.CustomControls
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error guardando selecciones por valor: {ex.Message}");
+                Debug.WriteLine($"Error guardando selecciones por valor: {ex.Message}");
             }
             
             return selecciones;
@@ -428,12 +425,12 @@ namespace WebForms.CustomControls
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error actualizando interfaz: {ex.Message}");
+                Debug.WriteLine($"Error actualizando interfaz: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Popula el TreeView con nodos de fecha agrupados por año y mes, manteniendo la jerarquía Año -> Mes -> Día.
+        /// Llena el TreeView con nodos de fecha agrupados por año y mes, manteniendo la jerarquía Año -> Mes -> Día.
         /// Este método mejora la claridad al aislar la lógica de manejo de fechas.
         /// </summary>
         /// <param name="dates">Lista de fechas únicas para mostrar.</param>
@@ -669,26 +666,24 @@ namespace WebForms.CustomControls
             {
                 if (page == null) return;
 
-                // 1. Find all TreeViewSearch controls on the page
+                // 1. Encuentra todos los controles TreeViewSearch en la página
                 List<TreeViewSearch> allTvsControls = new List<TreeViewSearch>();
                 FindAllTvsControlsRecursive(page, allTvsControls); // Usaremos un nuevo helper estático
 
-                // 2. Call ClearSelection on each control instance.
-                // Esto desmarcará los nodos del TreeView, limpiará su estado de sesión/contexto individualmente
-                // y actualizará los elementos de la UI del control del lado del servidor.
+                // 2. Llama a ClearSelection en cada instancia de control.
                 foreach (TreeViewSearch tvsControl in allTvsControls)
                 {
                     tvsControl.ClearSelection();
                 }
 
-                // 3. Set client-side flag for JavaScript to perform its UI updates (e.g., dropdown titles).
+                // 3. Establece un flag del lado del cliente para que JavaScript realice sus actualizaciones de UI (por ejemplo, títulos de dropdown).
                 // El JavaScript escuchará este flag y llamará a clearLocalStatesForTreeView.
                 ScriptManager.RegisterStartupScript(page, page.GetType(), "setFiltersCleared",
                     "sessionStorage.setItem('filtersCleared', 'true'); console.log('[TreeViewSearch.ClearAllFiltersOnPage] filtersCleared flag set for client-side refresh.');", true);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en TreeViewSearch.ClearAllFiltersOnPage: {ex.ToString()}");
+                Debug.WriteLine($"Error en TreeViewSearch.ClearAllFiltersOnPage: {ex.ToString()}");
                 // Considerar un logging más formal para producción.
             }
         }
