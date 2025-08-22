@@ -112,6 +112,7 @@
     <Content Include="Formulacion.aspx" />
     <Content Include="FormulacionAdmin.aspx" />
     <Content Include="FormulacionEF.aspx" />
+  <Content Include="LegitimosEF.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
@@ -270,8 +271,15 @@
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="LegitimosEF.aspx.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="FormulacionEF.aspx.designer.cs">
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LegitimosEF.aspx.designer.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="Legitimos.aspx.cs">

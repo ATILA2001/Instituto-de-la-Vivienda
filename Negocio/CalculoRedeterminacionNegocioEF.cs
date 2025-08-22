@@ -1340,6 +1340,23 @@ namespace Negocio
         }
 
         /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SADE a otras clases.
+        /// </summary>
+        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerDatosSadeBulk(List<string> expedientes)
+        {
+            return BuscarMuchosDatosSade(expedientes ?? new List<string>());
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SIGAF a otras clases.
+        /// </summary>
+        public Dictionary<string, decimal> ObtenerSigafBulk(List<string> expedientes)
+        {
+            // Llama al método privado que realiza la consulta bulk para SIGAF
+            return BuscarMuchosNumerosSigaf(expedientes ?? new List<string>());
+        }
+
+        /// <summary>
         /// Limpia el cache de datos SADE para forzar recarga desde BD
         /// </summary>
         public static void LimpiarCacheSade()

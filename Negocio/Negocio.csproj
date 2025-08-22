@@ -109,6 +109,7 @@
     <Compile Include="FormulacionNegocioEF.cs" />
     <Compile Include="FormulacionNegocio.cs" />
     <Compile Include="Helpers.cs" />
+  <Compile Include="LegitimoNegocioEF.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
