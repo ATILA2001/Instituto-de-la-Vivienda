@@ -25,6 +25,7 @@ namespace WebForms
             // Comprobación básica de usuario logueado
             if (Session["Usuario"] == null)
             {
+                Debug.WriteLine("Redirect to Login.aspx: " + DateTime.Now);
                 Response.Redirect("Login.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();

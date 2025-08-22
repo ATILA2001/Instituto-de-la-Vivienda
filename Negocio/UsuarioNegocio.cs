@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.DirectoryServices.AccountManagement;
+using System.Web.Security;
 
 namespace Negocio
 {
@@ -25,6 +27,13 @@ namespace Negocio
 				Debug.WriteLine("Valor de userName: " + userName);
 				// Debug.WriteLine("datos.Lector.Read()!!!!!!!!!!!!!!!: " + datos.Lector.Read());
 				// Debug.WriteLine(datos.Lector[0].ToString());
+				var contexto = new PrincipalContext(ContextType.Domain, "BUENOSAIRES");
+
+
+				// Validar las credenciales del usuario
+				bool resultado = contexto.ValidateCredentials(userName, usuario.Contrasenia);
+				Debug.Write("¿Credenciales válidas?: " + resultado);
+
 
 				while (datos.Lector.Read())
                 {
@@ -37,7 +46,7 @@ namespace Negocio
                     usuario.Area = new Area();
                     usuario.Area.Id = (int)datos.Lector["IDAREA"];
                     usuario.Area.Nombre = (string)datos.Lector["AREA"];
-                    return true;
+                    return true && contexto.ValidateCredentials(userName, usuario.Contrasenia);
                 }
 
 				Debug.WriteLine("usuario.Correo: " + usuario.Correo);

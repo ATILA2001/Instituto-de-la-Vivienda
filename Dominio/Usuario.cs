@@ -22,7 +22,7 @@ namespace Dominio
 
 		public String Domain { get; set; }
 
-		public String Username { get; set; }
+		public String Username { get; set; }    // destinado a guardar el nombre de usuario del dominio
 
 
 		public Usuario() { }

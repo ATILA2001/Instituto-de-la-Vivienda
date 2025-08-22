@@ -21,7 +21,7 @@ namespace WebForms
 
         protected void btnIniciar_Click(object sender, EventArgs e)
         {
-            Usuario usuario;
+            Usuario usuario = null;
             UsuarioNegocio negocio = new UsuarioNegocio();
             try
             {
@@ -35,22 +35,21 @@ namespace WebForms
                     {
                         var emailPattern = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
                         var cuilPattern = new Regex(@"^(20|23|27|30|33)\d{8}\d$");
+                        bool exito = false;
 
                         if (emailPattern.IsMatch(txtEmail.Text.Trim()))
                         {
                             usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                            exito = negocio.Logear(usuario);
                         }
                         else if (cuilPattern.IsMatch(txtEmail.Text.Trim()))
                         {
                             // CreateWithDomain
                             usuario = Usuario.CreateWithDomain(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                            exito = negocio.LogearIntegSecur(usuario, txtEmail.Text.Trim());
                         }
 
-                        if (
-                        //negocio.Logear(usuario)
-                      )
-
-                        {
+                        if (exito) {
                             Session.Add("Usuario", usuario);
                             if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
                             {
@@ -77,15 +76,16 @@ namespace WebForms
                                     Response.Redirect("Error.aspx", false);
                                 }
                             }
-                        } else {
-                                Session.Add("error", "Usuario o Contraseña Incorrectos");
-                                Response.Redirect("Error.aspx", false);
                         }
-
+                    }
+                    else
+                    {
+                        Session.Add("error", "Usuario o Contraseña Incorrectos");
+                        Response.Redirect("Error.aspx", false);
                     }
                 }
-
             }
+
 
             catch (Exception ex) {
 
