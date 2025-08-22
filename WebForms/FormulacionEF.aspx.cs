@@ -12,7 +12,7 @@ namespace WebForms
 {
     public partial class FormulacionEF : System.Web.UI.Page
     {
-        private FormulacionNegocioEF negocio = new FormulacionNegocioEF();
+        private readonly FormulacionNegocioEF negocio = new FormulacionNegocioEF();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -91,21 +91,21 @@ namespace WebForms
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") is CustomControls.TreeViewSearch cblsHeaderArea)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea)
                 {
                     var areasUnicas = formulacionesCompletas
                         .Where(f => f.ObraEF?.Area != null)
                         .Select(f => f.ObraEF.Area)
                         .Distinct()
                         .OrderBy(a => a.Nombre)
-                        .Select(a => new { Id = a.Id.ToString(), Nombre = a.Nombre })
+                        .Select(a => new { Id = a.Id.ToString(), a.Nombre })
                         .ToList();
                     cblsHeaderArea.DataSource = areasUnicas;
                     cblsHeaderArea.DataBind();
                     cblsHeaderArea.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") is CustomControls.TreeViewSearch cblsHeaderLineaGestion)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion)
                 {
                     var lineasUnicas = formulacionesCompletas
                         .Where(f => f.ObraEF?.Proyecto?.LineaGestionEF != null)
@@ -119,7 +119,7 @@ namespace WebForms
                     cblsHeaderLineaGestion.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") is CustomControls.TreeViewSearch cblsHeaderProyecto)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto)
                 {
                     var proyectosUnicos = formulacionesCompletas
                         .Where(f => f.ObraEF?.Proyecto != null)
@@ -133,21 +133,21 @@ namespace WebForms
                     cblsHeaderProyecto.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") is CustomControls.TreeViewSearch cblsHeaderMonto2026)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") is TreeViewSearch cblsHeaderMonto2026)
                 {
                     var montosUnicos = formulacionesCompletas
                         .Where(f => f.Monto_26.HasValue)
                         .Select(f => f.Monto_26.Value)
                         .Distinct()
                         .OrderBy(m => m)
-                        .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m.ToString("N2") }) // Use "N2" or "C" for display
+                        .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m })
                         .ToList();
                     cblsHeaderMonto2026.DataSource = montosUnicos;
                     cblsHeaderMonto2026.DataBind();
                     cblsHeaderMonto2026.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") is CustomControls.TreeViewSearch cblsHeaderPrioridad)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") is TreeViewSearch cblsHeaderPrioridad)
                 {
                     var prioridadesUnicas = formulacionesCompletas
                         .Where(f => f.PrioridadEF != null)
@@ -215,7 +215,7 @@ namespace WebForms
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingFormulacionEFId"] = null;
-                Session["formulacionesCompletas"] = null; // clear cache so selection sees fresh data
+                Session["formulacionesCompletas"] = null;
        
                 BindGrid();
             }
@@ -343,7 +343,7 @@ namespace WebForms
                 // Total filtrado en BD
                 int total = negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
 
-                // Ajustar paginación si necesario
+
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -358,16 +358,15 @@ namespace WebForms
                 dgvFormulacion.DataSource = pagina;
                 dgvFormulacion.DataBind();
 
-                // Calcular subtotal global (requiere suma total filtrada) -> eficiencia: si se necesita exacto hacer una consulta específica
+
                 decimal totalMonto26Global = 0;
                 if (total > 0)
                 {
-                    // Consulta rápida para subtotal (se podría optimizar combinando con el conteo si se usa proyección)
-                    // Para simplicidad se reusa BuildBaseQuery y filtros: ideal mover a un método en negocio si se usa frecuentemente
+
                     using (var context = new IVCdbContext())
                     {
                         var querySubtotal = context.Formulaciones.AsQueryable();
-                        // Reaplicar filtros mínimos (duplicado ligero respecto a negocio; factorizable)
+
                         if (!usuario.Tipo)
                         {
                             if (usuario.AreaId.HasValue)
