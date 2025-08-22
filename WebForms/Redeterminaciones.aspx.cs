@@ -98,6 +98,7 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderObra");
             ClearHeaderFilter("cblsHeaderAutorizante");
             ClearHeaderFilter("cblsHeaderEstado");
+            ViewState["BuzonFilterValue"] = "all";
             CargarListaRedeterminacion();
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
@@ -190,6 +191,61 @@ namespace WebForms
             return false;
         }
 
+        protected void ddlFiltroBuzon_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddlFiltroBuzon = (DropDownList)sender;
+            string selectedValue = ddlFiltroBuzon.SelectedValue;
+
+            ViewState["BuzonFilterValue"] = selectedValue;
+
+            List<Redeterminacion> listaCompleta = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
+            if (listaCompleta == null)
+                return;
+
+            IEnumerable<Redeterminacion> listaFiltrada = listaCompleta;
+
+            // List of excluded Etapa IDs
+            List<int> etapasExcluidas = new List<int> { 12, 22, 33, 34, 35, 36, 37, 38, 39 };
+
+            if (selectedValue != "all")
+            {
+                switch (selectedValue)
+                {                 
+
+                    case "0": // "En curso" (menos de 7 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays < 7);
+                        break;
+
+                    case "1": // "Revisar" (entre 7 y 14 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays >= 7 &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays <= 14);
+                        break;
+
+                    case "2": // "Reclamar" (más de 14 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays > 14);
+                        break;
+                }
+            }
+
+            List<Redeterminacion> resultadoFinal = listaFiltrada.ToList();
+            Session["listaRedeterminacion"] = resultadoFinal;
+            dgvRedeterminacion.DataSource = resultadoFinal;
+            dgvRedeterminacion.DataBind();
+
+        }
+
         private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
         {
             try
@@ -274,14 +330,6 @@ namespace WebForms
                 dgvRedeterminacion.DataSource = resultadoFinal;
                 dgvRedeterminacion.DataBind();
 
-                if (!resultadoFinal.Any())
-                {
-                    lblMensaje.Text = "No se encontraron redeterminaciones con los filtros aplicados.";
-                }
-                else
-                {
-                    lblMensaje.Text = "";
-                }
             }
             catch (Exception ex)
             {
@@ -413,6 +461,11 @@ namespace WebForms
                         .ToList();
                     cblsHeaderEstado.DataSource = items;
                     cblsHeaderEstado.DataBind();
+                }
+                var ddlFiltroBuzon = e.Row.FindControl("ddlFiltroBuzon") as DropDownList;
+                if (ddlFiltroBuzon != null && ViewState["BuzonFilterValue"] != null)
+                {
+                    ddlFiltroBuzon.SelectedValue = ViewState["BuzonFilterValue"].ToString();
                 }
             }
         }
