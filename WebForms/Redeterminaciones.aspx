@@ -142,168 +142,190 @@
 	</div>
 	<!-- /Modal -->
 
+
 	<div class="row mt-4 mb-3">
-		<div class="col-12">
-			<div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
-				<!-- Contenedor de Filtros alineados a la izquierda -->
-				<div class="d-flex flex-wrap gap-3">
-					<div class="form-check form-switch d-flex align-items-center">
-						<input type="checkbox" class="form-check-input me-2" id="chkShowMismatchOnly" name="chkShowMismatchOnly" runat="server" style="cursor: pointer;"
-							onserverchange="BtnToggleMismatch_ServerChange"
-							onchange="__doPostBack('<%= chkShowMismatchOnly.UniqueID %>', '')" />
-						<label class="form-check-label ms-1" for="chkShowMismatchOnly">Control de Estados</label>
+		<div class="col-6">
+
+			<div class="d-flex gap-3">
+				<div class="d-flex flex-column">
+					<div class="mb-1">
+						<span style="margin-left: 0.8rem;">Días x Buzón</span>
+					</div>
+					<div>
+						<asp:DropDownList ID="ddlFiltroBuzon" runat="server" AutoPostBack="true"
+							CssClass="dropdown-button"
+							OnSelectedIndexChanged="ddlFiltroBuzon_SelectedIndexChanged">
+							<asp:ListItem Text="Todos" Value="all" Selected="True"></asp:ListItem>
+							<asp:ListItem Text="En curso" Value="0"></asp:ListItem>
+							<asp:ListItem Text="Revisar" Value="1"></asp:ListItem>
+							<asp:ListItem Text="Reclamar" Value="2"></asp:ListItem>
+						</asp:DropDownList>
 					</div>
 				</div>
 
+				<div class="form-check form-switch form-check-reverse align-self-end">
+					<label class="form-check-label ms-1" for="chkShowMismatchOnly">Control de Estados</label>
+					<input type="checkbox" class="form-check-input" id="chkShowMismatchOnly" name="chkShowMismatchOnly" runat="server" style="cursor: pointer;"
+						onserverchange="BtnToggleMismatch_ServerChange"
+						onchange="__doPostBack('<%= chkShowMismatchOnly.UniqueID %>', '')" />
+				</div>
+			</div>
 
-				<!-- Contenedor de Botones alineados a la derecha -->
-				<div class="d-flex gap-3">
 
-					<div class="form-group mb-2">
-						<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
-					</div>
-					<div class="form-group mb-2">
-						<%--<asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />--%>
-						<asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
-							data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
+		</div>
+
+
+		<div class="col-6">
+			<div class="d-flex justify-content-end gap-3 align-items-end h-100">
+				<div class="form-group">
+					<asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar..."></asp:TextBox>
+				</div>
+				<div class="form-group">
+					<%--<asp:Button CssClass="btn btn-primary" ID="btnFiltrar" Text="Filtrar" runat="server" OnClick="btnFiltrar_Click" />--%>
+					<asp:LinkButton ID="btnFiltrar" runat="server" CssClass="btn btn-primary" OnClick="btnFiltrar_Click"
+						data-bs-toggle="tooltip" data-bs-placement="top" title="Filtrar">
 			<i class="bi bi-search"></i>
-						</asp:LinkButton>
-					</div>
+					</asp:LinkButton>
+				</div>
 
 
-					<%-- logica que aparezca o desaparezca. copiar de david --%>
-					<div class="form-group mb-2">
-						<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
-							data-bs-toggle="tooltip"
-							data-bs-placement="top"
-							title="Quita todos los filtros">
+				<%-- logica que aparezca o desaparezca. copiar de david --%>
+				<div class="form-group">
+					<asp:LinkButton CssClass="btn btn-primary" ID="btnLimpiarFiltros" Text="Limpiar" runat="server" OnClick="BtnClearFilters_Click"
+						data-bs-toggle="tooltip"
+						data-bs-placement="top"
+						title="Quita todos los filtros">
 			<i class="bi bi-funnel"></i>
-						</asp:LinkButton>
-					</div>
+					</asp:LinkButton>
+				</div>
 
-					<div class="form-group mb-2">
-						<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+				<div class="form-group">
+					<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
-						</asp:LinkButton>
-					</div>
-
+					</asp:LinkButton>
 				</div>
 			</div>
 		</div>
-
-		<hr class="mb-3" />
-		<div class="gridview-scroll-container">
-
-
-			<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover  mb-4"
-				OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
-				OnRowDeleting="dgvRedeterminacion_RowDeleting"
-				OnRowDataBound="dgvRedeterminacion_RowDataBound"
-				ShowHeaderWhenEmpty="true"
-				AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
-				<Columns>
-					<asp:TemplateField HeaderText="Usuario">
-						<HeaderTemplate>
-							<CustomControls:TreeViewSearch ID="cblsHeaderUsuario" runat="server"
-								HeaderText="Usuario" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-						</HeaderTemplate>
-						<ItemTemplate>
-							<asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
-								OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
-							</asp:DropDownList>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
-					<asp:TemplateField HeaderText="Obra">
-						<HeaderTemplate>
-							<CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
-								HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-						</HeaderTemplate>
-						<ItemTemplate>
-							<%# Eval("Autorizante.Obra.Descripcion") %>
-						</ItemTemplate>
-					</asp:TemplateField>
-
-					<asp:TemplateField HeaderText="Código Autorizante">
-						<HeaderTemplate>
-							<CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
-								HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-						</HeaderTemplate>
-						<ItemTemplate>
-							<%# Eval("CodigoRedet") %>
-						</ItemTemplate>
-					</asp:TemplateField>
-
-					<asp:TemplateField HeaderText="Etapa">
-						<HeaderTemplate>
-							<CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
-								HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
-						</HeaderTemplate>
-						<ItemTemplate>
-							<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
-								OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle">
-							</asp:DropDownList>
-						</ItemTemplate>
-					</asp:TemplateField>
-
-					<asp:TemplateField HeaderText="Expediente">
-						<ItemTemplate>
-							<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-								OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:BoundField HeaderText="Tipo" DataField="Tipo" />
-					<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
-					<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
-					<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-					<asp:BoundField HeaderText="Área" DataField="Area" />
-					<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
-					<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
-					<asp:TemplateField HeaderText="Días x Buzón">
-						<ItemTemplate>
-							<%# 
-            (Eval("FechaSade") != DBNull.Value && Eval("FechaSade") != null && 
-            Eval("Etapa.Id") != null && 
-            !new List<int>{12, 22, 33, 34, 35, 36, 37, 38, 39}.Contains((int)Eval("Etapa.Id"))) ? 
-            FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
-            string.Empty 
-							%>
-						</ItemTemplate>
-					</asp:TemplateField>
-					<asp:TemplateField HeaderText="Acciones">
-						<ItemTemplate>
-							<div class="d-flex justify-content-center gap-2">
-								<asp:LinkButton ID="btnModificar" runat="server"
-									CommandName="Select"
-									CssClass="btn btn-sm btn-warning "
-									ToolTip="Modificar">
-                    <i class="bi bi-pencil-square"></i>
-								</asp:LinkButton>
-								<asp:LinkButton ID="btnEliminar" runat="server"
-									CommandName="Delete"
-									CssClass="btn btn-sm btn-danger "
-									ToolTip="Eliminar"
-									OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                    <i class="bi bi-trash"></i>
-								</asp:LinkButton>
-							</div>
-						</ItemTemplate>
-					</asp:TemplateField>
-				</Columns>
-				<EmptyDataTemplate>
-					<div class="text-center m-3">
-						<i class="bi bi-info-circle fs-4"></i>
-						<p class="mb-0">No hay elementos para mostrar o registros que coincidan con los filtros aplicados.</p>
-					</div>
-				</EmptyDataTemplate>
-			</asp:GridView>
-		</div>
-
-		<div class="text-center p-4">
-			<asp:Label ID="lblMensaje" Text="" runat="server" />
-		</div>
 	</div>
+
+
+	<hr class="mb-3" />
+	<div class="gridview-scroll-container">
+
+
+		<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover  mb-4"
+			OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
+			OnRowDeleting="dgvRedeterminacion_RowDeleting"
+			OnRowDataBound="dgvRedeterminacion_RowDataBound"
+			ShowHeaderWhenEmpty="true"
+			AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
+			<Columns>
+				<asp:TemplateField HeaderText="Usuario">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderUsuario" runat="server"
+							HeaderText="Usuario" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
+							OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+						</asp:DropDownList>
+					</ItemTemplate>
+				</asp:TemplateField>
+				<asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
+				<asp:TemplateField HeaderText="Obra">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
+							HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Autorizante.Obra.Descripcion") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+				<asp:TemplateField HeaderText="Código Autorizante">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderAutorizante" runat="server"
+							HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("CodigoRedet") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+				<asp:TemplateField HeaderText="Etapa">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
+							HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
+							OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle">
+						</asp:DropDownList>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+				<asp:TemplateField HeaderText="Expediente">
+					<ItemTemplate>
+						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+					</ItemTemplate>
+				</asp:TemplateField>
+				<asp:BoundField HeaderText="Tipo" DataField="Tipo" />
+				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
+				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+				<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
+				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
+				<asp:BoundField HeaderText="Área" DataField="Area" />
+				<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
+				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+
+				<asp:TemplateField HeaderText="Días x Buzón">
+					<ItemTemplate>
+						<%# 
+        (Eval("FechaSade") != DBNull.Value && Eval("FechaSade") != null && 
+        Eval("Etapa.Id") != null && 
+        !new List<int>{12, 22, 33, 34, 35, 36, 37, 38, 39}.Contains((int)Eval("Etapa.Id"))) ? 
+        FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
+        string.Empty 
+        %>
+					</ItemTemplate>
+				</asp:TemplateField>
+				<asp:TemplateField HeaderText="Acciones">
+					<ItemTemplate>
+						<div class="d-flex justify-content-center gap-2">
+							<asp:LinkButton ID="btnModificar" runat="server"
+								CommandName="Select"
+								CssClass="btn btn-sm btn-warning "
+								ToolTip="Modificar">
+                    <i class="bi bi-pencil-square"></i>
+							</asp:LinkButton>
+							<asp:LinkButton ID="btnEliminar" runat="server"
+								CommandName="Delete"
+								CssClass="btn btn-sm btn-danger "
+								ToolTip="Eliminar"
+								OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                    <i class="bi bi-trash"></i>
+							</asp:LinkButton>
+						</div>
+					</ItemTemplate>
+				</asp:TemplateField>
+			</Columns>
+			<EmptyDataTemplate>
+				<div class="text-center m-3">
+					<i class="bi bi-info-circle fs-4"></i>
+					<p class="mb-0">No hay elementos para mostrar o registros que coincidan con los filtros aplicados.</p>
+				</div>
+			</EmptyDataTemplate>
+		</asp:GridView>
+	</div>
+	
+
+	<div class="text-center p-4">
+		<asp:Label ID="lblMensaje" Text="" runat="server" />
+	</div>
+
+
+
 	<script type="text/javascript">
 		function limpiarFormulario() {
 			document.getElementById('<%= txtExpediente.ClientID %>').value = '';
