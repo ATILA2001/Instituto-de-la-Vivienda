@@ -17,20 +17,35 @@ document.addEventListener('click', function (event) {
 
         if (!clickedInsideDropdown && !clickedOnButton) {
             const treeViewContainerInside = openDropdown.querySelector('.date-tree-view');
+
+            // Cerrar siempre el dropdown primero
+            openDropdown.style.display = 'none';
+
+            // Limpiar timeouts asociados si existen
+            if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
+                clearDropdownTimeout(openDropdown.id);
+            }
+
+            // Restaurar estado cliente si está disponible (por ejemplo, cancelar cambios temporales)
             if (treeViewContainerInside && typeof restoreState === 'function') {
-                restoreState(treeViewContainerInside);
-            } else {
-                openDropdown.style.display = 'none';
-                if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
-                    clearDropdownTimeout(openDropdown.id);
+                try {
+                    restoreState(treeViewContainerInside);
+                } catch (err) {
+                    console.warn('restoreState falló:', err);
                 }
-                if (treeViewContainerInside && typeof updateDropdownIcon === 'function') {
+            }
+
+            // Actualizar icono si corresponde
+            if (treeViewContainerInside && typeof updateDropdownIcon === 'function') {
+                try {
                     updateDropdownIcon(treeViewContainerInside);
+                } catch (err) {
+                    console.warn('updateDropdownIcon falló:', err);
                 }
             }
         }
     });
-});
+}, true); // usar fase de captura para recibir eventos antes de que otros handlers puedan stopPropagation
 
 function getPageName() {
     try {
