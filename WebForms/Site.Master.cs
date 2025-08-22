@@ -2,6 +2,7 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Web;
@@ -147,6 +148,41 @@ namespace WebForms
         protected void chkIsFormulationOpen_ServerChange(object sender, EventArgs e)
         {
             ABMPlaniNegocio.SetIsFormulationOpen(chkIsFormulationOpen.Checked);
+        }
+        /// <summary>
+        /// Obtiene el nombre de la página actual sin la extensión .aspx
+        /// </summary>
+        /// <returns>Nombre de la página actual</returns>
+        public string GetCurrentPageName()
+        {
+            string pageName = Path.GetFileNameWithoutExtension(Request.Path);
+
+            // Convertir algunos nombres técnicos a nombres más amigables
+            switch (pageName.ToLower())
+            {
+                case "formulacionef":
+                    return "Formulación 2026";
+                case "proyectosef":
+                    return "Proyectos";
+                case "movimientosgestionef":
+                    return "Movimientos";
+                case "lineasgestionef":
+                    return "Líneas de Gestión";
+                case "lineasgestionffef":
+                    return "Líneas de Gestión con FF";
+                case "autorizantesef":
+                    return "Autorizantes";
+                case "certificadosef":
+                    return "Certificados";
+                case "legitimosef":
+                    return "Legítimos Abonos";
+                case "redeterminacionesef":
+                    return "Redeterminaciones";
+                case "obrasef":
+                    return "Obras";
+                default:
+                    return pageName;
+            }
         }
     }
 }
