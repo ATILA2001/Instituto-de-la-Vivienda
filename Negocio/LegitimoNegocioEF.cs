@@ -40,6 +40,11 @@ namespace Negocio
                         l.Sigaf = null;
                         l.FechaSade = null;
                         l.BuzonSade = null;
+                        // Determinar estado por defecto: si no tiene expediente => NO INICIADO, si tiene expediente pero sin SIGAF => EN TRAMITE
+                        if (string.IsNullOrWhiteSpace(l.Expediente))
+                            l.Estado = "NO INICIADO";
+                        else
+                            l.Estado = "EN TRAMITE";
                     }
                     catch { }
                 }
@@ -195,6 +200,11 @@ namespace Negocio
                         l.Sigaf = null; // se rellenará a continuación si hay expedientes
                         l.FechaSade = null;
                         l.BuzonSade = null;
+                        // Estado por defecto antes de calcular SIGAF/SADE
+                        if (string.IsNullOrWhiteSpace(l.Expediente))
+                            l.Estado = "NO INICIADO";
+                        else
+                            l.Estado = "EN TRAMITE";
                     }
                     catch { }
                 }
@@ -203,26 +213,24 @@ namespace Negocio
                 var expedientesPagina = page.Where(p => !string.IsNullOrWhiteSpace(p.Expediente)).Select(p => p.Expediente).Distinct().ToList();
                 if (expedientesPagina.Any())
                 {
-                    var calculador = new CalculoRedeterminacionNegocioEF();
-                    var datosSade = calculador.ObtenerDatosSadeBulk(expedientesPagina);
-                    var datosSigaf = calculador.ObtenerSigafBulk(expedientesPagina);
+                    var calculoRedeterminacionNegocioEF = new CalculoRedeterminacionNegocioEF();
+                    var datosSade = calculoRedeterminacionNegocioEF.ObtenerDatosSadeBulk(expedientesPagina);
+                    var datosSigaf = calculoRedeterminacionNegocioEF.ObtenerSigafBulk(expedientesPagina);
 
                     foreach (var l in page)
                     {
-                        if (!string.IsNullOrWhiteSpace(l.Expediente))
-                        {
-                            if (datosSade != null && datosSade.TryGetValue(l.Expediente, out var sadeInfo))
-                            {
-                                l.BuzonSade = sadeInfo.Buzon;
-                                l.FechaSade = sadeInfo.Fecha;
-                            }
-                            if (datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sigafVal))
-                            {
-                                l.Sigaf = sigafVal;
-                            }
-                            // Estado derivado a partir de SIGAF/Reglas simples (puede mejorarse)
-                            l.Estado = l.Sigaf.HasValue && l.Sigaf > 0 ? "DEVENGADO" : "NO INICIADO";
-                        }
+                        // Obtener sigaf si existe
+                        decimal? sigafVal = null;
+                        if (!string.IsNullOrWhiteSpace(l.Expediente) && datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sVal))
+                            sigafVal = sVal;
+
+                        // Calcular propiedades adicionales exactamente como en CertificadosEF
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, (string, DateTime?)>());
+
+                        l.Sigaf = sigafVal;
+                        l.BuzonSade = buzon;
+                        l.FechaSade = fecha;
+                        l.Estado = estado;
                     }
                 }
 
@@ -250,6 +258,11 @@ namespace Negocio
                     {
                         l.Empresa = l.ObraEF?.Empresa?.Nombre;
                         l.Linea = l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre;
+                        // Estado por defecto antes de calcular SIGAF/SADE
+                        if (string.IsNullOrWhiteSpace(l.Expediente))
+                            l.Estado = "NO INICIADO";
+                        else
+                            l.Estado = "EN TRAMITE";
                     }
                     catch { }
                 }
@@ -258,25 +271,22 @@ namespace Negocio
                 var expedientes = list.Where(x => !string.IsNullOrWhiteSpace(x.Expediente)).Select(x => x.Expediente).Distinct().ToList();
                 if (expedientes.Any())
                 {
-                    var calculador = new CalculoRedeterminacionNegocioEF();
-                    var datosSade = calculador.ObtenerDatosSadeBulk(expedientes);
-                    var datosSigaf = calculador.ObtenerSigafBulk(expedientes);
+                    var calculoRedeterminacionNegocioEF = new CalculoRedeterminacionNegocioEF();
+                    var datosSade = calculoRedeterminacionNegocioEF.ObtenerDatosSadeBulk(expedientes);
+                    var datosSigaf = calculoRedeterminacionNegocioEF.ObtenerSigafBulk(expedientes);
 
                     foreach (var l in list)
                     {
-                        if (!string.IsNullOrWhiteSpace(l.Expediente))
-                        {
-                            if (datosSade != null && datosSade.TryGetValue(l.Expediente, out var sadeInfo))
-                            {
-                                l.BuzonSade = sadeInfo.Buzon;
-                                l.FechaSade = sadeInfo.Fecha;
-                            }
-                            if (datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sigafVal))
-                            {
-                                l.Sigaf = sigafVal;
-                            }
-                            l.Estado = l.Sigaf.HasValue && l.Sigaf > 0 ? "DEVENGADO" : "NO INICIADO";
-                        }
+                        decimal? sigafVal = null;
+                        if (!string.IsNullOrWhiteSpace(l.Expediente) && datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sVal))
+                            sigafVal = sVal;
+
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, (string, DateTime?)>());
+
+                        l.Sigaf = sigafVal;
+                        l.BuzonSade = buzon;
+                        l.FechaSade = fecha;
+                        l.Estado = estado;
                     }
                 }
 

@@ -160,7 +160,7 @@ namespace WebForms
                     var usuario = UserHelper.GetFullCurrentUser();
                     if (usuario != null)
                     {
-                        lista = negocio.ListarPorUsuario(usuario);
+                        lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
                         Session["legitimosCompletos"] = lista;
                         legitimo = lista?.FirstOrDefault(l => l.Id == id);
                     }
@@ -319,7 +319,25 @@ namespace WebForms
                 if (usuario == null) return new List<Dominio.LegitimoEF>();
                 try
                 {
-                    lista = negocio.ListarPorUsuario(usuario);
+                    lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
+
+                    // Asegurar que todos los registros tengan un Estado coherente (NO INICIADO por defecto)
+                    foreach (var l in lista)
+                    {
+                        try
+                        {
+                            // Misma lógica que Certificados: sin expediente => NO INICIADO,
+                            // con expediente y sin SIGAF => EN TRAMITE, si SIGAF>0 => DEVENGADO
+                            if (string.IsNullOrWhiteSpace(l.Expediente))
+                                l.Estado = "NO INICIADO";
+                            else if (!l.Sigaf.HasValue || l.Sigaf == 0)
+                                l.Estado = "EN TRAMITE";
+                            else
+                                l.Estado = "DEVENGADO";
+                        }
+                        catch { }
+                    }
+
                     Session["legitimosCompletos"] = lista;
                 }
                 catch
@@ -639,6 +657,23 @@ namespace WebForms
                                 enLista.Sigaf = entidad.Sigaf;
                                 enLista.BuzonSade = entidad.BuzonSade;
                                 enLista.FechaSade = entidad.FechaSade;
+
+                                // Ajustar Estado coherente
+                                if (string.IsNullOrWhiteSpace(enLista.Expediente))
+                                {
+                                    enLista.Estado = "NO INICIADO";
+                                    enLista.Sigaf = null;
+                                    enLista.BuzonSade = null;
+                                    enLista.FechaSade = null;
+                                }
+                                else if (!enLista.Sigaf.HasValue || enLista.Sigaf == 0)
+                                {
+                                    enLista.Estado = "EN TRAMITE";
+                                }
+                                else
+                                {
+                                    enLista.Estado = "DEVENGADO";
+                                }
                             }
                         }
                     }
@@ -715,7 +750,12 @@ namespace WebForms
                         l.Sigaf = sigafVal;
                     }
 
-                    l.Estado = l.Sigaf.HasValue && l.Sigaf > 0 ? "DEVENGADO" : "NO INICIADO";
+                    if (string.IsNullOrWhiteSpace(l.Expediente))
+                        l.Estado = "NO INICIADO";
+                    else if (!l.Sigaf.HasValue || l.Sigaf == 0)
+                        l.Estado = "EN TRAMITE";
+                    else
+                        l.Estado = "DEVENGADO";
                 }
 
                 // Guardar cambios en sesión e invalidar filtrado
