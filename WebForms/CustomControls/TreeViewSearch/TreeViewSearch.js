@@ -1,51 +1,19 @@
 ﻿/**
- * Delegated click handler: cierra dropdowns al hacer click fuera.
- * Usa data-dropdown-id vinculado en el botón para identificar el dropdown asociado.
+ * Cerrar dropdowns al hacer click fuera
  */
 document.addEventListener('click', function (event) {
-    // Primero, cerrar dropdowns donde se hizo click fuera
+    const target = event.target;
     document.querySelectorAll('.dropdown-content').forEach(openDropdown => {
-        // Comprobar si el dropdown está visible (más robusto que comparar style.display)
-        const isVisible = window.getComputedStyle(openDropdown).display !== 'none';
-        if (!isVisible) return;
-
-        // Encontrar el botón asociado de forma explícita: buscar botón con data-dropdown-id igual al id del openDropdown
+        if (window.getComputedStyle(openDropdown).display === 'none') return;
         const associatedButton = document.querySelector(`.dropdown-button[data-dropdown-id="${openDropdown.id}"]`);
-
-        const clickedInsideDropdown = openDropdown.contains(event.target);
-        const clickedOnButton = associatedButton && associatedButton.contains(event.target);
-
-        if (!clickedInsideDropdown && !clickedOnButton) {
-            const treeViewContainerInside = openDropdown.querySelector('.date-tree-view');
-
-            // Cerrar siempre el dropdown primero
-            openDropdown.style.display = 'none';
-
-            // Limpiar timeouts asociados si existen
-            if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
-                clearDropdownTimeout(openDropdown.id);
-            }
-
-            // Restaurar estado cliente si está disponible (por ejemplo, cancelar cambios temporales)
-            if (treeViewContainerInside && typeof restoreState === 'function') {
-                try {
-                    restoreState(treeViewContainerInside);
-                } catch (err) {
-                    console.warn('restoreState falló:', err);
-                }
-            }
-
-            // Actualizar icono si corresponde
-            if (treeViewContainerInside && typeof updateDropdownIcon === 'function') {
-                try {
-                    updateDropdownIcon(treeViewContainerInside);
-                } catch (err) {
-                    console.warn('updateDropdownIcon falló:', err);
-                }
-            }
+        if (openDropdown.contains(target) || (associatedButton && associatedButton.contains(target))) return;
+        openDropdown.style.display = 'none';
+        removeDropdownDynamicHandlers(openDropdown);
+        if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
+            clearDropdownTimeout(openDropdown.id);
         }
     });
-}, true); // usar fase de captura para recibir eventos antes de que otros handlers puedan stopPropagation
+}, false);
 
 function getPageName() {
     try {
@@ -71,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('.dropdown-button[data-dropdown-id]').forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
+            e.stopPropagation();
             const dropdownId = btn.getAttribute('data-dropdown-id');
             if (dropdownId) toggleDropdown(dropdownId);
             return false;
@@ -260,6 +229,7 @@ if (window.Sys && Sys.WebForms && Sys.WebForms.PageRequestManager) {
                     btn.removeEventListener('click', function () { });
                     btn.addEventListener('click', function (e) {
                         e.preventDefault();
+                        e.stopPropagation();
                         const dropdownId = btn.getAttribute('data-dropdown-id');
                         if (dropdownId) toggleDropdown(dropdownId);
                         return false;
@@ -400,6 +370,17 @@ function toggleDropdown(dropdownId) {
             setTimeout(() => {
                 searchInput.focus();
             }, 0);
+        }
+        // Limitar el ancho máximo del dropdown respecto a su contenedor offsetParent
+        try {
+            const offsetParent = dropdown.offsetParent || dropdown.parentElement || document.body;
+            const parentWidth = (offsetParent && offsetParent.clientWidth) ? offsetParent.clientWidth : Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const margin = 16; // dejar un pequeño margen
+            const maxW = Math.max(150, parentWidth - margin);
+            dropdown.style.maxWidth = maxW + 'px';
+            dropdown.style.boxSizing = 'border-box';
+        } catch (err) {
+            // no hacer nada si falla
         }
     }
 }
