@@ -577,6 +577,158 @@ namespace WebForms
             }
         }
 
+        protected void txtExpediente_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txtBox = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
+
+            try
+            {
+                int rowIndex = row.RowIndex;
+                string nuevoExpediente = txtBox.Text.Trim();
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                if (datosFiltradosActuales == null)
+                {
+                    lblMensaje.Text = "Error: No hay datos en memoria.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                {
+                    lblMensaje.Text = "Error: Índice fuera del rango de datos.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                var legitimo = datosFiltradosActuales[indiceReal];
+                string expedienteAnterior = legitimo.Expediente;
+
+                bool resultado = false;
+
+                // Si nuevo expediente vacío, limpiar; si no, actualizar.
+                if (legitimo.Id > 0)
+                {
+                    var entidad = negocio.ObtenerPorId(legitimo.Id);
+                    if (entidad != null)
+                    {
+                        entidad.Expediente = string.IsNullOrWhiteSpace(nuevoExpediente) ? string.Empty : nuevoExpediente;
+                        negocio.Modificar(entidad);
+                        resultado = true;
+
+                        // sincronizar en la lista en memoria (si existe)
+                        var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
+                        if (listaCompleta != null)
+                        {
+                            var enLista = listaCompleta.FirstOrDefault(x => x.Id == entidad.Id);
+                            if (enLista != null)
+                            {
+                                enLista.Expediente = entidad.Expediente;
+                                enLista.Sigaf = entidad.Sigaf;
+                                enLista.BuzonSade = entidad.BuzonSade;
+                                enLista.FechaSade = entidad.FechaSade;
+                            }
+                        }
+                    }
+                }
+
+                if (resultado)
+                {
+                    var expedientesAfectados = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(expedienteAnterior)) expedientesAfectados.Add(expedienteAnterior);
+                    if (!string.IsNullOrWhiteSpace(nuevoExpediente)) expedientesAfectados.Add(nuevoExpediente);
+
+                    // Recalcular datos relacionados (SIGAF/SADE) y actualizar cache
+                    RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
+
+                    lblMensaje.Text = "Expediente actualizado correctamente.";
+                    lblMensaje.CssClass = "alert alert-info";
+                }
+                else
+                {
+                    lblMensaje.Text = "No se detectaron cambios para guardar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        /// <summary>
+        /// Recalcula SIGAF/SADE para expedientes y actualiza la sesión y vista.
+        /// </summary>
+    private void RecalcularYActualizarCache(List<string> expedientesAfectados, List<Dominio.LegitimoEF> listaCache = null, bool persistirEnBD = false, bool recargarVista = true)
+        {
+            if (expedientesAfectados == null) return;
+
+            expedientesAfectados = expedientesAfectados
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Distinct()
+                .ToList();
+
+            if (!expedientesAfectados.Any()) return;
+
+            try
+            {
+                if (listaCache == null)
+                {
+                    listaCache = Session["legitimosCompletos"] as List<Dominio.LegitimoEF> ?? ObtenerDatosFiltradosActuales();
+                }
+
+                if (listaCache == null) return;
+
+                // Obtener datos SADE y SIGAF para los expedientes modificados
+                var datosSade = calculoRedeterminacionNegocio.ObtenerDatosSadeBulk(expedientesAfectados);
+                var datosSigaf = calculoRedeterminacionNegocio.ObtenerSigafBulk(expedientesAfectados);
+
+                // Actualizar cada elemento de la cache que tenga expediente en la lista afectada
+                foreach (var l in listaCache)
+                {
+                    if (string.IsNullOrWhiteSpace(l.Expediente)) continue;
+                    var exp = l.Expediente.Trim();
+                    if (!expedientesAfectados.Contains(exp)) continue;
+
+                    if (datosSade != null && datosSade.TryGetValue(exp, out var sadeInfo))
+                    {
+                        l.BuzonSade = sadeInfo.Buzon;
+                        l.FechaSade = sadeInfo.Fecha;
+                    }
+
+                    if (datosSigaf != null && datosSigaf.TryGetValue(exp, out var sigafVal))
+                    {
+                        l.Sigaf = sigafVal;
+                    }
+
+                    l.Estado = l.Sigaf.HasValue && l.Sigaf > 0 ? "DEVENGADO" : "NO INICIADO";
+                }
+
+                // Guardar cambios en sesión e invalidar filtrado
+                Session["legitimosCompletos"] = listaCache;
+                Session["FilteredLegitimos"] = null;
+
+                if (recargarVista)
+                {
+                    currentPageIndex = 0;
+                    ViewState["CurrentPageIndex"] = currentPageIndex;
+                    CargarPaginaActual();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Error al recalcular SIGAF/buzon/fecha SADE para legitimos: " + ex);
+            }
+            finally
+            {
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+            }
+        }
+
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             // Reiniciar a la primera página al aplicar filtros
@@ -622,7 +774,14 @@ namespace WebForms
         /// </summary>
         private void CargarPaginaActual()
         {
-            var listaFiltrada = Session["FilteredLegitimos"] as List<Dominio.LegitimoEF> ?? new List<Dominio.LegitimoEF>();
+            // Reconstruir la lista filtrada si no existe en sesión (igual que en CertificadosEF)
+            var listaFiltrada = Session["FilteredLegitimos"] as List<Dominio.LegitimoEF>;
+            if (listaFiltrada == null)
+            {
+                listaFiltrada = ObtenerDatosFiltradosActuales();
+                Session["FilteredLegitimos"] = listaFiltrada;
+            }
+
             int page = currentPageIndex;
             int size = pageSize;
 

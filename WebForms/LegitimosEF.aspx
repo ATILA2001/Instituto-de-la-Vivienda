@@ -260,7 +260,8 @@
 
                     <asp:TemplateField HeaderText="Expediente">
                         <ItemTemplate>
-                            <%# Eval("Expediente") %>
+                            <asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
+                                OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm w-auto text-center"></asp:TextBox>
                         </ItemTemplate>
                     </asp:TemplateField>
 

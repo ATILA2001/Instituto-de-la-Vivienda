@@ -331,5 +331,20 @@ namespace Negocio
                         .ToList();
             }
         }
+
+            public LegitimoEF ObtenerPorId(int id)
+            {
+                using (var context = new IVCdbContext())
+                {
+                    var entity = context.Legitimos
+                        .Include(l => l.ObraEF)
+                        .Include(l => l.ObraEF.Area)
+                        .Include(l => l.ObraEF.Empresa)
+                        .Include(l => l.ObraEF.Proyecto)
+                        .Include(l => l.ObraEF.Proyecto.LineaGestionEF)
+                        .FirstOrDefault(l => l.Id == id);
+                    return entity;
+                }
+            }
     }
 }
