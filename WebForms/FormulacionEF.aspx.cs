@@ -178,7 +178,11 @@ namespace WebForms
             Session["EditingFormulacionEFId"] = null;
         }
 
-        protected void btnAgregar_Click(object sender, EventArgs e)
+    // btnAgregar_Click: controlador de guardado compartido para el modal (Agregar y Editar).
+    // - Lee los valores del formulario y arma una entidad FormulacionEF.
+    // - Si Session["EditingFormulacionEFId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
+    // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
+    protected void btnAgregar_Click(object sender, EventArgs e)
         {
             if (!Page.IsValid) return;
 
@@ -227,7 +231,12 @@ namespace WebForms
             }
         }
 
-        protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
+    // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
+    // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
+    // - Define Session["EditingFormulacionEFId"] para indicar modo edición.
+    // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
+    // - Rellena los controles del modal, ajusta el texto del botón a "Modificar" y muestra el modal.
+    protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
@@ -246,29 +255,32 @@ namespace WebForms
                 }
                 if (formulacion != null)
                 {
-                    // Re-bind dropdown to include the current obra in edit mode
+                    // MARCAR MODO EDICIÓN y asegurar que los dropdowns incluyan la obra en edición
                     Session["EditingFormulacionEFId"] = formulacion.Id;
-                    
+
+                    // Re-cargar dropdowns para que ddlObra contenga la obra asociada (no se mostrará en el modal)
+                    BindDropDownList();
+
                     SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
-                    txtMonto26.Text = formulacion.Monto_26?.ToString() ?? "";
-                    txtMonto27.Text = formulacion.Monto_27?.ToString() ?? "";
-                    txtMonto28.Text = formulacion.Monto_28?.ToString() ?? "";
+                    txtMonto26.Text = formulacion.Monto_26?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    txtMonto27.Text = formulacion.Monto_27?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    txtMonto28.Text = formulacion.Monto_28?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtPpi.Text = formulacion.Ppi?.ToString() ?? "";
-                    txtTechos.Text = formulacion.Techos?.ToString() ?? "";
+                    txtTechos.Text = formulacion.Techos?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMesBase.Text = formulacion.MesBase?.ToString("yyyy-MM-dd") ?? "";
                     SelectDropDownListByValue(ddlUnidadMedida, formulacion.UnidadMedidaId?.ToString());
-                    txtValorMedida.Text = formulacion.ValorMedida?.ToString() ?? "";
+                    txtValorMedida.Text = formulacion.ValorMedida?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtObservaciones.Text = formulacion.Observaciones ?? "";
                     SelectDropDownListByValue(ddlPrioridades, formulacion.PrioridadId?.ToString());
 
-                    // Mantener el Id en sesión hasta guardar/cancelar
-
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
-                        $(document).ready(function() {
+                    // Mostrar modal en modo edición. No hacemos visible ddlObra, solo aseguramos que su item exista.
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", $@"
+                        $(document).ready(function() {{
                             $('#modalAgregar .modal-title').text('Modificar Formulación');
+                            document.getElementById('{btnAgregar.ClientID}').value = 'Modificar';
                             $('.col-12:first').hide();
                             $('#modalAgregar').modal('show');
-                        });", true);
+                        }});", true);
 
                     btnAgregar.Text = "Modificar";
                 }
