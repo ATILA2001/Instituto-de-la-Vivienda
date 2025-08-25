@@ -192,7 +192,7 @@
 
                     <asp:Panel ID="panelShowAddButton" runat="server">
                         <div class="form-group mb-2">
-                            <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
+                            <asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click" CausesValidation="false">
                                 <i class="bi bi-plus-lg"></i> Agregar
                             </asp:LinkButton>
                         </div>

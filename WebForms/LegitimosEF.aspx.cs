@@ -52,8 +52,17 @@ namespace WebForms
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
-            // Mostrar modal en cliente, aquí sólo se asegura que el panel existe; la plantilla del modal está en el .aspx
-            ScriptManager.RegisterStartupScript(this, GetType(), "showModal", "$('#modalAgregar').modal('show');", true);
+            // Seguir patrón de CertificadosEF: limpiar formulario, ajustar título y mostrar modal en cliente
+            LimpiarFormulario();
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow",
+                "$(document).ready(function() { $('#modalAgregar .modal-title').text('Agregar Legítimo'); document.getElementById('" + btnAgregar.ClientID + "').value = 'Agregar'; $('#modalAgregar').modal('show'); });",
+                true);
+
+            // Asegurar texto del botón y limpiar id de edición
+            btnAgregar.Text = "Agregar";
+            ddlObra.Enabled = true; // Permitir seleccionar obra al agregar
+            Session["EditingLegitimoEFId"] = null;
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -176,6 +185,7 @@ namespace WebForms
                             $('#modalAgregar').modal('show');
                         });", true);
 
+                    ddlObra.Enabled = false; // No permitir cambiar obra al editar
                     btnAgregar.Text = "Modificar";
                 }
             }
