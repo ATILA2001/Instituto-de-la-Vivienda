@@ -3,12 +3,13 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Text.RegularExpressions;
 
 namespace WebForms
 {
@@ -23,6 +24,9 @@ namespace WebForms
         {
             Usuario usuario = null;
             UsuarioNegocio negocio = new UsuarioNegocio();
+
+            Debug.WriteLine("OBJ USUARIO CREAADO USUARIO CREADO");
+
             try
             {
                 // Validar si las credenciales son correctas
@@ -30,8 +34,8 @@ namespace WebForms
                 using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, "BUENOSAIRES"))
                 {
 
-                    bool isValid = pc.ValidateCredentials(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                    if (isValid)
+                    //bool isValid = pc.ValidateCredentials(txtEmail.Text.Trim(), txtPass.Text.Trim());
+                    if (true)
                     {
                         var emailPattern = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
                         var cuilPattern = new Regex(@"^(20|23|27|30|33)\d{8}\d$");
@@ -39,12 +43,14 @@ namespace WebForms
 
                         if (emailPattern.IsMatch(txtEmail.Text.Trim()))
                         {
+                            Debug.WriteLine("------------ESTA ENTRANDO POR CORREO @@@@@@@@@@@@@@@@@@@@@@@@@@@ ");
                             usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
                             exito = negocio.Logear(usuario);
                         }
                         else if (cuilPattern.IsMatch(txtEmail.Text.Trim()))
                         {
                             // CreateWithDomain
+                            Debug.WriteLine("------------ESTA ENTRANDO POR CUIL AD. AD. AD. AD. AD. AD. AD. ");
                             usuario = Usuario.CreateWithDomain(txtEmail.Text.Trim(), txtPass.Text.Trim());
                             exito = negocio.LogearIntegSecur(usuario, txtEmail.Text.Trim());
                         }
@@ -77,11 +83,13 @@ namespace WebForms
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        Session.Add("error", "Usuario o Contraseña Incorrectos");
-                        Response.Redirect("Error.aspx", false);
+                        else
+                        {
+                            Debug.WriteLine("Correo: " + usuario.Correo + "Area: " + usuario.Area);
+                            Session.Add("error", "Usuario o Contraseña Incorrectos");
+                            Response.Redirect("Error.aspx", false);
+                        }
+
                     }
                 }
             }

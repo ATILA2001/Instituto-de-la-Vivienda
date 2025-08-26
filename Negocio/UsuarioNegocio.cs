@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices.AccountManagement;
 using System.Web.Security;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace Negocio
 {
@@ -34,7 +35,12 @@ namespace Negocio
 				Debug.Write("¿Credenciales válidas?...: ");
 				Debug.Write("¿userName?...: " + userName);
 				bool resultado = contexto.ValidateCredentials("BUENOSAIRES\\" + usuario.Username, usuario.Contrasenia);
-				Debug.Write("¿Credenciales válidas?: " + resultado);
+				if (!resultado)
+				{
+					return false;
+				}
+
+				Debug.Write("-----¿Credenciales válidas?--------------------------: " + resultado);
 
 
 				while (datos.Lector.Read())
@@ -75,7 +81,10 @@ namespace Negocio
                 datos.setearConsulta("SELECT u.ID,u.NOMBRE,TIPO,CORREO,ESTADO,a.NOMBRE as AREA,a.ID as IDAREA FROM USUARIOS as u inner join AREAS as a on AREA = a.ID WHERE CORREO = @correo AND CONTRASENIA = @pass ");
                 datos.setearParametros("@correo", usuario.Correo);
                 datos.setearParametros("@pass", usuario.Contrasenia);
-                datos.ejecutarLectura();
+                Debug.Write("@correo?...: " + usuario.Correo);
+
+				Debug.Write("@correo?...****: " );
+				datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
                 {

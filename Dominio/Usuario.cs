@@ -22,7 +22,7 @@ namespace Dominio
 
 		public String Domain { get; set; }
 
-		public String Username { get; set; }    // destinado a guardar el nombre de usuario del dominio
+		public String Username { get; set; }    // destinado a guardar el nombre de usuario del dominio o el mail
 
 
 		public Usuario() { }
@@ -39,12 +39,12 @@ namespace Dominio
 			Contrasenia = contrasenia;
 		}
 
-		public static Usuario CreateWithDomain(string domain, string username)
+		public static Usuario CreateWithDomain(string username, string contrasenia)
 		{
 			return new Usuario
 			{
-				Domain = domain,
-				Username = username
+				Username = username,
+				Contrasenia = contrasenia
 			};
 		}
 
