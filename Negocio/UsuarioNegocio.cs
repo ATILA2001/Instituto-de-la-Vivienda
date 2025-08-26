@@ -31,7 +31,9 @@ namespace Negocio
 
 
 				// Validar las credenciales del usuario
-				bool resultado = contexto.ValidateCredentials(userName, usuario.Contrasenia);
+				Debug.Write("¿Credenciales válidas?...: ");
+				Debug.Write("¿userName?...: " + userName);
+				bool resultado = contexto.ValidateCredentials("BUENOSAIRES\\" + usuario.Username, usuario.Contrasenia);
 				Debug.Write("¿Credenciales válidas?: " + resultado);
 
 
@@ -46,7 +48,8 @@ namespace Negocio
                     usuario.Area = new Area();
                     usuario.Area.Id = (int)datos.Lector["IDAREA"];
                     usuario.Area.Nombre = (string)datos.Lector["AREA"];
-                    return true && contexto.ValidateCredentials(userName, usuario.Contrasenia);
+                    return true;
+                    // && contexto.ValidateCredentials(userName, usuario.Contrasenia);
                 }
 
 				Debug.WriteLine("usuario.Correo: " + usuario.Correo);
