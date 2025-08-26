@@ -370,6 +370,55 @@ namespace WebForms
                 dgvFormulacion.DataSource = pagina;
                 dgvFormulacion.DataBind();
 
+                // Precalcular PLURIANUALES para las obras de la página (evita N+1)
+                try
+                {
+                    var obraIds = pagina.Select(f => f.ObraId).Where(id => id != 0).Distinct().ToList();
+                    var plurianuales = new Dictionary<int, decimal>();
+                    if (obraIds.Any())
+                    {
+                        DateTime start = new DateTime(2026, 1, 1);
+                        DateTime end = new DateTime(2028, 12, 31);
+                        using (var ctx = new IVCdbContext())
+                        {
+                            var certificadosPorObra = (from c in ctx.Certificados
+                                                       where c.MesAprobacion.HasValue && c.MesAprobacion.Value >= start && c.MesAprobacion.Value <= end
+                                                       join a in ctx.Autorizantes on c.CodigoAutorizante equals a.CodigoAutorizante
+                                                       where obraIds.Contains(a.ObraId)
+                                                       group c by a.ObraId into g
+                                                       select new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.MontoTotal) ?? 0m })
+                                                      .ToList();
+
+                            var legitimosPorObra = ctx.Legitimos
+                                .Where(l => obraIds.Contains(l.ObraId) && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start && l.MesAprobacion.Value <= end)
+                                .GroupBy(l => l.ObraId)
+                                .Select(g => new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.Certificado) ?? 0m })
+                                .ToList();
+
+                            // Inicializar
+                            foreach (var id in obraIds) plurianuales[id] = 0m;
+
+                            foreach (var c in certificadosPorObra)
+                            {
+                                if (plurianuales.ContainsKey(c.ObraId))
+                                    plurianuales[c.ObraId] += c.Sum;
+                            }
+
+                            foreach (var l in legitimosPorObra)
+                            {
+                                if (plurianuales.ContainsKey(l.ObraId))
+                                    plurianuales[l.ObraId] += l.Sum;
+                            }
+                        }
+                    }
+                    Context.Items["PlurianualesPagina"] = plurianuales;
+                }
+                catch
+                {
+                    // En caso de error, aseguramos que el diccionario exista para evitar excepciones en el binding
+                    Context.Items["PlurianualesPagina"] = new Dictionary<int, decimal>();
+                }
+
 
                 decimal totalMonto26Global = 0;
                 if (total > 0)
@@ -540,10 +589,13 @@ namespace WebForms
 
                 if (!int.TryParse(obraIdObj.ToString(), out int obraId)) return 0m.ToString("C");
 
-                // Cache por request para evitar ejecutar la misma consulta múltiples veces
-                var cacheKey = "Plurianual_" + obraId;
-                if (Context.Items[cacheKey] is decimal cached)
-                    return cached.ToString("C");
+                // Preferir diccionario precalculado para la página (evita consultas por fila)
+                if (Context.Items["PlurianualesPagina"] is Dictionary<int, decimal> dic)
+                {
+                    if (dic.TryGetValue(obraId, out decimal val))
+                        return val.ToString("C");
+                    return 0m.ToString("C");
+                }
 
                 DateTime start2026 = new DateTime(2026, 1, 1);
                 DateTime end2028 = new DateTime(2028, 12, 31);
@@ -577,7 +629,7 @@ namespace WebForms
                     // Si no hay certificados ni legítimos en 2026-2028, se deja total = 0
                 }
 
-                Context.Items[cacheKey] = total; // almacenar en contexto de la petición
+                
 
                 return total.ToString("C");
             }
