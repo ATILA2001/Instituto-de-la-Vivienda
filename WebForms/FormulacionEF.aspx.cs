@@ -527,28 +527,63 @@ namespace WebForms
         }
 
         /// <summary>
-        /// Calcula el total plurianual (suma de Monto_26, Monto_27 y Monto_28)
+        /// Calcula el total plurianual para la OBRA: suma de todos los CertificadoEF.MontoTotal
+        /// y LegitimoEF.Certificado para esa misma OBRA en los años 2026,2027,2028
+        /// (usa MesAprobacion para filtrar año).
+        /// Se acepta como parámetro el ObraId.
         /// </summary>
-        protected string CalcularPlurianual(object monto26, object monto27, object monto28)
+        protected string CalcularPlurianual(object obraIdObj)
         {
             try
             {
-                decimal total = 0;
+                if (obraIdObj == null || obraIdObj == DBNull.Value) return 0m.ToString("C");
 
-                if (monto26 != null && monto26 != DBNull.Value)
-                    total += Convert.ToDecimal(monto26);
+                if (!int.TryParse(obraIdObj.ToString(), out int obraId)) return 0m.ToString("C");
 
-                if (monto27 != null && monto27 != DBNull.Value)
-                    total += Convert.ToDecimal(monto27);
+                // Cache por request para evitar ejecutar la misma consulta múltiples veces
+                var cacheKey = "Plurianual_" + obraId;
+                if (Context.Items[cacheKey] is decimal cached)
+                    return cached.ToString("C");
 
-                if (monto28 != null && monto28 != DBNull.Value)
-                    total += Convert.ToDecimal(monto28);
+                DateTime start2026 = new DateTime(2026, 1, 1);
+                DateTime end2028 = new DateTime(2028, 12, 31);
+
+                decimal total = 0m;
+
+                using (var ctx = new IVCdbContext())
+                {
+                    // 1) Sumar Certificados cuyo MesAprobacion esté entre 2026-01-01 y 2028-12-31
+                    //    y que pertenezcan a la obra: relac. Certificado -> Autorizante (CodigoAutorizante) -> Autorizante.ObraId == obraId
+                    var certificadosQuery = from c in ctx.Certificados
+                                            where c.MesAprobacion.HasValue
+                                                  && c.MesAprobacion.Value >= start2026
+                                                  && c.MesAprobacion.Value <= end2028
+                                            join a in ctx.Autorizantes on c.CodigoAutorizante equals a.CodigoAutorizante
+                                            where a.ObraId == obraId
+                                            select c.MontoTotal;
+
+                    var sumaCertificados = certificadosQuery.Any() ? certificadosQuery.Sum() : 0m;
+
+                    // 2) Sumar Legitimos donde Legitimo.ObraId == obraId y MesAprobacion en 2026-2028
+                    var legitimosQuery = ctx.Legitimos
+                        .Where(l => l.ObraId == obraId && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start2026 && l.MesAprobacion.Value <= end2028)
+                        .Select(l => l.Certificado ?? 0m);
+
+                    var sumaLegitimos = legitimosQuery.Any() ? legitimosQuery.Sum() : 0m;
+
+                    total = sumaCertificados + sumaLegitimos;
+
+
+                    // Si no hay certificados ni legítimos en 2026-2028, se deja total = 0
+                }
+
+                Context.Items[cacheKey] = total; // almacenar en contexto de la petición
 
                 return total.ToString("C");
             }
             catch
             {
-                return "$0.00";
+                return 0m.ToString("C");
             }
         }
 

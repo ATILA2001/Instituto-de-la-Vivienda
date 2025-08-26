@@ -308,7 +308,7 @@
 
                 <asp:TemplateField HeaderText="Plurianual (2026,2027,2028)">
                     <ItemTemplate>
-                        <%# CalcularPlurianual(Eval("Monto_26"), Eval("Monto_27"), Eval("Monto_28")) %>
+                        <%# CalcularPlurianual(Eval("ObraId")) %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
