@@ -92,7 +92,7 @@
 								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<span>Admin</span>
 								</a>
-								<ul class="dropdown-menu">
+								<ul class="dropdown-menu dropdown-menu-end">
 
 									<li>
 										<div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
