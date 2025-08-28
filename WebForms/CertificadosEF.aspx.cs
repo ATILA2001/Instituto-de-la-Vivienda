@@ -73,7 +73,7 @@ namespace WebForms
 
         #region Métodos de Paginación
     /// <summary>
-    /// Carga o reutiliza la lista completa de certificados en Session["GridData"].
+    /// Carga o reutiliza la lista completa de certificados en Session["CertificadosCompleto"].
     /// Llama al negocio si no hay caché.
     /// </summary>
         private void CargarListaCertificadosCompleta()
@@ -82,18 +82,18 @@ namespace WebForms
             {
                 List<CertificadoDTO> todoLosCertificados;
 
-                if (Session["GridData"] == null)
+                if (Session["CertificadosCompleto"] == null)
                 {
                     UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                     todoLosCertificados = calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(usuarioActual);
 
                     // Guardar en cache
-                    Session["GridData"] = todoLosCertificados;
+                    Session["CertificadosCompleto"] = todoLosCertificados;
                     ViewState["NecesitaRecarga"] = null;
                 }
                 else
                 {
-                    todoLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                    todoLosCertificados = (List<CertificadoDTO>)Session["CertificadosCompleto"];
                 }
 
                 // Guardar total de registros en campo
@@ -108,15 +108,15 @@ namespace WebForms
         }
 
     /// <summary>
-    /// Filtra en memoria sobre Session["GridData"], pagina y realiza DataBind del GridView.
-    /// Guarda el resultado filtrado en Session["FilteredGridData"].
+    /// Filtra en memoria sobre Session["CertificadosCompleto"], pagina y realiza DataBind del GridView.
+    /// Guarda el resultado filtrado en Session["FilteredCertificadosCompleto"].
     /// </summary>
         private void BindGrid()
         {
-            if (Session["GridData"] == null)
+            if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["GridData"];
+            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
 
             // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
@@ -135,7 +135,7 @@ namespace WebForms
 
             // Aplicar filtros de las columnas (TreeView)
             var certificadosFiltrada = AplicarFiltrosTreeViewEnMemoria(certificadosCompleta);
-            Session["FilteredGridData"] = certificadosFiltrada;
+            Session["FilteredCertificadosCompleto"] = certificadosFiltrada;
 
             // Configurar paginación usando la lista ya filtrada
             int totalFiltrados = certificadosFiltrada.Count;
@@ -256,7 +256,7 @@ namespace WebForms
             ViewState["CurrentPageIndex"] = currentPageIndex;
 
             // Invalida la caché de filtrado para forzar que se apliquen los nuevos filtros
-            Session["FilteredGridData"] = null;
+            Session["FilteredCertificadosCompleto"] = null;
 
             CargarPaginaActual(); // Cargar datos filtrados y paginados
         }
@@ -288,14 +288,14 @@ namespace WebForms
                 // Usa datos del caché para exportación
                 List<CertificadoDTO> todosLosCertificados;
 
-                if (Session["GridData"] != null)
+                if (Session["CertificadosCompleto"] != null)
                 {
-                    todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                    todosLosCertificados = (List<CertificadoDTO>)Session["CertificadosCompleto"];
                 }
                 else
                 {
                     CargarListaCertificadosCompleta();
-                    todosLosCertificados = (List<CertificadoDTO>)Session["GridData"];
+                    todosLosCertificados = (List<CertificadoDTO>)Session["CertificadosCompleto"];
                 }
 
                 // Aplicar los mismos filtros que tiene la grilla
@@ -423,10 +423,10 @@ namespace WebForms
                 if (resultado)
                 {
                     // Preparar cache en memoria (si no existe)
-                    if (Session["GridData"] == null)
+                    if (Session["CertificadosCompleto"] == null)
                         CargarListaCertificadosCompleta();
 
-                    var listaCache = Session["GridData"] as List<CertificadoDTO>;
+                    var listaCache = Session["CertificadosCompleto"] as List<CertificadoDTO>;
 
                     // Construir lista de expedientes afectados (anterior y nuevo)
                     var expedientesAfectados = new List<string>();
@@ -436,9 +436,9 @@ namespace WebForms
                     if (editingId == null)
                     {
                         // Add: el nuevo registro puede no estar presente en la cache -> recargar desde BD
-                        Session["GridData"] = null;
+                        Session["CertificadosCompleto"] = null;
                         CargarListaCertificadosCompleta();
-                        listaCache = Session["GridData"] as List<CertificadoDTO>;
+                        listaCache = Session["CertificadosCompleto"] as List<CertificadoDTO>;
                     }
                     else
                     {
@@ -465,7 +465,7 @@ namespace WebForms
                     else
                     {
                         // Si no hay expedientes afectados o no hay cache disponible, invalidar para forzar recarga desde BD
-                        Session["GridData"] = null;
+                        Session["CertificadosCompleto"] = null;
                         CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                         CargarPaginaActual();
                     }
@@ -474,7 +474,7 @@ namespace WebForms
                     Session["EditingCertificadoId"] = null;
 
                     // Asegurar filtrado inválido para forzar recálculo en vista
-                    Session["FilteredGridData"] = null;
+                    Session["FilteredCertificadosCompleto"] = null;
 
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 }
@@ -655,7 +655,7 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-success";
 
                     // Obtener cache actual
-                    if (Session["GridData"] is List<CertificadoDTO> listaCache)
+                    if (Session["CertificadosCompleto"] is List<CertificadoDTO> listaCache)
                     {
                         // Buscar el certificado en el cache antes de eliminar para conocer expedientes afectados
                         var certificadoEliminado = listaCache.FirstOrDefault(c => c.Id == id);
@@ -677,7 +677,7 @@ namespace WebForms
                     {
                         // Si no hay cache en memoria, limpiar cache SADE y recargar desde BD
                         CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                        Session["GridData"] = null;
+                        Session["CertificadosCompleto"] = null;
                         CargarPaginaActual();
                     }
                 }
@@ -790,6 +790,8 @@ namespace WebForms
             }
             catch (Exception)
             {
+                lblMensaje.Text = "Error al cargar los datos del formulario.";
+                lblMensaje.CssClass = "alert alert-danger";
             }
         }
 
@@ -822,7 +824,7 @@ namespace WebForms
                 CertificadoDTO certificado = datosFiltradosActuales[indiceReal];
                 string expedienteAnterior = certificado.ExpedientePago;
 
-                List<CertificadoDTO> listaCompleta = Session["GridData"] as List<CertificadoDTO>;
+                List<CertificadoDTO> listaCompleta = Session["CertificadosCompleto"] as List<CertificadoDTO>;
 
                 bool resultado = false;
 
@@ -964,7 +966,7 @@ namespace WebForms
 
         /// <summary>
         /// Recalcula SIGAF, actualiza BuzonSade y FechaSade para los expedientes indicados,
-        /// actualiza Session["GridData"], limpia cache SADE y recarga la vista si corresponde.
+        /// actualiza Session["CertificadosCompleto"], limpia cache SADE y recarga la vista si corresponde.
         /// - expedientesAfectados: lista de números de expediente (anterior y/o nuevo)
         /// - listaCache: si se pasa, se usa la lista en memoria; si es null se carga desde Session
         /// - persistirEnBD: si true, el calculo debe persistir cambios en BD; si false solo en memoria
@@ -988,10 +990,10 @@ namespace WebForms
                 // Asegurar que exista la lista en memoria
                 if (listaCache == null)
                 {
-                    if (Session["GridData"] == null)
+                    if (Session["CertificadosCompleto"] == null)
                         CargarListaCertificadosCompleta();
 
-                    listaCache = Session["GridData"] as List<CertificadoDTO>;
+                    listaCache = Session["CertificadosCompleto"] as List<CertificadoDTO>;
                     if (listaCache == null) return;
                 }
 
@@ -1000,8 +1002,8 @@ namespace WebForms
                 calculoRedeterminacionNegocio.CalcularCertificadosPorExpedientes(expedientesAfectados, listaCache, persistirEnBD);
 
                 // Asegurar que los cambios queden en el cache de sesión
-                Session["GridData"] = listaCache;
-                Session["FilteredGridData"] = null; // <-- invalidar caché de filtrado
+                Session["CertificadosCompleto"] = listaCache;
+                Session["FilteredCertificadosCompleto"] = null; // <-- invalidar caché de filtrado
                 totalRecords = listaCache.Count;
             }
             catch (Exception ex)
@@ -1032,13 +1034,13 @@ namespace WebForms
         private List<CertificadoDTO> ObtenerDatosFiltradosActuales()
         {
             // Usar caché de filtrado si existe (establecido en BindGrid)
-            if (Session["FilteredGridData"] is List<CertificadoDTO> cachedFiltered)
+            if (Session["FilteredCertificadosCompleto"] is List<CertificadoDTO> cachedFiltered)
                 return cachedFiltered;
 
-            if (Session["GridData"] == null)
+            if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["GridData"];
+            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
 
             // Aplicar filtro de texto general (mismo que en BindGrid)
             string filtro = txtBuscar.Text.Trim().ToLower();
@@ -1059,7 +1061,7 @@ namespace WebForms
             var certificadosFiltrada = AplicarFiltrosTreeViewEnMemoria(certificadosCompleta);
 
             // Guardar en sesión para reuso
-            Session["FilteredGridData"] = certificadosFiltrada;
+            Session["FilteredCertificadosCompleto"] = certificadosFiltrada;
 
             return certificadosFiltrada;
         }
@@ -1074,7 +1076,7 @@ namespace WebForms
             currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
 
             // Forzar recomputo de filtros
-            Session["FilteredGridData"] = null;
+            Session["FilteredCertificadosCompleto"] = null;
 
             CargarPaginaActual();
         }
@@ -1086,7 +1088,7 @@ namespace WebForms
             currentPageIndex = 0;
 
             // Forzar recomputo de filtros (ahora sin filtros)
-            Session["FilteredGridData"] = null;
+            Session["FilteredCertificadosCompleto"] = null;
 
             CargarPaginaActual();
         }
