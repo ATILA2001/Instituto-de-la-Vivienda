@@ -129,23 +129,82 @@ namespace WebForms
             if (key == null)
             {
                 lblMensaje.Text = "Id inválido.";
+                lblMensaje.CssClass = "alert alert-danger";
                 return;
             }
             if (!int.TryParse(key.ToString(), out int id))
             {
                 lblMensaje.Text = "Id inválido.";
+                lblMensaje.CssClass = "alert alert-danger";
                 return;
             }
+
             try
             {
+                // Get the legitimo being deleted and its expediente first
+                var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
+                var legitimoAEliminar = listaCompleta?.FirstOrDefault(l => l.Id == id);
+                string expedienteAfectado = legitimoAEliminar?.Expediente;
+
+                // Delete from database
                 var ok = negocio.Eliminar(id);
-                lblMensaje.Text = ok ? "Legítimo eliminado." : "No se encontró el registro a eliminar.";
+
+                if (ok)
+                {
+                    lblMensaje.Text = "Legítimo eliminado exitosamente.";
+                    lblMensaje.CssClass = "alert alert-success";
+
+                    // Update the in-memory cache if it exists
+                    if (listaCompleta != null)
+                    {
+                        // Remove the deleted item from the in-memory list
+                        listaCompleta.RemoveAll(l => l.Id == id);
+
+                        // Update session with modified list
+                        Session["legitimosCompletos"] = listaCompleta;
+
+                        // Invalidate filtered data cache to force recalculation
+                        Session["FilteredLegitimos"] = null;
+
+                        // Recalculate SIGAF/SADE data for affected expedientes
+                        if (!string.IsNullOrWhiteSpace(expedienteAfectado))
+                        {
+                            List<string> expedientesAfectados = new List<string> { expedienteAfectado };
+                            RecalcularYActualizarCache(expedientesAfectados, listaCompleta, false, true);
+                        }
+                        else
+                        {
+                            // If no expediente to recalculate, just reload the current page
+                            currentPageIndex = 0; // Reset to first page on delete
+                            ViewState["CurrentPageIndex"] = currentPageIndex;
+                            CargarPaginaActual();
+                        }
+                    }
+                    else
+                    {
+                        // If no cache exists, invalidate and reload from DB
+                        Session["legitimosCompletos"] = null;
+                        Session["FilteredLegitimos"] = null;
+                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                        currentPageIndex = 0; // Reset to first page on delete
+                        ViewState["CurrentPageIndex"] = currentPageIndex;
+                        BindGrid();
+                    }
+                }
+                else
+                {
+                    lblMensaje.Text = "No se encontró el registro a eliminar.";
+                    lblMensaje.CssClass = "alert alert-warning";
+                    BindGrid();
+                }
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = "Error al eliminar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+                BindGrid();
             }
-            BindGrid();
         }
 
         protected void dgvRegistros_SelectedIndexChanged(object sender, EventArgs e)
