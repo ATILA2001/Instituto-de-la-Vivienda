@@ -773,12 +773,23 @@ namespace WebForms
 
         private void ObtenerAutorizantes()
         {
+            var usuario = UserHelper.GetFullCurrentUser();
             AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
-            ddlAutorizante.DataSource = autorizanteNegocio.ListarParaDDL();
+            var autorizantes = autorizanteNegocio.ListarParaDDL(usuario); // <-- define 'autorizantes' here
+            ddlAutorizante.DataSource = autorizantes;
             ddlAutorizante.DataTextField = "CodigoAutorizante";
             ddlAutorizante.DataValueField = "Id";
             ddlAutorizante.DataBind();
+            foreach (ListItem item in ddlAutorizante.Items)
+            {
+                var autorizante = autorizantes.FirstOrDefault(a => a.Id.ToString() == item.Value);
+                if (autorizante != null && autorizante.Obra != null)
+                {
+                    item.Text = $"{autorizante.CodigoAutorizante} - {autorizante.Obra.Descripcion} - {autorizante.Detalle}";
+                }
+            }
         }
+        
 
         private void BindDropDownList()
         {
