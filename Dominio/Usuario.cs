@@ -19,6 +19,7 @@ namespace Dominio
         public bool Estado { get; set; }
 
         public Area Area { get; set; }
+        public string Username { get; set; }
 
         public Usuario() { }
 

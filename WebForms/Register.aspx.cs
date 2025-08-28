@@ -32,6 +32,7 @@ namespace WebForms
 
             UsuarioNegocio negocio = new UsuarioNegocio();
             Usuario nuevo = new Usuario();
+            nuevo.Username = txtCUIL.Text.Trim();
             nuevo.Correo = txtEmail.Text.Trim();
             nuevo.Contrasenia = txtPass.Text;
             nuevo.Nombre = txtNombre.Text.Trim(); 

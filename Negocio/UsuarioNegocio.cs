@@ -51,11 +51,12 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("INSERT INTO USUARIOS (NOMBRE, CORREO, CONTRASENIA, AREA) OUTPUT INSERTED.NOMBRE VALUES (@nombre,@correo, @pass,@area);");
+                datos.setearConsulta("INSERT INTO USUARIOS (NOMBRE, CORREO, CONTRASENIA, AREA, USERNAME) OUTPUT INSERTED.NOMBRE VALUES (@nombre,@correo, @pass,@area, @username);");
                 datos.setearParametros("@correo", usuario.Correo);
                 datos.setearParametros("@pass", usuario.Contrasenia);
                 datos.setearParametros("@nombre", usuario.Nombre);
                 datos.setearParametros("@area", usuario.Area.Id);
+                datos.setearParametros("@username", usuario.Username);
                 return datos.ejecutarAccionScalar();
             }
             catch (Exception)
