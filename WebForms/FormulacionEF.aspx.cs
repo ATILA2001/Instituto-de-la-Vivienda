@@ -258,9 +258,6 @@ namespace WebForms
                     // MARCAR MODO EDICIÓN y asegurar que los dropdowns incluyan la obra en edición
                     Session["EditingFormulacionEFId"] = formulacion.Id;
 
-                    // Re-cargar dropdowns para que ddlObra contenga la obra asociada (no se mostrará en el modal)
-                    BindDropDownList();
-
                     SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
                     txtMonto26.Text = formulacion.Monto_26?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMonto27.Text = formulacion.Monto_27?.ToString(CultureInfo.CurrentCulture) ?? "";
