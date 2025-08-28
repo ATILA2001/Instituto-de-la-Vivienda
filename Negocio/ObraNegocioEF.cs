@@ -11,13 +11,25 @@ namespace Negocio
         /// <summary>
         /// Lista todas las obras para dropdown lists
         /// </summary>
-        public List<ObraEF> ListarParaDDL()
+        public List<ObraEF> ListarParaDDL(UsuarioEF usuario = null)
         {
             try
             {
                 using (var context = new IVCdbContext())
                 {
-                    return context.Obras.AsNoTracking()
+                   
+                    var query = context.Obras.AsNoTracking()
+                         .OrderBy(o => o.Descripcion)
+                         .ToList();
+                    if (usuario != null && !usuario.Tipo)
+                    {
+                        if (usuario.AreaId.HasValue)
+                            query = query.Where(o => o.AreaId == usuario.AreaId.Value).ToList();
+                        else if (usuario.Area != null)
+                            query = query.Where(o => o.AreaId == usuario.Area.Id).ToList();
+                    }                      
+
+                    return query
                         .OrderBy(o => o.Descripcion)
                         .ToList();
                 }

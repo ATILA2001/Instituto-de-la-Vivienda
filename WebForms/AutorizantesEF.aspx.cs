@@ -663,10 +663,11 @@ namespace WebForms
         private void ObtenerObras()
         {
             ObraNegocioEF obraNegocio = new ObraNegocioEF();
+            var usuario = UserHelper.GetFullCurrentUser();
 
             try
             {
-                List<ObraEF> obras = obraNegocio.ListarParaDDL();
+                List<ObraEF> obras = obraNegocio.ListarParaDDL(usuario);
 
                 ddlObraAgregar.DataSource = obras;
                 ddlObraAgregar.DataTextField = "Descripcion";
