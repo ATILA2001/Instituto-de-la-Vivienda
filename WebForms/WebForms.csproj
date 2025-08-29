@@ -86,6 +86,7 @@
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
     <Content Include="CertificadosEF.aspx" />
+    	<Content Include="ObrasEF.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -365,6 +366,13 @@
     </Compile>
     <Compile Include="ObrasAdmin.aspx.designer.cs">
       <DependentUpon>ObrasAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ObrasEF.aspx.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ObrasEF.aspx.designer.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="ObrasRedet.aspx.cs">
       <DependentUpon>ObrasRedet.aspx</DependentUpon>

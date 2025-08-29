@@ -95,6 +95,7 @@
     <Compile Include="CalculoRedeterminacionNegocioEF.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="CertificadoNegocioEF.cs" />
+  <Compile Include="CalculoObraNegocioEF.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ConceptoNegocioEF.cs" />
     <Compile Include="ABMPlaniNegocio.cs" />

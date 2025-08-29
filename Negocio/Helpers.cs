@@ -523,8 +523,8 @@ namespace Negocio
             if (HttpContext.Current?.Session["Usuario"] != null)
             {
                 var userEntity = (Usuario)HttpContext.Current.Session["Usuario"];
-                return new UsuarioEF 
-                { 
+                return new UsuarioEF
+                {
                     Id = userEntity.Id,
                     Nombre = userEntity.Nombre,
                     Correo = userEntity.Correo,
@@ -544,6 +544,18 @@ namespace Negocio
                 Estado = false,
                 AreaId = 0, // 0 significa sin filtro de área
             };
+        }
+
+        public static bool IsUserAdmin()
+        {
+            var user = GetFullCurrentUser();
+            return user.Tipo; // true: Administrador, false: Usuario normal
+        }
+
+        public static bool IsUserInArea(int areaId)
+        {
+            var user = GetFullCurrentUser();
+            return user.AreaId == areaId;
         }
 
     }

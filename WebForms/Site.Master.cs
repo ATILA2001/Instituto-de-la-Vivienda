@@ -56,11 +56,6 @@ namespace WebForms
 
             // Si el usuario es administrador, no mostramos el enlace basico de Formulación.
             lnkFormulacion.Visible = !visible;
-
-            // Como aun no hemos migrado Obras a la nueva lógica con EF,
-            // utilizamos los anteriores, segun el tipo de usuario.
-
-            lnkObras.HRef = visible ? "ObrasAdmin.aspx" : "Obras.aspx";
         }
 
         protected void ShowOrHideTechosAndPpiTextBoxes(bool isVisible)
