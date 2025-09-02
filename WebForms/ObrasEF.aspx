@@ -291,35 +291,98 @@
                     <asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestionNombre" />
                     <asp:BoundField HeaderText="Proyecto" DataField="ProyectoNombre" />
 
-                    <asp:BoundField HeaderText="Disponible Actual" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
-                    <asp:BoundField HeaderText="Planificacion 2025" DataField="MontoCertificado" DataFormatString="{0:C}" />
-                    <asp:BoundField HeaderText="Ejecucion Presupuesto 2025" DataField="Porcentaje" DataFormatString="{0:N2}%" />
+                    <asp:TemplateField HeaderText="Disponible Actual">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Disponible Actual</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("AutorizadoNuevo", "{0:C}") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                    <asp:BoundField HeaderText="Monto de Obra inicial" DataField="MontoInicial" DataFormatString="{0:C}" />
-                    <asp:BoundField HeaderText="Monto de Obra actual" DataField="MontoActual" DataFormatString="{0:C}" />
-                    <asp:BoundField HeaderText="Faltante de Obra" DataField="MontoFaltante" DataFormatString="{0:C}" />
+                    <asp:TemplateField HeaderText="Planificacion 2025">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Planificacion 2025</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("MontoCertificado", "{0:C}") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Ejecucion Presupuesto 2025">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Ejecucion Presupuesto 2025</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("Porcentaje", "{0:N2}%") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Monto de Obra inicial">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Monto de Obra inicial</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("MontoInicial", "{0:C}") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Monto de Obra actual">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Monto de Obra actual</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("MontoActual", "{0:C}") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Faltante de Obra">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Faltante de Obra</asp:PlaceHolder>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <asp:PlaceHolder runat="server">
+                                <%# Eval("MontoFaltante", "{0:C}") %>
+                            </asp:PlaceHolder>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
                     <asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
 
                     <asp:TemplateField HeaderText="Acciones">
+                        <HeaderTemplate>
+                            <asp:PlaceHolder runat="server">Acciones</asp:PlaceHolder>
+                        </HeaderTemplate>
                         <ItemTemplate>
-                            <div class="d-flex justify-content-center gap-2">
-                                <asp:LinkButton ID="btnModificar" runat="server"
-                                    CommandName="Select"
-                                    CausesValidation="false"
-                                    CssClass="btn btn-sm btn-warning "
-                                    ToolTip="Modificar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnEliminar" runat="server"
-                                    CommandName="Delete"
-                                    CausesValidation="false"
-                                    CssClass="btn btn-sm btn-danger "
-                                    ToolTip="Eliminar"
-                                    OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                                    <i class="bi bi-trash"></i>
-                                </asp:LinkButton>
-                            </div>
+                            <asp:PlaceHolder runat="server">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <asp:LinkButton ID="btnModificar" runat="server"
+                                        CommandName="Select"
+                                        CausesValidation="false"
+                                        CssClass="btn btn-sm btn-warning "
+                                        ToolTip="Modificar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnEliminar" runat="server"
+                                        CommandName="Delete"
+                                        CausesValidation="false"
+                                        CssClass="btn btn-sm btn-danger "
+                                        ToolTip="Eliminar"
+                                        OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
+                                        <i class="bi bi-trash"></i>
+                                    </asp:LinkButton>
+                                </div>
+                            </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>

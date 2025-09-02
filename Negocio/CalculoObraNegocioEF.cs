@@ -13,21 +13,21 @@ namespace Negocio
         /// Calcula los valores financieros por obra usando consultas EF (no legacy ADO).
         /// Devuelve un diccionario { ObraId -> aggregate primitive values } y no depende de DTO auxiliares.
         /// </summary>
-    public Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(UsuarioEF usuario = null, List<int> obraIds = null)
+    public Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(List<int> obraIds = null)
         {
             try
             {
                 using (var context = new IVCdbContext())
                 {
                     // Resolver obras si no se recibieron: si hay usuario y no es admin filtrar por su área, sino todas.
+                    int userAreaId = UserHelper.GetUserAreaId();
+
                     if (obraIds == null || !obraIds.Any())
                     {
-                        if (usuario != null && usuario.Tipo == false)
+                        if (!UserHelper.IsUserAdmin())
                         {
-                            if (usuario.AreaId.HasValue)
-                                obraIds = context.Obras.AsNoTracking().Where(o => o.AreaId == usuario.AreaId.Value).Select(o => o.Id).ToList();
-                            else if (usuario.Area != null)
-                                obraIds = context.Obras.AsNoTracking().Where(o => o.AreaId == usuario.Area.Id).Select(o => o.Id).ToList();
+                            if (userAreaId != 0)
+                                obraIds = context.Obras.AsNoTracking().Where(o => o.AreaId == userAreaId).Select(o => o.Id).ToList();
                             else
                                 obraIds = new List<int>();
                         }
@@ -46,8 +46,6 @@ namespace Negocio
                         .ToList();
 
                     var dictAutorizadoNuevo = proyectos.ToDictionary(p => p.ObraId, p => (decimal?)p.AutorizadoNuevo);
-
-                    // ya no se usa startDate/nextYearDate
 
                     var autorizantesGroup = context.Autorizantes.AsNoTracking()
                         .Where(a => obraIds.Contains(a.ObraId))
@@ -68,9 +66,7 @@ namespace Negocio
                         .Select(g => new
                         {
                             ObraId = g.Key,
-                            SumLegitimos = g.Sum(l => (decimal?)l.Certificado),
-                            // SumLegitimosYear removido: usamos el total histórico
-                            MinLegitimo = g.Min(l => l.MesAprobacion),
+                            SumLegitimos = g.Sum(l => (decimal?)l.Certificado),                            MinLegitimo = g.Min(l => l.MesAprobacion),
                             MaxLegitimo = g.Max(l => l.MesAprobacion)
                         })
                         .ToList();

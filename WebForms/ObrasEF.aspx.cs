@@ -21,6 +21,8 @@ namespace WebForms
         private int pageSize = 12;
         private int totalRecords = 0;
 
+        private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
+
         protected void Page_Load(object sender, EventArgs e)
         {
             // cargar paginación desde ViewState
@@ -41,11 +43,16 @@ namespace WebForms
         {
             try
             {
-                UsuarioEF usuario = UserHelper.GetFullCurrentUser();
-                List<ObraDTO> todasLasObras = Negocio.Listar(usuario);
+                List<ObraDTO> todasLasObras;
 
                 if (Session["ObrasCompleto"] == null)
                 {
+                    // Cargar la lista completa de obras o filtrarla por área.
+                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(AreaIdRedet))
+                        todasLasObras = Negocio.ListarTodo();
+                    else
+                        todasLasObras = Negocio.ListarPorArea(UserHelper.GetUserAreaId());
+
                     Session["ObrasCompleto"] = todasLasObras;
                 }
                 else
@@ -174,6 +181,62 @@ namespace WebForms
             }
             return null;
 
+        }
+
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            // Aplicar la visibilidad de columnas justo antes del render
+            try
+            {
+                // incluir tanto los DataField como los HeaderText para cubrir todos los casos
+                SetColumnsVisibilityForRedet(UserHelper.IsUserInArea(AreaIdRedet),
+                    // DataField names
+                    "AutorizadoNuevo",
+                    "MontoCertificado",
+                    "Porcentaje",
+                    "MontoInicial",
+                    "MontoActual",
+                    "MontoFaltante",
+                    // Header text / display names
+                    "Disponible Actual",
+                    "Planificacion 2025",
+                    "Ejecucion presupuesto 2025",
+                    "Monto de Obra inicial",
+                    "Monto de Obra actual",
+                    "Faltante de Obra",
+                    // acciones (template field header)
+                    "Acciones");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Error OnPreRender SetColumnsVisibilityForRedet: " + ex);
+            }
+        }
+
+        private void SetColumnsVisibilityForRedet(bool isRedet, params string[] columnsToHide)
+        {
+            if (dgvObra == null || dgvObra.Columns == null) return;
+
+            var hideSet = new HashSet<string>(columnsToHide ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+
+            // Encontrar columnas cuyo DataField (BoundField) o HeaderText coincida con la lista
+            var matches = dgvObra.Columns
+                .Cast<DataControlField>()
+                .Where(col =>
+                {
+                    if (col is BoundField bf && !string.IsNullOrWhiteSpace(bf.DataField))
+                        return hideSet.Contains(bf.DataField);
+                    if (!string.IsNullOrWhiteSpace(col.HeaderText))
+                        return hideSet.Contains(col.HeaderText);
+
+                    return false;
+                })
+                .ToList();
+
+            // Aplicar visibilidad (si isRedet=true -> ocultar)
+            matches.ForEach(c => c.Visible = !isRedet);
         }
 
 

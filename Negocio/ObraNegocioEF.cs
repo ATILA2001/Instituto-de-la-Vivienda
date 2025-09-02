@@ -61,15 +61,10 @@ namespace Negocio
             }
         }
 
-        public List<ObraDTO> Listar(UsuarioEF usuario = null)
+        public List<ObraDTO> ListarTodo()
         {
             try
-            {
-                if (usuario != null && !usuario.Tipo)
-                {
-                    return ListarPorArea(usuario.AreaId.Value);
-                }
-
+            { 
                 using (var context = new IVCdbContext())
                 {
                     var obras = context.Obras.AsNoTracking()
@@ -84,7 +79,7 @@ namespace Negocio
 
                     // Calcular finanzas y construir DTOs
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(usuario, obras.Select(o => o.Id).ToList());
+                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
                     return calc.ConstruirObraDTOs(obras, finanzas);
                 }
             }
@@ -94,7 +89,7 @@ namespace Negocio
             }
         }
 
-        private List<ObraDTO> ListarPorArea(int areaId)
+        public List<ObraDTO> ListarPorArea(int areaId)
         {
             try
             {
@@ -112,7 +107,7 @@ namespace Negocio
                         .ToList();
 
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(null, obras.Select(o => o.Id).ToList());
+                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
                     return calc.ConstruirObraDTOs(obras, finanzas);
                 }
             }

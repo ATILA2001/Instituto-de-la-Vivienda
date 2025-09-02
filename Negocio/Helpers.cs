@@ -546,16 +546,31 @@ namespace Negocio
             };
         }
 
+        /// <summary>
+        /// Devuelve true si el usuario actual es administrador
+        /// </summary>
         public static bool IsUserAdmin()
         {
-            var user = GetFullCurrentUser();
+            UsuarioEF user = GetFullCurrentUser();
             return user.Tipo; // true: Administrador, false: Usuario normal
         }
 
+        /// <summary>
+        /// Devuelve true si el usuario actual pertenece a un área específica
+        /// </summary>
         public static bool IsUserInArea(int areaId)
         {
             var user = GetFullCurrentUser();
             return user.AreaId == areaId;
+        }
+
+        /// <summary>
+        /// Devuelve el ID del área del usuario actual
+        /// </summary>
+        public static int GetUserAreaId()
+        {
+            var user = GetFullCurrentUser();
+            return user.AreaId.GetValueOrDefault();
         }
 
     }
