@@ -41,7 +41,7 @@
 				<div class="container-fluid">
 					<a class="navbar-brand d-flex align-items-center">
 						<img src="Images/IVC-Blanco.png" width="50" height="50" style="margin-right: 0!important; margin-top: 0!important; margin-left: 0.5rem!important;" />
-                            <span class="ms-3 text-white fs-4 d-flex align-items-end"><%: GetCurrentPageName() %></span>
+						<span class="ms-3 text-white fs-4 d-flex align-items-end"><%: GetCurrentPageName() %></span>
 
 					</a>
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
@@ -49,6 +49,17 @@
 					</button>
 					<div class="collapse navbar-collapse" id="navbarMenu">
 						<ul class="navbar-nav ms-auto">
+
+
+							<li class="nav-item">
+								<a id="lnkObras" runat="server" class="nav-link text-white" href="ObrasEF.aspx">Obras</a>
+							</li>
+							<li class="nav-item">
+								<a id="lnkAutorizantes" runat="server" class="nav-link text-white" href="AutorizantesEF.aspx">Autorizantes</a>
+							</li>
+							<li class="nav-item">
+								<a id="lnkRedeterminaciones" runat="server" class="nav-link text-white" href="Redeterminaciones.aspx">Redeterminaciones</a>
+							</li>
 
 							<li class="nav-item">
 								<a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2026</span></a>
@@ -75,7 +86,7 @@
 							</li>
 
 							<!-- Planificación -->
-							<li class="nav-item dropdown">
+							<li class="nav-item dropdown" id="liPlaniNav" runat="server">
 								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<span>Planificación</span>
 								</a>
