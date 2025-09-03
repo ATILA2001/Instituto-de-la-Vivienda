@@ -152,6 +152,8 @@ namespace Negocio
                 Contrata = o.Contrata?.Nombre,
                 ContrataId = o.ContrataId,
                 Numero = o.Numero,
+                ObraNumero = o.ObraNumero,
+                Etapa = o.Etapa,
                 Anio = o.Anio,
                 Barrio = o.Barrio?.Nombre,
                 BarrioId = o.BarrioId,

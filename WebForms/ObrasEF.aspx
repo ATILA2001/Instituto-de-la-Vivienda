@@ -148,9 +148,9 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtObra" class="form-label">Obra N°</label>
-                                        <asp:TextBox ID="txtObra" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvObra"
-                                            ControlToValidate="txtObra"
+                                        <asp:TextBox ID="txtObraNumero" CssClass="form-control" runat="server" onkeypress="return soloNumeros(event)" />
+                                        <asp:RequiredFieldValidator ID="rfvObraNumero"
+                                            ControlToValidate="txtObraNumero"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
                                             ErrorMessage="Ingrese el número de obra"
@@ -421,7 +421,7 @@
             document.getElementById('<%= txtNumero.ClientID %>').value = '';
             document.getElementById('<%= txtAnio.ClientID %>').value = '';
             document.getElementById('<%= txtEtapa.ClientID %>').value = '';
-            document.getElementById('<%= txtObra.ClientID %>').value = '';
+            document.getElementById('<%= txtObraNumero.ClientID %>').value = '';
             document.getElementById('<%= txtDescripcion.ClientID %>').value = '';
             document.getElementById('<%= ddlArea.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlEmpresa.ClientID %>').selectedIndex = 0;

@@ -14,6 +14,8 @@ namespace Dominio.DTO
         public string Contrata { get; set; }
         public int? ContrataId { get; set; }
         public int? Numero { get; set; }
+        public int? ObraNumero { get; set; }
+        public int? Etapa { get; set; }
         public int? Anio { get; set; }
         public string Barrio { get; set; }
         public int? BarrioId { get; set; }
