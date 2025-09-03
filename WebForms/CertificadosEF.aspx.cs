@@ -411,7 +411,7 @@ namespace WebForms
                         MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim()),
                         MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
                         TipoPagoId = int.Parse(ddlTipo.SelectedValue),
-                        CodigoAutorizante = ddlAutorizante.SelectedItem.Text
+                        CodigoAutorizante = new AutorizanteNegocioEF().ObtenerPorId(int.Parse( ddlAutorizante.SelectedValue)).CodigoAutorizante
                     };
 
                     resultado = negocio.Agregar(nuevoCertificado);
@@ -678,8 +678,8 @@ namespace WebForms
                         // Si no hay cache en memoria, limpiar cache SADE y recargar desde BD
                         CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                         Session["CertificadosCompleto"] = null;
-                        CargarPaginaActual();
                     }
+                        CargarPaginaActual();
                 }
             }
             catch (Exception ex)
@@ -1044,16 +1044,13 @@ namespace WebForms
         /// </summary>
         private List<CertificadoDTO> ObtenerDatosFiltradosActuales()
         {
-            // Usar caché de filtrado si existe (establecido en BindGrid)
-            if (Session["FilteredCertificadosCompleto"] is List<CertificadoDTO> cachedFiltered)
-                return cachedFiltered;
 
             if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
             var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
 
-            // Aplicar filtro de texto general (mismo que en BindGrid)
+            // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
             if (!string.IsNullOrEmpty(filtro))
             {
@@ -1068,7 +1065,7 @@ namespace WebForms
                 ).ToList();
             }
 
-            // Aplicar filtros de las columnas (TreeView) - mismo que en BindGrid
+            // Aplicar filtros de las columnas (TreeView)
             var certificadosFiltrada = AplicarFiltrosTreeViewEnMemoria(certificadosCompleta);
 
             // Guardar en sesión para reuso
