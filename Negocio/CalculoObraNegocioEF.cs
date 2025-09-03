@@ -13,7 +13,7 @@ namespace Negocio
         /// Calcula los valores financieros por obra usando consultas EF (no legacy ADO).
         /// Devuelve un diccionario { ObraId -> aggregate primitive values } y no depende de DTO auxiliares.
         /// </summary>
-    public Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(List<int> obraIds = null)
+        public Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(List<int> obraIds = null)
         {
             try
             {
@@ -66,7 +66,8 @@ namespace Negocio
                         .Select(g => new
                         {
                             ObraId = g.Key,
-                            SumLegitimos = g.Sum(l => (decimal?)l.Certificado),                            MinLegitimo = g.Min(l => l.MesAprobacion),
+                            SumLegitimos = g.Sum(l => (decimal?)l.Certificado),
+                            MinLegitimo = g.Min(l => l.MesAprobacion),
                             MaxLegitimo = g.Max(l => l.MesAprobacion)
                         })
                         .ToList();
@@ -140,7 +141,7 @@ namespace Negocio
         /// <summary>
         /// Construye una lista de ObraDTO a partir de entidades ObraEF y el diccionario financiero.
         /// </summary>
-    public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas)
+        public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas)
         {
             var listaDto = obras.Select(o => new ObraDTO
             {
@@ -156,19 +157,19 @@ namespace Negocio
                 Etapa = o.Etapa,
                 Anio = o.Anio,
                 Barrio = o.Barrio?.Nombre,
-                BarrioId = o.BarrioId,
+                BarrioId = o.BarrioId ?? 0,
                 Descripcion = o.Descripcion,
                 LineaGestionNombre = o.Proyecto?.LineaGestionEF?.Nombre,
                 ProyectoNombre = o.Proyecto?.Nombre,
                 ProyectoId = o.Proyecto != null ? o.Proyecto.Id : (int?)null,
-        AutorizadoNuevo = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].AutorizadoNuevo : (decimal?)null,
-        MontoCertificado = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoCertificado : (decimal?)null,
-        Porcentaje = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].Porcentaje : (decimal?)null,
-        MontoInicial = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoInicial : (decimal?)null,
-        MontoActual = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoActual : (decimal?)null,
-        MontoFaltante = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoFaltante : (decimal?)null,
-        FechaInicio = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaInicio : (DateTime?)null,
-        FechaFin = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaFin : (DateTime?)null
+                AutorizadoNuevo = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].AutorizadoNuevo : (decimal?)null,
+                MontoCertificado = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoCertificado : (decimal?)null,
+                Porcentaje = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].Porcentaje : (decimal?)null,
+                MontoInicial = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoInicial : (decimal?)null,
+                MontoActual = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoActual : (decimal?)null,
+                MontoFaltante = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoFaltante : (decimal?)null,
+                FechaInicio = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaInicio : (DateTime?)null,
+                FechaFin = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaFin : (DateTime?)null
             }).ToList();
 
             return listaDto;
