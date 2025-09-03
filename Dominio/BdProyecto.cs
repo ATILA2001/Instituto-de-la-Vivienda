@@ -9,7 +9,7 @@ namespace Dominio
     public class BdProyecto
     {
         public int Id { get; set; }
-        public Obra Obra {  get; set; }
+        public Obra Obra { get; set; }
 
         public string Proyecto { get; set; }
         public string SubProyecto { get; set; }

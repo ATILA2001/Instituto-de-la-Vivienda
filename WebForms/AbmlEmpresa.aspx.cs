@@ -19,7 +19,7 @@ namespace WebForms
             if (!IsPostBack)
             {
 
-               
+
                 CargarListaEmpresas();
             }
         }
@@ -30,8 +30,8 @@ namespace WebForms
         }
         private void CargarListaEmpresas(string filtro = null)
         {
-            
-            
+
+
             try
             {
                 Session["listaEmpresa"] = negocio.listar(filtro);
@@ -89,7 +89,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Empresa eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaEmpresas(); 
+                    CargarListaEmpresas();
                 }
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace WebForms
                 lblMensaje.CssClass = "alert alert-danger";
             }
         }
-       
+
 
     }
 }

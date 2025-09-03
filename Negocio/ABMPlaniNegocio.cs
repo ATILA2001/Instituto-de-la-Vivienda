@@ -14,7 +14,7 @@ namespace Negocio
             }
         }
 
-        public static bool GetIsFormulationOpen() 
+        public static bool GetIsFormulationOpen()
         {
             using (var db = new IVCdbContext())
             {

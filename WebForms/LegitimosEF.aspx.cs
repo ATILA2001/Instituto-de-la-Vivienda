@@ -2,9 +2,9 @@ using Dominio;
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
-using System.Data.Entity;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using WebForms.CustomControls;
@@ -33,10 +33,10 @@ namespace WebForms
         /// <summary>
         /// Total de registros disponibles según filtros actuales.
         /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
-    /// </summary>
-    private int totalRecords = 0;
+        /// </summary>
+        private int totalRecords = 0;
 
-    #endregion
+        #endregion
         protected void Page_Load(object sender, EventArgs e)
         {
             // Cargar valores de paginación desde ViewState
@@ -361,7 +361,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 lblMensaje.Text = "Error al cargar obras: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger"; 
+                lblMensaje.CssClass = "alert alert-danger";
             }
         }
 
@@ -766,7 +766,7 @@ namespace WebForms
         /// <summary>
         /// Recalcula SIGAF/SADE para expedientes y actualiza la sesión y vista.
         /// </summary>
-    private void RecalcularYActualizarCache(List<string> expedientesAfectados, List<Dominio.LegitimoEF> listaCache = null, bool persistirEnBD = false, bool recargarVista = true)
+        private void RecalcularYActualizarCache(List<string> expedientesAfectados, List<Dominio.LegitimoEF> listaCache = null, bool persistirEnBD = false, bool recargarVista = true)
         {
             if (expedientesAfectados == null) return;
 
@@ -918,7 +918,7 @@ namespace WebForms
                 pag.UpdateSubtotal(subtotalGlobal, totalRecords);
             }
         }
-        
+
         /// <summary>
         /// Busca un control recursivamente en la jerarquía de controles.
         /// Útil cuando el designer no expone el control directamente.

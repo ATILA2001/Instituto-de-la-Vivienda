@@ -91,7 +91,7 @@ namespace WebForms
             {
                 lnkRedeterminaciones.Visible = visible;
             }
-            
+
 
 
         }
@@ -122,11 +122,11 @@ namespace WebForms
                 var ppiColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "PPI", StringComparison.OrdinalIgnoreCase));
                 var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techos 2026", StringComparison.OrdinalIgnoreCase));
 
-                    if (ppiColumn != null)
-                        ppiColumn.Visible = isVisible; // Admin ve PPI, User no
+                if (ppiColumn != null)
+                    ppiColumn.Visible = isVisible; // Admin ve PPI, User no
 
-                    if (techosColumn != null)
-                        techosColumn.Visible = true; // Visible para ambos
+                if (techosColumn != null)
+                    techosColumn.Visible = true; // Visible para ambos
 
             }
         }

@@ -26,7 +26,7 @@ namespace WebForms
                 CalcularSubtotal();
             }
         }
-        
+
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             CargarListaProyectos();
@@ -305,7 +305,7 @@ namespace WebForms
             }
         }
 
-       
+
         protected void dgvBdProyecto_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
@@ -422,7 +422,7 @@ namespace WebForms
             ddlLineaGestion.DataValueField = "Id";
             ddlLineaGestion.DataBind();
         }
-       
+
         private DataTable ObtenerObras()
         {
             ObraNegocio barrioNegocio = new ObraNegocio();

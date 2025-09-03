@@ -153,7 +153,7 @@ namespace Negocio
                                 auth.Obra.Empresa = empresasDict[auth.Obra.EmpresaId.Value];
                             if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
                                 auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
-                            
+
                             auth.Estado = estadosDict[auth.EstadoId];
                             auth.Concepto = conceptosDict[auth.ConceptoId];
                         }
@@ -278,7 +278,7 @@ namespace Negocio
                 return new List<AutorizanteDTO>();
             }
         }
-    
+
         #region Configuración y Mapeo de Estados
 
         /// <summary>
@@ -1012,7 +1012,7 @@ namespace Negocio
                 if (autorizante == null || !redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
 
 
-                
+
                 if (certificados != null)
                 {
                     certificados = certificados
@@ -2546,4 +2546,4 @@ namespace Negocio
         #endregion
 
     }
-}    
+}

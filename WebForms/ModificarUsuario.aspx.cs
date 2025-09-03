@@ -23,7 +23,7 @@ namespace WebForms
                 {
                     ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
-                    List <Usuario> temp = (List<Usuario>)Session["listaUsuario"];
+                    List<Usuario> temp = (List<Usuario>)Session["listaUsuario"];
                     Usuario selected = temp.Find(x => x.Id == codM);
                     txtNombre.Text = selected.Nombre;
                     txtEmail.Text = selected.Correo;
@@ -38,11 +38,11 @@ namespace WebForms
             Usuario usuario = new Usuario();
             UsuarioNegocio negocio = new UsuarioNegocio();
 
-            if (txtNombre.Text.Trim() != string.Empty && txtEmail.Text.Trim() != string.Empty && txtTipo.Text.Trim() != string.Empty )
+            if (txtNombre.Text.Trim() != string.Empty && txtEmail.Text.Trim() != string.Empty && txtTipo.Text.Trim() != string.Empty)
             {
                 usuario.Id = int.Parse(Request.QueryString["codM"].ToString());
                 usuario.Nombre = txtNombre.Text.Trim();
-                usuario.Correo = txtEmail.Text.Trim(); 
+                usuario.Correo = txtEmail.Text.Trim();
                 usuario.Estado = ddlEstado.SelectedValue == "1";
                 negocio.ModificarUsuario(usuario);
                 lblMensaje.Text = "Se modificó el Usuario exitosamente.";

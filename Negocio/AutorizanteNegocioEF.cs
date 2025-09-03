@@ -78,7 +78,7 @@ namespace Negocio
         /// - Dropdowns en páginas con control de acceso por área
         /// - Listados que respetan jerarquía organizacional
         /// </summary>
-        
+
 
         /// <summary>
         /// Obtiene un autorizante específico por su código único.

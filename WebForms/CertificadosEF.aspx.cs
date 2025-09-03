@@ -72,10 +72,10 @@ namespace WebForms
         #endregion
 
         #region Métodos de Paginación
-    /// <summary>
-    /// Carga o reutiliza la lista completa de certificados en Session["CertificadosCompleto"].
-    /// Llama al negocio si no hay caché.
-    /// </summary>
+        /// <summary>
+        /// Carga o reutiliza la lista completa de certificados en Session["CertificadosCompleto"].
+        /// Llama al negocio si no hay caché.
+        /// </summary>
         private void CargarListaCertificadosCompleta()
         {
             try
@@ -107,10 +107,10 @@ namespace WebForms
             }
         }
 
-    /// <summary>
-    /// Filtra en memoria sobre Session["CertificadosCompleto"], pagina y realiza DataBind del GridView.
-    /// Guarda el resultado filtrado en Session["FilteredCertificadosCompleto"].
-    /// </summary>
+        /// <summary>
+        /// Filtra en memoria sobre Session["CertificadosCompleto"], pagina y realiza DataBind del GridView.
+        /// Guarda el resultado filtrado en Session["FilteredCertificadosCompleto"].
+        /// </summary>
         private void BindGrid()
         {
             if (Session["CertificadosCompleto"] == null)
@@ -157,10 +157,10 @@ namespace WebForms
         }
 
 
-    /// <summary>
-    /// Reconstituye y hace DataBind de la página actual usando la lista filtrada (recalcula si no existe caché).
-    /// </summary>
-    private void CargarPaginaActual()
+        /// <summary>
+        /// Reconstituye y hace DataBind de la página actual usando la lista filtrada (recalcula si no existe caché).
+        /// </summary>
+        private void CargarPaginaActual()
         {
             // Guarda el estado actual en ViewState
             ViewState["CurrentPageIndex"] = currentPageIndex;
@@ -226,10 +226,10 @@ namespace WebForms
         }
 
 
-    /// <summary>
-    /// Busca un control recursivamente en la jerarquía de controles.
-    /// Útil cuando el designer no expone el control directamente.
-    /// </summary>
+        /// <summary>
+        /// Busca un control recursivamente en la jerarquía de controles.
+        /// Útil cuando el designer no expone el control directamente.
+        /// </summary>
         private Control FindControlRecursive(Control root, string id)
         {
             if (root.ID == id)
@@ -247,9 +247,9 @@ namespace WebForms
 
         #endregion
 
-    /// <summary>
-    /// Handler de confirmación de filtros del header: invalida caché de filtrado y recarga la primera página.
-    /// </summary>
+        /// <summary>
+        /// Handler de confirmación de filtros del header: invalida caché de filtrado y recarga la primera página.
+        /// </summary>
         public void OnAcceptChanges(object sender, EventArgs e)
         {
             currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
@@ -411,7 +411,7 @@ namespace WebForms
                         MontoTotal = decimal.Parse(txtMontoCertificado.Text.Trim()),
                         MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text),
                         TipoPagoId = int.Parse(ddlTipo.SelectedValue),
-                        CodigoAutorizante = new AutorizanteNegocioEF().ObtenerPorId(int.Parse( ddlAutorizante.SelectedValue)).CodigoAutorizante
+                        CodigoAutorizante = new AutorizanteNegocioEF().ObtenerPorId(int.Parse(ddlAutorizante.SelectedValue)).CodigoAutorizante
                     };
 
                     resultado = negocio.Agregar(nuevoCertificado);
@@ -679,7 +679,7 @@ namespace WebForms
                         CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                         Session["CertificadosCompleto"] = null;
                     }
-                        CargarPaginaActual();
+                    CargarPaginaActual();
                 }
             }
             catch (Exception ex)
@@ -789,7 +789,7 @@ namespace WebForms
                 }
             }
         }
-        
+
 
         private void BindDropDownList()
         {
@@ -1075,10 +1075,10 @@ namespace WebForms
         }
 
 
-    #region Eventos de Filtrado Optimizados
-    /// <summary>
-    /// Aplica filtros desde el header y recarga la primera página.
-    /// </summary>
+        #region Eventos de Filtrado Optimizados
+        /// <summary>
+        /// Aplica filtros desde el header y recarga la primera página.
+        /// </summary>
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros

@@ -24,7 +24,7 @@ namespace Negocio
             {
                 using (var context = new IVCdbContext())
                 {
-                   
+
                     var query = context.Obras.AsNoTracking()
                          .OrderBy(o => o.Descripcion)
                          .ToList();
@@ -34,7 +34,7 @@ namespace Negocio
                             query = query.Where(o => o.AreaId == usuario.AreaId.Value).ToList();
                         else if (usuario.Area != null)
                             query = query.Where(o => o.AreaId == usuario.Area.Id).ToList();
-                    }                      
+                    }
 
                     return query
                         .OrderBy(o => o.Descripcion)
@@ -64,7 +64,7 @@ namespace Negocio
         public List<ObraDTO> ListarTodo()
         {
             try
-            { 
+            {
                 using (var context = new IVCdbContext())
                 {
                     var obras = context.Obras.AsNoTracking()

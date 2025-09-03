@@ -282,7 +282,7 @@ namespace WebForms
                     {
                         selectedHeaderProyecto = cblsHeaderProyectoControl.SelectedValues;
                     }
-                    
+
                     var cblsHeaderEmpresaControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaControl != null)
                     {
@@ -396,7 +396,7 @@ namespace WebForms
                 {
                     listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Barrio != null && selectedHeaderBarrio.Contains(c.Autorizante.Obra.Barrio.Id.ToString()));
                 }
-                
+
                 if (selectedHeaderProyecto != null && selectedHeaderProyecto.Any())
                 {
                     listaFiltrada = listaFiltrada.Where(c => c.Autorizante?.Obra?.Proyecto != null && selectedHeaderProyecto.Contains(c.Autorizante.Obra.Proyecto.Id.ToString()));
@@ -563,7 +563,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaCertificados(null,true); 
+                    CargarListaCertificados(null, true);
                     CalcularSubtotal();
                 }
             }
@@ -576,7 +576,7 @@ namespace WebForms
 
         protected void dgvCertificado_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            if (e.Row.RowType == DataControlRowType.Header) 
+            if (e.Row.RowType == DataControlRowType.Header)
             {
                 List<Certificado> certificadosCompleto = (List<Certificado>)Session["certificadosCompleto"];//calculoRedeterminacionNegocio.listarCertReliq();
 
@@ -633,12 +633,12 @@ namespace WebForms
                     cblsHeaderBarrio.DataSource = barriosUnicos;
                     cblsHeaderBarrio.DataBind();
                 }
-                
+
                 if (cblsHeaderProyecto != null)
                 {
                     var proyectosUnicos = certificadosCompleto
                         .Where(c => c.Autorizante?.Obra?.Proyecto != null)
-                        .Select(c => new { Nombre = c.Autorizante.Obra.Proyecto.Proyecto, Id = c.Autorizante.Obra.Proyecto.Id  })
+                        .Select(c => new { Nombre = c.Autorizante.Obra.Proyecto.Proyecto, Id = c.Autorizante.Obra.Proyecto.Id })
                         .Distinct()
                         .OrderBy(a => a.Nombre)
                         .ToList();
@@ -706,7 +706,8 @@ namespace WebForms
                         .Select(c => c.MesAprobacion.Value) // Obtener solo las fechas
                         .Distinct()
                         .OrderByDescending(d => d) // Ordenar por fecha, más recientes primero
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             // El UserControl usará 'Id' para el valor del nodo y para parsear la fecha.
                             // El UserControl generará la jerarquía Año/Mes/Día.
                             Id = d.ToString("yyyy-MM-dd"), // Formato que el UserControl puede parsear a DateTime
@@ -738,7 +739,7 @@ namespace WebForms
 
             }
         }
- 
+
         private DataTable ObtenerTipos()
         {
             TipoPagoNegocio tipoPagNegocio = new TipoPagoNegocio();

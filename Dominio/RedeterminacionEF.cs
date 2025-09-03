@@ -10,7 +10,7 @@ namespace Dominio
     {
         [Key]
         public int Id { get; set; }
-        
+
         public virtual AutorizanteEF Autorizante { get; set; }
 
         [Column("CODIGO_AUTORIZANTE")]

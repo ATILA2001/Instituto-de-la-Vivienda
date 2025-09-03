@@ -9,7 +9,7 @@ namespace Dominio
     [Serializable]
     public class Contrata
     {
-        public int Id {  get; set; }
+        public int Id { get; set; }
         public string Nombre { get; set; }
         public Contrata() { }
         public override string ToString()

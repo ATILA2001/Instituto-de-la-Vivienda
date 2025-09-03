@@ -210,7 +210,7 @@ namespace WebForms
             if (selectedValue != "all")
             {
                 switch (selectedValue)
-                {                 
+                {
 
                     case "0": // "En curso" (menos de 7 días)
                         listaFiltrada = listaCompleta.Where(r =>

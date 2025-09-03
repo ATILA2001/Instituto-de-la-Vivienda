@@ -13,7 +13,7 @@ namespace Negocio
     {
         public DataTable listarddl()
         {
-            DataTable dt = new DataTable(); 
+            DataTable dt = new DataTable();
             AccesoDatos datos = new AccesoDatos();
 
             try
@@ -103,7 +103,7 @@ namespace Negocio
             }
         }
         public void modificar(Barrio barrio)
-        { 
+        {
             AccesoDatos datos = new AccesoDatos();
             try
             {
@@ -134,10 +134,10 @@ namespace Negocio
                 return true;
             }
             catch (Exception)
-           {
-               return false;
+            {
+                return false;
             }
-           finally { datos.cerrarConexion(); }
+            finally { datos.cerrarConexion(); }
         }
     }
 }

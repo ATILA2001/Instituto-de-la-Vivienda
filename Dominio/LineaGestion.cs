@@ -8,7 +8,7 @@ namespace Dominio
 {
     public class LineaGestion
     {
-        public int Id {  get; set; }
+        public int Id { get; set; }
         public string Nombre { get; set; }
         public string Grupo { get; set; }
         public string Reparticion { get; set; }

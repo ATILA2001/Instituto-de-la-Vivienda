@@ -2,9 +2,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dominio
-{    [Table("BD_Proyectos")] // Mapeo a la tabla BD_Proyectos
+{
+    [Table("BD_Proyectos")] // Mapeo a la tabla BD_Proyectos
     public class ProyectoEF
-    {        
+    {
         public int Id { get; set; }
 
         [Key, ForeignKey("ObraEF")]

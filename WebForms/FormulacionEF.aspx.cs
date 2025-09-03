@@ -178,11 +178,11 @@ namespace WebForms
             Session["EditingFormulacionEFId"] = null;
         }
 
-    // btnAgregar_Click: controlador de guardado compartido para el modal (Agregar y Editar).
-    // - Lee los valores del formulario y arma una entidad FormulacionEF.
-    // - Si Session["EditingFormulacionEFId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
-    // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
-    protected void btnAgregar_Click(object sender, EventArgs e)
+        // btnAgregar_Click: controlador de guardado compartido para el modal (Agregar y Editar).
+        // - Lee los valores del formulario y arma una entidad FormulacionEF.
+        // - Si Session["EditingFormulacionEFId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
+        // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
+        protected void btnAgregar_Click(object sender, EventArgs e)
         {
             if (!Page.IsValid) return;
 
@@ -220,7 +220,7 @@ namespace WebForms
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingFormulacionEFId"] = null;
                 Session["formulacionesCompletas"] = null;
-       
+
                 BindGrid();
             }
             catch (Exception ex)
@@ -231,12 +231,12 @@ namespace WebForms
             }
         }
 
-    // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
-    // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
-    // - Define Session["EditingFormulacionEFId"] para indicar modo edición.
-    // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
-    // - Rellena los controles del modal, ajusta el texto del botón a "Modificar" y muestra el modal.
-    protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
+        // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
+        // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
+        // - Define Session["EditingFormulacionEFId"] para indicar modo edición.
+        // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
+        // - Rellena los controles del modal, ajusta el texto del botón a "Modificar" y muestra el modal.
+        protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
@@ -626,7 +626,7 @@ namespace WebForms
                     // Si no hay certificados ni legítimos en 2026-2028, se deja total = 0
                 }
 
-                
+
 
                 return total.ToString("C");
             }

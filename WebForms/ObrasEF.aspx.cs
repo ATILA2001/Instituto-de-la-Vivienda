@@ -370,7 +370,7 @@ namespace WebForms
 
             if (editingId != null)
             {
-                
+
                 if (Negocio.Modificar(obra))
                 {
                     lblMensaje.Text = "Obra modificada exitosamente!";
@@ -588,7 +588,7 @@ namespace WebForms
                     .OrderBy(b => b.Nombre)
                     .ToList();
 
-                bindFilter("cblsHeaderBarrio", barriosDesdeObras, "Nombre", "Id");
+            bindFilter("cblsHeaderBarrio", barriosDesdeObras, "Nombre", "Id");
 
         }
 
