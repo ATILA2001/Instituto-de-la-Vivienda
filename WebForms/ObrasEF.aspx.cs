@@ -190,6 +190,7 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
+                panelShowAddButton.Visible = !UserHelper.IsUserInArea(AreaIdRedet);
                 // incluir tanto los DataField como los HeaderText para cubrir todos los casos
                 SetColumnsVisibilityForRedet(UserHelper.IsUserInArea(AreaIdRedet),
                     // DataField names
@@ -571,9 +572,23 @@ namespace WebForms
                 }
             };
 
+            List<ObraDTO> obrasCompleto = (List<ObraDTO>)Session["ObrasCompleto"];
+
             bindFilter("cblsHeaderArea", Negocio.ListarAreas().Select(a => new { a.Id, a.Nombre }).ToList(), "Nombre", "Id");
             bindFilter("cblsHeaderEmpresa", Negocio.ListarEmpresas().Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-            bindFilter("cblsHeaderBarrio", Negocio.ListarBarrios().Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
+            // bindFilter("cblsHeaderBarrio", Negocio.ListarBarrios().Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
+            var barriosDesdeObras = obrasCompleto
+                    .Select(o => new
+                    {
+                        Id = o.BarrioId ?? 0, // usar 0 para los vacíos
+                        Nombre = string.IsNullOrWhiteSpace(o.Barrio) ? string.Empty : o.Barrio
+                    })
+                    .GroupBy(b => new { b.Id, b.Nombre })
+                    .Select(g => new { g.Key.Id, g.Key.Nombre })
+                    .OrderBy(b => b.Nombre)
+                    .ToList();
+
+                bindFilter("cblsHeaderBarrio", barriosDesdeObras, "Nombre", "Id");
 
         }
 
