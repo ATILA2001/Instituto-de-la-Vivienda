@@ -50,7 +50,7 @@ namespace WebForms
         /// Clase de negocio para operaciones CRUD de autorizantes.
         /// Maneja las operaciones básicas como agregar, modificar, eliminar y consultar autorizantes.
         /// </summary>
-        private AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
+        private AutorizanteNegocioEF _autorizanteNegocioEF = new AutorizanteNegocioEF();
         
         /// <summary>
         /// Clase de negocio para cálculos complejos de redeterminaciones.
@@ -60,7 +60,7 @@ namespace WebForms
         /// - Integrar datos SADE y SIGAF
         /// - Manejar la paginación optimizada de grandes volúmenes de datos
         /// </summary>
-        private CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
+        private CalculoRedeterminacionNegocioEF _calculoRedeterminacionNegocioEF = new CalculoRedeterminacionNegocioEF();
 
         #endregion
 
@@ -70,19 +70,19 @@ namespace WebForms
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
-        private int currentPageIndex = 0;
+        private int _currentPageIndex = 0;
         
         /// <summary>
         /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
         /// Se mantiene en ViewState para persistir la preferencia del usuario.
         /// </summary>
-        private int pageSize = 12;
+        private int _pageSize = 12;
         
         /// <summary>
         /// Total de registros disponibles (autorizantes + redeterminaciones).
         /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
         /// </summary>
-        private int totalRecords = 0;
+        private int _totalRecords = 0;
         
 
         #endregion
@@ -110,8 +110,8 @@ namespace WebForms
         protected void Page_Load(object sender, EventArgs e)
         {
             // Cargar valores de paginación desde ViewState
-            currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
-            pageSize = (int)(ViewState["PageSize"] ?? 12);
+            _currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
+            _pageSize = (int)(ViewState["PageSize"] ?? 12);
 
             if (!IsPostBack)
             {
@@ -142,8 +142,8 @@ namespace WebForms
         /// </summary>
         protected void OnAcceptChanges(object sender, EventArgs e)
         {
-            currentPageIndex = 0;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             CargarPaginaActual();
         }
 
@@ -396,7 +396,7 @@ namespace WebForms
                     // Solo al agregar se asigna la obra seleccionada
                     autorizante.ObraId = int.Parse(ddlObraAgregar.SelectedValue);
 
-                    if (autorizanteNegocio.Agregar(autorizante))
+                    if (_autorizanteNegocioEF.Agregar(autorizante))
                     {
                         lblMensaje.Text = "Autorizante agregado exitosamente!";
                         lblMensaje.CssClass = "alert alert-success";
@@ -436,7 +436,7 @@ namespace WebForms
 
                     // MODO EDITAR: Obtener el autorizante existente de la BD
                     int autorizanteId = (int)Session["EditingAutorizanteId"];
-                    var autorizanteExistente = autorizanteNegocio.ObtenerPorId(autorizanteId);
+                    var autorizanteExistente = _autorizanteNegocioEF.ObtenerPorId(autorizanteId);
                     
                     if (autorizanteExistente == null)
                     {
@@ -472,7 +472,7 @@ namespace WebForms
                     autorizanteExistente.ConceptoId = int.Parse(ddlConceptoEditar.SelectedValue);
                     autorizanteExistente.EstadoId = int.Parse(ddlEstadoEditar.SelectedValue);
 
-                    if (autorizanteNegocio.Modificar(autorizanteExistente))
+                    if (_autorizanteNegocioEF.Modificar(autorizanteExistente))
                     {
                         lblMensaje.Text = "Autorizante modificado exitosamente!";
                         lblMensaje.CssClass = "alert alert-success";
@@ -820,7 +820,7 @@ namespace WebForms
                 if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
                     UsuarioEF usuario = ObtenerUsuarioActual();
-                    todos = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
+                    todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;
                     ViewState["NecesitaRecarga"] = null;
                 }
@@ -829,7 +829,7 @@ namespace WebForms
                     todos = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
                 }
 
-                totalRecords = todos?.Count ?? 0;
+                _totalRecords = todos?.Count ?? 0;
                 BindGrid();
             }
             catch (Exception ex)
@@ -841,8 +841,8 @@ namespace WebForms
 
         private void CargarPaginaActual()
         {
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-            ViewState["PageSize"] = pageSize;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
+            ViewState["PageSize"] = _pageSize;
             CargarListaAutorizantesRedet();
             ConfigurarPaginationControl();
         }
@@ -874,16 +874,16 @@ namespace WebForms
 
             int totalFiltrados = datosEnMemoria.Count;
             gridviewRegistros.VirtualItemCount = totalFiltrados;
-            gridviewRegistros.PageSize = pageSize;
-            gridviewRegistros.PageIndex = currentPageIndex;
+            gridviewRegistros.PageSize = _pageSize;
+            gridviewRegistros.PageIndex = _currentPageIndex;
             gridviewRegistros.DataSource = datosEnMemoria
-                .Skip(currentPageIndex * pageSize)
-                .Take(pageSize)
+                .Skip(_currentPageIndex * _pageSize)
+                .Take(_pageSize)
                 .ToList();
             gridviewRegistros.DataBind();
             PoblarFiltrosHeader();
 
-            totalRecords = totalFiltrados;
+            _totalRecords = totalFiltrados;
             ViewState["TotalRecords"] = totalFiltrados;
             ConfigurarPaginationControl();
             CalcularSubtotalParaPaginationControl();
@@ -1147,7 +1147,7 @@ namespace WebForms
                     return;
                 }
 
-                bool eliminado = autorizanteNegocio.Eliminar(id);
+                bool eliminado = _autorizanteNegocioEF.Eliminar(id);
 
                 if (eliminado)
                 {
@@ -1165,8 +1165,8 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-success";
 
                     // Actualizar totales y rebind
-                    totalRecords = (Session["GridDataAutorizantes"] as List<AutorizanteDTO>)?.Count ?? 0;
-                    ViewState["TotalRecords"] = totalRecords;
+                    _totalRecords = (Session["GridDataAutorizantes"] as List<AutorizanteDTO>)?.Count ?? 0;
+                    ViewState["TotalRecords"] = _totalRecords;
                     BindGrid();
                 }
                 else
@@ -1220,7 +1220,7 @@ namespace WebForms
                 string codigoAutorizante = autorizante.CodigoAutorizante;
 
                 // Actualizar en la base de datos
-                bool resultado = autorizanteNegocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
+                bool resultado = _autorizanteNegocioEF.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
 
                 if (resultado)
                 {
@@ -1337,15 +1337,15 @@ namespace WebForms
 
         protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            currentPageIndex = e.PageIndex;
+            _currentPageIndex = e.PageIndex;
             CargarPaginaActual();
         }
 
         protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            pageSize = e.PageSize;
-            ViewState["PageSize"] = pageSize;
-            currentPageIndex = 0;
+            _pageSize = e.PageSize;
+            ViewState["PageSize"] = _pageSize;
+            _currentPageIndex = 0;
             CargarPaginaActual();
         }
 
@@ -1358,9 +1358,9 @@ namespace WebForms
         {
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
-                paginationControl.TotalRecords = totalRecords;
-                paginationControl.CurrentPageIndex = currentPageIndex;
-                paginationControl.PageSize = pageSize;
+                paginationControl.TotalRecords = _totalRecords;
+                paginationControl.CurrentPageIndex = _currentPageIndex;
+                paginationControl.PageSize = _pageSize;
                 paginationControl.UpdatePaginationControls();
                 CalcularSubtotalParaPaginationControl();
             }
@@ -1381,7 +1381,7 @@ namespace WebForms
                 else
                 {
                     UsuarioEF usuario = ObtenerUsuarioActual();
-                    todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
+                    todosLosRegistros = _calculoRedeterminacionNegocioEF.ListarAutorizantesCompleto(usuario);
                 }
 
                 // Aplicar filtro de búsqueda (txtBuscar)
@@ -1495,8 +1495,8 @@ namespace WebForms
                     var filtrados = ObtenerDatosFiltradosActuales();
                     if (filtrados != null)
                     {
-                        int pageIndex = currentPageIndex;
-                        int pageSizeLocal = pageSize;
+                        int pageIndex = _currentPageIndex;
+                        int pageSizeLocal = _pageSize;
                         int rowIndex = row.RowIndex;
                         int indiceReal = pageIndex * pageSizeLocal + rowIndex;
                         if (indiceReal >= 0 && indiceReal < filtrados.Count)
