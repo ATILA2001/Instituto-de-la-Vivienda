@@ -19,6 +19,12 @@ namespace Dominio
         [Column("AÑO")]
         public int? Anio { get; set; }
 
+        [Column("OBRA")]
+        public int? ObraNumero { get; set; }
+
+        [Column("ETAPA")]
+        public int? Etapa { get; set; }
+
         // Relaciones
         [Column("EMPRESA")]
         public int? EmpresaId { get; set; }

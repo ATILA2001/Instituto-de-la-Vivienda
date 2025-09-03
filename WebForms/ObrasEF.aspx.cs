@@ -164,7 +164,7 @@ namespace WebForms
                     paginationControl.UpdateSubtotal(subtotal, cantidad);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("Error CalcularSubtotalParaPaginationControl (ObrasEF): " + ex);
             }
@@ -313,14 +313,15 @@ namespace WebForms
             {
                 ddlArea.Enabled = false;
                 ddlArea.SelectedValue = UserHelper.GetFullCurrentUser().AreaId.ToString();
-            }else
+            }
+            else
             {
                 ddlArea.Enabled = true;
             }
 
 
             btnAgregar.Text = "Agregar";
-            ViewState["EditingObraIdEF"] = null;
+            Session["EditingObraId"] = null;
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
                 $(document).ready(function() {
                     $('#modalAgregar .modal-title').text('Agregar Obra');
@@ -341,80 +342,74 @@ namespace WebForms
                 return;
             }
 
-            try
+            int? editingId = Session["EditingObraId"] as int?;
+
+            // Crear o cargar la obra según si es edición o nueva
+            ObraEF obra = editingId != null ? Negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new ObraEF();
+
+            int.TryParse(txtNumero.Text.Trim(), out int numero);
+            int.TryParse(txtAnio.Text.Trim(), out int anio);
+
+            obra.Descripcion = txtDescripcion.Text.Trim();
+            obra.Numero = numero;
+            obra.Anio = anio;
+
+            if (ddlArea.SelectedIndex > 0 && int.TryParse(ddlArea.SelectedValue, out int areaId))
             {
-                ObraEF obra = new ObraEF();
+                obra.AreaId = areaId;
+            }
 
-                int editingId = ViewState["EditingObraIdEF"] != null ? (int)ViewState["EditingObraIdEF"] : 0;
+            obra.EmpresaId = int.Parse(ddlEmpresa.SelectedValue);
+            obra.ContrataId = int.Parse(ddlContrata.SelectedValue);
+            obra.BarrioId = int.Parse(ddlBarrio.SelectedValue);
 
-                // Campos obligatorios y relaciones mínimas
-                int.TryParse(txtNumero.Text.Trim(), out int numero);
-                int.TryParse(txtAnio.Text.Trim(), out int anio);
+            obra.Etapa = int.Parse(txtEtapa.Text.Trim());
+            obra.ObraNumero = int.Parse(txtObraNumero.Text.Trim());
 
-                obra.Descripcion = txtDescripcion.Text.Trim();
-                obra.Numero = numero;
-                obra.Anio = anio;
 
-                // Asignar FK en lugar de crear objetos de navegación
-                if (int.TryParse(ddlEmpresa.SelectedValue, out int empresaId)) obra.EmpresaId = empresaId; else obra.EmpresaId = null;
-                if (int.TryParse(ddlContrata.SelectedValue, out int contrataId)) obra.ContrataId = contrataId; else obra.ContrataId = null;
-                if (int.TryParse(ddlBarrio.SelectedValue, out int barrioId)) obra.BarrioId = barrioId; else obra.BarrioId = null;
-
-                // Area: si está visible en el modal se toma del ddl, si no, se toma del usuario
-                if (ddlArea.SelectedIndex > 0 && int.TryParse(ddlArea.SelectedValue, out int areaId))
-                {
-                    obra.AreaId = areaId;
-                }
-                else
-                {
-                    // Usar el helper central para obtener el usuario completo
-                    UsuarioEF usuarioLogueado = UserHelper.GetFullCurrentUser();
-                    if (usuarioLogueado != null && usuarioLogueado.AreaId.HasValue)
-                        obra.AreaId = usuarioLogueado.AreaId.Value;
-                }
-
-                if (editingId > 0)
-                {
-                    obra.Id = editingId;
-                    if (Negocio.Modificar(obra))
-                    {
-                        lblMensaje.Text = "Obra modificada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
-                        ViewState["EditingObraIdEF"] = null;
-                    }
-                    else
-                    {
-                        lblMensaje.Text = "Hubo un problema al modificar la obra.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                    }
-                }
-                else
-                {
-                    if (Negocio.Agregar(obra))
-                    {
-                        lblMensaje.Text = "Obra agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
-                    }
-                    else
-                    {
-                        lblMensaje.Text = "Hubo un problema al agregar la obra.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                    }
-                }
-
-                // 
-                Session["ObrasCompleto"] = null;
-                LimpiarFormulario();
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
+            if (editingId != null)
+            {
                 
-                CargarListaObrasCompleta();
-                CargarPaginaActual();
+                if (Negocio.Modificar(obra))
+                {
+                    lblMensaje.Text = "Obra modificada exitosamente!";
+                    lblMensaje.CssClass = "alert alert-success";
+                    Session["EditingObraId"] = null;
+                }
+                else
+                {
+                    lblMensaje.Text = "Hubo un problema al modificar la obra.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
+
             }
-            catch (Exception ex)
+            else
             {
-                lblMensaje.Text = "Error: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                // Nueva obra
+                if (Negocio.Agregar(obra))
+                {
+                    lblMensaje.Text = "Obra agregada exitosamente!";
+                    lblMensaje.CssClass = "alert alert-success";
+                }
+                else
+                {
+                    lblMensaje.Text = "Hubo un problema al agregar la obra.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                }
+
             }
+
+
+
+            LimpiarFormulario();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
+
+            // Forzar recarga de la lista completa
+            Session["ObrasCompleto"] = null;
+            CargarListaObrasCompleta();
+            CargarPaginaActual();
+
+
         }
 
         private void LimpiarFormulario()
@@ -422,7 +417,7 @@ namespace WebForms
             txtNumero.Text = string.Empty;
             txtAnio.Text = string.Empty;
             txtEtapa.Text = string.Empty;
-            txtObra.Text = string.Empty;
+            txtObraNumero.Text = string.Empty;
             txtDescripcion.Text = string.Empty;
             ddlEmpresa.SelectedIndex = 0;
             ddlContrata.SelectedIndex = 0;
@@ -472,9 +467,8 @@ namespace WebForms
                     // Poblar modal con los campos que realmente existen en el markup de ObrasEF.aspx
                     txtNumero.Text = obraSeleccionada.Numero?.ToString() ?? string.Empty;
                     txtAnio.Text = obraSeleccionada.Anio?.ToString() ?? string.Empty;
-                    // Etapa y Obra N° no están en el DTO/EF actual, dejarlas vacías (el otro helper ShowEditModalForId también las pone vacías)
-                    txtEtapa.Text = string.Empty;
-                    txtObra.Text = string.Empty;
+                    txtEtapa.Text = obraSeleccionada.Etapa.ToString();
+                    txtObraNumero.Text = obraSeleccionada.ObraNumero.ToString();
                     txtDescripcion.Text = obraSeleccionada.Descripcion ?? string.Empty;
 
                     // Seleccionar valores en los dropdowns si existen
@@ -500,8 +494,6 @@ namespace WebForms
                                     // Cambiar título y texto del botón
                                     $('#modalAgregar .modal-title').text('Modificar Obra');
                                     document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
-                                    // Ocultar el dropdown de Autorizante y su etiqueta
-                                    $('#autorizanteContainer').hide();
                                     // Mostrar el modal
                                     $('#modalAgregar').modal('show');
                                 });", true);
@@ -635,9 +627,6 @@ namespace WebForms
 
         private List<ObraDTO> ObtenerDatosFiltradosActuales()
         {
-            if (Session["FilteredObrasCompleto"] is List<ObraDTO> cachedFiltered)
-                return cachedFiltered;
-
             if (Session["ObrasCompleto"] == null)
                 CargarListaObrasCompleta();
 
@@ -674,7 +663,7 @@ namespace WebForms
             try
             {
                 // Busca el control por id en toda la página (no depender del HeaderRow)
-                Func<string, WebForms.CustomControls.TreeViewSearch> find = id => FindControlRecursive(this, id) as WebForms.CustomControls.TreeViewSearch;
+                Func<string, CustomControls.TreeViewSearch> find = id => FindControlRecursive(this, id) as WebForms.CustomControls.TreeViewSearch;
 
                 // Función auxiliar para parsear IDs de forma segura.
                 Func<WebForms.CustomControls.TreeViewSearch, List<int>> getSelectedIds = (tv) =>
@@ -729,54 +718,6 @@ namespace WebForms
 
             CargarPaginaActual();
         }
-
-
-
-
-        private void ShowEditModalForId(int idObra)
-        {
-            var listaDto = Session["listaObraEF"] as List<ObraDTO>;
-            var dto = listaDto?.FirstOrDefault(o => o.Id == idObra);
-            if (dto == null)
-            {
-                lblMensaje.Text = "No se encontró la obra seleccionada.";
-                lblMensaje.CssClass = "alert alert-warning";
-                return;
-            }
-
-            btnAgregar.Text = "Actualizar";
-
-            // Populate fields from DTO
-            txtNumero.Text = dto.Numero?.ToString() ?? string.Empty;
-            txtAnio.Text = dto.Anio.HasValue ? dto.Anio.Value.ToString() : string.Empty;
-            txtEtapa.Text = string.Empty;
-            txtObra.Text = string.Empty;
-            txtDescripcion.Text = dto.Descripcion;
-
-            if (dto.EmpresaId.HasValue) SelectDropDownListByValue(ddlEmpresa, dto.EmpresaId.Value.ToString());
-            if (dto.ContrataId.HasValue) SelectDropDownListByValue(ddlContrata, dto.ContrataId.Value.ToString());
-            if (dto.BarrioId.HasValue) SelectDropDownListByValue(ddlBarrio, dto.BarrioId.Value.ToString());
-
-            ViewState["EditingObraIdEF"] = idObra;
-            if (dto.AreaId.HasValue)
-            {
-                ViewState["EditingAreaIdEF"] = dto.AreaId.Value;
-                ViewState["EditingAreaNombreEF"] = dto.Area;
-            }
-
-            try { rfvArea.Enabled = false; } catch { }
-
-            // Update modal title and hide the Area field
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
-                        $(document).ready(function() {
-                            $('#modalAgregar .modal-title').text('Modificar Obra');
-                            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
-                            $('#areaContainer').hide();
-                            $('#modalAgregar').modal('show');
-                        });", true);
-        }
-
-
 
         protected void dgvObra_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {

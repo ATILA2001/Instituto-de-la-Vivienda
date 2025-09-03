@@ -159,22 +159,22 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEtapa;
 
         /// <summary>
-        /// txtObra control.
+        /// txtObraNumero control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtObra;
+        protected global::System.Web.UI.WebControls.TextBox txtObraNumero;
 
         /// <summary>
-        /// rfvObra control.
+        /// rfvObraNumero control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObra;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObraNumero;
 
         /// <summary>
         /// btnAgregar control.
