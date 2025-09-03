@@ -25,7 +25,7 @@ namespace WebForms
             Usuario usuario = null;
             UsuarioNegocio negocio = new UsuarioNegocio();
 
-            Debug.WriteLine("OBJ USUARIO CREAADO USUARIO CREADO");
+            Debug.WriteLine("OBJ USUARIO CREADO USUARIO CREADO");
 
             try
             {
@@ -44,8 +44,12 @@ namespace WebForms
                         if (emailPattern.IsMatch(txtEmail.Text.Trim()))
                         {
                             Debug.WriteLine("------------ESTA ENTRANDO POR CORREO @@@@@@@@@@@@@@@@@@@@@@@@@@@ ");
+
+                            // Obtener el cuil a partir del correo
+
                             usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                            exito = negocio.Logear(usuario);
+                            negocio.ObtenerCuil(usuario);
+                            exito = negocio.LogearIntegSecur(usuario, usuario.Username);
                         }
                         else if (cuilPattern.IsMatch(txtEmail.Text.Trim()))
                         {
