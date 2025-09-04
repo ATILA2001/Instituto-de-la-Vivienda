@@ -667,7 +667,7 @@ namespace WebForms
 
             try
             {
-                List<ObraEF> obras = obraNegocio.ListarParaDDL(usuario);
+                List<ObraEF> obras = obraNegocio.ListarParaDDL();
 
                 ddlObraAgregar.DataSource = obras;
                 ddlObraAgregar.DataTextField = "Descripcion";

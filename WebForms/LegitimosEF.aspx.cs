@@ -350,7 +350,7 @@ namespace WebForms
                     if (actual != null) includeObraId = actual.ObraId;
                 }
 
-                var obras = new ObraNegocioEF().ListarParaDDL(usuario);
+                var obras = new ObraNegocioEF().ListarParaDDL();
                 ddlObra.Items.Clear();
                 ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
                 foreach (var o in obras)

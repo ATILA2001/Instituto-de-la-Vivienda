@@ -18,27 +18,24 @@ namespace Negocio
         /// Lista obras proyectadas a DTO para el grid, delegando cálculos financieros.
         /// Se respeta el usuario: si es administrador devuelve todas, si no filtra por el area del usuario.
         /// </summary>
-        public List<ObraEF> ListarParaDDL(UsuarioEF usuario = null)
+        public List<ObraEF> ListarParaDDL()
         {
             try
             {
                 using (var context = new IVCdbContext())
                 {
 
-                    var query = context.Obras.AsNoTracking()
-                         .OrderBy(o => o.Descripcion)
-                         .ToList();
-                    if (usuario != null && !usuario.Tipo)
-                    {
-                        if (usuario.AreaId.HasValue)
-                            query = query.Where(o => o.AreaId == usuario.AreaId.Value).ToList();
-                        else if (usuario.Area != null)
-                            query = query.Where(o => o.AreaId == usuario.Area.Id).ToList();
-                    }
+                    List<ObraEF> query;
+                    int userAreaId = UserHelper.GetUserAreaId();
+
+                    if (UserHelper.IsUserAdmin())
+                        query = context.Obras.AsNoTracking().ToList();
+                    else
+                        query = context.Obras.AsNoTracking().Where(o => o.AreaId == userAreaId).ToList();
 
                     return query
-                        .OrderBy(o => o.Descripcion)
-                        .ToList();
+                            .OrderBy(o => o.Descripcion)
+                            .ToList();
                 }
             }
             catch (Exception ex)
