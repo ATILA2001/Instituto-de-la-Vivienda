@@ -20,12 +20,17 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label for="ddlObra" class="form-label">Obra</label>
-                                        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                        <asp:label ID="lblObra" for="ddlObraAgregar" class="form-label" runat="server">Obra</asp:label>
+                                        <asp:DropDownList ID="ddlObraAgregar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
                                             <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
                                         </asp:DropDownList>
+
+                                        <asp:DropDownList ID="ddlObraEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True" Visible="false" Enabled="false"></asp:ListItem>
+                                        </asp:DropDownList>
+
                                         <asp:RequiredFieldValidator ID="rfvObra"
-                                            ControlToValidate="ddlObra"
+                                            ControlToValidate="ddlObraAgregar"
                                             ValidationGroup="AgregarFormulacion"
                                             runat="server"
                                             ErrorMessage="Seleccione una obra"
@@ -159,7 +164,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        
+
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -248,7 +253,7 @@
     <hr class="mb-3" />
     <div class="gridview-scroll-container">
 
-    <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+        <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
             OnRowDeleting="dgvFormulacion_RowDeleting"
             OnDataBound="dgvFormulacion_DataBound"
@@ -402,7 +407,8 @@
             document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
             document.getElementById('<%= txtMesBase.ClientID %>').value = '';
             document.getElementById('<%= txtObservaciones.ClientID %>').value = '';
-            document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlObraEditar.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
         }

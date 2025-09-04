@@ -12,7 +12,7 @@ namespace WebForms
 {
     public partial class FormulacionEF : System.Web.UI.Page
     {
-        private readonly FormulacionNegocioEF negocio = new FormulacionNegocioEF();
+        private readonly FormulacionNegocioEF _negocio = new FormulacionNegocioEF();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -87,7 +87,7 @@ namespace WebForms
                 UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                 if (!(Session["formulacionesCompletas"] is List<Dominio.FormulacionEF> formulacionesCompletas))
                 {
-                    formulacionesCompletas = negocio.ListarPorUsuario(usuarioActual);
+                    formulacionesCompletas = _negocio.ListarPorUsuario(usuarioActual);
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
@@ -165,6 +165,13 @@ namespace WebForms
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
+            // Preparar ddlObra para agregar nueva formulación;
+            lblObra.Attributes["for"] = ddlObraAgregar.ClientID;
+            ddlObraAgregar.Visible = true;
+            ddlObraEditar.Visible = false;
+            rfvObra.Enabled = true;
+
+
             LimpiarFormulario();
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
                 $(document).ready(function() {
@@ -175,12 +182,12 @@ namespace WebForms
                 });", true);
 
             btnAgregar.Text = "Agregar";
-            Session["EditingFormulacionEFId"] = null;
+            Session["EditingFormulacionId"] = null;
         }
 
         // btnAgregar_Click: controlador de guardado compartido para el modal (Agregar y Editar).
         // - Lee los valores del formulario y arma una entidad FormulacionEF.
-        // - Si Session["EditingFormulacionEFId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
+        // - Si Session["EditingFormulacionId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
         // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
@@ -188,37 +195,57 @@ namespace WebForms
 
             try
             {
-                var formulacion = new Dominio.FormulacionEF
-                {
-                    ObraId = int.Parse(ddlObra.SelectedValue),
-                    Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ',')),
-                    Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ',')),
-                    Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ',')),
-                    MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text),
-                    Observaciones = txtObservaciones.Text,
-                    Ppi = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text),
-                    Techos = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ',')),
-                    UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue),
-                    ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ',')),
-                    PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue)
-                };
+                int? editingId = Session["EditingFormulacionId"] as int?;
 
-                if (Session["EditingFormulacionEFId"] != null)
+                Dominio.FormulacionEF formu = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new Dominio.FormulacionEF();
+
+
+                formu.ObraId            = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
+                formu.Monto_26          = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ','));
+                formu.Monto_27          = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ','));
+                formu.Monto_28          = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ','));
+                formu.MesBase           = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text);
+                formu.Observaciones     = txtObservaciones.Text;
+                formu.Ppi               = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text);
+                formu.Techos            = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ','));
+                formu.UnidadMedidaId    = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue);
+                formu.ValorMedida       = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ','));
+                formu.PrioridadId       = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue);
+
+
+
+                if (editingId != null)
                 {
-                    formulacion.Id = (int)Session["EditingFormulacionEFId"];
-                    negocio.Modificar(formulacion);
-                    lblMensaje.Text = "Formulación modificada exitosamente!";
+                    if (_negocio.Modificar(formu))
+                    {
+                        lblMensaje.Text = "Formulación modificada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-success";
+                        Session["EditingFormulacionId"] = null;
+                    }
+                    else
+                    {                         
+                        lblMensaje.Text = "No se pudo modificar la formulación.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
                 }
                 else
                 {
-                    negocio.Agregar(formulacion);
-                    lblMensaje.Text = "Formulación agregada exitosamente!";
+                    if(_negocio.Agregar(formu))
+                    {
+                        lblMensaje.Text = "Formulación agregada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-success";
+                    }
+                    else
+                    {
+                        lblMensaje.Text = "Formulación agregada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
                 }
 
                 lblMensaje.CssClass = "alert alert-success";
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingFormulacionEFId"] = null;
+                Session["EditingFormulacionId"] = null;
                 Session["formulacionesCompletas"] = null;
 
                 BindGrid();
@@ -233,7 +260,7 @@ namespace WebForms
 
         // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
         // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
-        // - Define Session["EditingFormulacionEFId"] para indicar modo edición.
+        // - Define Session["EditingFormulacionId"] para indicar modo edición.
         // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
         // - Rellena los controles del modal, ajusta el texto del botón a "Modificar" y muestra el modal.
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
@@ -248,7 +275,7 @@ namespace WebForms
                     var usuario = UserHelper.GetFullCurrentUser();
                     if (usuario != null)
                     {
-                        lista = negocio.ListarPorUsuario(usuario);
+                        lista = _negocio.ListarPorUsuario(usuario);
                         Session["formulacionesCompletas"] = lista;
                         formulacion = lista?.FirstOrDefault(f => f.Id == id);
                     }
@@ -256,9 +283,15 @@ namespace WebForms
                 if (formulacion != null)
                 {
                     // MARCAR MODO EDICIÓN y asegurar que los dropdowns incluyan la obra en edición
-                    Session["EditingFormulacionEFId"] = formulacion.Id;
+                    Session["EditingFormulacionId"] = formulacion.Id;
 
-                    SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
+                    lblObra.Attributes["for"] = ddlObraEditar.ClientID;
+                    ddlObraAgregar.Visible = false;
+                    ddlObraEditar.Visible = true;
+                    ddlObraEditar.Enabled = false;
+                    rfvObra.Enabled = false;
+
+                    SelectDropDownListByValue(ddlObraEditar, formulacion.ObraId.ToString());
                     txtMonto26.Text = formulacion.Monto_26?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMonto27.Text = formulacion.Monto_27?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMonto28.Text = formulacion.Monto_28?.ToString(CultureInfo.CurrentCulture) ?? "";
@@ -270,16 +303,22 @@ namespace WebForms
                     txtObservaciones.Text = formulacion.Observaciones ?? "";
                     SelectDropDownListByValue(ddlPrioridades, formulacion.PrioridadId?.ToString());
 
-                    // Mostrar modal en modo edición. No hacemos visible ddlObra, solo aseguramos que su item exista.
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", $@"
-                        $(document).ready(function() {{
-                            $('#modalAgregar .modal-title').text('Modificar Formulación');
-                            document.getElementById('{btnAgregar.ClientID}').value = 'Modificar';
-                            $('.col-12:first').hide();
-                            $('#modalAgregar').modal('show');
-                        }});", true);
+                    btnAgregar.Text = "Actualizar";
 
-                    btnAgregar.Text = "Modificar";
+                    // Mostrar modal en modo edición. No hacemos visible ddlObra, solo aseguramos que su item exista.
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                        $(document).ready(function() {
+                            $('#modalAgregar .modal-title').text('Modificar Formulación');
+                            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+
+//MODIFICAR ESE COL-12 por el id de lo que queremos ocultar (DDL OBRA)
+
+
+                            //$('.col-12:first').hide();
+                            $('#modalAgregar').modal('show');
+                        });", true);
+
                 }
             }
             catch (Exception ex)
@@ -306,7 +345,7 @@ namespace WebForms
             try
             {
                 int id = Convert.ToInt32(dgvFormulacion.DataKeys[e.RowIndex].Value);
-                if (negocio.Eliminar(id))
+                if (_negocio.Eliminar(id))
                 {
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
@@ -350,7 +389,7 @@ namespace WebForms
                 int pageSize = paginationControl.PageSize;
 
                 // Total filtrado en BD
-                int total = negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                int total = _negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
 
 
                 if (pageIndex * pageSize >= Math.Max(1, total))
@@ -362,7 +401,7 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
 
                 // Página actual desde BD
-                var pagina = negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                var pagina = _negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
 
                 dgvFormulacion.DataSource = pagina;
                 dgvFormulacion.DataBind();
@@ -484,7 +523,7 @@ namespace WebForms
                 // ddlObra: listar solo obras que no están en Formulación (y filtrar por área si corresponde)
                 UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                 int? obraEnEdicion = null;
-                if (Session["EditingFormulacionEFId"] is int editId)
+                if (Session["EditingFormulacionId"] is int editId)
                 {
                     // obtener la obra asociada a la formulación en edición para incluirla en el combo
                     using (var ctx = new IVCdbContext())
@@ -493,10 +532,16 @@ namespace WebForms
                         obraEnEdicion = form?.ObraId;
                     }
                 }
-                ddlObra.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
-                ddlObra.DataTextField = "Descripcion";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
+                ddlObraAgregar.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
+                ddlObraAgregar.DataTextField = "Descripcion";
+                ddlObraAgregar.DataValueField = "Id";
+                ddlObraAgregar.DataBind();
+
+                ddlObraEditar.DataSource = new ObraNegocioEF().ListarParaDDL();
+                ddlObraEditar.DataTextField = "Descripcion";
+                ddlObraEditar.DataValueField = "Id";
+                ddlObraEditar.DataBind();
+
 
                 ddlUnidadMedida.DataSource = new UnidadMedidaNegocioEF().Listar();
                 ddlUnidadMedida.DataTextField = "Nombre";
@@ -517,7 +562,8 @@ namespace WebForms
 
         private void LimpiarFormulario()
         {
-            ddlObra.SelectedIndex = 0;
+            ddlObraAgregar.SelectedIndex = 0;
+            ddlObraEditar.SelectedIndex = 0;
             txtMonto26.Text = "";
             txtPpi.Text = "";
             txtTechos.Text = "";
@@ -539,7 +585,7 @@ namespace WebForms
                 if (usuario != null)
                 {
                     string filtroGeneral = txtBuscar?.Text?.Trim();
-                    int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                    int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
                     paginationControl.Initialize(totalRecords, 0, paginationControl.PageSize);
                     BindGrid();
                 }
@@ -672,7 +718,7 @@ namespace WebForms
             if (usuario != null)
             {
                 string filtroGeneral = txtBuscar?.Text?.Trim();
-                int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
                 paginationControl.Initialize(totalRecords, 0, e.PageSize);
                 BindGrid();
             }

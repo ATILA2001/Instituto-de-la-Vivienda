@@ -15,13 +15,31 @@ namespace WebForms
     {
 
         /// <summary>
-        /// ddlObra control.
+        /// lblObra control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlObra;
+        protected global::System.Web.UI.WebControls.Label lblObra;
+
+        /// <summary>
+        /// ddlObraAgregar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlObraAgregar;
+
+        /// <summary>
+        /// ddlObraEditar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlObraEditar;
 
         /// <summary>
         /// rfvObra control.
