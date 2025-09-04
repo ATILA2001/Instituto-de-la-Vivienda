@@ -42,6 +42,33 @@ namespace WebForms
         protected global::System.Web.UI.ScriptManager ScriptManager1;
 
         /// <summary>
+        /// lnkObras control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkObras;
+
+        /// <summary>
+        /// lnkAutorizantes control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkAutorizantes;
+
+        /// <summary>
+        /// lnkRedeterminaciones control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkRedeterminaciones;
+
+        /// <summary>
         /// lnkFormulacion control.
         /// </summary>
         /// <remarks>
@@ -60,22 +87,13 @@ namespace WebForms
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl dropdownGestion;
 
         /// <summary>
-        /// lnkObras control.
+        /// liPlaniNav control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkObras;
-
-        /// <summary>
-        /// lnkLegitimos control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkLegitimos;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl liPlaniNav;
 
         /// <summary>
         /// liAdminNav control.

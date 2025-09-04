@@ -45,13 +45,13 @@ namespace WebForms
     public partial class AutorizantesEF : System.Web.UI.Page
     {
         #region Variables y Dependencias
-        
+
         /// <summary>
         /// Clase de negocio para operaciones CRUD de autorizantes.
         /// Maneja las operaciones básicas como agregar, modificar, eliminar y consultar autorizantes.
         /// </summary>
-        private AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
-        
+        private AutorizanteNegocioEF _autorizanteNegocioEF = new AutorizanteNegocioEF();
+
         /// <summary>
         /// Clase de negocio para cálculos complejos de redeterminaciones.
         /// Responsable de:
@@ -60,30 +60,30 @@ namespace WebForms
         /// - Integrar datos SADE y SIGAF
         /// - Manejar la paginación optimizada de grandes volúmenes de datos
         /// </summary>
-        private CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
+        private CalculoRedeterminacionNegocioEF _calculoRedeterminacionNegocioEF = new CalculoRedeterminacionNegocioEF();
 
         #endregion
 
         #region Variables de Paginación Externa
-        
+
         /// <summary>
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
-        private int currentPageIndex = 0;
-        
+        private int _currentPageIndex = 0;
+
         /// <summary>
         /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
         /// Se mantiene en ViewState para persistir la preferencia del usuario.
         /// </summary>
-        private int pageSize = 12;
-        
+        private int _pageSize = 12;
+
         /// <summary>
         /// Total de registros disponibles (autorizantes + redeterminaciones).
         /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
         /// </summary>
-        private int totalRecords = 0;
-        
+        private int _totalRecords = 0;
+
 
         #endregion
 
@@ -110,8 +110,8 @@ namespace WebForms
         protected void Page_Load(object sender, EventArgs e)
         {
             // Cargar valores de paginación desde ViewState
-            currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
-            pageSize = (int)(ViewState["PageSize"] ?? 12);
+            _currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
+            _pageSize = (int)(ViewState["PageSize"] ?? 12);
 
             if (!IsPostBack)
             {
@@ -142,8 +142,8 @@ namespace WebForms
         /// </summary>
         protected void OnAcceptChanges(object sender, EventArgs e)
         {
-            currentPageIndex = 0;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             CargarPaginaActual();
         }
 
@@ -371,59 +371,59 @@ namespace WebForms
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
-                    // Crear nuevo autorizante con todos los campos
-                    AutorizanteEF autorizante = new AutorizanteEF();
-                    // autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
-                    autorizante.Expediente = txtExpedienteAgregar.Text.Trim();
-                    autorizante.Detalle = txtDetalleAgregar.Text.Trim();
-                    autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoAgregar.Text);
+            // Crear nuevo autorizante con todos los campos
+            AutorizanteEF autorizante = new AutorizanteEF();
+            // autorizante.CodigoAutorizante = txtCodigoAutorizante.Text.Trim();
+            autorizante.Expediente = txtExpedienteAgregar.Text.Trim();
+            autorizante.Detalle = txtDetalleAgregar.Text.Trim();
+            autorizante.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoAgregar.Text);
 
-                    // Parsear fecha si se proporciona
-                    if (!string.IsNullOrEmpty(txtMesAprobacionAgregar.Text))
-                    {
-                        autorizante.MesAprobacion = DateTime.Parse(txtMesAprobacionAgregar.Text);
-                    }
+            // Parsear fecha si se proporciona
+            if (!string.IsNullOrEmpty(txtMesAprobacionAgregar.Text))
+            {
+                autorizante.MesAprobacion = DateTime.Parse(txtMesAprobacionAgregar.Text);
+            }
 
-                    // Parsear mes base si se proporciona
-                    if (!string.IsNullOrEmpty(txtMesBaseAgregar.Text))
-                    {
-                        autorizante.MesBase = DateTime.Parse(txtMesBaseAgregar.Text);
-                    }
+            // Parsear mes base si se proporciona
+            if (!string.IsNullOrEmpty(txtMesBaseAgregar.Text))
+            {
+                autorizante.MesBase = DateTime.Parse(txtMesBaseAgregar.Text);
+            }
 
-                    autorizante.ConceptoId = int.Parse(ddlConceptoAgregar.SelectedValue);
-                    autorizante.EstadoId = int.Parse(ddlEstadoAgregar.SelectedValue);
+            autorizante.ConceptoId = int.Parse(ddlConceptoAgregar.SelectedValue);
+            autorizante.EstadoId = int.Parse(ddlEstadoAgregar.SelectedValue);
 
-                    // Solo al agregar se asigna la obra seleccionada
-                    autorizante.ObraId = int.Parse(ddlObraAgregar.SelectedValue);
+            // Solo al agregar se asigna la obra seleccionada
+            autorizante.ObraId = int.Parse(ddlObraAgregar.SelectedValue);
 
-                    if (autorizanteNegocio.Agregar(autorizante))
-                    {
-                        lblMensaje.Text = "Autorizante agregado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
-                    }
-                    else
-                    {
-                        lblMensaje.Text = "Hubo un problema al agregar el autorizante.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                    }
-                
+            if (_autorizanteNegocioEF.Agregar(autorizante))
+            {
+                lblMensaje.Text = "Autorizante agregado exitosamente!";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+            else
+            {
+                lblMensaje.Text = "Hubo un problema al agregar el autorizante.";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
 
-                // Limpiar campos
-                LimpiarFormularioAgregar();
 
-                // Ocultar el modal
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
-                    "$('#modalAgregarAutorizante').modal('hide');", true);
+            // Limpiar campos
+            LimpiarFormularioAgregar();
 
-                // Limpiar cache SADE ya que se agregó/modificó un autorizante
-                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+            // Ocultar el modal
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                "$('#modalAgregarAutorizante').modal('hide');", true);
 
-                // Limpiar cache de datos para forzar recarga desde BD
-                Session["GridDataAutorizantes"] = null;
+            // Limpiar cache SADE ya que se agregó/modificó un autorizante
+            CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
-                // Invalida cache y fuerza recarga
-                ViewState["NecesitaRecarga"] = true;
-                CargarPaginaActual();
+            // Limpiar cache de datos para forzar recarga desde BD
+            Session["GridDataAutorizantes"] = null;
+
+            // Invalida cache y fuerza recarga
+            ViewState["NecesitaRecarga"] = true;
+            CargarPaginaActual();
 
         }
 
@@ -434,82 +434,82 @@ namespace WebForms
 
 
 
-                    // MODO EDITAR: Obtener el autorizante existente de la BD
-                    int autorizanteId = (int)Session["EditingAutorizanteId"];
-                    var autorizanteExistente = autorizanteNegocio.ObtenerPorId(autorizanteId);
-                    
-                    if (autorizanteExistente == null)
-                    {
-                        lblMensaje.Text = "Error: No se encontró el autorizante a modificar.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                        return;
-                    }
+            // MODO EDITAR: Obtener el autorizante existente de la BD
+            int autorizanteId = (int)Session["EditingAutorizanteId"];
+            var autorizanteExistente = _autorizanteNegocioEF.ObtenerPorId(autorizanteId);
 
-                    autorizanteExistente.Expediente = txtExpedienteEditar.Text.Trim();
-                    autorizanteExistente.Detalle = txtDetalleEditar.Text.Trim();
-                    autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoEditar.Text);
+            if (autorizanteExistente == null)
+            {
+                lblMensaje.Text = "Error: No se encontró el autorizante a modificar.";
+                lblMensaje.CssClass = "alert alert-danger";
+                return;
+            }
 
-                    // Parsear fecha si se proporciona
-                    if (!string.IsNullOrEmpty(txtMesAprobacionEditar.Text))
-                    {
-                        autorizanteExistente.MesAprobacion = DateTime.Parse(txtMesAprobacionEditar.Text);
-                    }
-                    else
-                    {
-                        autorizanteExistente.MesAprobacion = null;
-                    }
+            autorizanteExistente.Expediente = txtExpedienteEditar.Text.Trim();
+            autorizanteExistente.Detalle = txtDetalleEditar.Text.Trim();
+            autorizanteExistente.MontoAutorizado = Convert.ToDecimal(txtMontoAutorizadoEditar.Text);
 
-                    // Parsear mes base si se proporciona
-                    if (!string.IsNullOrEmpty(txtMesBaseEditar.Text))
-                    {
-                        autorizanteExistente.MesBase = DateTime.Parse(txtMesBaseEditar.Text);
-                    }
-                    else
-                    {
-                        autorizanteExistente.MesBase = null;
-                    }
+            // Parsear fecha si se proporciona
+            if (!string.IsNullOrEmpty(txtMesAprobacionEditar.Text))
+            {
+                autorizanteExistente.MesAprobacion = DateTime.Parse(txtMesAprobacionEditar.Text);
+            }
+            else
+            {
+                autorizanteExistente.MesAprobacion = null;
+            }
 
-                    autorizanteExistente.ConceptoId = int.Parse(ddlConceptoEditar.SelectedValue);
-                    autorizanteExistente.EstadoId = int.Parse(ddlEstadoEditar.SelectedValue);
+            // Parsear mes base si se proporciona
+            if (!string.IsNullOrEmpty(txtMesBaseEditar.Text))
+            {
+                autorizanteExistente.MesBase = DateTime.Parse(txtMesBaseEditar.Text);
+            }
+            else
+            {
+                autorizanteExistente.MesBase = null;
+            }
 
-                    if (autorizanteNegocio.Modificar(autorizanteExistente))
-                    {
-                        lblMensaje.Text = "Autorizante modificado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+            autorizanteExistente.ConceptoId = int.Parse(ddlConceptoEditar.SelectedValue);
+            autorizanteExistente.EstadoId = int.Parse(ddlEstadoEditar.SelectedValue);
 
-                        // Limpiar cache SADE ya que se modificó un autorizante
-                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+            if (_autorizanteNegocioEF.Modificar(autorizanteExistente))
+            {
+                lblMensaje.Text = "Autorizante modificado exitosamente!";
+                lblMensaje.CssClass = "alert alert-success";
 
-                        // Limpiar el estado de edición
-                        Session["EditingAutorizanteId"] = null;
-                    }
-                    else
-                    {
-                        lblMensaje.Text = "Hubo un problema al modificar el autorizante.";
-                        lblMensaje.CssClass = "alert alert-danger";
-                    }
+                // Limpiar cache SADE ya que se modificó un autorizante
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                // Limpiar el estado de edición
+                Session["EditingAutorizanteId"] = null;
+            }
+            else
+            {
+                lblMensaje.Text = "Hubo un problema al modificar el autorizante.";
+                lblMensaje.CssClass = "alert alert-danger";
+            }
 
 
-                // Limpiar campos
-                LimpiarFormularioEditar();
+            // Limpiar campos
+            LimpiarFormularioEditar();
 
-                // Ocultar el modal
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
-                    "$('#modalEditarAutorizante').modal('hide');", true);
+            // Ocultar el modal
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
+                "$('#modalEditarAutorizante').modal('hide');", true);
 
-                // (Cache SADE ya se limpió arriba en caso de modificación exitosa)
+            // (Cache SADE ya se limpió arriba en caso de modificación exitosa)
 
-                // Limpiar cache de datos para forzar recarga desde BD
-                Session["GridDataAutorizantes"] = null;
+            // Limpiar cache de datos para forzar recarga desde BD
+            Session["GridDataAutorizantes"] = null;
 
-                // Invalida cache y fuerza recarga
-                ViewState["NecesitaRecarga"] = true;
-                CargarPaginaActual();
+            // Invalida cache y fuerza recarga
+            ViewState["NecesitaRecarga"] = true;
+            CargarPaginaActual();
 
         }
 
 
-        private void LimpiarFormularioAgregar() 
+        private void LimpiarFormularioAgregar()
         {
             txtExpedienteAgregar.Text = string.Empty;
             txtDetalleAgregar.Text = string.Empty;
@@ -520,7 +520,7 @@ namespace WebForms
             ddlConceptoAgregar.SelectedIndex = 0;
             ddlEstadoAgregar.SelectedIndex = 0;
         }
-        private void LimpiarFormularioEditar()         
+        private void LimpiarFormularioEditar()
         {
             txtExpedienteEditar.Text = string.Empty;
             txtDetalleEditar.Text = string.Empty;
@@ -604,9 +604,9 @@ namespace WebForms
                 bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderProyecto", context.Proyectos.AsNoTracking().OrderBy(p => p.Nombre).Select(p => new { p.Id, p.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(),"CodigoAutorizante","CodigoAutorizante"
-);                bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
-                
+                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(), "CodigoAutorizante", "CodigoAutorizante"
+); bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
+
                 // Filtro de Concepto con "REDETERMINACION" incluida
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
                 {
@@ -614,7 +614,7 @@ namespace WebForms
                     // Agregar "REDETERMINACION" como concepto especial
                     conceptos.Add(new { Id = "REDETERMINACION", Nombre = "REDETERMINACION" });
                     conceptos = conceptos.OrderBy(c => c.Nombre).ToList();
-                    
+
                     cblsHeaderConcepto.DataSource = conceptos;
                     cblsHeaderConcepto.DataTextField = "Nombre";
                     cblsHeaderConcepto.DataValueField = "Id";
@@ -663,6 +663,7 @@ namespace WebForms
         private void ObtenerObras()
         {
             ObraNegocioEF obraNegocio = new ObraNegocioEF();
+            var usuario = UserHelper.GetFullCurrentUser();
 
             try
             {
@@ -747,7 +748,7 @@ namespace WebForms
         /// </summary>
         private void ObtenerEstados()
         {
-                EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
+            EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
 
             try
             {
@@ -819,7 +820,7 @@ namespace WebForms
                 if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
                     UsuarioEF usuario = ObtenerUsuarioActual();
-                    todos = calculoRedeterminacionNegocio.ListarAutorizantesYRedeterminaciones(usuario);
+                    todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;
                     ViewState["NecesitaRecarga"] = null;
                 }
@@ -828,7 +829,7 @@ namespace WebForms
                     todos = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
                 }
 
-                totalRecords = todos?.Count ?? 0;
+                _totalRecords = todos?.Count ?? 0;
                 BindGrid();
             }
             catch (Exception ex)
@@ -840,8 +841,8 @@ namespace WebForms
 
         private void CargarPaginaActual()
         {
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-            ViewState["PageSize"] = pageSize;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
+            ViewState["PageSize"] = _pageSize;
             CargarListaAutorizantesRedet();
             ConfigurarPaginationControl();
         }
@@ -873,16 +874,16 @@ namespace WebForms
 
             int totalFiltrados = datosEnMemoria.Count;
             gridviewRegistros.VirtualItemCount = totalFiltrados;
-            gridviewRegistros.PageSize = pageSize;
-            gridviewRegistros.PageIndex = currentPageIndex;
+            gridviewRegistros.PageSize = _pageSize;
+            gridviewRegistros.PageIndex = _currentPageIndex;
             gridviewRegistros.DataSource = datosEnMemoria
-                .Skip(currentPageIndex * pageSize)
-                .Take(pageSize)
+                .Skip(_currentPageIndex * _pageSize)
+                .Take(_pageSize)
                 .ToList();
             gridviewRegistros.DataBind();
             PoblarFiltrosHeader();
 
-            totalRecords = totalFiltrados;
+            _totalRecords = totalFiltrados;
             ViewState["TotalRecords"] = totalFiltrados;
             ConfigurarPaginationControl();
             CalcularSubtotalParaPaginationControl();
@@ -897,7 +898,7 @@ namespace WebForms
             try
             {
                 // Aplicar filtro de Área
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea &&
                     cblsHeaderArea.SelectedValues?.Any() == true)
                 {
                     var areasSeleccionadas = cblsHeaderArea.SelectedValues.Select(int.Parse).ToList();
@@ -905,7 +906,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Obra
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra &&
                     cblsHeaderObra.SelectedValues?.Any() == true)
                 {
                     var obrasSeleccionadas = cblsHeaderObra.SelectedValues.Select(int.Parse).ToList();
@@ -913,7 +914,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Empresa
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa &&
                     cblsHeaderEmpresa.SelectedValues?.Any() == true)
                 {
                     var empresasSeleccionadas = cblsHeaderEmpresa.SelectedValues.Select(int.Parse).ToList();
@@ -933,31 +934,31 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Concepto
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto &&
                     cblsHeaderConcepto.SelectedValues?.Any() == true)
                 {
                     var conceptosSeleccionados = cblsHeaderConcepto.SelectedValues.ToList();
-                    autorizantes = autorizantes.Where(a => 
+                    autorizantes = autorizantes.Where(a =>
                     {
                         // Si se seleccionó "REDETERMINACION", filtrar por ConceptoNombre
                         if (conceptosSeleccionados.Contains("REDETERMINACION") && a.ConceptoNombre == "REDETERMINACION")
                         {
                             return true;
                         }
-                        
+
                         // Si se seleccionaron conceptos normales, filtrar por ConceptoId
                         var conceptosNumericos = conceptosSeleccionados.Where(c => int.TryParse(c, out _)).Select(int.Parse).ToList();
                         if (conceptosNumericos.Any() && a.ConceptoId.HasValue && conceptosNumericos.Contains(a.ConceptoId.Value))
                         {
                             return true;
                         }
-                        
+
                         return false;
                     }).ToList();
                 }
 
                 // Aplicar filtro de Estado
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado &&
                     cblsHeaderEstado.SelectedValues?.Any() == true)
                 {
                     var estadosSeleccionados = cblsHeaderEstado.SelectedValues.Select(int.Parse).ToList();
@@ -965,7 +966,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Barrio (si existe)
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio &&
                     cblsHeaderBarrio.SelectedValues?.Any() == true)
                 {
                     var barriosSeleccionados = cblsHeaderBarrio.SelectedValues.Select(int.Parse).ToList();
@@ -973,7 +974,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Contrata (si existe)
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata &&
                     cblsHeaderContrata.SelectedValues?.Any() == true)
                 {
                     var contratasSeleccionadas = cblsHeaderContrata.SelectedValues.Select(int.Parse).ToList();
@@ -981,7 +982,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Línea de Gestión (si existe)
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion &&
                     cblsHeaderLineaGestion.SelectedValues?.Any() == true)
                 {
                     var lineasGestionSeleccionadas = cblsHeaderLineaGestion.SelectedValues.Select(int.Parse).ToList();
@@ -989,7 +990,7 @@ namespace WebForms
                 }
 
                 // Aplicar filtro de Proyecto (si existe)
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto && 
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto &&
                     cblsHeaderProyecto.SelectedValues?.Any() == true)
                 {
                     var proyectosSeleccionados = cblsHeaderProyecto.SelectedValues.Select(int.Parse).ToList();
@@ -1012,8 +1013,8 @@ namespace WebForms
             if (Session["Usuario"] != null)
             {
                 var usuarioTradicional = (Usuario)Session["Usuario"];
-                return new UsuarioEF 
-                { 
+                return new UsuarioEF
+                {
                     Id = usuarioTradicional.Id,
                     Nombre = usuarioTradicional.Nombre,
                     Correo = usuarioTradicional.Correo,
@@ -1022,10 +1023,10 @@ namespace WebForms
                     AreaId = usuarioTradicional.Area?.Id ?? 0,
                 };
             }
-            
+
             // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
             // (sin filtro de área)
-            return new UsuarioEF 
+            return new UsuarioEF
             {
                 Id = 0,
                 Nombre = "Usuario null",
@@ -1081,7 +1082,7 @@ namespace WebForms
                     // Seleccionar valores en dropdowns usando método helper
                     if (autorizanteSeleccionado.ConceptoId.HasValue)
                         SelectDropDownListByValue(ddlConceptoEditar, autorizanteSeleccionado.ConceptoId.Value.ToString());
-                    
+
                     if (autorizanteSeleccionado.EstadoId.HasValue)
                         SelectDropDownListByValue(ddlEstadoEditar, autorizanteSeleccionado.EstadoId.Value.ToString());
 
@@ -1146,7 +1147,7 @@ namespace WebForms
                     return;
                 }
 
-                bool eliminado = autorizanteNegocio.Eliminar(id);
+                bool eliminado = _autorizanteNegocioEF.Eliminar(id);
 
                 if (eliminado)
                 {
@@ -1164,8 +1165,8 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-success";
 
                     // Actualizar totales y rebind
-                    totalRecords = (Session["GridDataAutorizantes"] as List<AutorizanteDTO>)?.Count ?? 0;
-                    ViewState["TotalRecords"] = totalRecords;
+                    _totalRecords = (Session["GridDataAutorizantes"] as List<AutorizanteDTO>)?.Count ?? 0;
+                    ViewState["TotalRecords"] = _totalRecords;
                     BindGrid();
                 }
                 else
@@ -1219,7 +1220,7 @@ namespace WebForms
                 string codigoAutorizante = autorizante.CodigoAutorizante;
 
                 // Actualizar en la base de datos
-                bool resultado = autorizanteNegocio.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
+                bool resultado = _autorizanteNegocioEF.ActualizarExpediente(codigoAutorizante, nuevoExpediente);
 
                 if (resultado)
                 {
@@ -1273,7 +1274,7 @@ namespace WebForms
         private List<AutorizanteDTO> ObtenerDatosFiltradosActuales()
         {
             if (Session["GridDataAutorizantes"] == null) return null;
-            
+
             var autorizantes = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
 
             // Aplicar filtro de búsqueda
@@ -1336,15 +1337,15 @@ namespace WebForms
 
         protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
-            currentPageIndex = e.PageIndex;
+            _currentPageIndex = e.PageIndex;
             CargarPaginaActual();
         }
 
         protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
         {
-            pageSize = e.PageSize;
-            ViewState["PageSize"] = pageSize;
-            currentPageIndex = 0;
+            _pageSize = e.PageSize;
+            ViewState["PageSize"] = _pageSize;
+            _currentPageIndex = 0;
             CargarPaginaActual();
         }
 
@@ -1357,9 +1358,9 @@ namespace WebForms
         {
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
-                paginationControl.TotalRecords = totalRecords;
-                paginationControl.CurrentPageIndex = currentPageIndex;
-                paginationControl.PageSize = pageSize;
+                paginationControl.TotalRecords = _totalRecords;
+                paginationControl.CurrentPageIndex = _currentPageIndex;
+                paginationControl.PageSize = _pageSize;
                 paginationControl.UpdatePaginationControls();
                 CalcularSubtotalParaPaginationControl();
             }
@@ -1380,7 +1381,7 @@ namespace WebForms
                 else
                 {
                     UsuarioEF usuario = ObtenerUsuarioActual();
-                    todosLosRegistros = calculoRedeterminacionNegocio.ListarAutorizantesCompleto(usuario);
+                    todosLosRegistros = _calculoRedeterminacionNegocioEF.ListarAutorizantesCompleto(usuario);
                 }
 
                 // Aplicar filtro de búsqueda (txtBuscar)
@@ -1451,50 +1452,131 @@ namespace WebForms
 
             try
             {
-                // Obtener el índice de la fila actual
-                int rowIndex = row.RowIndex;
-                
-                // Obtener los datos de la sesión
-                List<AutorizanteDTO> listaAutorizantes = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
-                if (listaAutorizantes == null || rowIndex >= listaAutorizantes.Count)
+                // Preferir identificar por DataKeys: Id (autorizante) o IdRedeterminacion (redet)
+                int nuevoEstadoId = int.Parse(ddlEstadoAutorizante.SelectedValue);
+
+                int id = 0;
+                int idRedeterminacion = 0;
+                if (gridviewRegistros.DataKeys != null && gridviewRegistros.DataKeys.Count > row.RowIndex)
                 {
-                    lblMensaje.Text = "Error: No se pudieron obtener los datos del autorizante.";
+                    var dataKey = gridviewRegistros.DataKeys[row.RowIndex];
+                    if (dataKey != null && dataKey.Values != null)
+                    {
+                        if (dataKey.Values["Id"] != null) int.TryParse(dataKey.Values["Id"].ToString(), out id);
+                        if (dataKey.Values["IdRedeterminacion"] != null) int.TryParse(dataKey.Values["IdRedeterminacion"].ToString(), out idRedeterminacion);
+                    }
+                }
+
+                var listaCompleta = Session["GridDataAutorizantes"] as List<AutorizanteDTO>;
+                if (listaCompleta == null)
+                {
+                    lblMensaje.Text = "Error: No hay datos en memoria.";
                     lblMensaje.CssClass = "alert alert-danger";
                     return;
                 }
-                
-                AutorizanteDTO autorizanteDTO = listaAutorizantes[rowIndex];
-                int nuevoEstadoId = int.Parse(ddlEstadoAutorizante.SelectedValue);
-                
-                // Actualizar el estado en la base de datos
-                AutorizanteNegocioEF negocio = new AutorizanteNegocioEF();
-                if (negocio.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId))
+
+                AutorizanteDTO autorizanteDTO = null;
+
+                // Si tenemos Id (autorizante real) buscar por Id
+                if (id > 0)
                 {
-                    // Actualizar el DTO en memoria
+                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.Id == id);
+                }
+
+                // Si no se encontró y existe IdRedeterminacion, buscar por IdRedeterminacion
+                if (autorizanteDTO == null && idRedeterminacion > 0)
+                {
+                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.IdRedeterminacion == idRedeterminacion);
+                }
+
+                // Fallback: si DataKeys no estaban disponibles o no localizaron, mapear usando lista filtrada y pageIndex
+                if (autorizanteDTO == null)
+                {
+                    var filtrados = ObtenerDatosFiltradosActuales();
+                    if (filtrados != null)
+                    {
+                        int pageIndex = _currentPageIndex;
+                        int pageSizeLocal = _pageSize;
+                        int rowIndex = row.RowIndex;
+                        int indiceReal = pageIndex * pageSizeLocal + rowIndex;
+                        if (indiceReal >= 0 && indiceReal < filtrados.Count)
+                        {
+                            var dtoEnFiltrados = filtrados[indiceReal];
+                            if (dtoEnFiltrados != null)
+                            {
+                                // Buscar en la lista completa por Id preferentemente
+                                if (dtoEnFiltrados.Id > 0)
+                                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.Id == dtoEnFiltrados.Id);
+                                if (autorizanteDTO == null && !string.IsNullOrEmpty(dtoEnFiltrados.CodigoAutorizante))
+                                    autorizanteDTO = listaCompleta.FirstOrDefault(a => a.CodigoAutorizante == dtoEnFiltrados.CodigoAutorizante);
+                            }
+                        }
+                    }
+                }
+
+                if (autorizanteDTO == null)
+                {
+                    lblMensaje.Text = "Error: no se pudo localizar el autorizante a actualizar.";
+                    lblMensaje.CssClass = "alert alert-danger";
+                    return;
+                }
+
+                // Ejecutar la actualización: preferir métodos por Id si existen
+                bool actualizado = false;
+                // Si es una redeterminación (IdRedeterminacion > 0) y existe negocio para redeterminaciones por Id
+                if (autorizanteDTO.IdRedeterminacion > 0)
+                {
+                    // Utilizar RedeterminacionNegocio para actualizar por Id
+                    var redNeg = new RedeterminacionNegocio();
+                    var red = new Dominio.Redeterminacion { Id = autorizanteDTO.IdRedeterminacion, Etapa = new Dominio.EstadoRedet { Id = nuevoEstadoId } };
+                    actualizado = redNeg.ActualizarEstado(red);
+                }
+                else if (autorizanteDTO.Id > 0)
+                {
+                    // Autorizante normal: usar AutorizanteNegocioEF.ObtenerPorId + Modificar o crear método especializado
+                    var authNeg = new AutorizanteNegocioEF();
+                    var entidad = authNeg.ObtenerPorId(autorizanteDTO.Id);
+                    if (entidad != null)
+                    {
+                        entidad.EstadoId = nuevoEstadoId;
+                        actualizado = authNeg.Modificar(entidad);
+                    }
+                    else
+                    {
+                        // Fallback a método por código si la entidad no existe por Id
+                        actualizado = authNeg.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId);
+                    }
+                }
+                else
+                {
+                    // Último recurso: usar el método existente que acepta codigoAutorizante
+                    var authNeg = new AutorizanteNegocioEF();
+                    actualizado = authNeg.ActualizarEstado(autorizanteDTO.CodigoAutorizante, nuevoEstadoId);
+                }
+
+                if (actualizado)
+                {
+                    // Actualizar DTO en memoria
                     autorizanteDTO.EstadoId = nuevoEstadoId;
-                    
-                    // Obtener el nombre del estado para actualizar también en memoria
-                    EstadoAutorizanteNegocioEF estadoNegocio = new EstadoAutorizanteNegocioEF();
+                    var estadoNegocio = new EstadoAutorizanteNegocioEF();
                     var estados = estadoNegocio.Listar();
                     var estadoSeleccionado = estados.FirstOrDefault(estado => estado.Id == nuevoEstadoId);
                     if (estadoSeleccionado != null)
                     {
                         autorizanteDTO.EstadoNombre = estadoSeleccionado.Nombre;
                     }
-                    
+
                     lblMensaje.Text = "Estado actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    
-                    // Recargar solo si es necesario (para mantener la paginación actual)
+                    // Invalidate caches if needed
+                    Session["GridDataAutorizantes"] = listaCompleta;
+                    ViewState["NecesitaRecarga"] = null;
                     BindGrid();
                 }
                 else
                 {
                     lblMensaje.Text = "Error al actualizar el estado.";
                     lblMensaje.CssClass = "alert alert-danger";
-                    
-                    // Restaurar el valor anterior en el desplegable
-                    ddlEstadoAutorizante.SelectedValue = autorizanteDTO.EstadoId.ToString();
                 }
             }
             catch (Exception ex)

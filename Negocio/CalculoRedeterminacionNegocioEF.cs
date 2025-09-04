@@ -153,7 +153,7 @@ namespace Negocio
                                 auth.Obra.Empresa = empresasDict[auth.Obra.EmpresaId.Value];
                             if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
                                 auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
-                            
+
                             auth.Estado = estadosDict[auth.EstadoId];
                             auth.Concepto = conceptosDict[auth.ConceptoId];
                         }
@@ -278,7 +278,7 @@ namespace Negocio
                 return new List<AutorizanteDTO>();
             }
         }
-    
+
         #region Configuración y Mapeo de Estados
 
         /// <summary>
@@ -1012,7 +1012,7 @@ namespace Negocio
                 if (autorizante == null || !redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
 
 
-                
+
                 if (certificados != null)
                 {
                     certificados = certificados
@@ -1337,6 +1337,23 @@ namespace Negocio
                 System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SADE: {ex.Message}");
                 return new Dictionary<string, (string, DateTime?)>();
             }
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SADE a otras clases.
+        /// </summary>
+        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerDatosSadeBulk(List<string> expedientes)
+        {
+            return BuscarMuchosDatosSade(expedientes ?? new List<string>());
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SIGAF a otras clases.
+        /// </summary>
+        public Dictionary<string, decimal> ObtenerSigafBulk(List<string> expedientes)
+        {
+            // Llama al método privado que realiza la consulta bulk para SIGAF
+            return BuscarMuchosNumerosSigaf(expedientes ?? new List<string>());
         }
 
         /// <summary>
@@ -2529,4 +2546,4 @@ namespace Negocio
         #endregion
 
     }
-}    
+}

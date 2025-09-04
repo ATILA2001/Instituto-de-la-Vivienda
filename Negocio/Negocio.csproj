@@ -97,6 +97,7 @@
     <Compile Include="CalculoRedeterminacionNegocioEF.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="CertificadoNegocioEF.cs" />
+  <Compile Include="CalculoObraNegocioEF.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ConceptoNegocioEF.cs" />
     <Compile Include="ABMPlaniNegocio.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="FormulacionNegocioEF.cs" />
     <Compile Include="FormulacionNegocio.cs" />
     <Compile Include="Helpers.cs" />
+  <Compile Include="LegitimoNegocioEF.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />

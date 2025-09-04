@@ -112,8 +112,8 @@ namespace WebForms
                 List<Formulacion> formulacionesCompletas = negocio.listar();
                 Session["formulacionesCompletas"] = formulacionesCompletas;
 
-                BindDropDownList(); 
-                CargarListaFormulaciones(); 
+                BindDropDownList();
+                CargarListaFormulaciones();
             }
         }
 
@@ -235,7 +235,7 @@ namespace WebForms
                 }
 
                 List<Formulacion> resultadoFinal = listaFiltrada.ToList();
-                Session["listaFormulacionAdmin"] = resultadoFinal; 
+                Session["listaFormulacionAdmin"] = resultadoFinal;
                 dgvFormulacion.DataSource = resultadoFinal;
                 dgvFormulacion.DataBind();
             }

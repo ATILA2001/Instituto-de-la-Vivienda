@@ -88,6 +88,7 @@
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
     <Content Include="CertificadosEF.aspx" />
+    	<Content Include="ObrasEF.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -114,6 +115,7 @@
     <Content Include="Formulacion.aspx" />
     <Content Include="FormulacionAdmin.aspx" />
     <Content Include="FormulacionEF.aspx" />
+  <Content Include="LegitimosEF.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
@@ -273,8 +275,15 @@
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="LegitimosEF.aspx.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="FormulacionEF.aspx.designer.cs">
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LegitimosEF.aspx.designer.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="Legitimos.aspx.cs">
@@ -364,6 +373,13 @@
     </Compile>
     <Compile Include="ObrasAdmin.aspx.designer.cs">
       <DependentUpon>ObrasAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ObrasEF.aspx.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ObrasEF.aspx.designer.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="ObrasRedet.aspx.cs">
       <DependentUpon>ObrasRedet.aspx</DependentUpon>

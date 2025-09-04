@@ -59,8 +59,9 @@
     <Compile Include="Barrio.cs" />
     <Compile Include="BarrioEF.cs" />
     <Compile Include="BdProyecto.cs" />
-    <Compile Include="DTO\AutorizanteDTO.cs" />
-    <Compile Include="DTO\CertificadoDTO.cs" />
+  <Compile Include="DTO\AutorizanteDTO.cs" />
+  <Compile Include="DTO\CertificadoDTO.cs" />
+  <Compile Include="DTO\ObraDTO.cs" />
     <Compile Include="ProyectoEF.cs" />
     <Compile Include="Certificado.cs" />
     <Compile Include="CertificadoEF.cs" />

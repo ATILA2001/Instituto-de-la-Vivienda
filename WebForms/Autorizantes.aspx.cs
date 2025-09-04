@@ -42,10 +42,10 @@ namespace WebForms
                     autorizantes = negocio.listar(
                         usuarioLogueado,
                         new List<string>(),
-                        new List<string>(), 
                         new List<string>(),
-                        new List<string>(), 
-                        null                
+                        new List<string>(),
+                        new List<string>(),
+                        null
                     );
                     Session["autorizantesUsuarioCompleto"] = autorizantes;
                 }
@@ -630,7 +630,7 @@ namespace WebForms
         //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
         //    return empresaNegocio.listarddl();
         //}
-      
+
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();

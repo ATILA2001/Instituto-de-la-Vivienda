@@ -12,7 +12,7 @@ namespace WebForms
 {
     public partial class FormulacionEF : System.Web.UI.Page
     {
-        private FormulacionNegocioEF negocio = new FormulacionNegocioEF();
+        private readonly FormulacionNegocioEF _negocio = new FormulacionNegocioEF();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -43,6 +43,9 @@ namespace WebForms
                         { "Contrata", "ObraEF.Contrata.Nombre" },
                         { "Barrio", "ObraEF.Barrio.Nombre" },
                         { "Nombre de Obra", "ObraEF.Descripcion" },
+                        { "Proyecto", "ObraEF.Proyecto.Nombre" },
+                        { "PPI", "Ppi" },
+                        { "Techos 2026", "Techos" },
                         { "Monto 2026", "Monto_26" },
                         { "Monto 2027", "Monto_27" },
                         { "Monto 2028", "Monto_28" },
@@ -84,25 +87,25 @@ namespace WebForms
                 UsuarioEF usuarioActual = UserHelper.GetFullCurrentUser();
                 if (!(Session["formulacionesCompletas"] is List<Dominio.FormulacionEF> formulacionesCompletas))
                 {
-                    formulacionesCompletas = negocio.ListarPorUsuario(usuarioActual);
+                    formulacionesCompletas = _negocio.ListarPorUsuario(usuarioActual);
                     Session["formulacionesCompletas"] = formulacionesCompletas;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") is CustomControls.TreeViewSearch cblsHeaderArea)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea)
                 {
                     var areasUnicas = formulacionesCompletas
                         .Where(f => f.ObraEF?.Area != null)
                         .Select(f => f.ObraEF.Area)
                         .Distinct()
                         .OrderBy(a => a.Nombre)
-                        .Select(a => new { Id = a.Id.ToString(), Nombre = a.Nombre })
+                        .Select(a => new { Id = a.Id.ToString(), a.Nombre })
                         .ToList();
                     cblsHeaderArea.DataSource = areasUnicas;
                     cblsHeaderArea.DataBind();
                     cblsHeaderArea.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") is CustomControls.TreeViewSearch cblsHeaderLineaGestion)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion)
                 {
                     var lineasUnicas = formulacionesCompletas
                         .Where(f => f.ObraEF?.Proyecto?.LineaGestionEF != null)
@@ -116,7 +119,7 @@ namespace WebForms
                     cblsHeaderLineaGestion.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") is CustomControls.TreeViewSearch cblsHeaderProyecto)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderProyecto") is TreeViewSearch cblsHeaderProyecto)
                 {
                     var proyectosUnicos = formulacionesCompletas
                         .Where(f => f.ObraEF?.Proyecto != null)
@@ -130,21 +133,21 @@ namespace WebForms
                     cblsHeaderProyecto.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") is CustomControls.TreeViewSearch cblsHeaderMonto2026)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") is TreeViewSearch cblsHeaderMonto2026)
                 {
                     var montosUnicos = formulacionesCompletas
                         .Where(f => f.Monto_26.HasValue)
                         .Select(f => f.Monto_26.Value)
                         .Distinct()
                         .OrderBy(m => m)
-                        .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m.ToString("N2") }) // Use "N2" or "C" for display
+                        .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m })
                         .ToList();
                     cblsHeaderMonto2026.DataSource = montosUnicos;
                     cblsHeaderMonto2026.DataBind();
                     cblsHeaderMonto2026.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") is CustomControls.TreeViewSearch cblsHeaderPrioridad)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") is TreeViewSearch cblsHeaderPrioridad)
                 {
                     var prioridadesUnicas = formulacionesCompletas
                         .Where(f => f.PrioridadEF != null)
@@ -162,6 +165,13 @@ namespace WebForms
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
+            // Preparar ddlObra para agregar nueva formulación;
+            lblObra.Attributes["for"] = ddlObraAgregar.ClientID;
+            ddlObraAgregar.Visible = true;
+            ddlObraEditar.Visible = false;
+            rfvObra.Enabled = true;
+
+
             LimpiarFormulario();
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
                 $(document).ready(function() {
@@ -172,46 +182,72 @@ namespace WebForms
                 });", true);
 
             btnAgregar.Text = "Agregar";
-            Session["EditingFormulacionEFId"] = null;
+            Session["EditingFormulacionId"] = null;
         }
 
+        // btnAgregar_Click: controlador de guardado compartido para el modal (Agregar y Editar).
+        // - Lee los valores del formulario y arma una entidad FormulacionEF.
+        // - Si Session["EditingFormulacionId"] está presente, actualiza (Modificar); si no, agrega (Agregar).
+        // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             if (!Page.IsValid) return;
 
             try
             {
-                var formulacion = new Dominio.FormulacionEF
-                {
-                    ObraId = int.Parse(ddlObra.SelectedValue),
-                    Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ',')),
-                    Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ',')),
-                    Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ',')),
-                    MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text),
-                    Observaciones = txtObservaciones.Text,
-                    UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue),
-                    ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ',')),
-                    PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue)
-                };
+                int? editingId = Session["EditingFormulacionId"] as int?;
 
-                if (Session["EditingFormulacionEFId"] != null)
+                Dominio.FormulacionEF formu = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new Dominio.FormulacionEF();
+
+
+                formu.ObraId            = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
+                formu.Monto_26          = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ','));
+                formu.Monto_27          = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ','));
+                formu.Monto_28          = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ','));
+                formu.MesBase           = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text);
+                formu.Observaciones     = txtObservaciones.Text;
+                formu.Ppi               = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text);
+                formu.Techos            = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ','));
+                formu.UnidadMedidaId    = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue);
+                formu.ValorMedida       = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ','));
+                formu.PrioridadId       = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue);
+
+
+
+                if (editingId != null)
                 {
-                    formulacion.Id = (int)Session["EditingFormulacionEFId"];
-                    negocio.Modificar(formulacion);
-                    lblMensaje.Text = "Formulación modificada exitosamente!";
+                    if (_negocio.Modificar(formu))
+                    {
+                        lblMensaje.Text = "Formulación modificada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-success";
+                        Session["EditingFormulacionId"] = null;
+                    }
+                    else
+                    {                         
+                        lblMensaje.Text = "No se pudo modificar la formulación.";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
                 }
                 else
                 {
-                    negocio.Agregar(formulacion);
-                    lblMensaje.Text = "Formulación agregada exitosamente!";
+                    if(_negocio.Agregar(formu))
+                    {
+                        lblMensaje.Text = "Formulación agregada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-success";
+                    }
+                    else
+                    {
+                        lblMensaje.Text = "Formulación agregada exitosamente!";
+                        lblMensaje.CssClass = "alert alert-danger";
+                    }
                 }
 
                 lblMensaje.CssClass = "alert alert-success";
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingFormulacionEFId"] = null;
-                Session["formulacionesCompletas"] = null; // clear cache so selection sees fresh data
-                BindDropDownList(); // refresh ddlObra options
+                Session["EditingFormulacionId"] = null;
+                Session["formulacionesCompletas"] = null;
+
                 BindGrid();
             }
             catch (Exception ex)
@@ -222,6 +258,11 @@ namespace WebForms
             }
         }
 
+        // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
+        // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
+        // - Define Session["EditingFormulacionId"] para indicar modo edición.
+        // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
+        // - Rellena los controles del modal, ajusta el texto del botón a "Modificar" y muestra el modal.
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -234,36 +275,50 @@ namespace WebForms
                     var usuario = UserHelper.GetFullCurrentUser();
                     if (usuario != null)
                     {
-                        lista = negocio.ListarPorUsuario(usuario);
+                        lista = _negocio.ListarPorUsuario(usuario);
                         Session["formulacionesCompletas"] = lista;
                         formulacion = lista?.FirstOrDefault(f => f.Id == id);
                     }
                 }
                 if (formulacion != null)
                 {
-                    // Re-bind dropdown to include the current obra in edit mode
-                    Session["EditingFormulacionEFId"] = formulacion.Id;
-                    BindDropDownList();
-                    SelectDropDownListByValue(ddlObra, formulacion.ObraId.ToString());
-                    txtMonto26.Text = formulacion.Monto_26?.ToString() ?? "";
-                    txtMonto27.Text = formulacion.Monto_27?.ToString() ?? "";
-                    txtMonto28.Text = formulacion.Monto_28?.ToString() ?? "";
+                    // MARCAR MODO EDICIÓN y asegurar que los dropdowns incluyan la obra en edición
+                    Session["EditingFormulacionId"] = formulacion.Id;
+
+                    lblObra.Attributes["for"] = ddlObraEditar.ClientID;
+                    ddlObraAgregar.Visible = false;
+                    ddlObraEditar.Visible = true;
+                    ddlObraEditar.Enabled = false;
+                    rfvObra.Enabled = false;
+
+                    SelectDropDownListByValue(ddlObraEditar, formulacion.ObraId.ToString());
+                    txtMonto26.Text = formulacion.Monto_26?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    txtMonto27.Text = formulacion.Monto_27?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    txtMonto28.Text = formulacion.Monto_28?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    txtPpi.Text = formulacion.Ppi?.ToString() ?? "";
+                    txtTechos.Text = formulacion.Techos?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMesBase.Text = formulacion.MesBase?.ToString("yyyy-MM-dd") ?? "";
                     SelectDropDownListByValue(ddlUnidadMedida, formulacion.UnidadMedidaId?.ToString());
-                    txtValorMedida.Text = formulacion.ValorMedida?.ToString() ?? "";
+                    txtValorMedida.Text = formulacion.ValorMedida?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtObservaciones.Text = formulacion.Observaciones ?? "";
                     SelectDropDownListByValue(ddlPrioridades, formulacion.PrioridadId?.ToString());
 
-                    // Mantener el Id en sesión hasta guardar/cancelar
+                    btnAgregar.Text = "Actualizar";
 
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
+                    // Mostrar modal en modo edición. No hacemos visible ddlObra, solo aseguramos que su item exista.
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
                         $(document).ready(function() {
                             $('#modalAgregar .modal-title').text('Modificar Formulación');
-                            $('.col-12:first').hide();
+                            document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+
+
+//MODIFICAR ESE COL-12 por el id de lo que queremos ocultar (DDL OBRA)
+
+
+                            //$('.col-12:first').hide();
                             $('#modalAgregar').modal('show');
                         });", true);
 
-                    btnAgregar.Text = "Modificar";
                 }
             }
             catch (Exception ex)
@@ -290,11 +345,11 @@ namespace WebForms
             try
             {
                 int id = Convert.ToInt32(dgvFormulacion.DataKeys[e.RowIndex].Value);
-                if (negocio.Eliminar(id))
+                if (_negocio.Eliminar(id))
                 {
                     lblMensaje.Text = "Formulación eliminada correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    BindDropDownList();
+
                     BindGrid();
                 }
                 else
@@ -334,9 +389,9 @@ namespace WebForms
                 int pageSize = paginationControl.PageSize;
 
                 // Total filtrado en BD
-                int total = negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                int total = _negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
 
-                // Ajustar paginación si necesario
+
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -346,21 +401,69 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
 
                 // Página actual desde BD
-                var pagina = negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                var pagina = _negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
 
                 dgvFormulacion.DataSource = pagina;
                 dgvFormulacion.DataBind();
 
-                // Calcular subtotal global (requiere suma total filtrada) -> eficiencia: si se necesita exacto hacer una consulta específica
+                // Precalcular PLURIANUALES para las obras de la página (evita N+1)
+                try
+                {
+                    var obraIds = pagina.Select(f => f.ObraId).Where(id => id != 0).Distinct().ToList();
+                    var plurianuales = new Dictionary<int, decimal>();
+                    if (obraIds.Any())
+                    {
+                        DateTime start = new DateTime(2026, 1, 1);
+                        DateTime end = new DateTime(2028, 12, 31);
+                        using (var ctx = new IVCdbContext())
+                        {
+                            var certificadosPorObra = (from c in ctx.Certificados
+                                                       where c.MesAprobacion.HasValue && c.MesAprobacion.Value >= start && c.MesAprobacion.Value <= end
+                                                       join a in ctx.Autorizantes on c.CodigoAutorizante equals a.CodigoAutorizante
+                                                       where obraIds.Contains(a.ObraId)
+                                                       group c by a.ObraId into g
+                                                       select new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.MontoTotal) ?? 0m })
+                                                      .ToList();
+
+                            var legitimosPorObra = ctx.Legitimos
+                                .Where(l => obraIds.Contains(l.ObraId) && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start && l.MesAprobacion.Value <= end)
+                                .GroupBy(l => l.ObraId)
+                                .Select(g => new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.Certificado) ?? 0m })
+                                .ToList();
+
+                            // Inicializar
+                            foreach (var id in obraIds) plurianuales[id] = 0m;
+
+                            foreach (var c in certificadosPorObra)
+                            {
+                                if (plurianuales.ContainsKey(c.ObraId))
+                                    plurianuales[c.ObraId] += c.Sum;
+                            }
+
+                            foreach (var l in legitimosPorObra)
+                            {
+                                if (plurianuales.ContainsKey(l.ObraId))
+                                    plurianuales[l.ObraId] += l.Sum;
+                            }
+                        }
+                    }
+                    Context.Items["PlurianualesPagina"] = plurianuales;
+                }
+                catch
+                {
+                    // En caso de error, aseguramos que el diccionario exista para evitar excepciones en el binding
+                    Context.Items["PlurianualesPagina"] = new Dictionary<int, decimal>();
+                }
+
+
                 decimal totalMonto26Global = 0;
                 if (total > 0)
                 {
-                    // Consulta rápida para subtotal (se podría optimizar combinando con el conteo si se usa proyección)
-                    // Para simplicidad se reusa BuildBaseQuery y filtros: ideal mover a un método en negocio si se usa frecuentemente
+
                     using (var context = new IVCdbContext())
                     {
                         var querySubtotal = context.Formulaciones.AsQueryable();
-                        // Reaplicar filtros mínimos (duplicado ligero respecto a negocio; factorizable)
+
                         if (!usuario.Tipo)
                         {
                             if (usuario.AreaId.HasValue)
@@ -420,7 +523,7 @@ namespace WebForms
                 // ddlObra: listar solo obras que no están en Formulación (y filtrar por área si corresponde)
                 UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                 int? obraEnEdicion = null;
-                if (Session["EditingFormulacionEFId"] is int editId)
+                if (Session["EditingFormulacionId"] is int editId)
                 {
                     // obtener la obra asociada a la formulación en edición para incluirla en el combo
                     using (var ctx = new IVCdbContext())
@@ -429,10 +532,16 @@ namespace WebForms
                         obraEnEdicion = form?.ObraId;
                     }
                 }
-                ddlObra.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
-                ddlObra.DataTextField = "Descripcion";
-                ddlObra.DataValueField = "Id";
-                ddlObra.DataBind();
+                ddlObraAgregar.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
+                ddlObraAgregar.DataTextField = "Descripcion";
+                ddlObraAgregar.DataValueField = "Id";
+                ddlObraAgregar.DataBind();
+
+                ddlObraEditar.DataSource = new ObraNegocioEF().ListarParaDDL();
+                ddlObraEditar.DataTextField = "Descripcion";
+                ddlObraEditar.DataValueField = "Id";
+                ddlObraEditar.DataBind();
+
 
                 ddlUnidadMedida.DataSource = new UnidadMedidaNegocioEF().Listar();
                 ddlUnidadMedida.DataTextField = "Nombre";
@@ -453,8 +562,11 @@ namespace WebForms
 
         private void LimpiarFormulario()
         {
-            ddlObra.SelectedIndex = 0;
+            ddlObraAgregar.SelectedIndex = 0;
+            ddlObraEditar.SelectedIndex = 0;
             txtMonto26.Text = "";
+            txtPpi.Text = "";
+            txtTechos.Text = "";
             txtMonto27.Text = "";
             txtMonto28.Text = "";
             txtMesBase.Text = "";
@@ -473,7 +585,7 @@ namespace WebForms
                 if (usuario != null)
                 {
                     string filtroGeneral = txtBuscar?.Text?.Trim();
-                    int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                    int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
                     paginationControl.Initialize(totalRecords, 0, paginationControl.PageSize);
                     BindGrid();
                 }
@@ -507,28 +619,66 @@ namespace WebForms
         }
 
         /// <summary>
-        /// Calcula el total plurianual (suma de Monto_26, Monto_27 y Monto_28)
+        /// Calcula el total plurianual para la OBRA: suma de todos los CertificadoEF.MontoTotal
+        /// y LegitimoEF.Certificado para esa misma OBRA en los años 2026,2027,2028
+        /// (usa MesAprobacion para filtrar año).
+        /// Se acepta como parámetro el ObraId.
         /// </summary>
-        protected string CalcularPlurianual(object monto26, object monto27, object monto28)
+        protected string CalcularPlurianual(object obraIdObj)
         {
             try
             {
-                decimal total = 0;
+                if (obraIdObj == null || obraIdObj == DBNull.Value) return 0m.ToString("C");
 
-                if (monto26 != null && monto26 != DBNull.Value)
-                    total += Convert.ToDecimal(monto26);
+                if (!int.TryParse(obraIdObj.ToString(), out int obraId)) return 0m.ToString("C");
 
-                if (monto27 != null && monto27 != DBNull.Value)
-                    total += Convert.ToDecimal(monto27);
+                // Preferir diccionario precalculado para la página (evita consultas por fila)
+                if (Context.Items["PlurianualesPagina"] is Dictionary<int, decimal> dic)
+                {
+                    if (dic.TryGetValue(obraId, out decimal val))
+                        return val.ToString("C");
+                    return 0m.ToString("C");
+                }
 
-                if (monto28 != null && monto28 != DBNull.Value)
-                    total += Convert.ToDecimal(monto28);
+                DateTime start2026 = new DateTime(2026, 1, 1);
+                DateTime end2028 = new DateTime(2028, 12, 31);
+
+                decimal total = 0m;
+
+                using (var ctx = new IVCdbContext())
+                {
+                    // 1) Sumar Certificados cuyo MesAprobacion esté entre 2026-01-01 y 2028-12-31
+                    //    y que pertenezcan a la obra: relac. Certificado -> Autorizante (CodigoAutorizante) -> Autorizante.ObraId == obraId
+                    var certificadosQuery = from c in ctx.Certificados
+                                            where c.MesAprobacion.HasValue
+                                                  && c.MesAprobacion.Value >= start2026
+                                                  && c.MesAprobacion.Value <= end2028
+                                            join a in ctx.Autorizantes on c.CodigoAutorizante equals a.CodigoAutorizante
+                                            where a.ObraId == obraId
+                                            select c.MontoTotal;
+
+                    var sumaCertificados = certificadosQuery.Any() ? certificadosQuery.Sum() : 0m;
+
+                    // 2) Sumar Legitimos donde Legitimo.ObraId == obraId y MesAprobacion en 2026-2028
+                    var legitimosQuery = ctx.Legitimos
+                        .Where(l => l.ObraId == obraId && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start2026 && l.MesAprobacion.Value <= end2028)
+                        .Select(l => l.Certificado ?? 0m);
+
+                    var sumaLegitimos = legitimosQuery.Any() ? legitimosQuery.Sum() : 0m;
+
+                    total = sumaCertificados + sumaLegitimos;
+
+
+                    // Si no hay certificados ni legítimos en 2026-2028, se deja total = 0
+                }
+
+
 
                 return total.ToString("C");
             }
             catch
             {
-                return "$0.00";
+                return 0m.ToString("C");
             }
         }
 
@@ -568,7 +718,7 @@ namespace WebForms
             if (usuario != null)
             {
                 string filtroGeneral = txtBuscar?.Text?.Trim();
-                int totalRecords = negocio.ContarPorUsuario(usuario, filtroGeneral);
+                int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
                 paginationControl.Initialize(totalRecords, 0, e.PageSize);
                 BindGrid();
             }

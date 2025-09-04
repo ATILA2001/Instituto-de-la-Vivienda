@@ -42,7 +42,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente ,string filtro = null)
+        public List<Certificado> listarFiltro(Usuario usuario, List<string> autorizante, List<string> tipo, List<string> mesAprobacion, List<string> empresa, List<string> estadoExpediente, string filtro = null)
         {
             var lista = new List<Certificado>();
             var datos = new AccesoDatos();
@@ -111,8 +111,8 @@ namespace Negocio
                     INNER JOIN EMPRESAS EM ON O.EMPRESA = EM.ID
                     INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID 
                     WHERE O.AREA = @area ";
-                
-                
+
+
 
 
                 if (empresa != null && empresa.Count > 0)
@@ -225,7 +225,7 @@ namespace Negocio
                         Empresa = datos.Lector["EMPRESA"]?.ToString(),
                         MontoTotal = datos.Lector["MONTO_TOTAL"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["MONTO_TOTAL"]) : 0M,
                         MesAprobacion = datos.Lector["MES_APROBACION"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["MES_APROBACION"]) : null,
-                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) :0,
+                        Porcentaje = datos.Lector["PORCENTAJE"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["PORCENTAJE"]) : 0,
                         Sigaf = datos.Lector["SIGAF"] != DBNull.Value ? Convert.ToDecimal(datos.Lector["SIGAF"]) : (decimal?)null,
                         FechaSade = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"]) : null,
                         BuzonSade = datos.Lector["BUZON DESTINO"]?.ToString(),
@@ -252,7 +252,7 @@ namespace Negocio
                                 Id = datos.Lector["OBRA_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["OBRA_ID"]) : 0,
 
                                 Descripcion = datos.Lector["OBRA"]?.ToString(),
-                                
+
                                 Area = new Area
                                 {
                                     Id = datos.Lector["AREAS_ID"] != DBNull.Value ? Convert.ToInt32(datos.Lector["AREAS_ID"]) : 0,
@@ -349,7 +349,7 @@ LEFT JOIN BD_PROYECTOS B ON O.ID = B.ID_BASE
 LEFT JOIN LINEA_DE_GESTION LDG ON B.LINEA_DE_GESTION = LDG.ID
 LEFT JOIN PASES_SADE PS ON C.EXPEDIENTE_PAGO = PS.EXPEDIENTE COLLATE Modern_Spanish_CI_AS 
 WHERE 1=1";
-       query += " ORDER BY O.DESCRIPCION,C.CODIGO_AUTORIZANTE, C.MES_APROBACION";
+                query += " ORDER BY O.DESCRIPCION,C.CODIGO_AUTORIZANTE, C.MES_APROBACION";
                 datos.setearConsulta(query);
                 datos.ejecutarLectura();
 

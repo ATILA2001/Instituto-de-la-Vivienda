@@ -8,6 +8,7 @@ namespace Negocio
 {
     public class FormulacionNegocioEF
     {
+
         public List<FormulacionEF> ListarPorUsuario(UsuarioEF usuario)
         {
             using (var context = new IVCdbContext())
@@ -50,21 +51,21 @@ namespace Negocio
 
         }
 
-        public void Agregar(FormulacionEF formulacion)
+        public bool Agregar(FormulacionEF formulacion)
         {
             using (var context = new IVCdbContext())
             {
                 context.Formulaciones.Add(formulacion);
-                context.SaveChanges();
+                return context.SaveChanges() > 0;
             }
         }
 
-        public void Modificar(FormulacionEF formulacion)
+        public bool Modificar(FormulacionEF formulacion)
         {
             using (var context = new IVCdbContext())
             {
                 context.Entry(formulacion).State = EntityState.Modified;
-                context.SaveChanges();
+                return context.SaveChanges() > 0;
             }
         }
 
@@ -78,6 +79,30 @@ namespace Negocio
                 context.SaveChanges();
             }
             return true;
+        }
+
+        /// <summary>
+        /// Obtiene una formulación por su Id incluyendo las entidades relacionadas necesarias.
+        /// Devuelve null si no existe.
+        /// </summary>
+        public FormulacionEF ObtenerPorId(int id)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var entidad = context.Formulaciones
+                    .Include(f => f.ObraEF)
+                    .Include(f => f.ObraEF.Area)
+                    .Include(f => f.ObraEF.Empresa)
+                    .Include(f => f.ObraEF.Contrata)
+                    .Include(f => f.ObraEF.Barrio)
+                    .Include(f => f.ObraEF.Proyecto)
+                    .Include(f => f.ObraEF.Proyecto.LineaGestionEF)
+                    .Include(f => f.UnidadMedidaEF)
+                    .Include(f => f.PrioridadEF)
+                    .FirstOrDefault(f => f.Id == id);
+
+                return entidad;
+            }
         }
 
         #region Métodos para Paginación

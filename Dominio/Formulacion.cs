@@ -8,9 +8,9 @@ namespace Dominio
 {
     public class Formulacion
     {
-        public Obra Obra {get; set; }
+        public Obra Obra { get; set; }
         public int Id { get; set; }
-       public decimal Monto_26 { get; set; }
+        public decimal Monto_26 { get; set; }
         public decimal Monto_27 { get; set; }
         public decimal Monto_28 { get; set; }
         public int? Ppi { get; set; }

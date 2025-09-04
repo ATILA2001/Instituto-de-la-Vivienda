@@ -32,9 +32,10 @@ namespace WebForms
 
             UsuarioNegocio negocio = new UsuarioNegocio();
             Usuario nuevo = new Usuario();
+            nuevo.Username = txtCUIL.Text.Trim();
             nuevo.Correo = txtEmail.Text.Trim();
             nuevo.Contrasenia = txtPass.Text;
-            nuevo.Nombre = txtNombre.Text.Trim(); 
+            nuevo.Nombre = txtNombre.Text.Trim();
             nuevo.Area = new Area();
             nuevo.Area.Id = int.Parse(ddlAreas.SelectedValue);
             nuevo.Area.Nombre = ddlAreas.SelectedItem.Text;
@@ -45,8 +46,8 @@ namespace WebForms
                 negocio.Logear(nuevo);
                 Session["usuario"] = nuevo;
 
-                if (nuevo.Tipo & nuevo.Estado) 
-                { 
+                if (nuevo.Tipo & nuevo.Estado)
+                {
                     Response.Redirect("BdProyectos.aspx", false);
                 }
                 else

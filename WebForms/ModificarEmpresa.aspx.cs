@@ -24,7 +24,7 @@ namespace WebForms
                     List<Empresa> temp = (List<Empresa>)Session["listaEmpresa"];
                     Empresa selected = temp.Find(x => x.Id == codM);
                     txtNombre.Text = selected.Nombre;
-                    
+
                 }
             }
 
@@ -34,7 +34,7 @@ namespace WebForms
             Empresa empresa = new Empresa();
             EmpresaNegocio negocio = new EmpresaNegocio();
 
-            if (txtNombre.Text.Trim() != string.Empty )
+            if (txtNombre.Text.Trim() != string.Empty)
             {
                 empresa.Id = int.Parse(Request.QueryString["codM"].ToString());
                 empresa.Nombre = txtNombre.Text.Trim();

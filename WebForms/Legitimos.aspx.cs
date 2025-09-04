@@ -35,7 +35,7 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-warning";
                 }
 
-                BindDropDownList(); 
+                BindDropDownList();
                 CargarListaLegitimos();
             }
         }
@@ -215,30 +215,30 @@ namespace WebForms
             {
                 List<Legitimo> listaCompleta;
 
-                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+                    //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //Session["legitimosUsuarioCompleto"] = listaCompleta;
+
+                    if (forzarRecargaCompleta || Session["legitimosUsuarioCompleto"] == null)
                     {
-                        //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        //Session["legitimosUsuarioCompleto"] = listaCompleta;
-
-                        if (forzarRecargaCompleta || Session["legitimosUsuarioCompleto"] == null)
-                        {
-                            listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                            Session["legitimosUsuarioCompleto"] = listaCompleta;
-                        }
-                        else
-                        {
-                            listaCompleta = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
-                        }
-
+                        listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        Session["legitimosUsuarioCompleto"] = listaCompleta;
                     }
                     else
                     {
-                        gridviewRegistros.DataSource = new List<Legitimo>();
-                        gridviewRegistros.DataBind();
-                        CalcularSubtotal();
-                        return;
+                        listaCompleta = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
                     }
+
+                }
+                else
+                {
+                    gridviewRegistros.DataSource = new List<Legitimo>();
+                    gridviewRegistros.DataBind();
+                    CalcularSubtotal();
+                    return;
+                }
 
 
                 IEnumerable<Legitimo> listaFiltrada = listaCompleta;
@@ -370,7 +370,8 @@ namespace WebForms
                         .Select(l => l.MesAprobacion.Value.Date)
                         .Distinct()
                         .OrderByDescending(d => d)
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")),
                             Valor = d.ToString("yyyy-MM-dd") // Usar yyyy-MM-dd para el valor
                         })
@@ -669,7 +670,7 @@ namespace WebForms
             CargarListaLegitimos();
         }
 
-        
+
 
     }
 

@@ -15,11 +15,37 @@ namespace Negocio
         /// <summary>
         /// Lista completa para dropdown (sin tracking).
         /// </summary>
-        public List<AutorizanteEF> ListarParaDDL()
+        public List<AutorizanteEF> ListarParaDDL(UsuarioEF usuario = null)
         {
-            using (var context = new IVCdbContext())
+            try
             {
-                return context.Autorizantes.AsNoTracking().ToList();
+                using (var context = new IVCdbContext())
+                {
+                    var query = context.Autorizantes.AsNoTracking()
+                        .Include(a => a.Obra);
+
+                    // Aplica filtro de seguridad por área solo si:
+                    // 1. Usuario no es null
+                    // 2. Usuario no es administrador (Tipo = false) 
+                    // 3. Usuario tiene un área asignada
+                    if (usuario != null && !usuario.Tipo)
+                    {
+                        int? areaId = usuario.AreaId ?? (usuario.Area != null ? usuario.Area.Id : (int?)null);
+
+                        if (areaId.HasValue)
+                        {
+                            query = query.Where(a => a.Obra.AreaId == areaId.Value);
+                        }
+                    }
+
+                    return query
+                        .OrderBy(a => a.CodigoAutorizante)
+                        .ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error al obtener los autorizantes", ex);
             }
         }
 
@@ -52,16 +78,7 @@ namespace Negocio
         /// - Dropdowns en páginas con control de acceso por área
         /// - Listados que respetan jerarquía organizacional
         /// </summary>
-        public List<AutorizanteEF> ListarParaDDL(UsuarioEF usuario)
-        {
-            using (var context = new IVCdbContext())
-            {
-                return context.Autorizantes
-                    .AsNoTracking()
-                    .Where(a => context.Obras.Any(o => o.AreaId == usuario.AreaId && a.ObraId == o.Id))
-                    .ToList();
-            }
-        }
+
 
         /// <summary>
         /// Obtiene un autorizante específico por su código único.

@@ -20,12 +20,17 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label for="ddlObra" class="form-label">Obra</label>
-                                        <asp:DropDownList ID="ddlObra" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                        <asp:label ID="lblObra" for="ddlObraAgregar" class="form-label" runat="server">Obra</asp:label>
+                                        <asp:DropDownList ID="ddlObraAgregar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
                                             <asp:ListItem Value="" Text="Seleccione una obra" Selected="True"></asp:ListItem>
                                         </asp:DropDownList>
+
+                                        <asp:DropDownList ID="ddlObraEditar" CssClass="form-select" runat="server" AppendDataBoundItems="true">
+                                            <asp:ListItem Value="" Text="Seleccione una obra" Selected="True" Visible="false" Enabled="false"></asp:ListItem>
+                                        </asp:DropDownList>
+
                                         <asp:RequiredFieldValidator ID="rfvObra"
-                                            ControlToValidate="ddlObra"
+                                            ControlToValidate="ddlObraAgregar"
                                             ValidationGroup="AgregarFormulacion"
                                             runat="server"
                                             ErrorMessage="Seleccione una obra"
@@ -159,15 +164,7 @@
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revValorMedida"
-                                            ControlToValidate="txtValorMedida"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese un valor numérico válido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -256,7 +253,7 @@
     <hr class="mb-3" />
     <div class="gridview-scroll-container">
 
-    <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+        <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
             OnRowDeleting="dgvFormulacion_RowDeleting"
             OnDataBound="dgvFormulacion_DataBound"
@@ -310,9 +307,13 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
+                <asp:BoundField HeaderText="PPI" DataField="Ppi" />
+
+                <asp:BoundField HeaderText="Techos 2026" DataField="Techos" DataFormatString="{0:C}" />
+
                 <asp:TemplateField HeaderText="Plurianual (2026,2027,2028)">
                     <ItemTemplate>
-                        <%# CalcularPlurianual(Eval("Monto_26"), Eval("Monto_27"), Eval("Monto_28")) %>
+                        <%# CalcularPlurianual(Eval("ObraId")) %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -401,10 +402,13 @@
             document.getElementById('<%= txtMonto26.ClientID %>').value = '';
             document.getElementById('<%= txtMonto27.ClientID %>').value = '';
             document.getElementById('<%= txtMonto28.ClientID %>').value = '';
+            document.getElementById('<%= txtPpi.ClientID %>').value = '';
+            document.getElementById('<%= txtTechos.ClientID %>').value = '';
             document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
             document.getElementById('<%= txtMesBase.ClientID %>').value = '';
             document.getElementById('<%= txtObservaciones.ClientID %>').value = '';
-            document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlObraEditar.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
         }

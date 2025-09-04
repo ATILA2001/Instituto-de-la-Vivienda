@@ -13,7 +13,7 @@ namespace Negocio
     {
         public DataTable listarddl()
         {
-            DataTable dt = new DataTable(); 
+            DataTable dt = new DataTable();
             AccesoDatos datos = new AccesoDatos();
 
             try

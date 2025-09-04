@@ -12,7 +12,7 @@ namespace WebForms
             ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.WebForms;
 
             // Agregar el mapping de jQuery
-            ScriptManager.ScriptResourceMapping.AddDefinition("jquery", 
+            ScriptManager.ScriptResourceMapping.AddDefinition("jquery",
                 new ScriptResourceDefinition
                 {
                     Path = "~/Scripts/jquery-3.6.0.min.js",

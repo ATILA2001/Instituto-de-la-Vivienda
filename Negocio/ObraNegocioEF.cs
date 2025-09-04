@@ -1,4 +1,6 @@
+// No markdown fences found in the file. No changes made.
 using Dominio;
+using Dominio.DTO;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -6,10 +8,15 @@ using System.Linq;
 
 namespace Negocio
 {
+    /// <summary>
+    /// Operaciones de negocio para Obras.
+    /// Delega cálculos complejos a CalculoObraNegocioEF para mantener la clase reducida.
+    /// </summary>
     public class ObraNegocioEF
     {
         /// <summary>
-        /// Lista todas las obras para dropdown lists
+        /// Lista obras proyectadas a DTO para el grid, delegando cálculos financieros.
+        /// Se respeta el usuario: si es administrador devuelve todas, si no filtra por el area del usuario.
         /// </summary>
         public List<ObraEF> ListarParaDDL()
         {
@@ -17,9 +24,18 @@ namespace Negocio
             {
                 using (var context = new IVCdbContext())
                 {
-                    return context.Obras.AsNoTracking()
-                        .OrderBy(o => o.Descripcion)
-                        .ToList();
+
+                    List<ObraEF> query;
+                    int userAreaId = UserHelper.GetUserAreaId();
+
+                    if (UserHelper.IsUserAdmin())
+                        query = context.Obras.AsNoTracking().ToList();
+                    else
+                        query = context.Obras.AsNoTracking().Where(o => o.AreaId == userAreaId).ToList();
+
+                    return query
+                            .OrderBy(o => o.Descripcion)
+                            .ToList();
                 }
             }
             catch (Exception ex)
@@ -28,117 +44,89 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Lista obras para dropdown excluyendo las que ya tienen Formulación.
-        /// Permite incluir explícitamente una obra (por ejemplo, al editar) y filtrar por área del usuario no admin.
-        /// </summary>
-        /// <param name="includeObraId">ID de obra a incluir aunque ya esté en Formulación (útil al editar).</param>
-        /// <param name="usuario">Usuario actual; si no es admin y tiene área, filtra por área.</param>
         public List<ObraEF> ListarParaDDLNoEnFormulacion(int? includeObraId = null, UsuarioEF usuario = null)
         {
-            try
+            using (var context = new IVCdbContext())
             {
-                using (var context = new IVCdbContext())
+                var query = context.Obras.AsNoTracking().Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id) || (includeObraId.HasValue && o.Id == includeObraId.Value));
+                if (usuario != null && !usuario.Tipo)
                 {
-                    var query = context.Obras.AsNoTracking().Where(o =>
-                        !context.Formulaciones.Any(f => f.ObraId == o.Id) ||
-                        (includeObraId.HasValue && o.Id == includeObraId.Value));
-
-                    // Si el usuario no es admin, filtrar por su área (si la tiene)
-                    if (usuario != null && !usuario.Tipo)
-                    {
-                        if (usuario.AreaId.HasValue)
-                            query = query.Where(o => o.AreaId == usuario.AreaId.Value);
-                        else if (usuario.Area != null)
-                            query = query.Where(o => o.AreaId == usuario.Area.Id);
-                    }
-
-                    return query
-                        .OrderBy(o => o.Descripcion)
-                        .ToList();
+                    if (usuario.AreaId.HasValue) query = query.Where(o => o.AreaId == usuario.AreaId.Value);
+                    else if (usuario.Area != null) query = query.Where(o => o.AreaId == usuario.Area.Id);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Error al obtener las obras disponibles para Formulación", ex);
+                return query.OrderBy(o => o.Descripcion).ToList();
             }
         }
 
-        /// <summary>
-        /// Lista todas las obras con información completa
-        /// </summary>
-        public List<ObraEF> Listar()
+        public List<ObraDTO> ListarTodo()
         {
             try
             {
                 using (var context = new IVCdbContext())
                 {
-                    return context.Obras.AsNoTracking()
+                    var obras = context.Obras.AsNoTracking()
                         .Include(o => o.Empresa)
                         .Include(o => o.Area)
                         .Include(o => o.Barrio)
                         .Include(o => o.Contrata)
+                        .Include("Proyecto")
+                        .Include("Proyecto.LineaGestionEF")
                         .OrderBy(o => o.Descripcion)
                         .ToList();
+
+                    // Calcular finanzas y construir DTOs
+                    var calc = new CalculoObraNegocioEF();
+                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
+                    return calc.ConstruirObraDTOs(obras, finanzas);
                 }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error al obtener las obras", ex);
+                throw new ApplicationException("Error al obtener las obras DTO", ex);
             }
         }
 
-        /// <summary>
-        /// Lista obras filtradas por área del usuario
-        /// </summary>
-        public List<ObraEF> ListarPorArea(int areaId)
+        public List<ObraDTO> ListarPorArea(int areaId)
         {
             try
             {
                 using (var context = new IVCdbContext())
                 {
-                    return context.Obras.AsNoTracking()
+                    var obras = context.Obras.AsNoTracking()
                         .Where(o => o.AreaId == areaId)
                         .Include(o => o.Empresa)
                         .Include(o => o.Area)
                         .Include(o => o.Barrio)
                         .Include(o => o.Contrata)
+                        .Include("Proyecto")
+                        .Include("Proyecto.LineaGestionEF")
                         .OrderBy(o => o.Descripcion)
                         .ToList();
+
+                    var calc = new CalculoObraNegocioEF();
+                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
+                    return calc.ConstruirObraDTOs(obras, finanzas);
                 }
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error al obtener las obras por área", ex);
+                throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
             }
         }
 
-        /// <summary>
-        /// Obtiene una obra por su ID
-        /// </summary>
         public ObraEF ObtenerPorId(int id)
         {
-            try
+            using (var context = new IVCdbContext())
             {
-                using (var context = new IVCdbContext())
-                {
-                    return context.Obras.AsNoTracking()
-                        .Include(o => o.Empresa)
-                        .Include(o => o.Area)
-                        .Include(o => o.Barrio)
-                        .Include(o => o.Contrata)
-                        .FirstOrDefault(o => o.Id == id);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException($"Error al obtener la obra con ID {id}", ex);
+                return context.Obras.AsNoTracking()
+                    .Include(o => o.Empresa)
+                    .Include(o => o.Area)
+                    .Include(o => o.Barrio)
+                    .Include(o => o.Contrata)
+                    .FirstOrDefault(o => o.Id == id);
             }
         }
 
-        /// <summary>
-        /// Agrega una nueva obra
-        /// </summary>
         public bool Agregar(ObraEF obra)
         {
             try
@@ -155,9 +143,6 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Modifica una obra existente
-        /// </summary>
         public bool Modificar(ObraEF obra)
         {
             try
@@ -174,9 +159,6 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Elimina una obra por su ID
-        /// </summary>
         public bool Eliminar(int id)
         {
             try
@@ -196,6 +178,22 @@ namespace Negocio
             {
                 throw new ApplicationException("Error al eliminar la obra", ex);
             }
+        }
+
+        // Helpers para filtros
+        public List<AreaEF> ListarAreas()
+        {
+            using (var context = new IVCdbContext()) return context.Areas.AsNoTracking().OrderBy(a => a.Nombre).ToList();
+        }
+
+        public List<EmpresaEF> ListarEmpresas()
+        {
+            using (var context = new IVCdbContext()) return context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).ToList();
+        }
+
+        public List<BarrioEF> ListarBarrios()
+        {
+            using (var context = new IVCdbContext()) return context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).ToList();
         }
     }
 }

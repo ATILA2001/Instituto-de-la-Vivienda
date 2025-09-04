@@ -51,7 +51,7 @@ namespace Negocio
                     query += " AND (O.DESCRIPCION LIKE @filtro OR BA.NOMBRE LIKE @filtro OR BD.PROYECTO LIKE @filtro OR BD.SUBPROYECTO LIKE @filtro OR LG.NOMBRE LIKE @filtro OR M.MOVIMIENTO LIKE @filtro) ";
                     datos.setearParametros("@filtro", $"%{filtro}%");
                 }
-            
+
 
                 query += " ORDER BY M.ID";
                 datos.setearConsulta(query);
@@ -99,7 +99,7 @@ namespace Negocio
                 datos.agregarParametro("@OBRA", movimiento.Obra.Id);
                 datos.agregarParametro("@MOVIMIENTO", movimiento.Monto);
                 datos.agregarParametro("@FECHA", movimiento.Fecha);
-               
+
 
                 // Ejecutar la inserción
                 datos.ejecutarAccion();

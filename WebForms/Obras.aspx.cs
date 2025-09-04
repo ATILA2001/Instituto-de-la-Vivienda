@@ -69,7 +69,7 @@ namespace WebForms
                     Session["obrasUsuarioCompleto"] = obrasUsuario;
                 }
 
-               
+
                 if (obrasUsuario.Any())
                 {
                     // Definir mapeo de columnas (encabezado de columna -> ruta de propiedad)
@@ -503,7 +503,7 @@ namespace WebForms
             ddlBarrio.DataTextField = "Nombre";
             ddlBarrio.DataValueField = "Id";
             ddlBarrio.DataBind();
-        }      
+        }
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             string filtro = txtBuscar.Text.Trim();

@@ -277,7 +277,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                     };
                     aux.FechaInicio = datos.Lector["FECHA_INICIO"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_INICIO"] : (DateTime?)null;
                     aux.FechaFin = datos.Lector["FECHA_FIN"] != DBNull.Value ? (DateTime)datos.Lector["FECHA_FIN"] : (DateTime?)null;
-                   
+
                     aux.Barrio = new Barrio
                     {
                         Id = (int)datos.Lector["BARRIO_ID"],

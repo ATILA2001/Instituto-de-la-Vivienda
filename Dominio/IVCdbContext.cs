@@ -40,9 +40,10 @@ namespace Dominio
         public DbSet<LineaGestionFFEF> LineasGestionFF { get; set; }
         public DbSet<ConceptoEF> Conceptos { get; set; }
         public DbSet<EstadoAutorizanteEF> EstadosAutorizante { get; set; }
-        public DbSet<EstadoRedetEF> EstadosRedet { get; set; }        public DbSet<TipoPagoEF> TiposPago { get; set; }
+        public DbSet<EstadoRedetEF> EstadosRedet { get; set; }
+        public DbSet<TipoPagoEF> TiposPago { get; set; }
         public DbSet<ABMPlaniEF> ABMPlani { get; set; } // Estado de planificación
-        
+
         // Nuevas tablas para consultas EF
         public DbSet<PaseSadeEF> PasesSade { get; set; }
 
@@ -100,7 +101,7 @@ namespace Dominio
                 .WithMany(er => er.Redeterminaciones)
                 .HasForeignKey(r => r.EstadoRedetEFId);// Relación Certificado - TipoPago (muchos a uno)
             modelBuilder.Entity<CertificadoEF>()
-                .HasRequired(c => c.TipoPago) 
+                .HasRequired(c => c.TipoPago)
                 .WithMany(tp => tp.Certificados)
                 .HasForeignKey(c => c.TipoPagoId);
 

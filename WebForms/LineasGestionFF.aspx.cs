@@ -82,8 +82,8 @@ namespace WebForms
         }
         protected void dgvLineaGestionFF_SelectedIndexChanged(object sender, EventArgs e)
         {
-        //    var idSeleccionado = dgvLineaGestion.SelectedDataKey.Value.ToString();
-        //    Response.Redirect("modificarEmpresa.aspx?codM=" + idSeleccionado);
+            //    var idSeleccionado = dgvLineaGestion.SelectedDataKey.Value.ToString();
+            //    Response.Redirect("modificarEmpresa.aspx?codM=" + idSeleccionado);
         }
 
         protected void dgvLineaGestionFF_RowDeleting(object sender, GridViewDeleteEventArgs e)

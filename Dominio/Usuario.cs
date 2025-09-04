@@ -14,7 +14,7 @@ namespace Dominio
         public String Correo { get; set; }
 
         public String Contrasenia { get; set; }
-        public bool Tipo {  get; set; }
+        public bool Tipo { get; set; }
 
         public bool Estado { get; set; }
 

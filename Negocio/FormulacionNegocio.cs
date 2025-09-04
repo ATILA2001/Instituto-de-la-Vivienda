@@ -191,7 +191,7 @@ namespace Negocio
                     datos.setearParametros("@IdUnidadMedida", formulacion.UnidadMedida.Id);
                 else
                     datos.setearParametros("@IdUnidadMedida", DBNull.Value);
-              
+
                 if (formulacion.MesBase != null)
                     datos.setearParametros("@mes", formulacion.MesBase);
                 else

@@ -29,7 +29,7 @@ namespace WebForms.CustomControls
         #endregion
 
         #region Propiedades Públicas
-        
+
         /// <summary>
         /// Índice de la página actual (base 0)
         /// </summary>
@@ -45,8 +45,8 @@ namespace WebForms.CustomControls
         public int PageSize
         {
             get { return ViewState["PageSize"] != null ? (int)ViewState["PageSize"] : 12; }
-            set 
-            { 
+            set
+            {
                 ViewState["PageSize"] = value;
                 if (ddlPageSizeExternal.Items.FindByValue(value.ToString()) != null)
                 {
@@ -114,23 +114,23 @@ namespace WebForms.CustomControls
             }
 
             this.Visible = true;
-            
+
             // Actualizar información de página
             lblPaginaInfo.Text = $"Página {CurrentPageIndex + 1} de {Math.Max(TotalPages, 1)}";
-            
-            
+
+
             // Habilitar/deshabilitar botones de navegación
             lnkFirst.Enabled = CurrentPageIndex > 0;
             lnkPrev.Enabled = CurrentPageIndex > 0;
             lnkNext.Enabled = CurrentPageIndex < TotalPages - 1;
             lnkLast.Enabled = CurrentPageIndex < TotalPages - 1;
-            
+
             // Aplicar estilos visuales según estado
             lnkFirst.CssClass = lnkFirst.Enabled ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
             lnkPrev.CssClass = lnkPrev.Enabled ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
             lnkNext.CssClass = lnkNext.Enabled ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
             lnkLast.CssClass = lnkLast.Enabled ? "btn btn-sm btn-outline-primary" : "btn btn-sm btn-outline-secondary disabled";
-            
+
             // Configurar botones de página numerados
             ConfigurarBotonesPagina();
         }
@@ -175,27 +175,27 @@ namespace WebForms.CustomControls
         private void ConfigurarBotonesPagina()
         {
             var botonesPagina = new[] { lnkPage1, lnkPage2, lnkPage3, lnkPage4, lnkPage5 };
-            
+
             // Calcular rango de páginas a mostrar (ventana deslizante)
             int startPage = Math.Max(0, CurrentPageIndex - 2);
             int endPage = Math.Min(TotalPages - 1, startPage + 4);
-            
+
             // Ajustar startPage si hay menos de 5 páginas al final
             if (endPage - startPage < 4 && TotalPages >= 5)
                 startPage = Math.Max(0, endPage - 4);
-            
+
             for (int i = 0; i < botonesPagina.Length; i++)
             {
                 int pageIndex = startPage + i;
                 var boton = botonesPagina[i];
-                
+
                 if (pageIndex < TotalPages)
                 {
                     boton.Visible = true;
                     boton.Text = (pageIndex + 1).ToString();
                     boton.CommandArgument = pageIndex.ToString();
-                    boton.CssClass = pageIndex == CurrentPageIndex 
-                        ? "btn btn-sm btn-primary mx-1" 
+                    boton.CssClass = pageIndex == CurrentPageIndex
+                        ? "btn btn-sm btn-primary mx-1"
                         : "btn btn-sm btn-outline-primary mx-1";
                 }
                 else
@@ -210,9 +210,9 @@ namespace WebForms.CustomControls
         /// </summary>
         private void OnPageChanged()
         {
-            PageChanged?.Invoke(this, new PaginationEventArgs 
-            { 
-                PageIndex = CurrentPageIndex, 
+            PageChanged?.Invoke(this, new PaginationEventArgs
+            {
+                PageIndex = CurrentPageIndex,
                 PageSize = PageSize,
                 TotalRecords = TotalRecords
             });
@@ -223,9 +223,9 @@ namespace WebForms.CustomControls
         /// </summary>
         private void OnPageSizeChanged()
         {
-            PageSizeChanged?.Invoke(this, new PaginationEventArgs 
-            { 
-                PageIndex = CurrentPageIndex, 
+            PageSizeChanged?.Invoke(this, new PaginationEventArgs
+            {
+                PageIndex = CurrentPageIndex,
                 PageSize = PageSize,
                 TotalRecords = TotalRecords
             });

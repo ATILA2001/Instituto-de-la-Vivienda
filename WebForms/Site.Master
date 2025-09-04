@@ -3,152 +3,167 @@
 <!DOCTYPE html>
 <html>
 <head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Instituto de la Vivienda - Buenos Aires</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<title>Instituto de la Vivienda - Buenos Aires</title>
 
-    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
-    <link rel="icon" href="Images/IVC-Blanco.png" type="image/x-icon" />
+	<asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
+	<link rel="icon" href="Images/IVC-Blanco.png" type="image/x-icon" />
 
-    <!-- En Admin.Master, después del título -->
-    <script src="<%= ResolveUrl("~/Scripts/jquery-3.6.0.min.js") %>"></script>
-    <link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
-    <script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
-    <link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
+	<!-- En Admin.Master, después del título -->
+	<script src="<%= ResolveUrl("~/Scripts/jquery-3.6.0.min.js") %>"></script>
+	<link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
+	<script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
+	<link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
 
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var form = document.getElementById('<%= form1.ClientID %>');
-            form.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                }
-            });
-        });
-    </script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var form = document.getElementById('<%= form1.ClientID %>');
+			form.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter') {
+					event.preventDefault();
+				}
+			});
+		});
+	</script>
 
 
 
 </head>
 <body class="bg-light">
-    <form id="form1" runat="server">
-        <asp:ScriptManager ID="ScriptManager1" runat="server" />
+	<form id="form1" runat="server">
+		<asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-dark m-2 rounded-3 navbar-3d">
-                <div class="container-fluid">
-                    <a class="navbar-brand d-flex align-items-center">
-                        <img src="Images/IVC-Blanco.png" width="50" height="50" style="margin-right: 0!important; margin-top: 0!important; margin-left: 0.5rem!important;" />
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarMenu">
-                        <ul class="navbar-nav ms-auto">
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark m-2 rounded-3 navbar-3d">
+				<div class="container-fluid">
+					<a class="navbar-brand d-flex align-items-center">
+						<img src="Images/IVC-Blanco.png" width="50" height="50" style="margin-right: 0!important; margin-top: 0!important; margin-left: 0.5rem!important;" />
+						<span class="ms-3 text-white fs-4 d-flex align-items-end"><%: GetCurrentPageName() %></span>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2026</span></a>
-                            </li>
-                            <!-- Gestión -->
-                            <li class="nav-item dropdown" id="dropdownGestion" runat="server">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span>Gestión</span>
-                                </a>
+					</a>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarMenu">
+						<ul class="navbar-nav ms-auto">
 
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="BdProyectos.aspx">Proyectos</a></li>
-                                    <li><a class="dropdown-item" href="MovimientosGestion.aspx">Movimientos</a></li>
-                                    <li><a class="dropdown-item" href="FormulacionEF.aspx">Formulación 2026</a></li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <h6 class="dropdown-header">Líneas de Gestión</h6>
-                                    </li>
-                                    <li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
-                                    <li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
-                                </ul>
-                            </li>
 
-                            <!-- Planificación -->
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span>Planificación</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" id="lnkObras" runat="server">Obras</a></li>
-                                    <li><a class="dropdown-item" href="AutorizantesEF.aspx">Autorizantes</a></li>
-                                    <li><a class="dropdown-item" href="CertificadosEF.aspx">Certificados</a></li>
-                                    <li><a class="dropdown-item" id="lnkLegitimos" runat="server">Legítimos Abonos</a></li>
-                                </ul>
-                            </li>
+							<li class="nav-item">
+								<a id="lnkObras" runat="server" class="nav-link text-white" href="ObrasEF.aspx">Obras</a>
+							</li>
+							<li class="nav-item">
+								<a id="lnkAutorizantes" runat="server" class="nav-link text-white" href="AutorizantesEF.aspx">Autorizantes</a>
+							</li>
+							<li class="nav-item">
+								<a id="lnkRedeterminaciones" runat="server" class="nav-link text-white" href="Redeterminaciones.aspx">Redeterminaciones</a>
+							</li>
 
-                            <!-- Admin -->
-                            <li class="nav-item dropdown" id="liAdminNav" runat="server">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span>Admin</span>
-                                </a>
-                                <ul class="dropdown-menu">
+							<li class="nav-item">
+								<a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2026</span></a>
+							</li>
+							<!-- Gestión -->
+							<li class="nav-item dropdown" id="dropdownGestion" runat="server">
+								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<span>Gestión</span>
+								</a>
 
-                                    <li>
-                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-                                            <input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
-                                                onserverchange="chkIsPlanningOpen_ServerChange" />
-                                            <label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-                                            <input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
-                                                onserverchange="chkIsFormulationOpen_ServerChange" />
-                                            <label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
-                                        </div>
-                                    </li>
+								<ul class="dropdown-menu">
+									<li><a class="dropdown-item" href="BdProyectos.aspx">Proyectos</a></li>
+									<li><a class="dropdown-item" href="MovimientosGestion.aspx">Movimientos</a></li>
+									<li><a class="dropdown-item" href="FormulacionEF.aspx">Formulación 2026</a></li>
+									<li>
+										<hr class="dropdown-divider">
+									</li>
+									<li>
+										<h6 class="dropdown-header">Líneas de Gestión</h6>
+									</li>
+									<li><a class="dropdown-item" href="LineasGestion.aspx">Sin FF</a></li>
+									<li><a class="dropdown-item" href="LineasGestionFF.aspx">Con FF</a></li>
+								</ul>
+							</li>
 
-                                    <li>
-                                        <a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
-                                    </li>
+							<!-- Planificación -->
+							<li class="nav-item dropdown" id="liPlaniNav" runat="server">
+								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<span>Planificación</span>
+								</a>
+								<ul class="dropdown-menu">
+									<li><a class="dropdown-item" href="ObrasEF.aspx" runat="server">Obras</a></li>
+									<li><a class="dropdown-item" href="AutorizantesEF.aspx">Autorizantes</a></li>
+									<li><a class="dropdown-item" href="CertificadosEF.aspx">Certificados</a></li>
+									<li><a class="dropdown-item" href="LegitimosEF.aspx" runat="server">Legítimos Abonos</a></li>
+								</ul>
+							</li>
 
-                                    <li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
+							<!-- Admin -->
+							<li class="nav-item dropdown" id="liAdminNav" runat="server">
+								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<span>Admin</span>
+								</a>
+								<ul class="dropdown-menu dropdown-menu-end">
 
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <h6 class="dropdown-header">Base de Datos</h6>
-                                    </li>
-                                    <li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
-                                    <li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
-                                </ul>
-                            </li>
+									<li>
+										<div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+											<input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
+												onserverchange="chkIsPlanningOpen_ServerChange"
+												onchange="__doPostBack('<%= chkIsPlanningOpen.UniqueID %>', '')" />
+											<label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
+										</div>
+									</li>
+									<li>
+										<div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
+											<input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
+												onserverchange="chkIsFormulationOpen_ServerChange"
+												onchange="__doPostBack('<%= chkIsFormulationOpen.UniqueID %>', '')" />
+											<label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
+										</div>
+									</li>
 
-                        </ul>
+									<li>
+										<a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
+									</li>
 
-                        <!-- Botón Cerrar Sesión -->
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
+									<li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
+
+									<li>
+										<hr class="dropdown-divider">
+									</li>
+									<li>
+										<h6 class="dropdown-header">Base de Datos</h6>
+									</li>
+									<li><a class="dropdown-item" href="AbmlBarrio.aspx">Barrios</a></li>
+									<li><a class="dropdown-item" href="AbmlEmpresa.aspx">Empresas</a></li>
+								</ul>
+							</li>
+
+						</ul>
+
+						<!-- Botón Cerrar Sesión -->
+						<ul class="navbar-nav">
+							<li class="nav-item">
+								<asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-primary" OnClick="btnCerrarSesion_Click" Text="Cerrar Sesión" runat="server" ToolTip="Cerrar sesión">
                             <i class="bi bi-box-arrow-right"></i>
-                                </asp:LinkButton>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        </header>
-        <main class="container-fluid">
-            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
-        </main>
+								</asp:LinkButton>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+		<main class="container-fluid">
+			<asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
+		</main>
 
-        <footer class="bg-dark text-light py-4">
-            <div class="container text-center">
-                <p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
-                <p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
-            </div>
-        </footer>
-    </form>
+		<footer class="bg-dark text-light py-4">
+			<div class="container text-center">
+				<p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
+				<p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
+			</div>
+		</footer>
+	</form>
 
 </body>
 
