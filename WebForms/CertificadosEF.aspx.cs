@@ -453,6 +453,8 @@ namespace WebForms
                                 dto.MesAprobacion = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
                                 dto.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
                                 // Opcional: actualizar texto del tipo/campos derivados si tu DTO lo contiene
+                                dto.TipoPagoNombre = ddlTipo.SelectedItem?.Text ?? dto.TipoPagoNombre;
+
                             }
                         }
                     }
