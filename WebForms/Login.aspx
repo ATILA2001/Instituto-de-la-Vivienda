@@ -26,10 +26,9 @@
 								<div class="col-12">
 									<div class="mb-4">
 										<div class="form-label-container">
-											<asp:Label ID="lblEmail" CssClass="form-label" Text="Correo electrónico" runat="server" />
+											<asp:Label ID="lblEmail" CssClass="form-label" Text="Correo electrónico o CUIL" runat="server" />
 										</div>
 										<asp:TextBox
-											type="email"
 											CssClass="form-control"
 											ID="txtEmail"
 											placeholder="Ingrese su correo electrónico"
@@ -38,9 +37,10 @@
 										<asp:RequiredFieldValidator
 											ID="rfvEmail"
 											ControlToValidate="txtEmail"
-											ErrorMessage="El correo electrónico es requerido"
+											ErrorMessage="Debe ingresar un correo válido o un CUIL correcto"
 											CssClass="text-danger small"
 											Display="Dynamic"
+                                            ValidationExpression="^(([^@\s]+@[^@\s]+\.[^@\s]+)|((20|23|27|30|33)([0-9]{8})([0-9])))$"
 											runat="server" />
 									</div>
 

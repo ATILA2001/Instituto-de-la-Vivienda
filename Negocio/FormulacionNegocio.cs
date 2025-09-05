@@ -370,7 +370,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
                     aux.Ppi = datos.Lector["PPI"] != DBNull.Value ?
                         Convert.ToInt32(datos.Lector["PPI"]) : 0;
                     aux.Plurianual = datos.Lector["PLURIANUAL"] != DBNull.Value ?
-                        Convert.ToDecimal(datos.Lector["PLURIANUAL"]) : 0;
+                        Convert.ToInt32(datos.Lector["PLURIANUAL"]) : 0;
                     aux.Techos2026 = datos.Lector["TECHOS"] != DBNull.Value ?
                         Convert.ToDecimal(datos.Lector["TECHOS"]) : 0;
                     aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ?
