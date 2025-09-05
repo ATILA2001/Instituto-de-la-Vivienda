@@ -19,7 +19,7 @@ namespace WebForms
         {
             // Skip authentication for certain pages
             string currentPage = System.IO.Path.GetFileName(Request.Url.AbsolutePath);
-            if (currentPage.Equals("LogoutConfirmation.aspx", StringComparison.OrdinalIgnoreCase) ||
+            if (currentPage.Equals("Login.aspx", StringComparison.OrdinalIgnoreCase) ||
                 currentPage.Equals("Error.aspx", StringComparison.OrdinalIgnoreCase))
             {
                 return;
