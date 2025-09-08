@@ -803,7 +803,6 @@ namespace WebForms
         /// 
         /// DEPENDENCIAS:
         /// - CalculoRedeterminacionNegocioEF para datos combinados
-        /// - ObtenerUsuarioActual() para filtro por área
         /// - Variables currentPageIndex, pageSize (paginación externa)
         /// 
         /// DIFERENCIAS CON OTROS MÓDULOS:
@@ -819,7 +818,7 @@ namespace WebForms
                 List<AutorizanteDTO> todos;
                 if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;
                     ViewState["NecesitaRecarga"] = null;
@@ -1004,37 +1003,6 @@ namespace WebForms
                 System.Diagnostics.Debug.WriteLine($"Error en AplicarFiltrosTreeViewEnMemoria: {ex.Message}");
                 return autorizantes; // Devolver lista original en caso de error
             }
-        }
-
-        private UsuarioEF ObtenerUsuarioActual()
-        {
-            // Implementar según tu lógica de sesión
-            // Por ejemplo:
-            if (Session["Usuario"] != null)
-            {
-                var usuarioTradicional = (Usuario)Session["Usuario"];
-                return new UsuarioEF
-                {
-                    Id = usuarioTradicional.Id,
-                    Nombre = usuarioTradicional.Nombre,
-                    Correo = usuarioTradicional.Correo,
-                    Tipo = usuarioTradicional.Tipo,
-                    Estado = usuarioTradicional.Estado,
-                    AreaId = usuarioTradicional.Area?.Id ?? 0,
-                };
-            }
-
-            // Si no hay usuario en sesión, devolver un usuario por defecto que permita ver todos los datos
-            // (sin filtro de área)
-            return new UsuarioEF
-            {
-                Id = 0,
-                Nombre = "Usuario null",
-                Correo = null,
-                Tipo = false, // Usuario normal por defecto
-                Estado = false,
-                AreaId = 0, // 0 significa sin filtro de área
-            };
         }
 
 
@@ -1380,7 +1348,7 @@ namespace WebForms
                 }
                 else
                 {
-                    UsuarioEF usuario = ObtenerUsuarioActual();
+                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     todosLosRegistros = _calculoRedeterminacionNegocioEF.ListarAutorizantesCompleto(usuario);
                 }
 
