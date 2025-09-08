@@ -276,7 +276,11 @@
                 </asp:TemplateField>
 
                 <asp:BoundField HeaderText="Empresa" DataField="ObraEF.Empresa.Nombre" />
-                <asp:BoundField HeaderText="Contrata" DataField="ObraEF.Contrata.Nombre" />
+                <asp:TemplateField HeaderText="Contrata">
+                    <ItemTemplate>
+                        <%# string.Format("{0} {1}/{2}", Eval("ObraEF.Contrata.Nombre"), Eval("ObraEF.Numero"), Eval("ObraEF.Anio")) %>
+                    </ItemTemplate>
+                </asp:TemplateField>
 
                 <asp:BoundField HeaderText="Barrio" DataField="ObraEF.Barrio.Nombre" />
                 <asp:BoundField HeaderText="Nombre de Obra" DataField="ObraEF.Descripcion" />
