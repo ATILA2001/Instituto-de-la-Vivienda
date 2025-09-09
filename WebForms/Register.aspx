@@ -63,46 +63,6 @@
 										runat="server" />
 								</div>
 
-								<div class="col-md-6 mb-3">
-									<div class="form-label-container">
-										<asp:Label ID="lblTipoIdentificacion" CssClass="form-label" Text="Tipo de Identificación" runat="server" />
-									</div>
-									<asp:DropDownList
-										ID="ddlTipoIdentificacion"
-										CssClass="form-control form-select"
-										runat="server">
-										<asp:ListItem Text="CUIL" Value="CUIL" Selected="True"></asp:ListItem>
-									</asp:DropDownList>
-								</div>
-
-								<div class="col-md-6 mb-3">
-									<div class="form-label-container">
-										<asp:Label ID="lblCUIL" CssClass="form-label" Text="Número de CUIL" runat="server" />
-									</div>
-									<asp:TextBox
-										ID="txtCUIL"
-										CssClass="form-control"
-										placeHolder="00-00000000-0"
-										aria-required="true"
-										runat="server" />
-									<asp:RequiredFieldValidator
-										ID="rfvCUIL"
-										ControlToValidate="txtCUIL"
-										ErrorMessage="El CUIL es requerido"
-										CssClass="text-danger small"
-										Display="Dynamic"
-										runat="server" />
-									<asp:RegularExpressionValidator
-										ID="revCUIL"
-										ControlToValidate="txtCUIL"
-										ValidationExpression="^\d+$"
-										ErrorMessage="Escribilo todo junto, sin espacios ni guiones."
-										CssClass="text-danger small"
-										Display="Dynamic"
-										runat="server" />
-								</div>
-
-
 
 								<div class="col-md-6 mb-3">
 									<div class="form-label-container">

@@ -69,60 +69,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvArea;
 
         /// <summary>
-        /// lblTipoIdentificacion control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblTipoIdentificacion;
-
-        /// <summary>
-        /// ddlTipoIdentificacion control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlTipoIdentificacion;
-
-        /// <summary>
-        /// lblCUIL control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCUIL;
-
-        /// <summary>
-        /// txtCUIL control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCUIL;
-
-        /// <summary>
-        /// rfvCUIL control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCUIL;
-
-        /// <summary>
-        /// revCUIL control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revCUIL;
-
-        /// <summary>
         /// lblEmail control.
         /// </summary>
         /// <remarks>

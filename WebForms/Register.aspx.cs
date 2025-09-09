@@ -32,7 +32,6 @@ namespace WebForms
 
             UsuarioNegocio negocio = new UsuarioNegocio();
             Usuario nuevo = new Usuario();
-            nuevo.Username = txtCUIL.Text.Trim();
             nuevo.Correo = txtEmail.Text.Trim();
             nuevo.Nombre = txtNombre.Text.Trim();
             nuevo.Area = new Area();
@@ -42,25 +41,10 @@ namespace WebForms
             try
             {
                 nuevo.Nombre = negocio.registrarUsuario(nuevo);
-                negocio.Logear(nuevo);
-                Session["usuario"] = nuevo;
 
-                if (nuevo.Tipo & nuevo.Estado)
-                {
-                    Response.Redirect("BdProyectos.aspx", false);
-                }
-                else
-                {
-                    if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
-                    {
-                        Response.Redirect("Obras.aspx", false);
-                    }
-                    else
-                    {
                         lblMensaje.Text = "Usuario registrado. Pendiente de habilitación.";
-                        lblMensaje.CssClass = "alert alert-info";
-                    }
-                }
+                        lblMensaje.CssClass = "alert alert-success";
+
             }
             catch (Exception ex)
             {
