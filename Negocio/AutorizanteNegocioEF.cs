@@ -22,7 +22,8 @@ namespace Negocio
                 using (var context = new IVCdbContext())
                 {
                     var query = context.Autorizantes.AsNoTracking()
-                        .Include(a => a.Obra);
+                        .Include(a => a.Obra)
+                        .Include(e => e.Obra.Empresa);
 
                     // Aplica filtro de seguridad por área solo si:
                     // 1. Usuario no es null

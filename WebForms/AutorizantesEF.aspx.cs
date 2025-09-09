@@ -747,6 +747,15 @@ namespace WebForms
                 ddlObraAgregar.DataTextField = "Descripcion";
                 ddlObraAgregar.DataValueField = "Id";
                 ddlObraAgregar.DataBind();
+
+                foreach (ListItem item in ddlObraAgregar.Items)
+                {
+                    var obra = obras.FirstOrDefault(a => a.Id.ToString() == item.Value);
+                    if (obra != null && obra.Empresa != null)
+                    {
+                        item.Text = $"{obra.Descripcion} - {obra.Empresa.Nombre}";
+                    }
+                }
             }
             catch (Exception ex)
             {

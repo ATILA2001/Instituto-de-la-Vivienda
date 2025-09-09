@@ -777,7 +777,7 @@ namespace WebForms
         {
             var usuario = UserHelper.GetFullCurrentUser();
             AutorizanteNegocioEF autorizanteNegocio = new AutorizanteNegocioEF();
-            var autorizantes = autorizanteNegocio.ListarParaDDL(usuario); // <-- define 'autorizantes' here
+            var autorizantes = autorizanteNegocio.ListarParaDDL(usuario);
             ddlAutorizante.DataSource = autorizantes;
             ddlAutorizante.DataTextField = "CodigoAutorizante";
             ddlAutorizante.DataValueField = "Id";
@@ -787,7 +787,7 @@ namespace WebForms
                 var autorizante = autorizantes.FirstOrDefault(a => a.Id.ToString() == item.Value);
                 if (autorizante != null && autorizante.Obra != null)
                 {
-                    item.Text = $"{autorizante.CodigoAutorizante} - {autorizante.Obra.Descripcion} - {autorizante.Detalle}";
+                    item.Text = $"{autorizante.CodigoAutorizante} - {autorizante.Obra.Descripcion} - {autorizante.Obra.Empresa.Nombre} - {autorizante.Detalle}";
                 }
             }
         }

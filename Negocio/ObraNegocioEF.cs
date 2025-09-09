@@ -29,9 +29,13 @@ namespace Negocio
                     int userAreaId = UserHelper.GetUserAreaId();
 
                     if (UserHelper.IsUserAdmin())
-                        query = context.Obras.AsNoTracking().ToList();
+                        query = context.Obras.AsNoTracking()
+                            .Include(e => e.Empresa)
+                            .ToList();
                     else
-                        query = context.Obras.AsNoTracking().Where(o => o.AreaId == userAreaId).ToList();
+                        query = context.Obras.AsNoTracking()
+                            .Include (e => e.Empresa)
+                            .Where(o => o.AreaId == userAreaId).ToList();
 
                     return query
                             .OrderBy(o => o.Descripcion)
