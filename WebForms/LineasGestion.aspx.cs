@@ -48,13 +48,13 @@ namespace WebForms
                 linea.Grupo = grupo;
                 linea.Reparticion = reparticion;
                 // Llamar a la lógica para agregar la nueva línea de gestión
-               negocio.agregar(linea);
+                negocio.agregar(linea);
 
                 // Mostrar mensaje de éxito
                 lblMensaje.Text = "¡Línea de Gestión agregada exitosamente!";
                 lblMensaje.ForeColor = System.Drawing.Color.Green;
 
-                 
+
                 List<LineaGestion> listaLineaGestion = negocio.listar();
                 dgvLineaGestion.DataSource = listaLineaGestion;
                 dgvLineaGestion.DataBind();
@@ -68,8 +68,8 @@ namespace WebForms
         }
         protected void dgvLineaGestion_SelectedIndexChanged(object sender, EventArgs e)
         {
-        //    var idSeleccionado = dgvLineaGestion.SelectedDataKey.Value.ToString();
-        //    Response.Redirect("modificarEmpresa.aspx?codM=" + idSeleccionado);
+            //    var idSeleccionado = dgvLineaGestion.SelectedDataKey.Value.ToString();
+            //    Response.Redirect("modificarEmpresa.aspx?codM=" + idSeleccionado);
         }
 
         protected void dgvLineaGestion_RowDeleting(object sender, GridViewDeleteEventArgs e)

@@ -1,58 +1,19 @@
 ﻿/**
- * Cierra otros dropdowns abiertos y el actual si se hace clic fuera.
+ * Cerrar dropdowns al hacer click fuera
  */
-document.addEventListener("click", function (event) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    const buttons = document.querySelectorAll(".dropdown-button");
-
-    dropdowns.forEach((dropdown, index) => {
-        const button = buttons[index]; 
-
-        const clickedOnAssociatedButton = button ? button.contains(event.target) : false;
-
-        if (dropdown.style.display === 'block' && !dropdown.contains(event.target) && !clickedOnAssociatedButton) {
-            dropdown.style.display = "none";
+document.addEventListener('click', function (event) {
+    const target = event.target;
+    document.querySelectorAll('.dropdown-content').forEach(openDropdown => {
+        if (window.getComputedStyle(openDropdown).display === 'none') return;
+        const associatedButton = document.querySelector(`.dropdown-button[data-dropdown-id="${openDropdown.id}"]`);
+        if (openDropdown.contains(target) || (associatedButton && associatedButton.contains(target))) return;
+        openDropdown.style.display = 'none';
+        removeDropdownDynamicHandlers(openDropdown);
+        if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
+            clearDropdownTimeout(openDropdown.id);
         }
     });
-});
-
-document.addEventListener("click", function (event) {
-    document.querySelectorAll(".dropdown-content.show").forEach(openDropdown => {
-        const dropdownButtonId = openDropdown.id ? openDropdown.id.replace('_dropdown', 'Button') : null;
-        const dropdownButton = dropdownButtonId ? document.getElementById(dropdownButtonId) : null;
-
-        // Si no se pudo encontrar el botón por ID, intentar encontrarlo por relación en el DOM
-        // Esto es un fallback, idealmente los IDs son consistentes.
-        const fallbackButton = openDropdown.previousElementSibling;
-
-        const clickedOnButton = dropdownButton && dropdownButton.contains(event.target);
-        const clickedOnFallbackButton = fallbackButton && fallbackButton.contains(event.target);
-
-        if (!openDropdown.contains(event.target) && !clickedOnButton && !clickedOnFallbackButton) {
-            const treeViewContainerInside = openDropdown.querySelector('.date-tree-view');
-
-            if (treeViewContainerInside) { 
-                if (typeof restoreState === 'function') {
-
-                    restoreState(treeViewContainerInside); 
-                } else {
-                    // Fallback si restoreState no está definida
-                    openDropdown.style.display = 'none';
-                    if (openDropdown.id && typeof clearDropdownTimeout === 'function') {
-                         clearDropdownTimeout(openDropdown.id);
-                    }
-                    if (typeof updateDropdownIcon === 'function') {
-                         updateDropdownIcon(treeViewContainerInside);
-                    }
-                }
-            } else {
-                // Si no hay treeViewContainer, simplemente cerrar
-                openDropdown.style.display = 'none';
-                if (openDropdown.id) clearDropdownTimeout(openDropdown.id);
-            }
-        }
-    });
-});
+}, false);
 
 function getPageName() {
     try {
@@ -73,6 +34,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Inicializa los tooltips de Bootstrap.
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+    // Conectar botones con data-dropdown-id a la función toggleDropdown (respaldo si server no asignó onclick)
+    document.querySelectorAll('.dropdown-button[data-dropdown-id]').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdownId = btn.getAttribute('data-dropdown-id');
+            if (dropdownId) toggleDropdown(dropdownId);
+            return false;
+        });
+    });
 
 
     // Gestiona el cierre del dropdown si venimos de un postback que lo requiere.
@@ -126,24 +98,55 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Configura el listener delegado para clics en la fila dentro del TreeView
-        treeViewContainer.addEventListener('click', function(event) {
-            const target = event.target;
-            let checkbox = null;
-            let label = null;
-            const nodeElement = target.closest('table tr > td') || target.closest('div[id$="Nodes"] > div');
+        // Implementación más robusta: buscar la <table> que representa el nodo y alternar su checkbox.
+        if (!treeViewContainer.dataset.tvsInit) {
+            treeViewContainer.addEventListener('click', function(event) {
+                const target = event.target;
 
-            if (nodeElement) {
-                checkbox = nodeElement.querySelector('input[type="checkbox"]');
-                label = nodeElement.querySelector('a[id*="chkListn"]');
-            }
+                // Si se hizo click directamente sobre el checkbox, dejamos que el evento 'change' normal lo maneje.
+                if (target.tagName === 'INPUT' && target.type === 'checkbox') return;
 
-            if (checkbox && target !== checkbox && (target === label || (nodeElement && nodeElement.contains(target)))) {
-                event.preventDefault();
-                checkbox.checked = !checkbox.checked;
-                const changeEvent = new Event('change', { bubbles: true });
-                checkbox.dispatchEvent(changeEvent);
-            }
-        });
+                // Ascender el DOM buscando el ancestro que contenga un checkbox (más robusto que assuming table structure)
+                let ancestor = target;
+                let checkbox = null;
+                let anchor = null;
+                while (ancestor && ancestor !== treeViewContainer) {
+                    if (ancestor.querySelector) {
+                        checkbox = ancestor.querySelector('input[type="checkbox"]');
+                        anchor = ancestor.querySelector('a[id*="chkListn"]');
+                        if (checkbox) break;
+                    }
+                    ancestor = ancestor.parentElement;
+                }
+
+                if (!checkbox) return;
+
+                // Si el click ocurrió dentro de un anchor del nodo, prevenir postback/link default
+                if (target.closest('a[id*="chkListn"]')) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                // Evitar doble-toggle: leer estado inicial y aplicar toggle condicional en next tick.
+                const initialChecked = checkbox.checked;
+                setTimeout(() => {
+                    try {
+                        // Si el estado no cambió por el comportamiento nativo, invertirlo
+                        if (checkbox.checked === initialChecked) {
+                            checkbox.checked = !initialChecked;
+                        }
+                        // Disparar evento change para propagar la actualización
+                        const changeEvent = new Event('change', { bubbles: true });
+                        checkbox.dispatchEvent(changeEvent);
+                    } catch (err) {
+                        console.debug('Error toggling checkbox in TreeViewSearch click handler', err);
+                    }
+                }, 0);
+            });
+
+            // Marcar como inicializado para evitar listeners duplicados (importante en re-renderes)
+            treeViewContainer.dataset.tvsInit = 'true';
+        }
 
         // Listener para el evento 'change' de los checkboxes
         treeViewContainer.addEventListener('change', function(event) {
@@ -155,13 +158,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        const dropdownContent = treeViewContainer.closest('.dropdown-content');
+    const dropdownContent = treeViewContainer.closest('.dropdown-content');
         if (dropdownContent) {
             const renderedAcceptButtonId = treeViewContainer.id + '_btnAccept';
             const specificAcceptButton = document.getElementById(renderedAcceptButtonId);
             if (specificAcceptButton && dropdownContent.contains(specificAcceptButton)) {
                 specificAcceptButton.addEventListener('click', function () {                    
-                    // --- INICIO DE MODIFICACIÓN: Lógica del botón Aceptar ---
                     // 1. Guardar el estado actual como el nuevo "estado inicial" para este filtro.
                     // Esto significa que "Cancelar" o una reapertura futura usarán este estado.
                     if (typeof saveInitialState === 'function') {
@@ -170,10 +172,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     // 2. Cerrar el dropdown.
-                    if (dropdownContent) { // dropdownContent ya está definido en este scope
+                    if (dropdownContent) { 
                         dropdownContent.style.display = 'none';
-                        // Si usas una clase como 'show' para controlar la visibilidad, también quítala.
-                        // dropdownContent.classList.remove('show'); 
                         
                         // Limpiar timeouts si los hubiera (asumiendo que dropdownContent tiene un ID)
                         if (dropdownContent.id && typeof clearDropdownTimeout === 'function') {
@@ -205,6 +205,42 @@ document.addEventListener("DOMContentLoaded", function () {
         sessionStorage.removeItem('filtersCleared');
     }
 });
+
+// Re-inicializar listeners después de partial postbacks de ASP.NET AJAX
+if (window.Sys && Sys.WebForms && Sys.WebForms.PageRequestManager) {
+    try {
+        const prm = Sys.WebForms.PageRequestManager.getInstance();
+        prm.add_endRequest(function () {
+            // Reutilizar la lógica de inicialización para nuevos fragmentos
+            document.querySelectorAll('.date-tree-view').forEach(treeViewContainer => {
+                // Limpiar flag de inicialización para forzar re-attach en caso de nuevo DOM
+                if (treeViewContainer.dataset.tvsInit) {
+                    delete treeViewContainer.dataset.tvsInit;
+                }
+            });
+            // Ejecutar de nuevo la lógica principal
+            // Llamamos manualmente a DOMContentLoaded handler simplificado
+            try {
+                const event = new Event('DOMContentLoaded');
+                document.dispatchEvent(event);
+            } catch (e) {
+                
+                document.querySelectorAll('.dropdown-button[data-dropdown-id]').forEach(btn => {
+                    btn.removeEventListener('click', function () { });
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const dropdownId = btn.getAttribute('data-dropdown-id');
+                        if (dropdownId) toggleDropdown(dropdownId);
+                        return false;
+                    });
+                });
+            }
+        });
+    } catch (err) {
+        console.warn('No se pudo registrar PageRequestManager.endRequest: ', err);
+    }
+}
 
 // Función para limpiar estados locales de un TreeView específico
 function clearLocalStatesForTreeView(treeViewContainer) {
@@ -313,19 +349,18 @@ function toggleDropdown(dropdownId) {
         return;
     }
 
-    const isVisible = dropdown.style.display === 'block';
+    // Usar getComputedStyle para decidir visibilidad
+    const isVisible = window.getComputedStyle(dropdown).display !== 'none';
 
     const treeId = dropdownId.replace('_dropdown', '');
     const searchInputId = treeId + '_txtSearch';
-    const titleElementId = treeId.substring(0, treeId.lastIndexOf('_chkList')) + '_litTitle';
 
-    if (!isVisible) {
-        document.querySelectorAll(".dropdown-content").forEach(otherDropdown => {
-            if (otherDropdown.id !== dropdownId && otherDropdown.style.display === 'block') {
-                otherDropdown.style.display = 'none';
-            }
-        });
-    }
+    // Cerrar otros dropdowns visibles
+    document.querySelectorAll('.dropdown-content').forEach(otherDropdown => {
+        if (otherDropdown.id !== dropdownId && window.getComputedStyle(otherDropdown).display !== 'none') {
+            otherDropdown.style.display = 'none';
+        }
+    });
 
     dropdown.style.display = isVisible ? 'none' : 'block';
 
@@ -335,6 +370,17 @@ function toggleDropdown(dropdownId) {
             setTimeout(() => {
                 searchInput.focus();
             }, 0);
+        }
+        // Limitar el ancho máximo del dropdown respecto a su contenedor offsetParent
+        try {
+            const offsetParent = dropdown.offsetParent || dropdown.parentElement || document.body;
+            const parentWidth = (offsetParent && offsetParent.clientWidth) ? offsetParent.clientWidth : Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const margin = 16; // dejar un pequeño margen
+            const maxW = Math.max(150, parentWidth - margin);
+            dropdown.style.maxWidth = maxW + 'px';
+            dropdown.style.boxSizing = 'border-box';
+        } catch (err) {
+            // no hacer nada si falla
         }
     }
 }

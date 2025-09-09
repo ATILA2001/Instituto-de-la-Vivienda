@@ -8,16 +8,16 @@ namespace Dominio
     [Table("Autorizantes")]
     public class AutorizanteEF
     {
-        
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }        
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
         [Column("CODIGO_AUTORIZANTE")]
-        public string CodigoAutorizante { get; set; }        
+        public string CodigoAutorizante { get; set; }
 
         public string Detalle { get; set; }
-        
+
         [Column("EXPEDIENTE")]
         public string Expediente { get; set; }
 
@@ -41,7 +41,7 @@ namespace Dominio
         public virtual ConceptoEF Concepto { get; set; }
 
         [Column("ESTADO")]
-        public int EstadoId { get; set; }        
+        public int EstadoId { get; set; }
         [ForeignKey("EstadoId")]
         public virtual EstadoAutorizanteEF Estado { get; set; }
 

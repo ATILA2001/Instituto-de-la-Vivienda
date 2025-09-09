@@ -9,14 +9,21 @@ namespace Dominio
     public class ObraEF
     {
         [Key]
-        public int Id { get; set; }        [Required]
+        public int Id { get; set; }
+
+        [Required]
         public string Descripcion { get; set; }
 
-        // Mapeo correcto - las columnas existen en BD
         [Column("NUMERO")]
-        public int? Numero { get; set; }  // Cambiar a int? como en Obra.cs original
+        public int? Numero { get; set; }
         [Column("AÑO")]
-        public int? Anio { get; set; }     // Mapeo correcto a la columna AÑO de la BD
+        public int? Anio { get; set; }
+
+        [Column("OBRA")]
+        public int? ObraNumero { get; set; }
+
+        [Column("ETAPA")]
+        public int? Etapa { get; set; }
 
         // Relaciones
         [Column("EMPRESA")]
@@ -42,8 +49,7 @@ namespace Dominio
         // Relación 0..1 a 1 con BdProyectoEF
         public virtual ProyectoEF Proyecto { get; set; }
 
-        // Relación 0..1 a 1 con FormulacionEF
-        public virtual FormulacionEF Formulacion { get; set; }
+        public virtual ICollection<FormulacionEF> Formulaciones { get; set; }
 
         // Relación 1 a muchos con AutorizanteEF
         public virtual ICollection<AutorizanteEF> Autorizantes { get; set; }

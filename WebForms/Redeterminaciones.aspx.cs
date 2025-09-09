@@ -3,6 +3,7 @@ using Negocio;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -21,12 +22,14 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            Debug.WriteLine("Página Redeterminacion cargada: " + DateTime.Now);
             if (!IsPostBack)
             {
                 // Force complete reload on initial page load
                 CargarListaRedeterminacion(null, true);
                 BindDropDownList();
             }
+            
         }
 
         protected void Page_PreRender(object sender, EventArgs e)
@@ -98,6 +101,7 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderObra");
             ClearHeaderFilter("cblsHeaderAutorizante");
             ClearHeaderFilter("cblsHeaderEstado");
+            ViewState["BuzonFilterValue"] = "all";
             CargarListaRedeterminacion();
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SetFiltersClearedFlag", "sessionStorage.setItem('filtersCleared', 'true');", true);
         }
@@ -117,6 +121,132 @@ namespace WebForms
                     if (HttpContext.Current.Items.Contains(contextKey)) HttpContext.Current.Items.Remove(contextKey);
                 }
             }
+        }
+
+        protected string FormatDaysWithColor(double days)
+        {
+            int dayCount = (int)Math.Floor(days);
+            string color;
+
+            if (dayCount < 7)
+            {
+                color = "green"; // Verde para menos de 7 días
+            }
+            else if (dayCount >= 7 && dayCount <= 14)
+            {
+                color = "orange"; // Amarillo para entre 7 y 14 días
+            }
+            else
+            {
+                color = "red"; // Rojo para más de 14 días
+            }
+
+            return $"<span style='color: {color}; font-weight: bold;'>{dayCount}</span>";
+        }
+        protected void BtnToggleMismatch_ServerChange(object sender, EventArgs e)
+        {
+            ShowOnlyMismatchedRecords = chkShowMismatchOnly.Checked;
+            CargarListaRedeterminacion();
+        }
+
+        protected bool ShowOnlyMismatchedRecords
+        {
+            get { return ViewState["ShowOnlyMismatchedRecords"] as bool? ?? false; }
+            set { ViewState["ShowOnlyMismatchedRecords"] = value; }
+        }
+        protected bool IsBuzonEtapaMismatch(string etapaNombre, string buzonSade)
+        {
+            if (string.IsNullOrEmpty(etapaNombre) || string.IsNullOrEmpty(buzonSade))
+                return false;
+
+            // Diccionario de correspondencias entre etapas y buzones
+            var correspondencias = new Dictionary<string, List<string>>
+    {
+        {"RD-01/11-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+        {"RD-02/11-Análisis Tecnica", new List<string>{
+            "IVC-3300 GO PLANEAMIENTO Y EVALUACIÓN",
+            "IVC-3430 DEPTO OBRAS 1",
+            "IVC-3400 GO INSPECCIION Y AUDITORIA DE OBRAS",
+            "11000",
+            "IVC-2600 GO PLANIFICACION Y CONTROL",
+            "VLMOHAREM",
+            "IVC-12400 GO LOGISTICA",
+            "IVC-3000 DG OBRAS",
+            "IVC-3420 DEPTO AUDITORIA 2",
+            "IVC-9500 GO MODERNIZACION"
+        }},
+        {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+        {"RD-04/11-Dgtal-Dictamen", new List<string>{
+            "IVC-5210 DEPTO OBRAS PUBLICAS",
+            "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
+            "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
+        }},
+        // Mantener las demás correspondencias...
+    };
+
+            // Verificar si el buzón corresponde a la etapa
+            if (correspondencias.ContainsKey(etapaNombre))
+            {
+                bool coincide = correspondencias[etapaNombre].Any(b => buzonSade.Contains(b));
+                return !coincide; // Retorna true si NO coincide (hay mismatch)
+            }
+
+            return false;
+        }
+
+        protected void ddlFiltroBuzon_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddlFiltroBuzon = (DropDownList)sender;
+            string selectedValue = ddlFiltroBuzon.SelectedValue;
+
+            ViewState["BuzonFilterValue"] = selectedValue;
+
+            List<Redeterminacion> listaCompleta = Session["redeterminacionesCompletas"] as List<Redeterminacion>;
+            if (listaCompleta == null)
+                return;
+
+            IEnumerable<Redeterminacion> listaFiltrada = listaCompleta;
+
+            // List of excluded Etapa IDs
+            List<int> etapasExcluidas = new List<int> { 12, 22, 33, 34, 35, 36, 37, 38, 39 };
+
+            if (selectedValue != "all")
+            {
+                switch (selectedValue)
+                {
+
+                    case "0": // "En curso" (menos de 7 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays < 7);
+                        break;
+
+                    case "1": // "Revisar" (entre 7 y 14 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays >= 7 &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays <= 14);
+                        break;
+
+                    case "2": // "Reclamar" (más de 14 días)
+                        listaFiltrada = listaCompleta.Where(r =>
+                            r.FechaSade.HasValue &&
+                            r.Etapa != null &&
+                            !etapasExcluidas.Contains(r.Etapa.Id) &&
+                            (DateTime.Now - r.FechaSade.Value).TotalDays > 14);
+                        break;
+                }
+            }
+
+            List<Redeterminacion> resultadoFinal = listaFiltrada.ToList();
+            Session["listaRedeterminacion"] = resultadoFinal;
+            dgvRedeterminacion.DataSource = resultadoFinal;
+            dgvRedeterminacion.DataBind();
+
         }
 
         private void CargarListaRedeterminacion(string filtro = null, bool forzarRecargaCompleta = false)
@@ -148,6 +278,12 @@ namespace WebForms
 
                 IEnumerable<Redeterminacion> listaFiltrada = redeterminacionesCompletas;
 
+                // Filtrar por mismatch si el toggle está activo
+                if (ShowOnlyMismatchedRecords)
+                {
+                    listaFiltrada = listaFiltrada.Where(r =>
+                        IsBuzonEtapaMismatch(r.Etapa?.Nombre, r.BuzonSade));
+                }
                 // Aplicar filtro de texto general (txtBuscar)
                 string filtroGeneral = string.IsNullOrEmpty(filtro) ? txtBuscar.Text.Trim().ToUpper() : filtro.Trim().ToUpper();
                 if (!string.IsNullOrEmpty(filtroGeneral))
@@ -197,14 +333,6 @@ namespace WebForms
                 dgvRedeterminacion.DataSource = resultadoFinal;
                 dgvRedeterminacion.DataBind();
 
-                if (!resultadoFinal.Any())
-                {
-                    lblMensaje.Text = "No se encontraron redeterminaciones con los filtros aplicados.";
-                }
-                else
-                {
-                    lblMensaje.Text = "";
-                }
             }
             catch (Exception ex)
             {
@@ -239,9 +367,55 @@ namespace WebForms
                         {
                             ddlEtapas.SelectedValue = redetItem.Etapa.Id.ToString();
                         }
+                        if (!string.IsNullOrEmpty(redetItem.BuzonSade))
+                        {
+                            string etapaNombre = redetItem.Etapa.Nombre;
+                            string buzonSade = redetItem.BuzonSade;
+
+                        }
                     }
                 }
             }
+
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                // Lógica existente para poblar el DropDownList de Etapas en cada fila
+                DropDownList ddlUsuario = (DropDownList)e.Row.FindControl("ddlUsuario");
+                if (ddlUsuario != null)
+                {
+                    DataTable usuarios = ObtenerUsuarios(); // Este método ya existe y obtiene los estados
+                    ddlUsuario.DataSource = usuarios;
+                    ddlUsuario.DataTextField = "Nombre";
+                    ddlUsuario.DataValueField = "Id";
+                    ddlUsuario.DataBind();
+
+                    // Añadir opción "Sin Usuario" si no existe
+                    if (!ddlUsuario.Items.Cast<ListItem>().Any(x => x.Value == "-1"))
+                    {
+                        ddlUsuario.Items.Insert(0, new ListItem("Sin Usuario", "-1"));
+                    }
+
+                    // Establecer el valor seleccionado para el DropDownList de la fila
+                    Redeterminacion redetItem = e.Row.DataItem as Redeterminacion;
+                    if (redetItem != null)
+                    {
+                        if (redetItem.Usuario != null)
+                        {
+                            ListItem item = ddlUsuario.Items.FindByValue(redetItem.Usuario.Id.ToString());
+                            if (item != null)
+                            {
+                                ddlUsuario.SelectedValue = redetItem.Usuario.Id.ToString();
+                            }
+                        }
+                        else
+                        {
+                            // Si no hay usuario, seleccionar la opción "Sin Usuario"
+                            ddlUsuario.SelectedValue = "-1";
+                        }
+                    }
+                }
+            }
+
             else if (e.Row.RowType == DataControlRowType.Header)
             {
                 // Poblar los TreeViewSearch en la cabecera
@@ -291,9 +465,19 @@ namespace WebForms
                     cblsHeaderEstado.DataSource = items;
                     cblsHeaderEstado.DataBind();
                 }
+                var ddlFiltroBuzon = e.Row.FindControl("ddlFiltroBuzon") as DropDownList;
+                if (ddlFiltroBuzon != null && ViewState["BuzonFilterValue"] != null)
+                {
+                    ddlFiltroBuzon.SelectedValue = ViewState["BuzonFilterValue"].ToString();
+                }
             }
         }
 
+        private DataTable ObtenerUsuarios()
+        {
+            UsuarioNegocio usuarios = new UsuarioNegocio();
+            return usuarios.listarDdlRedet();
+        }
 
         protected void dgvRedeterminacion_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -554,19 +738,7 @@ namespace WebForms
             }
         }
 
-        //private DataTable ObtenerObras()
-        //{
-        //    ObraNegocio empresaNegocio = new ObraNegocio();
-        //    return empresaNegocio.listarddl();
-        //}
 
-        //private DataRow CrearFilaTodos(DataTable table)
-        //{
-        //    DataRow row = table.NewRow();
-        //    row["Id"] = 0;
-        //    row["Nombre"] = "Todos";
-        //    return row;
-        //}
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -583,7 +755,7 @@ namespace WebForms
                 if (negocio.ActualizarExpediente(idRedeterminacion, nuevoExpediente))
                 {
 
-                    CargarListaRedeterminacion(null, true); 
+                    CargarListaRedeterminacion(null, true);
 
                     lblMensaje.Text = "Expediente actualizado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
@@ -627,6 +799,41 @@ namespace WebForms
                 CargarListaRedeterminacion(null, true);
 
                 lblMensaje.Text = "Etapa actualizada correctamente.";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+        }
+
+        protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddlUsuario = (DropDownList)sender;
+            GridViewRow row = (GridViewRow)ddlUsuario.NamingContainer;
+
+            List<Redeterminacion> listaRedeterminaciones = (List<Redeterminacion>)Session["listaRedeterminacion"];
+            int id = int.Parse(dgvRedeterminacion.DataKeys[row.RowIndex].Value.ToString());
+            Redeterminacion redeterminacion = listaRedeterminaciones.Find(r => r.Id == id);
+
+            if (redeterminacion != null)
+            {
+                if (ddlUsuario.SelectedValue == "-1")
+                {
+                    // Si se selecciona "Sin Usuario", asignar null al usuario
+                    redeterminacion.Usuario = null;
+                }
+                else
+                {
+                    // Asegurarse que el objeto Usuario existe
+                    if (redeterminacion.Usuario == null)
+                    {
+                        redeterminacion.Usuario = new Usuario();
+                    }
+                    redeterminacion.Usuario.Id = int.Parse(ddlUsuario.SelectedValue);
+                }
+
+                RedeterminacionNegocio negocio = new RedeterminacionNegocio();
+                negocio.ActualizarUsuario(redeterminacion);
+                CargarListaRedeterminacion(null, true);
+
+                lblMensaje.Text = "Usuario actualizado correctamente.";
                 lblMensaje.CssClass = "alert alert-success";
             }
         }

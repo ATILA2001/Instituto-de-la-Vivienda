@@ -1,24 +1,17 @@
-:root {
-/*	colores institucionales*/
-	--inst-blue: #153244;
-	--inst-cyan: #8DE2D6;
-	--inst-white: #FCFCFC;
-	--inst-yellow: #FFCC00;
-	--inst-gray: #3C3C3B;
-
-/*	colores de botones de bootstrap*/
-    --bs-primary: var(--inst-blue);
-	--bs-secondary: var(--inst-cyan);
-}
-
 /* Iconos de Bootstrap */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
 
 @font-face {
 	font-family: 'Archivo';
 	src: url('../Fonts/Archivo-VariableFont_wdth,wght.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
+    font-display: swap; 
 }
 
 @font-face {
@@ -26,9 +19,31 @@
 	src: url('../Fonts/Archivo-Italic-VariableFont_wdth,wght.ttf') format('truetype');
 	font-weight: normal;
 	font-style: italic;
+    font-display: swap;
+}
+
+
+:root {
+    /*	colores institucionales*/
+    --inst-blue: #153244;
+    --inst-cyan: #8DE2D6;
+    --inst-white: #FCFCFC;
+    --inst-yellow: #FFCC00;
+    --inst-gray: #3C3C3B;
+
+    /* --- Colores base de Bootstrap personalizados --- */
+    --bs-primary: var(--inst-blue); /* Color primario */
+    --bs-secondary: var(--inst-cyan); /* Color secundario */
+
+    --bs-body-bg: var(--inst-white); /* Fondo del body */
+    --bs-body-color: var(--inst-gray); /* Color del texto del body */
+    --bs-font-sans-serif: 'Nunito', 'Archivo', Arial, sans-serif; /* Fuente sans-serif */
+
 }
 
 body{
-	font-family: 'Archivo', Arial, sans-serif;
+	font-family: var(--bs-font-sans-serif);
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
 }
 

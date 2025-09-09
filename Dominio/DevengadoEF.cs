@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dominio
-{    [Table("DEVENGADOS")]
+{
+    [Table("DEVENGADOS")]
     public class DevengadoEF
     {
         [Key]

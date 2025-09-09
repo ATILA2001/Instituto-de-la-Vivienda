@@ -18,8 +18,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44330</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
+    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -52,6 +52,8 @@
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -80,12 +82,13 @@
     <Content Include="AbmlUsuarios.aspx" />
     <Content Include="Autorizantes.aspx" />
     <Content Include="AutorizantesAdmin.aspx" />
-    <Content Include="AutorizantesAdminEF.aspx" />
+    <Content Include="AutorizantesEF.aspx" />
     <Content Include="AutorizantesRedet.aspx" />
     <Content Include="BdProyectos.aspx" />
     <Content Include="Certificados.aspx" />
     <Content Include="CertificadosAdmin.aspx" />
-    <Content Include="CertificadosAdminEF.aspx" />
+    <Content Include="CertificadosEF.aspx" />
+    	<Content Include="ObrasEF.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -102,14 +105,17 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="CustomControls\TreeViewSearch.ascx" />
-    <Content Include="CustomControls\chevron-down.svg" />
-    <Content Include="CustomControls\chevron-right.svg" />
-    <Content Include="CustomControls\TreeViewSearch.css" />
-    <Content Include="CustomControls\TreeViewSearch.js" />
+    <Content Include="CustomControls\PaginationControl\PaginationControl.ascx" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.ascx" />
+    <Content Include="CustomControls\TreeViewSearch\chevron-down.svg" />
+    <Content Include="CustomControls\TreeViewSearch\chevron-right.svg" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.css" />
+    <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
     <Content Include="Formulacion.aspx" />
     <Content Include="FormulacionAdmin.aspx" />
+    <Content Include="FormulacionEF.aspx" />
+  <Content Include="LegitimosEF.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
@@ -190,12 +196,12 @@
     <Compile Include="AutorizantesAdmin.aspx.designer.cs">
       <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="AutorizantesAdminEF.aspx.cs">
-      <DependentUpon>AutorizantesAdminEF.aspx</DependentUpon>
+    <Compile Include="AutorizantesEF.aspx.cs">
+      <DependentUpon>AutorizantesEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="AutorizantesAdminEF.aspx.designer.cs">
-      <DependentUpon>AutorizantesAdminEF.aspx</DependentUpon>
+    <Compile Include="AutorizantesEF.aspx.designer.cs">
+      <DependentUpon>AutorizantesEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="AutorizantesRedet.aspx.cs">
       <DependentUpon>AutorizantesRedet.aspx</DependentUpon>
@@ -225,14 +231,21 @@
     <Compile Include="CertificadosAdmin.aspx.designer.cs">
       <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="CertificadosAdminEF.aspx.cs">
-      <DependentUpon>CertificadosAdminEF.aspx</DependentUpon>
+    <Compile Include="CertificadosEF.aspx.cs">
+      <DependentUpon>CertificadosEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="CertificadosAdminEF.aspx.designer.cs">
-      <DependentUpon>CertificadosAdminEF.aspx</DependentUpon>
+    <Compile Include="CertificadosEF.aspx.designer.cs">
+      <DependentUpon>CertificadosEF.aspx</DependentUpon>
     </Compile>
-    <Compile Include="CustomControls\TreeViewSearch.ascx.cs">
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.designer.cs">
+      <DependentUpon>PaginationControl.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\TreeViewSearch\TreeViewSearch.ascx.cs">
       <DependentUpon>TreeViewSearch.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -256,6 +269,20 @@
     </Compile>
     <Compile Include="FormulacionAdmin.aspx.designer.cs">
       <DependentUpon>FormulacionAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FormulacionEF.aspx.cs">
+      <DependentUpon>FormulacionEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LegitimosEF.aspx.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FormulacionEF.aspx.designer.cs">
+      <DependentUpon>FormulacionEF.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LegitimosEF.aspx.designer.cs">
+      <DependentUpon>LegitimosEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="Legitimos.aspx.cs">
@@ -342,6 +369,13 @@
     <Compile Include="ObrasAdmin.aspx.designer.cs">
       <DependentUpon>ObrasAdmin.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ObrasEF.aspx.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ObrasEF.aspx.designer.cs">
+      <DependentUpon>ObrasEF.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ObrasRedet.aspx.cs">
       <DependentUpon>ObrasRedet.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -376,6 +410,13 @@
     <Compile Include="Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Site.Master.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
     <Compile Include="User.Master.cs">
       <DependentUpon>User.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -389,7 +430,9 @@
     <Content Include="LoginRegister.Master" />
     <None Include=".editorconfig" />
     <Content Include="libman.json" />
-    <Content Include="connectionStrings.config" />
+    <Content Include="connectionStrings.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Fonts\Archivo-Italic-VariableFont_wdth,wght.ttf" />
     <Content Include="Fonts\Archivo-VariableFont_wdth,wght.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -530,6 +573,7 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.6.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.6.0.min.map" />
+    <Content Include="Site.Master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

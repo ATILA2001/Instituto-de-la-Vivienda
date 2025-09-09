@@ -42,10 +42,10 @@ namespace WebForms
                     autorizantes = negocio.listar(
                         usuarioLogueado,
                         new List<string>(),
-                        new List<string>(), 
                         new List<string>(),
-                        new List<string>(), 
-                        null                
+                        new List<string>(),
+                        new List<string>(),
+                        null
                     );
                     Session["autorizantesUsuarioCompleto"] = autorizantes;
                 }
@@ -71,7 +71,7 @@ namespace WebForms
                     };
 
                     // Exportar a Excel
-                    ExcelHelper.ExportarDatosGenericos(dgvAutorizante, autorizantes, mapeoColumnas, "Autorizantes");
+                    ExcelHelper.ExportarDatosGenericos(gridviewRegistros, autorizantes, mapeoColumnas, "Autorizantes");
                 }
                 else
                 {
@@ -162,7 +162,7 @@ namespace WebForms
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
-            List<Autorizante> dataSource = dgvAutorizante.DataSource as List<Autorizante>;
+            List<Autorizante> dataSource = gridviewRegistros.DataSource as List<Autorizante>;
 
             if (dataSource != null) // Si el DataSource fue asignado directamente
             {
@@ -200,8 +200,8 @@ namespace WebForms
                 }
                 else
                 {
-                    dgvAutorizante.DataSource = new List<Autorizante>();
-                    dgvAutorizante.DataBind();
+                    gridviewRegistros.DataSource = new List<Autorizante>();
+                    gridviewRegistros.DataBind();
                     CalcularSubtotal();
                     return;
                 }
@@ -215,18 +215,18 @@ namespace WebForms
                 List<string> selectedHeaderConceptos = new List<string>();
                 List<string> selectedHeaderEstados = new List<string>();
 
-                if (dgvAutorizante.HeaderRow != null)
+                if (gridviewRegistros.HeaderRow != null)
                 {
-                    var cblsHeaderObraCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderObraCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderObra") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderObraCtrl != null) selectedHeaderObras = cblsHeaderObraCtrl.SelectedValues;
 
-                    var cblsHeaderEmpresaCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEmpresaCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
-                    var cblsHeaderConceptoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderConceptoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderConcepto") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderConceptoCtrl != null) selectedHeaderConceptos = cblsHeaderConceptoCtrl.SelectedValues;
 
-                    var cblsHeaderEstadoCtrl = dgvAutorizante.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEstadoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
                 }
 
@@ -263,16 +263,16 @@ namespace WebForms
 
                 List<Autorizante> resultadoFinal = listaFiltrada.ToList();
                 Session["listaAutorizante"] = resultadoFinal; // Actualizar la sesión con la lista filtrada
-                dgvAutorizante.DataSource = resultadoFinal;
-                dgvAutorizante.DataBind();
+                gridviewRegistros.DataSource = resultadoFinal;
+                gridviewRegistros.DataBind();
                 CalcularSubtotal();
             }
             catch (Exception ex)
             {
                 lblMensaje.Text = $"Error al cargar los Autorizantes: {ex.Message}";
                 lblMensaje.CssClass = "alert alert-danger";
-                dgvAutorizante.DataSource = new List<Autorizante>(); // Evitar error si falla la carga
-                dgvAutorizante.DataBind();
+                gridviewRegistros.DataSource = new List<Autorizante>(); // Evitar error si falla la carga
+                gridviewRegistros.DataBind();
                 CalcularSubtotal(); // Asegurar que el subtotal se actualice a 0 o el valor correcto
             }
 
@@ -284,12 +284,12 @@ namespace WebForms
             CargarListaAutorizantes(filtro);
         }
 
-        protected void dgvAutorizante_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 // Get the ID of the selected row
-                string codigoAutorizante = dgvAutorizante.SelectedDataKey.Value.ToString();
+                string codigoAutorizante = gridviewRegistros.SelectedDataKey.Value.ToString();
 
                 // Get the list of autorizantes from session
                 List<Autorizante> autorizantesList = (List<Autorizante>)Session["listaAutorizante"];
@@ -361,11 +361,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                var id = dgvAutorizante.DataKeys[e.RowIndex].Value.ToString();
+                var id = gridviewRegistros.DataKeys[e.RowIndex].Value.ToString();
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Autorizante eliminado correctamente.";
@@ -381,11 +381,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
             {
-                dgvAutorizante.PageIndex = e.NewPageIndex;
+                gridviewRegistros.PageIndex = e.NewPageIndex;
                 CargarListaAutorizantes();
                 CalcularSubtotal();
             }
@@ -396,7 +396,7 @@ namespace WebForms
             }
         }
 
-        protected void dgvAutorizante_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
@@ -630,7 +630,7 @@ namespace WebForms
         //    EmpresaNegocio empresaNegocio = new EmpresaNegocio();
         //    return empresaNegocio.listarddl();
         //}
-      
+
         private DataTable ObtenerEstado()
         {
             EstadoAutorizanteNegocio empresaNegocio = new EstadoAutorizanteNegocio();
@@ -657,7 +657,7 @@ namespace WebForms
             try
             {
                 List<Autorizante> listaAutorizantes = (List<Autorizante>)Session["listaAutorizante"];
-                string codAutorizante = dgvAutorizante.DataKeys[row.RowIndex].Value.ToString();
+                string codAutorizante = gridviewRegistros.DataKeys[row.RowIndex].Value.ToString();
                 Autorizante autorizante = listaAutorizantes.Find(a => a.CodigoAutorizante == codAutorizante);
 
                 if (autorizante != null)
@@ -701,7 +701,7 @@ namespace WebForms
             TextBox txtExpediente = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
-            string codigoAutorizante = dgvAutorizante.DataKeys[row.RowIndex].Value.ToString();
+            string codigoAutorizante = gridviewRegistros.DataKeys[row.RowIndex].Value.ToString();
             string nuevoExpediente = txtExpediente.Text;
 
             try
@@ -744,9 +744,9 @@ namespace WebForms
 
         //private void ClearHeaderFilter(string controlId)
         //{
-        //    if (dgvAutorizante.HeaderRow != null)
+        //    if (gridviewRegistros.HeaderRow != null)
         //    {
-        //        var control = dgvAutorizante.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
+        //        var control = gridviewRegistros.HeaderRow.FindControl(controlId) as WebForms.CustomControls.TreeViewSearch;
         //        if (control != null)
         //        {
         //            control.ClearSelection();

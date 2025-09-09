@@ -106,7 +106,7 @@ namespace Negocio
                     context.Configuration.ValidateOnSaveEnabled = false;
 
                     List<AutorizanteEF> autorizantes;
-                    if (usuario != null && usuario.Tipo == false) // Usuario normal (no administrador)
+                    if (usuario != null && usuario.Tipo == false && usuario.AreaId != 16) // Usuario normal (no administrador)
                     {
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId == usuario.AreaId)
@@ -153,7 +153,7 @@ namespace Negocio
                                 auth.Obra.Empresa = empresasDict[auth.Obra.EmpresaId.Value];
                             if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
                                 auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
-                            
+
                             auth.Estado = estadosDict[auth.EstadoId];
                             auth.Concepto = conceptosDict[auth.ConceptoId];
                         }
@@ -163,16 +163,19 @@ namespace Negocio
                     var codigosAutorizante = autorizantes.Select(a => a.CodigoAutorizante).ToList();
                     var redeterminaciones = context.Redeterminaciones.AsNoTracking()
                         .Where(r => codigosAutorizante.Contains(r.CodigoAutorizante))
-                        .Include("Autorizante")
-                        .Include("Autorizante.Obra")
-                        .Include("Autorizante.Obra.Area")
-                        .Include("Autorizante.Obra.Barrio")
-                        .Include("Autorizante.Obra.Empresa")
-                        .Include("Autorizante.Obra.Contrata")
-                        .Include("Autorizante.Estado")
-                        .Include("Autorizante.Concepto")
                         .Include("Etapa")
                         .ToList();
+
+                    // IMPORTANTE: Debemos cargar el autorizante manualmente, ya que las redeterminaciones y los autorizantes se relacionan a traves de CodigoAutorizante.
+                    foreach (var redet in redeterminaciones)
+                    {
+                        var autorizante = autorizantes.FirstOrDefault(a => a.CodigoAutorizante == redet.CodigoAutorizante);
+                        if (autorizante != null)
+                        {
+                            // Asi accedemos a obra, área, barrio, empresa, contrata asignados en autorizante
+                            redet.Autorizante = autorizante;
+                        }
+                    }
 
                     // Expedientes de autorizantes y redeterminaciones
                     var expedientesValidos = autorizantes
@@ -275,7 +278,7 @@ namespace Negocio
                 return new List<AutorizanteDTO>();
             }
         }
-    
+
         #region Configuración y Mapeo de Estados
 
         /// <summary>
@@ -688,7 +691,7 @@ namespace Negocio
 
                             listaReliqDTO.Add(new CertificadoDTO
                             {
-                                IdReliquidacion = idReliq++,
+                                IdReliquidacion = ++idReliq,
                                 ExpedientePago = expedienteFinalReliq,
                                 MesAprobacion = certAfectado.MesAprobacion,
                                 MontoTotal = montoReliq,
@@ -1009,7 +1012,7 @@ namespace Negocio
                 if (autorizante == null || !redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
 
 
-                
+
                 if (certificados != null)
                 {
                     certificados = certificados
@@ -1334,6 +1337,23 @@ namespace Negocio
                 System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SADE: {ex.Message}");
                 return new Dictionary<string, (string, DateTime?)>();
             }
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SADE a otras clases.
+        /// </summary>
+        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerDatosSadeBulk(List<string> expedientes)
+        {
+            return BuscarMuchosDatosSade(expedientes ?? new List<string>());
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de SIGAF a otras clases.
+        /// </summary>
+        public Dictionary<string, decimal> ObtenerSigafBulk(List<string> expedientes)
+        {
+            // Llama al método privado que realiza la consulta bulk para SIGAF
+            return BuscarMuchosNumerosSigaf(expedientes ?? new List<string>());
         }
 
         /// <summary>
@@ -2526,4 +2546,4 @@ namespace Negocio
         #endregion
 
     }
-}    
+}

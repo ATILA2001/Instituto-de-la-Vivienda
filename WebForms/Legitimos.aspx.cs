@@ -35,7 +35,7 @@ namespace WebForms
                     lblMensaje.CssClass = "alert alert-warning";
                 }
 
-                BindDropDownList(); 
+                BindDropDownList();
                 CargarListaLegitimos();
             }
         }
@@ -92,7 +92,7 @@ namespace WebForms
                     };
 
                     // Exportar a Excel
-                    ExcelHelper.ExportarDatosGenericos(dgvLegitimos, legitimos, mapeoColumnas, "LegitimosAbonos");
+                    ExcelHelper.ExportarDatosGenericos(gridviewRegistros, legitimos, mapeoColumnas, "LegitimosAbonos");
                 }
                 else
                 {
@@ -146,12 +146,12 @@ namespace WebForms
             ViewState["EditingObraId"] = null;
         }
 
-        protected void dgvLegitimos_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 // Get the ID of the selected row
-                int idLegitimo = Convert.ToInt32(dgvLegitimos.SelectedDataKey.Value);
+                int idLegitimo = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
 
                 // Get the list of legitimos from session
                 List<Legitimo> legitimosList = (List<Legitimo>)Session["listaLegitimos"];
@@ -215,30 +215,30 @@ namespace WebForms
             {
                 List<Legitimo> listaCompleta;
 
-                    Usuario usuarioLogueado = (Usuario)Session["usuario"];
-                    if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                Usuario usuarioLogueado = (Usuario)Session["usuario"];
+                if (usuarioLogueado != null && usuarioLogueado.Area != null)
+                {
+                    //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                    //Session["legitimosUsuarioCompleto"] = listaCompleta;
+
+                    if (forzarRecargaCompleta || Session["legitimosUsuarioCompleto"] == null)
                     {
-                        //listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                        //Session["legitimosUsuarioCompleto"] = listaCompleta;
-
-                        if (forzarRecargaCompleta || Session["legitimosUsuarioCompleto"] == null)
-                        {
-                            listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
-                            Session["legitimosUsuarioCompleto"] = listaCompleta;
-                        }
-                        else
-                        {
-                            listaCompleta = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
-                        }
-
+                        listaCompleta = negocio.listarFiltro(usuarioLogueado, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null);
+                        Session["legitimosUsuarioCompleto"] = listaCompleta;
                     }
                     else
                     {
-                        dgvLegitimos.DataSource = new List<Legitimo>();
-                        dgvLegitimos.DataBind();
-                        CalcularSubtotal();
-                        return;
+                        listaCompleta = (List<Legitimo>)Session["legitimosUsuarioCompleto"];
                     }
+
+                }
+                else
+                {
+                    gridviewRegistros.DataSource = new List<Legitimo>();
+                    gridviewRegistros.DataBind();
+                    CalcularSubtotal();
+                    return;
+                }
 
 
                 IEnumerable<Legitimo> listaFiltrada = listaCompleta;
@@ -249,18 +249,18 @@ namespace WebForms
                 List<string> selectedHeaderMeses = new List<string>(); // Formato "yyyy-MM-dd"
                 List<string> selectedHeaderEstados = new List<string>();
 
-                if (dgvLegitimos.HeaderRow != null)
+                if (gridviewRegistros.HeaderRow != null)
                 {
-                    var cblsHeaderEmpresaCtrl = dgvLegitimos.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEmpresaCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
-                    var cblsHeaderAutorizanteCtrl = dgvLegitimos.HeaderRow.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderAutorizanteCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderAutorizanteCtrl != null) selectedHeaderAutorizantes = cblsHeaderAutorizanteCtrl.SelectedValues;
 
-                    var cblsHeaderMesAprobacionCtrl = dgvLegitimos.HeaderRow.FindControl("cblsHeaderMesAprobacion") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderMesAprobacionCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesAprobacion") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderMesAprobacionCtrl != null) selectedHeaderMeses = cblsHeaderMesAprobacionCtrl.SelectedValues;
 
-                    var cblsHeaderEstadoCtrl = dgvLegitimos.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEstadoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
                 }
 
@@ -306,8 +306,8 @@ namespace WebForms
 
                 List<Legitimo> resultadoFinal = listaFiltrada.ToList();
                 Session["listaLegitimos"] = resultadoFinal; // Actualizar la sesión con la lista filtrada
-                dgvLegitimos.DataSource = resultadoFinal;
-                dgvLegitimos.DataBind();
+                gridviewRegistros.DataSource = resultadoFinal;
+                gridviewRegistros.DataBind();
                 CalcularSubtotal();
             }
             catch (Exception ex)
@@ -320,7 +320,7 @@ namespace WebForms
         }
 
 
-        protected void dgvLegitimos_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.Header)
             {
@@ -370,7 +370,8 @@ namespace WebForms
                         .Select(l => l.MesAprobacion.Value.Date)
                         .Distinct()
                         .OrderByDescending(d => d)
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")),
                             Valor = d.ToString("yyyy-MM-dd") // Usar yyyy-MM-dd para el valor
                         })
@@ -401,11 +402,11 @@ namespace WebForms
         }
 
 
-        protected void dgvLegitimos_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                var id = dgvLegitimos.DataKeys[e.RowIndex].Value.ToString();
+                var id = gridviewRegistros.DataKeys[e.RowIndex].Value.ToString();
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
@@ -422,11 +423,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvLegitimos_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
             {
-                dgvLegitimos.PageIndex = e.NewPageIndex;
+                gridviewRegistros.PageIndex = e.NewPageIndex;
                 CargarListaLegitimos();
                 CalcularSubtotal();
 
@@ -576,7 +577,7 @@ namespace WebForms
             GridViewRow row = (GridViewRow)txtExpedienteControl.NamingContainer; // Obtener la fila del GridView
 
             // Asegurarse de que el DataKeyNames="ID" esté configurado en el GridView
-            int idLegitimo = Convert.ToInt32(dgvLegitimos.DataKeys[row.RowIndex].Value);
+            int idLegitimo = Convert.ToInt32(gridviewRegistros.DataKeys[row.RowIndex].Value);
             string nuevoExpediente = txtExpedienteControl.Text;
 
             try
@@ -613,7 +614,7 @@ namespace WebForms
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
-            List<Legitimo> dataSource = dgvLegitimos.DataSource as List<Legitimo>;
+            List<Legitimo> dataSource = gridviewRegistros.DataSource as List<Legitimo>;
 
             if (dataSource != null)
             {
@@ -669,7 +670,7 @@ namespace WebForms
             CargarListaLegitimos();
         }
 
-        
+
 
     }
 

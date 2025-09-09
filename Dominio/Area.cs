@@ -9,14 +9,14 @@ namespace Dominio
     [Serializable]
     public class Area
     {
-        public int Id {  get; set; }
+        public int Id { get; set; }
         public String Nombre { get; set; }
 
         public Area() { }
 
         public override string ToString()
         {
-            return  Nombre ;
+            return Nombre;
         }
     }
 }

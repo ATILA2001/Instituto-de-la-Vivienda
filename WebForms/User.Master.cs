@@ -29,7 +29,7 @@ namespace WebForms
         protected void btnCerrarSession_Click(object sender, EventArgs e)
         {
             Session.Clear();
-            Response.Redirect("Login.aspx", false);
+            Response.Redirect("LogoutConfirmation.aspx", false);
         }
 
         protected void btnBuscar_Click(object sender, EventArgs e)

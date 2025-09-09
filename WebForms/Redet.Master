@@ -48,8 +48,8 @@
                         <ul class="navbar-nav ms-auto">
 
 
-                            <li class="nav-item"><a class="nav-link text-white" href="ObrasRedet.aspx"><span>Obras</span></a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="AutorizantesRedet.aspx"><span>Autorizantes</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="ObrasEF.aspx"><span>Obras</span></a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="AutorizantesEF.aspx"><span>Autorizantes</span></a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="Redeterminaciones.aspx"><span>Redeterminaciones</span></a></li>
 
 

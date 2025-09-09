@@ -8,7 +8,7 @@
 <script src="<%= ResolveUrl("TreeViewSearch.js") %>"></script>
 
 <div class="dropdown">
-    <button type="button" id="dropdownButton" runat="server" class="dropdown-button">
+    <button type="button" id="dropdownButton" runat="server" class="dropdown-button" data-dropdown-id="<%= chkList.ClientID %>_dropdown">
         <span id="litTitle" runat="server"></span>
 
     </button>
@@ -34,8 +34,8 @@
                 ShowCheckBoxes="All"
                 ShowLines="false"
                 CssClass="date-tree-view"
-                CollapseImageUrl="~/CustomControls/chevron-down.svg"
-                ExpandImageUrl="~/CustomControls/chevron-right.svg">
+                CollapseImageUrl="~/CustomControls/TreeViewSearch/chevron-down.svg"
+                ExpandImageUrl="~/CustomControls/TreeViewSearch/chevron-right.svg">
             </asp:TreeView>
 
         </div>

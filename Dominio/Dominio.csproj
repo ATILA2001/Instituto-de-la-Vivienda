@@ -59,9 +59,9 @@
     <Compile Include="Barrio.cs" />
     <Compile Include="BarrioEF.cs" />
     <Compile Include="BdProyecto.cs" />
-    <Compile Include="DTO\AutorizanteDTO.cs" />
-    <Compile Include="DTO\AutorizanteDTO.cs" />
-    <Compile Include="DTO\CertificadoDTO.cs" />
+  <Compile Include="DTO\AutorizanteDTO.cs" />
+  <Compile Include="DTO\CertificadoDTO.cs" />
+  <Compile Include="DTO\ObraDTO.cs" />
     <Compile Include="ProyectoEF.cs" />
     <Compile Include="Certificado.cs" />
     <Compile Include="CertificadoEF.cs" />
@@ -95,7 +95,7 @@
     <Compile Include="ObraEF.cs" />
     <Compile Include="PaseSadeEF.cs" />
     <Compile Include="Prioridad.cs" />
-    <Compile Include="PrioridadEF.cs" />
+    <Compile Include="PrioridadesEF.cs" />
     <Compile Include="ABMPlaniEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Redeterminacion.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="TipoPago.cs" />
     <Compile Include="TipoPagoEF.cs" />
     <Compile Include="UnidadMedida.cs" />
-    <Compile Include="UnidadMedidaEF.cs" />
+    <Compile Include="UnidadesMedidaEF.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="UsuarioEF.cs" />
   </ItemGroup>

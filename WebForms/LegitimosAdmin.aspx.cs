@@ -225,7 +225,7 @@ namespace WebForms
                         "$('#modalAgregar').modal('hide');", true);
 
                     // Refresh the legitimos list
-                    CargarListaLegitimos(null,true);
+                    CargarListaLegitimos(null, true);
                     CalcularSubtotal();
                 }
                 catch (Exception ex)
@@ -333,9 +333,9 @@ namespace WebForms
                     listaFiltrada = listaFiltrada.Where(l => selectedEstados.Contains(l.Estado ?? ""));
 
 
-                if (selectedLineas.Any())                  
+                if (selectedLineas.Any())
                     listaFiltrada = listaFiltrada.Where(l => selectedLineas.Contains(l.Linea ?? ""));
-                
+
 
                 if (selectedMesesAprobacion.Any())
                 {
@@ -381,7 +381,7 @@ namespace WebForms
                 if (legitimosCompleto == null || !legitimosCompleto.Any())
                 {
                     return; // No hay datos para poblar los filtros.
-                }     
+                }
 
                 var cblsHeaderArea = e.Row.FindControl("cblsHeaderArea") as WebForms.CustomControls.TreeViewSearch;
                 if (cblsHeaderArea != null)
@@ -439,7 +439,8 @@ namespace WebForms
                         .Select(l => l.MesAprobacion.Value.Date) // Normalizar a solo fecha
                         .Distinct()
                         .OrderByDescending(d => d)
-                        .Select(d => new {
+                        .Select(d => new
+                        {
                             Nombre = d.ToString("MMMM yyyy", new CultureInfo("es-ES")),
                             Valor = d.ToString("yyyy-MM-dd")
                         })
@@ -570,7 +571,7 @@ namespace WebForms
                 {
                     lblMensaje.Text = "Legítimo eliminado correctamente.";
                     lblMensaje.CssClass = "alert alert-success";
-                    CargarListaLegitimos(null,true);
+                    CargarListaLegitimos(null, true);
                 }
             }
             catch (Exception ex)

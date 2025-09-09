@@ -67,7 +67,7 @@ namespace WebForms
             };
 
                     // Exportar a Excel
-                    ExcelHelper.ExportarDatosGenericos(dgvCertificado, certificados, mapeoColumnas, "Certificados");
+                    ExcelHelper.ExportarDatosGenericos(gridviewRegistros, certificados, mapeoColumnas, "Certificados");
                 }
                 else
                 {
@@ -155,7 +155,7 @@ namespace WebForms
         private void CalcularSubtotal()
         {
             decimal subtotal = 0;
-            List<Certificado> dataSource = dgvCertificado.DataSource as List<Certificado>;
+            List<Certificado> dataSource = gridviewRegistros.DataSource as List<Certificado>;
 
             if (dataSource != null)
             {
@@ -193,8 +193,8 @@ namespace WebForms
                 }
                 else
                 {
-                    dgvCertificado.DataSource = new List<Certificado>();
-                    dgvCertificado.DataBind();
+                    gridviewRegistros.DataSource = new List<Certificado>();
+                    gridviewRegistros.DataBind();
                     CalcularSubtotal();
                     return;
                 }
@@ -211,25 +211,25 @@ namespace WebForms
                 List<string> selectedHeaderTipos = new List<string>(); // IDs de TipoPago
                 List<string> selectedHeaderMesesCertificado = new List<string>(); // Formato yyyy-MM-dd o yyyy_MM o year_yyyy
 
-                if (dgvCertificado.HeaderRow != null)
+                if (gridviewRegistros.HeaderRow != null)
                 {
-                    var cblsHeaderObraControl = dgvCertificado.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
+                    var cblsHeaderObraControl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderObra") as CustomControls.TreeViewSearch;
                     if (cblsHeaderObraControl != null) selectedHeaderObra = cblsHeaderObraControl.SelectedValues;
 
 
-                    var cblsHeaderEmpresaCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEmpresaCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEmpresaCtrl != null) selectedHeaderEmpresas = cblsHeaderEmpresaCtrl.SelectedValues;
 
-                    var cblsHeaderCodigoAutorizanteCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderCodigoAutorizanteCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderCodigoAutorizante") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderCodigoAutorizanteCtrl != null) selectedHeaderCodigosAutorizante = cblsHeaderCodigoAutorizanteCtrl.SelectedValues;
 
-                    var cblsHeaderEstadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderEstadoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderEstadoCtrl != null) selectedHeaderEstados = cblsHeaderEstadoCtrl.SelectedValues;
 
-                    var cblsHeaderTipoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderTipoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderTipo") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderTipoCtrl != null) selectedHeaderTipos = cblsHeaderTipoCtrl.SelectedValues;
 
-                    var cblsHeaderMesCertificadoCtrl = dgvCertificado.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
+                    var cblsHeaderMesCertificadoCtrl = gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesCertificado") as WebForms.CustomControls.TreeViewSearch;
                     if (cblsHeaderMesCertificadoCtrl != null) selectedHeaderMesesCertificado = cblsHeaderMesCertificadoCtrl.SelectedValues;
                 }
 
@@ -305,8 +305,8 @@ namespace WebForms
 
                 List<Certificado> resultadoFinal = listaFiltrada.ToList();
                 Session["listaCertificado"] = resultadoFinal;
-                dgvCertificado.DataSource = resultadoFinal;
-                dgvCertificado.DataBind();
+                gridviewRegistros.DataSource = resultadoFinal;
+                gridviewRegistros.DataBind();
                 CalcularSubtotal();
             }
             catch (Exception ex)
@@ -318,12 +318,12 @@ namespace WebForms
 
         }
 
-        protected void dgvCertificado_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 // Get the ID of the selected row
-                int idCertificado = Convert.ToInt32(dgvCertificado.SelectedDataKey.Value);
+                int idCertificado = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
 
                 // Get the list of certificados from session
                 List<Certificado> certificadosList = (List<Certificado>)Session["listaCertificado"];
@@ -394,11 +394,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvCertificado_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
             {
-                var id = Convert.ToInt32(dgvCertificado.DataKeys[e.RowIndex].Value);
+                var id = Convert.ToInt32(gridviewRegistros.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
                     lblMensaje.Text = "Certificado eliminado correctamente.";
@@ -414,11 +414,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvCertificado_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             try
             {
-                dgvCertificado.PageIndex = e.NewPageIndex;
+                gridviewRegistros.PageIndex = e.NewPageIndex;
                 CargarListaCertificados();
                 CalcularSubtotal();
             }
@@ -571,7 +571,7 @@ namespace WebForms
         //    return dt;
         //}
 
-        protected void dgvCertificado_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.Header)
             {
@@ -726,7 +726,7 @@ namespace WebForms
             GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
 
             // Obtiene la clave del registro desde DataKeyNames
-            int id = int.Parse(dgvCertificado.DataKeys[row.RowIndex].Value.ToString());
+            int id = int.Parse(gridviewRegistros.DataKeys[row.RowIndex].Value.ToString());
 
             // Nuevo valor del expediente
             string nuevoExpediente = txtExpediente.Text;

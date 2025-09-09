@@ -24,7 +24,7 @@ namespace WebForms
                     List<Barrio> temp = (List<Barrio>)Session["listaBarrio"];
                     Barrio selected = temp.Find(x => x.Id == codM);
                     txtNombre.Text = selected.Nombre;
-                   
+
                 }
             }
 
@@ -34,7 +34,7 @@ namespace WebForms
             Barrio barrio = new Barrio();
             BarrioNegocio negocio = new BarrioNegocio();
 
-            if (txtNombre.Text.Trim() != string.Empty )
+            if (txtNombre.Text.Trim() != string.Empty)
             {
                 barrio.Id = int.Parse(Request.QueryString["codM"].ToString());
                 barrio.Nombre = txtNombre.Text.Trim();

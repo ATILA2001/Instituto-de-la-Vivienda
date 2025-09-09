@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Autorizantes.aspx.cs" Inherits="WebForms.Autorizantes" %>
 
-<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -62,7 +62,7 @@
                                     <div class="mb-3">
                                         <label for="txtExpediente" class="form-label">Expediente</label>
                                         <asp:TextBox ID="txtExpediente" CssClass="form-control" runat="server" placeHolder="xxxxxxxx/25" />
-                                       
+
                                     </div>
                                 </div>
 
@@ -207,8 +207,8 @@
                         </asp:LinkButton>
                     </div>
                     <div class="form-group mb-2">
-						<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
-							data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+                        <asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
     <i class="bi bi-download"></i>
 </asp:LinkButton>
 					</div>
@@ -225,11 +225,11 @@
         <hr class="mb-3" />
         <div class="gridview-scroll-container">
 
-            <asp:GridView ID="dgvAutorizante" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4"
-                OnSelectedIndexChanged="dgvAutorizante_SelectedIndexChanged"
-                OnRowDeleting="dgvAutorizante_RowDeleting" OnRowDataBound="dgvAutorizante_RowDataBound"
+            <asp:GridView ID="gridviewRegistros" DataKeyNames="CodigoAutorizante" CssClass="table1  table-bordered table-hover mb-4"
+                OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
+                OnRowDeleting="gridviewRegistros_RowDeleting" OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
-                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvAutorizante_PageIndexChanging" runat="server">
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="gridviewRegistros_PageIndexChanging" runat="server">
                 <Columns>
                     <asp:BoundField HeaderText="Obra" DataField="Obra.Id" Visible="false" />
 

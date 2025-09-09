@@ -4,38 +4,80 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+	<div class="container-fluid d-flex justify-content-center align-items-center">
+		<div class="card" style="width: 100%; max-width: 1200px;">
+			<div class="row g-0 h-100">
+				<!-- Left panel -->
+				<div class="col-md-4 text-white bg-dark d-flex flex-column justify-content-center rounded-2">
+					<div class="p-4 p-md-5 text-center">
+						<div class="mb-5 d-flex justify-content-center align-items-center">
+							<img src="Images/IVC-Blanco.png" alt="Logo" class="img-fluid" />
+						</div>
+					</div>
+				</div>
 
-        <div class="container-fluid" style="max-width: 28rem;">
-            <h1 class="text-center p-4 fs-1">Inicia Sesión</h1>
-            <asp:Panel ID="pnlLogin" runat="server" DefaultButton="btnIniciar">
+				<!-- Right panel -->
+				<div class="col-md-8 bg-white">
+					<div class="p-4 p-md-5">
+						<h2 class="mb-4">Iniciá sesión</h2>
 
-                <div class="card shadow-lg border-0">
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <asp:Label ID="lblEmail" CssClass="fs-5" Text="Email" runat="server" />
-                            <asp:TextBox type="email" CssClass="form-control" ID="txtEmail" placeholder="Email@Ejemplo.com" runat="server" />
-                        </div>
-                        <div class="mb-4">
-                            <asp:Label ID="lblContrasenia" CssClass="fs-5" Text="Contraseña" runat="server" />
-                            <asp:TextBox type="password" CssClass="form-control" ID="txtPass" placeholder="Contraseña" runat="server" />
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <div class="ms-auto">
-                                <asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" class="btn btn-primary" Text="Iniciar" runat="server" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </asp:Panel>
+						<asp:Panel ID="pnlLogin" runat="server" DefaultButton="btnIniciar">
+							<div class="row" style="max-height: 450px; overflow-y: auto;">
+								<div class="col-12">
+									<div class="mb-4">
+										<div class="form-label-container">
+											<asp:Label ID="lblEmail" CssClass="form-label" Text="Correo electrónico o CUIL" runat="server" />
+										</div>
+										<asp:TextBox
+											CssClass="form-control"
+											ID="txtEmail"
+											placeholder="Ingrese su correo electrónico"
+											aria-required="true"
+											runat="server" />
+										<asp:RequiredFieldValidator
+											ID="rfvEmail"
+											ControlToValidate="txtEmail"
+											ErrorMessage="Debe ingresar un correo válido o un CUIL correcto"
+											CssClass="text-danger small"
+											Display="Dynamic"
+                                            ValidationExpression="^(([^@\s]+@[^@\s]+\.[^@\s]+)|((20|23|27|30|33)([0-9]{8})([0-9])))$"
+											runat="server" />
+									</div>
 
+									<div class="mb-5">
+										<div class="form-label-container">
+											<asp:Label ID="lblContrasenia" CssClass="form-label" Text="Contraseña" runat="server" />
+										</div>
+										<asp:TextBox
+											type="password"
+											CssClass="form-control"
+											ID="txtPass"
+											placeholder="Ingrese su contraseña"
+											aria-required="true"
+											runat="server" />
+										<asp:RequiredFieldValidator
+											ID="rfvPassword"
+											ControlToValidate="txtPass"
+											ErrorMessage="La contraseña es requerida"
+											CssClass="text-danger small"
+											Display="Dynamic"
+											runat="server" />
+									</div>
+								</div>
+							</div>
 
-            <div class="text-center mt-3">
-                ¿Eres nuevo? <a href="Register.aspx" style="color: #34495e; font-weight: 500;">Crear cuenta</a>
-            </div>
-        </div>
-    </div>
+							<div class="mt-3">
+								<asp:Label ID="lblMensaje" CssClass="d-block text-center" runat="server" />
+							</div>
 
-
-
+							<div class="d-flex justify-content-end align-items-center mt-4">
+								<a href="Register.aspx" class="access" style="margin-right: auto;">Crear una cuenta</a>
+								<asp:Button ID="btnIniciar" OnClick="btnIniciar_Click" CssClass="btn btn-primary" Text="Ingresar" runat="server" />
+							</div>
+						</asp:Panel>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </asp:Content>

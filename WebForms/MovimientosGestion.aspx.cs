@@ -53,11 +53,11 @@ namespace WebForms
                     var obrasUnicas = movimientosCompleto
                         .Where(m => m.Obra != null && m.Obra.Id != 0)
                         .Select(m => new { Id = m.Obra.Id, Nombre = m.Obra.Descripcion })
-                        .Distinct() 
+                        .Distinct()
                         .OrderBy(x => x.Nombre)
                         .ToList();
                     cblsHeaderObra.DataTextField = "Nombre";
-                    cblsHeaderObra.DataValueField = "Id"; 
+                    cblsHeaderObra.DataValueField = "Id";
                     cblsHeaderObra.DataSource = obrasUnicas;
                     cblsHeaderObra.DataBind();
                 }

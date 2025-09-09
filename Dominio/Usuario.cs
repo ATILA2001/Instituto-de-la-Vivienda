@@ -14,18 +14,40 @@ namespace Dominio
         public String Correo { get; set; }
 
         public String Contrasenia { get; set; }
-        public bool Tipo {  get; set; }
+        public bool Tipo { get; set; }
 
         public bool Estado { get; set; }
 
         public Area Area { get; set; }
 
-        public Usuario() { }
+		public String Domain { get; set; }
 
-        public Usuario( string correo, string contrasenia)
-        {
-            Correo = correo;
-            Contrasenia = contrasenia;
-        }
-    }
+		public String Username { get; set; }    // destinado a guardar el nombre de usuario del dominio o el mail
+
+
+		public Usuario() { }
+
+		//public Usuario(string domain, string username)
+		//{
+		//	Domain = domain;
+		//	Username = username;
+		//}
+
+		public Usuario(string correo, string contrasenia)
+		{
+			Correo = correo;
+			Contrasenia = contrasenia;
+		}
+
+		public static Usuario CreateWithDomain(string username, string contrasenia)
+		{
+			return new Usuario
+			{
+				Username = username,
+				Contrasenia = contrasenia
+			};
+		}
+
+
+	}
 }

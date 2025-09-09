@@ -13,7 +13,7 @@ namespace Dominio
         public string CodigoRedet { get; set; }
         public DateTime MesAprobacion { get; set; }
         public string Expediente { get; set; }
-        
+
     }
 }
 

@@ -13,7 +13,9 @@ namespace WebForms
         {
             if (Session["error"] != null)
             {
-                lblMensaje.Text = Session["error"].ToString();
+                // HtmlEncode para evitar inyección de HTML desde la sesión
+                lblMensaje.Text = Server.HtmlEncode(Session["error"].ToString());
+                Session.Remove("error"); // Evita redirecciones repetidas
             }
         }
     }

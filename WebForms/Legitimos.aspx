@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Legitimos.aspx.cs" Inherits="WebForms.Legitimos" %>
 
-<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -213,11 +213,11 @@
         <div class="gridview-scroll-container">
 
 
-            <asp:GridView ID="dgvLegitimos" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
-                OnRowDeleting="dgvLegitimos_RowDeleting" OnSelectedIndexChanged="dgvLegitimos_SelectedIndexChanged"
-                OnRowDataBound="dgvLegitimos_RowDataBound"
+            <asp:GridView ID="gridviewRegistros" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+                OnRowDeleting="gridviewRegistros_RowDeleting" OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
+                OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
-                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvLegitimos_PageIndexChanging" runat="server">
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="gridviewRegistros_PageIndexChanging" runat="server">
 
                 <Columns>
                     <asp:BoundField HeaderText="Obra" DataField="Obra.Descripcion" />

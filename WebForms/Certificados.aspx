@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User.Master" AutoEventWireup="true" CodeBehind="Certificados.aspx.cs" Inherits="WebForms.Certificados" %>
 
-<%@ Register Src="~/CustomControls/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
@@ -175,12 +175,12 @@
         <hr class="mb-3" />
         <div class="gridview-scroll-container">
 
-            <asp:GridView ID="dgvCertificado" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
-                OnSelectedIndexChanged="dgvCertificado_SelectedIndexChanged"
-                OnRowDeleting="dgvCertificado_RowDeleting"
-                OnRowDataBound="dgvCertificado_RowDataBound"
+            <asp:GridView ID="gridviewRegistros" DataKeyNames="ID" CssClass="table1  table-bordered table-hover mb-4"
+                OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
+                OnRowDeleting="gridviewRegistros_RowDeleting"
+                OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
-                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvCertificado_PageIndexChanging" runat="server">
+                AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="gridviewRegistros_PageIndexChanging" runat="server">
                 <Columns>
                     <asp:BoundField HeaderText="ID" DataField="Autorizante.Id" Visible="false" />
 
