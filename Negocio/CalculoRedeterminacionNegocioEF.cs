@@ -106,7 +106,7 @@ namespace Negocio
                     context.Configuration.ValidateOnSaveEnabled = false;
 
                     List<AutorizanteEF> autorizantes;
-                    if (usuario != null && usuario.Tipo == false) // Usuario normal (no administrador)
+                    if (usuario != null && usuario.Tipo == false && usuario.AreaId != 16) // Usuario normal (no administrador)
                     {
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId == usuario.AreaId)
