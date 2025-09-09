@@ -154,57 +154,7 @@
 										runat="server" />
 								</div>
 
-								<div class="col-md-6 mb-3">
-									<div class="form-label-container">
-										<asp:Label ID="lblContrasenia" CssClass="form-label" Text="Contraseña" runat="server" />
-									</div>
-									<asp:TextBox
-										type="password"
-										CssClass="form-control"
-										ID="txtPass"
-										placeholder="Contraseña"
-										aria-required="true"
-										runat="server" />
-									<asp:RequiredFieldValidator
-										ID="rfvContrasenia"
-										ControlToValidate="txtPass"
-										ErrorMessage="La contraseña es requerida"
-										CssClass="text-danger small"
-										Display="Dynamic"
-										runat="server" />
-
 								</div>
-
-								<div class="col-md-6 mb-3">
-									<div class="form-label-container">
-										<asp:Label ID="lblPassRep" CssClass="form-label" Text="Repetir Contraseña" runat="server" />
-									</div>
-									<asp:TextBox
-										type="password"
-										ID="txtPassRep"
-										placeholder="Contraseña"
-										CssClass="form-control"
-										aria-required="true"
-										runat="server" />
-									<asp:RequiredFieldValidator
-										ID="rfvPassRep"
-										ControlToValidate="txtPassRep"
-										ErrorMessage="Debe repetir la contraseña"
-										CssClass="text-danger small"
-										Display="Dynamic"
-										runat="server" />
-									<asp:CompareValidator
-										ID="cvPasswordMatch"
-										ControlToValidate="txtPassRep"
-										ControlToCompare="txtPass"
-										Operator="Equal"
-										Type="String"
-										ErrorMessage="Las contraseñas no coinciden"
-										CssClass="text-danger small"
-										Display="Dynamic"
-										runat="server" />
-								</div>
-							</div>
 
 							<div class="mt-3">
 								<asp:Label ID="lblMensaje" CssClass="d-block text-center" runat="server" />

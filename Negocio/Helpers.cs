@@ -522,7 +522,7 @@ namespace Negocio
             // Implementar según la lógica de sesión del sistema
             if (HttpContext.Current?.Session["Usuario"] != null)
             {
-                var userEntity = (Usuario)HttpContext.Current.Session["Usuario"];
+                var userEntity = (UsuarioEF)HttpContext.Current.Session["Usuario"];
                 return new UsuarioEF
                 {
                     Id = userEntity.Id,

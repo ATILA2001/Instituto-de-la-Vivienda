@@ -22,89 +22,121 @@ namespace WebForms
 
         protected void btnIniciar_Click(object sender, EventArgs e)
         {
-            Usuario usuario = null;
-            UsuarioNegocio negocio = new UsuarioNegocio();
+            if (!FormatValidation(txtEmail.Text.Trim()))
+            {
+                // Guardar el mensaje en sesión antes de redirigir a la página de error
+                Session["error"] = "Formato de CUIL o Email incorrecto.";
+                Response.Redirect("Error.aspx", false);
+                return;
+            }
 
-            Debug.WriteLine("OBJ USUARIO CREADO USUARIO CREADO");
+            var input = txtEmail.Text.Trim();
+            var password = txtPass.Text ?? string.Empty;
 
+            UsuarioEF usuario = null;
             try
             {
-                // Validar si las credenciales son correctas
-
-                using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, "BUENOSAIRES"))
+                using (var ctx = new IVCdbContext())
                 {
+                    var auth = new AuthenticationManager(ctx);
+                    usuario = auth.Authenticate(input, password);
+                }
+            }
+            catch (Exception)
+            {
+                // Guardar el mensaje de error en sesión (se puede ajustar para no exponer detalles en producción)
+                Session["error"] = "Error al intentar autenticar";
+                Response.Redirect("Error.aspx", false);
+                return;
+            }
 
-                    //bool isValid = pc.ValidateCredentials(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                    if (true)
-                    {
-                        var emailPattern = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
-                        var cuilPattern = new Regex(@"^(20|23|27|30|33)\d{8}\d$");
-                        bool exito = false;
+            if (usuario != null)
+            {
+                if (ValidarEstado(usuario))
+                {
+                    Session.Add("Usuario", usuario);
+                    RedirigirSegunArea(usuario);
+                    return;
+                }
+                // Usuario encontrado pero inactivo
+                Session["error"] = "Usuario inactivo. Contacte al administrador.";
+                Response.Redirect("Error.aspx", false);
+                return;
+            }
 
-                        if (emailPattern.IsMatch(txtEmail.Text.Trim()))
-                        {
-                            Debug.WriteLine("------------ESTA ENTRANDO POR CORREO @@@@@@@@@@@@@@@@@@@@@@@@@@@ ");
+            // Credenciales inválidas
+            Session["error"] = "Usuario o contraseña inválidos.";
+            Response.Redirect("Error.aspx", false);
+        }
 
-                            // Obtener el cuil a partir del correo
 
-                            usuario = new Usuario(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                            negocio.ObtenerCuil(usuario);
-                            exito = negocio.LogearIntegSecur(usuario, usuario.Username);
-                        }
-                        else if (cuilPattern.IsMatch(txtEmail.Text.Trim()))
-                        {
-                            // CreateWithDomain
-                            Debug.WriteLine("------------ESTA ENTRANDO POR CUIL AD. AD. AD. AD. AD. AD. AD. ");
-                            usuario = Usuario.CreateWithDomain(txtEmail.Text.Trim(), txtPass.Text.Trim());
-                            exito = negocio.LogearIntegSecur(usuario, txtEmail.Text.Trim());
-                        }
+        private bool ValidarEstado(UsuarioEF usuario)
+        {
+            return usuario != null && usuario.Estado;
+        }
 
-                        if (exito) {
-                            Session.Add("Usuario", usuario);
-                            if (Session["Usuario"] != null && ((Dominio.Usuario)Session["Usuario"]).Tipo == true)
-                            {
-                                Response.Redirect("AutorizantesEF.aspx", false);
-                            }
-                            else
-                            {
-                                if (((Dominio.Usuario)Session["Usuario"]).Estado == true)
-                                {
-                                    if (((Dominio.Usuario)Session["Usuario"]).Area != null &&
-                                        ((Dominio.Usuario)Session["Usuario"]).Area.Id == 16)
-                                    {
-                                        Response.Redirect("Redeterminaciones.aspx", false);
-                                    }
-                                    else
-                                    {
-                                        Response.Redirect("AutorizantesEF.aspx", false);
-                                    }
-                                }
-                                else
-                                {
-                                    Session.Add("error",
-                                        "Usuario no habilitado a ingresar, solicitar acceso al area correspondiente.");
-                                    Response.Redirect("Error.aspx", false);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Debug.WriteLine("Correo: " + usuario.Correo + "Area: " + usuario.Area);
-                            Session.Add("error", "Usuario o Contraseña Incorrectos");
-                            Response.Redirect("Error.aspx", false);
-                        }
+        private void RedirigirSegunArea(UsuarioEF usuario)
+        {
+            if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
+            {
+                Response.Redirect("Redeterminaciones.aspx", false);
+            }
+            else
+            {
+                Response.Redirect("CertificadosEF.aspx", false);
+            }
+        }
 
-                    }
+        private bool FormatValidation(string input)
+        {
+            input = (input ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(input)) return false;
+
+            // Si parece un correo, validar con System.Net.Mail.MailAddress (más robusto que un regex simple)
+            if (input.Contains("@"))
+            {
+                try
+                {
+                    var addr = new System.Net.Mail.MailAddress(input);
+                    return true;
+                }
+                catch
+                {
+                    return false;
                 }
             }
 
-
-            catch (Exception ex) {
-
-                        Session.Add("error", ex.ToString());
-                        Response.Redirect("Error.aspx");
-            }
-            
+            // Sino, validar CUIT/CUIL usando el algoritmo módulo 11 (verifica dígito verificador)
+            return ValidateCuitCuil(input);
         }
+
+        // Valida un CUIT/CUIL (acepta dígitos y guiones). Algoritmo: multiplicadores 5,4,3,2,7,6,5,4,3,2 y comprobación módulo 11.
+        private bool ValidateCuitCuil(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+
+            var digits = new string(input.Where(char.IsDigit).ToArray());
+            if (digits.Length != 11) return false;
+
+            int[] weights = new int[] { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
+            int sum = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                sum += (digits[i] - '0') * weights[i];
+            }
+
+            int mod = sum % 11;
+            int dv = 11 - mod;
+            if (dv == 11) dv = 0;
+            // Si dv == 10 el número es inválido según la regla estándar
+            if (dv == 10) return false;
+
+            int provided = digits[10] - '0';
+            return dv == provided;
+        }
+
+
+
+
     }
 }

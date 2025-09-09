@@ -97,7 +97,7 @@
     <Compile Include="CalculoRedeterminacionNegocioEF.cs" />
     <Compile Include="CertificadoNegocio.cs" />
     <Compile Include="CertificadoNegocioEF.cs" />
-  <Compile Include="CalculoObraNegocioEF.cs" />
+    <Compile Include="CalculoObraNegocioEF.cs" />
     <Compile Include="ConceptoNegocio.cs" />
     <Compile Include="ConceptoNegocioEF.cs" />
     <Compile Include="ABMPlaniNegocio.cs" />
@@ -112,7 +112,7 @@
     <Compile Include="FormulacionNegocioEF.cs" />
     <Compile Include="FormulacionNegocio.cs" />
     <Compile Include="Helpers.cs" />
-  <Compile Include="LegitimoNegocioEF.cs" />
+    <Compile Include="LegitimoNegocioEF.cs" />
     <Compile Include="LegitimoNegocio.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
@@ -128,6 +128,10 @@
     <Compile Include="UnidadMedidaNegocio.cs" />
     <Compile Include="UnidadMedidaNegocioEF.cs" />
     <Compile Include="UsuarioNegocio.cs" />
+  <Compile Include="ActiveDirectoryAuthenticator.cs" />
+  <Compile Include="LocalAuthenticator.cs" />
+  <Compile Include="AuthenticationManager.cs" />
+    <Compile Include="UsuarioNegocioEF.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dominio\Dominio.csproj">
