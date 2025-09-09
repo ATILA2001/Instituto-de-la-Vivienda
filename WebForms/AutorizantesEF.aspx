@@ -110,8 +110,8 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtMesAprobacionAgregar" class="form-label">Mes Aprobación</label>
-                                            <asp:TextBox ID="txtMesAprobacionAgregar" CssClass="form-control" runat="server" TextMode="Date" />
-                                            <asp:RequiredFieldValidator ID="rfvMesAprobacionAgregar" runat="server" ControlToValidate="txtMesAprobacionAgregar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="AgregarAutorizante" />
+                                        <asp:TextBox ID="txtMesAprobacionAgregar" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <asp:RequiredFieldValidator ID="rfvMesAprobacionAgregar" runat="server" ControlToValidate="txtMesAprobacionAgregar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="AgregarAutorizante" />
                                     </div>
                                 </div>
 
@@ -149,7 +149,7 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <button type="button" class="btn btn-secondary" ID="btnLimpiarAgregar" onclick="limpiarFormularioAgregar()">Limpiar</button>
+                    <button type="button" class="btn btn-secondary" id="btnLimpiarAgregar" onclick="limpiarFormularioAgregar()">Limpiar</button>
                     <div class="d-flex gap-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarAutorizante" />
@@ -241,8 +241,8 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         <label for="txtMesAprobacionEditar" class="form-label">Mes Aprobación</label>
-                                            <asp:TextBox ID="txtMesAprobacionEditar" CssClass="form-control" runat="server" TextMode="Date" />
-                                            <asp:RequiredFieldValidator ID="rfvMesAprobacionEditar" runat="server" ControlToValidate="txtMesAprobacionEditar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="EditarAutorizante" />
+                                        <asp:TextBox ID="txtMesAprobacionEditar" CssClass="form-control" runat="server" TextMode="Date" />
+                                        <asp:RequiredFieldValidator ID="rfvMesAprobacionEditar" runat="server" ControlToValidate="txtMesAprobacionEditar" ErrorMessage="Mes Aprobación es obligatorio" CssClass="text-danger" Display="Dynamic" ValidationGroup="EditarAutorizante" />
                                     </div>
                                 </div>
 
@@ -278,7 +278,7 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <button type="button" class="btn btn-secondary" ID="btnLimpiarEditar" onclick="limpiarFormularioEditar()">Limpiar</button>
+                    <button type="button" class="btn btn-secondary" id="btnLimpiarEditar" onclick="limpiarFormularioEditar()">Limpiar</button>
                     <div class="d-flex gap-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <asp:Button Text="Editar" ID="btnEditar" OnClick="btnEditar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="EditarAutorizante" />
@@ -343,7 +343,7 @@
     <hr class="mb-3" />
 
     <div class="gridview-scroll-container">
-    <asp:GridView ID="gridviewRegistros" DataKeyNames="Id,IdRedeterminacion" CssClass="table1 table-bordered table-hover mb-4"
+        <asp:GridView ID="gridviewRegistros" DataKeyNames="Id,IdRedeterminacion" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
             OnRowDeleting="gridviewRegistros_RowDeleting"
             OnDataBound="gridviewRegistros_DataBound"
@@ -384,7 +384,21 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Contrata" DataField="Contrata" />
+
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderContrata" runat="server"
+                            HeaderText="Contrata"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Contrata") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
+
 
                 <asp:TemplateField>
                     <HeaderTemplate>
@@ -498,9 +512,9 @@
         <asp:Label ID="lblMensaje" Text="" runat="server" />
     </div>
 
-        <script type="text/javascript">
-            function limpiarFormularioAgregar() {
-                document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
+    <script type="text/javascript">
+        function limpiarFormularioAgregar() {
+            document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
                 document.getElementById('<%= txtExpedienteAgregar.ClientID %>').value = '';
                 document.getElementById('<%= txtDetalleAgregar.ClientID %>').value = '';
                 document.getElementById('<%= txtMontoAutorizadoAgregar.ClientID %>').value = '';
@@ -508,16 +522,16 @@
                 document.getElementById('<%= txtMesBaseAgregar.ClientID %>').value = '';
                 document.getElementById('<%= ddlConceptoAgregar.ClientID %>').selectedIndex = 0;
                 document.getElementById('<%= ddlEstadoAgregar.ClientID %>').selectedIndex = 0;
-            }
+        }
 
-            function limpiarFormularioEditar() {
-                document.getElementById('<%= txtExpedienteEditar.ClientID %>').value = '';
+        function limpiarFormularioEditar() {
+            document.getElementById('<%= txtExpedienteEditar.ClientID %>').value = '';
                 document.getElementById('<%= txtDetalleEditar.ClientID %>').value = '';
                 document.getElementById('<%= txtMontoAutorizadoEditar.ClientID %>').value = '';
                 document.getElementById('<%= txtMesAprobacionEditar.ClientID %>').value = '';
                 document.getElementById('<%= txtMesBaseEditar.ClientID %>').value = '';
                 document.getElementById('<%= ddlConceptoEditar.ClientID %>').selectedIndex = 0;
                 document.getElementById('<%= ddlEstadoEditar.ClientID %>').selectedIndex = 0;
-            }
-        </script>
+        }
+    </script>
 </asp:Content>

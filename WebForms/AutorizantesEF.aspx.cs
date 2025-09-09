@@ -62,6 +62,10 @@ namespace WebForms
         /// </summary>
         private CalculoRedeterminacionNegocioEF _calculoRedeterminacionNegocioEF = new CalculoRedeterminacionNegocioEF();
 
+
+
+        private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
+
         #endregion
 
         #region Variables de Paginación Externa
@@ -128,6 +132,66 @@ namespace WebForms
                 }
             }
         }
+
+
+
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            // Aplicar la visibilidad de columnas justo antes del render
+            try
+            {
+                panelShowAddButton.Visible = !UserHelper.IsUserInArea(AreaIdRedet);
+
+                // Solo ocultar/mostrar las columnas requeridas para Redeterminaciones:
+                // - Mes base (DataField: "MesBase")
+                // - Buzón SADE (DataField: "BuzonSade")
+                // - Fecha SADE (DataField: "FechaSade")
+                // - Acciones (Header text: "Acciones")
+                SetColumnsVisibilityForRedet(
+                    UserHelper.IsUserInArea(AreaIdRedet),
+                    // DataField names
+                    "MesBase",
+                    "BuzonSade",
+                    "FechaSade",
+                    // Header text / display names (por si la columna está definida por HeaderText)
+                    "Mes Base",
+                    "Buzón SADE",
+                    "Fecha SADE",
+                    // acciones (template field header)
+                    "Acciones");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Error OnPreRender SetColumnsVisibilityForRedet: " + ex);
+            }
+        }
+
+        private void SetColumnsVisibilityForRedet(bool isRedet, params string[] columnsToHide)
+        {
+            if (gridviewRegistros == null || gridviewRegistros.Columns == null) return;
+
+            var hideSet = new HashSet<string>(columnsToHide ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+
+            // Encontrar columnas cuyo DataField (BoundField) o HeaderText coincida con la lista
+            var matches = gridviewRegistros.Columns
+                .Cast<DataControlField>()
+                .Where(col =>
+                {
+                    if (col is BoundField bf && !string.IsNullOrWhiteSpace(bf.DataField))
+                        return hideSet.Contains(bf.DataField);
+                    if (!string.IsNullOrWhiteSpace(col.HeaderText))
+                        return hideSet.Contains(col.HeaderText);
+
+                    return false;
+                })
+                .ToList();
+
+            // Aplicar visibilidad (si isRedet=true -> ocultar)
+            matches.ForEach(c => c.Visible = !isRedet);
+        }
+
         /// <summary>
         /// Manejador genérico para aceptar cambios en filtros TreeViewSearch.
         /// 
@@ -604,8 +668,8 @@ namespace WebForms
                 bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderProyecto", context.Proyectos.AsNoTracking().OrderBy(p => p.Nombre).Select(p => new { p.Id, p.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(), "CodigoAutorizante", "CodigoAutorizante"
-); bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Id");
+                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(), "CodigoAutorizante", "CodigoAutorizante");
+                bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Nombre");
 
                 // Filtro de Concepto con "REDETERMINACION" incluida
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
@@ -640,6 +704,16 @@ namespace WebForms
                         .ToList();
                     cblsHeaderMesAutorizante.DataSource = meses;
                     cblsHeaderMesAutorizante.DataBind();
+                }
+
+                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata)
+                {
+                    List<AutorizanteDTO> autorizantesCompleto= (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
+                    var items = autorizantesCompleto.Select(a => a.Contrata).Distinct().OrderBy(c => c).Select(c => new { Nombre = c }).ToList();
+                    cblsHeaderContrata.DataSource = items;
+                    cblsHeaderContrata.DataTextField = "Nombre";
+                    cblsHeaderContrata.DataValueField = "Nombre";
+                    cblsHeaderContrata.DataBind();
                 }
             }
         }
@@ -972,12 +1046,16 @@ namespace WebForms
                     autorizantes = autorizantes.Where(a => a.BarrioId.HasValue && barriosSeleccionados.Contains(a.BarrioId.Value)).ToList();
                 }
 
-                // Aplicar filtro de Contrata (si existe)
+                // Aplicar filtro de Contrata (AHORA POR TEXTO, NO POR ID)
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata &&
                     cblsHeaderContrata.SelectedValues?.Any() == true)
                 {
-                    var contratasSeleccionadas = cblsHeaderContrata.SelectedValues.Select(int.Parse).ToList();
-                    autorizantes = autorizantes.Where(a => a.ContrataId.HasValue && contratasSeleccionadas.Contains(a.ContrataId.Value)).ToList();
+                    // Las SelectedValues contienen nombres de contrata (texto). Comparar con la propiedad string en DTO.
+                    var contratasSeleccionadas = new HashSet<string>(cblsHeaderContrata.SelectedValues, StringComparer.OrdinalIgnoreCase);
+                    autorizantes = autorizantes.Where(a =>
+                        !string.IsNullOrWhiteSpace(a.Contrata) && contratasSeleccionadas.Contains(a.Contrata)
+                        || !string.IsNullOrWhiteSpace(a.ContrataNombre) && contratasSeleccionadas.Contains(a.ContrataNombre)
+                    ).ToList();
                 }
 
                 // Aplicar filtro de Línea de Gestión (si existe)
@@ -1283,21 +1361,6 @@ namespace WebForms
             }
         }
 
-
-        protected override void OnInit(EventArgs e)
-        {
-            base.OnInit(e);
-            // Asegurar que el GridView está configurado correctamente
-            gridviewRegistros.DataBound += gridviewRegistros_DataBound;
-        }
-
-        protected override void OnPreRender(EventArgs e)
-        {
-            base.OnPreRender(e);
-            // Actualizar controles de paginación externa antes del render
-            var paginationControl = FindControlRecursive(this, "paginationControl") as PaginationControl;
-            paginationControl?.UpdatePaginationControls();
-        }
 
         #endregion
 
