@@ -751,9 +751,9 @@ namespace WebForms
                 foreach (ListItem item in ddlObraAgregar.Items)
                 {
                     var obra = obras.FirstOrDefault(a => a.Id.ToString() == item.Value);
-                    if (obra != null && obra.Empresa != null)
+                    if (obra != null)
                     {
-                        item.Text = $"{obra.Descripcion} - {obra.Empresa.Nombre}";
+                        item.Text = $"{obra.Descripcion} - {obra.Barrio?.Nombre} - {obra.Empresa?.Nombre}";
                     }
                 }
             }

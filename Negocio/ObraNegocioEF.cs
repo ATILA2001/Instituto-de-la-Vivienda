@@ -31,10 +31,12 @@ namespace Negocio
                     if (UserHelper.IsUserAdmin())
                         query = context.Obras.AsNoTracking()
                             .Include(e => e.Empresa)
+                            .Include(b => b.Barrio)
                             .ToList();
                     else
                         query = context.Obras.AsNoTracking()
-                            .Include (e => e.Empresa)
+                            .Include(e => e.Empresa)
+                            .Include(b => b.Barrio)
                             .Where(o => o.AreaId == userAreaId).ToList();
 
                     return query
