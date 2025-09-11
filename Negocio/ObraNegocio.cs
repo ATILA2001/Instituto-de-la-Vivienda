@@ -535,7 +535,9 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
 
 
                 // Consulta que solo devuelve las obras cuyo área coincida con la del usuario activo
-                datos.setearConsulta("SELECT O.ID, CONCAT( B.NOMBRE, ' - ' , O.DESCRIPCION,' - ', C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE FROM OBRAS AS O INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS) order by NOMBRE");
+                datos.setearConsulta("SELECT O.ID, CONCAT( B.NOMBRE, ' - ' , O.DESCRIPCION, ' - ', E.NOMBRE,' - ', C.NOMBRE, ' - ', O.NUMERO, '/', O.AÑO) AS NOMBRE FROM OBRAS AS O " +
+                    "INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID  INNER JOIN EMPRESAS E ON E.ID = O.EMPRESA " +
+                    "WHERE O.ID NOT IN (SELECT ID_BASE FROM BD_PROYECTOS) order by NOMBRE");
 
 
                 // Ejecutar la consulta.
