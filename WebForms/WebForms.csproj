@@ -18,8 +18,10 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44330</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
-    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
+    <IISExpressAnonymousAuthentication>
+    </IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>
+    </IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -80,13 +82,8 @@
     <Content Include="AbmlBarrio.aspx" />
     <Content Include="AbmlEmpresa.aspx" />
     <Content Include="AbmlUsuarios.aspx" />
-    <Content Include="Autorizantes.aspx" />
-    <Content Include="AutorizantesAdmin.aspx" />
     <Content Include="AutorizantesEF.aspx" />
-    <Content Include="AutorizantesRedet.aspx" />
     <Content Include="BdProyectos.aspx" />
-    <Content Include="Certificados.aspx" />
-    <Content Include="CertificadosAdmin.aspx" />
     <Content Include="CertificadosEF.aspx" />
     <Content Include="Images\1-IVC.jpg" />
     <Content Include="Images\10-IVC.jpg" />
@@ -135,17 +132,13 @@
     <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.css" />
     <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
-    <Content Include="Formulacion.aspx" />
-    <Content Include="FormulacionAdmin.aspx" />
     <Content Include="FormulacionEF.aspx" />
-  <Content Include="LegitimosEF.aspx" />
+    <Content Include="LegitimosEF.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
     <Content Include="Images\IVC-Azul.png" />
     <Content Include="Images\IVC-Blanco.png" />
     <Content Include="Images\IVC-Celeste.png" />
-    <Content Include="Legitimos.aspx" />
-    <Content Include="LegitimosAdmin.aspx" />
     <Content Include="LineasGestion.aspx" />
     <Content Include="LineasGestionFF.aspx" />
     <Content Include="Login.aspx" />
@@ -153,9 +146,6 @@
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
-    <Content Include="Obras.aspx" />
-    <Content Include="ObrasAdmin.aspx" />
-    <Content Include="ObrasRedet.aspx" />
     <Content Include="Redeterminaciones.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -205,20 +195,6 @@
     <Compile Include="Admin.Master.designer.cs">
       <DependentUpon>Admin.Master</DependentUpon>
     </Compile>
-    <Compile Include="Autorizantes.aspx.cs">
-      <DependentUpon>Autorizantes.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Autorizantes.aspx.designer.cs">
-      <DependentUpon>Autorizantes.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="AutorizantesAdmin.aspx.cs">
-      <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AutorizantesAdmin.aspx.designer.cs">
-      <DependentUpon>AutorizantesAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="AutorizantesEF.aspx.cs">
       <DependentUpon>AutorizantesEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -226,33 +202,12 @@
     <Compile Include="AutorizantesEF.aspx.designer.cs">
       <DependentUpon>AutorizantesEF.aspx</DependentUpon>
     </Compile>
-    <Compile Include="AutorizantesRedet.aspx.cs">
-      <DependentUpon>AutorizantesRedet.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AutorizantesRedet.aspx.designer.cs">
-      <DependentUpon>AutorizantesRedet.aspx</DependentUpon>
-    </Compile>
     <Compile Include="BdProyectos.aspx.cs">
       <DependentUpon>BdProyectos.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="BdProyectos.aspx.designer.cs">
       <DependentUpon>BdProyectos.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Certificados.aspx.cs">
-      <DependentUpon>Certificados.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Certificados.aspx.designer.cs">
-      <DependentUpon>Certificados.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="CertificadosAdmin.aspx.cs">
-      <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="CertificadosAdmin.aspx.designer.cs">
-      <DependentUpon>CertificadosAdmin.aspx</DependentUpon>
     </Compile>
     <Compile Include="CertificadosEF.aspx.cs">
       <DependentUpon>CertificadosEF.aspx</DependentUpon>
@@ -279,20 +234,6 @@
     <Compile Include="Error.aspx.designer.cs">
       <DependentUpon>Error.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Formulacion.aspx.cs">
-      <DependentUpon>Formulacion.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Formulacion.aspx.designer.cs">
-      <DependentUpon>Formulacion.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="FormulacionAdmin.aspx.cs">
-      <DependentUpon>FormulacionAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="FormulacionAdmin.aspx.designer.cs">
-      <DependentUpon>FormulacionAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="FormulacionEF.aspx.cs">
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -308,20 +249,6 @@
       <DependentUpon>LegitimosEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
-    <Compile Include="Legitimos.aspx.cs">
-      <DependentUpon>Legitimos.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Legitimos.aspx.designer.cs">
-      <DependentUpon>Legitimos.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="LegitimosAdmin.aspx.cs">
-      <DependentUpon>LegitimosAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="LegitimosAdmin.aspx.designer.cs">
-      <DependentUpon>LegitimosAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="LineasGestion.aspx.cs">
       <DependentUpon>LineasGestion.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -378,33 +305,12 @@
     <Compile Include="MovimientosGestion.aspx.designer.cs">
       <DependentUpon>MovimientosGestion.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Obras.aspx.cs">
-      <DependentUpon>Obras.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Obras.aspx.designer.cs">
-      <DependentUpon>Obras.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ObrasAdmin.aspx.cs">
-      <DependentUpon>ObrasAdmin.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ObrasAdmin.aspx.designer.cs">
-      <DependentUpon>ObrasAdmin.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ObrasEF.aspx.cs">
       <DependentUpon>ObrasEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ObrasEF.aspx.designer.cs">
       <DependentUpon>ObrasEF.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ObrasRedet.aspx.cs">
-      <DependentUpon>ObrasRedet.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ObrasRedet.aspx.designer.cs">
-      <DependentUpon>ObrasRedet.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -439,13 +345,6 @@
     </Compile>
     <Compile Include="Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
-    </Compile>
-    <Compile Include="User.Master.cs">
-      <DependentUpon>User.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="User.Master.designer.cs">
-      <DependentUpon>User.Master</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -585,7 +484,6 @@
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
-    <Content Include="User.Master" />
     <Content Include="Redet.Master" />
     <Content Include="Styles\readme.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
