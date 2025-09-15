@@ -11,224 +11,143 @@ namespace WebForms
 {
 
 
-    public partial class FormulacionAdmin
+    public partial class RedeterminacionesEF
     {
 
         /// <summary>
-        /// ddlObra control.
+        /// ddlAutorizante control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlObra;
+        protected global::System.Web.UI.WebControls.DropDownList ddlAutorizante;
 
         /// <summary>
-        /// rfvObra control.
+        /// rfvAutorizante control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvObra;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAutorizante;
 
         /// <summary>
-        /// txtTechos control.
+        /// txtExpediente control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTechos;
+        protected global::System.Web.UI.WebControls.TextBox txtExpediente;
 
         /// <summary>
-        /// revTechos control.
+        /// rfvExpediente control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revTechos;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvExpediente;
 
         /// <summary>
-        /// txtMesBase control.
+        /// txtSalto control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMesBase;
+        protected global::System.Web.UI.WebControls.TextBox txtSalto;
 
         /// <summary>
-        /// txtMonto26 control.
+        /// rfvSalto control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMonto26;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvSalto;
 
         /// <summary>
-        /// rfvMonto26 control.
+        /// txtNro control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMonto26;
+        protected global::System.Web.UI.WebControls.TextBox txtNro;
 
         /// <summary>
-        /// revMonto26 control.
+        /// rfvNro control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto26;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvNro;
 
         /// <summary>
-        /// txtMonto27 control.
+        /// txtTipo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMonto27;
+        protected global::System.Web.UI.WebControls.TextBox txtTipo;
 
         /// <summary>
-        /// rfvMonto27 control.
+        /// rfvTipo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMonto27;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTipo;
 
         /// <summary>
-        /// revMonto27 control.
+        /// ddlEtapa control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto27;
+        protected global::System.Web.UI.WebControls.DropDownList ddlEtapa;
 
         /// <summary>
-        /// txtMonto28 control.
+        /// rfvEtapa control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtMonto28;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvEtapa;
 
         /// <summary>
-        /// rfvMonto28 control.
+        /// txtPorcentaje control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvMonto28;
+        protected global::System.Web.UI.WebControls.TextBox txtPorcentaje;
 
         /// <summary>
-        /// revMonto28 control.
+        /// rfvPorcentaje control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto28;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvPorcentaje;
 
         /// <summary>
-        /// txtPPI control.
+        /// txtObservacion control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPPI;
-
-        /// <summary>
-        /// revPPI control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revPPI;
-
-        /// <summary>
-        /// ddlUnidadMedida control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlUnidadMedida;
-
-        /// <summary>
-        /// rfvUnidadMedida control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvUnidadMedida;
-
-        /// <summary>
-        /// txtValorMedida control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtValorMedida;
-
-        /// <summary>
-        /// rfvValorMedida control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvValorMedida;
-
-        /// <summary>
-        /// revValorMedida control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revValorMedida;
-
-        /// <summary>
-        /// ddlPrioridades control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlPrioridades;
-
-        /// <summary>
-        /// rfvPrioridades control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvPrioridades;
-
-        /// <summary>
-        /// txtObservaciones control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtObservaciones;
+        protected global::System.Web.UI.WebControls.TextBox txtObservacion;
 
         /// <summary>
         /// btnAgregar control.
@@ -238,6 +157,24 @@ namespace WebForms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnAgregar;
+
+        /// <summary>
+        /// ddlFiltroBuzon control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroBuzon;
+
+        /// <summary>
+        /// chkShowMismatchOnly control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputCheckBox chkShowMismatchOnly;
 
         /// <summary>
         /// txtBuscar control.
@@ -267,15 +204,6 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.LinkButton btnLimpiarFiltros;
 
         /// <summary>
-        /// btnExportarExcel control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnExportarExcel;
-
-        /// <summary>
         /// btnShowAddModal control.
         /// </summary>
         /// <remarks>
@@ -285,13 +213,22 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.LinkButton btnShowAddModal;
 
         /// <summary>
-        /// dgvFormulacion control.
+        /// dgvRedeterminacion control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView dgvFormulacion;
+        protected global::System.Web.UI.WebControls.GridView dgvRedeterminacion;
+
+        /// <summary>
+        /// paginationControl control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::WebForms.CustomControls.PaginationControl paginationControl;
 
         /// <summary>
         /// lblMensaje control.

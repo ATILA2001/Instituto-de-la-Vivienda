@@ -113,6 +113,8 @@ namespace Negocio
                     L.ID as ID_LINEA,
                     A.ID AS ID_AREA,
                     A.NOMBRE AS AREA,
+E.ID AS ID_EMPRESA,
+                    E.NOMBRE AS EMPRESA,
                     C.ID AS ID_CONTRATA
                 FROM BD_PROYECTOS AS BD
                 INNER JOIN OBRAS AS O ON BD.ID_BASE = O.ID
@@ -120,7 +122,8 @@ namespace Negocio
                 INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID
                 INNER JOIN LINEA_DE_GESTION AS L ON BD.LINEA_DE_GESTION = L.ID
                 INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID
-                WHERE 1=1";
+INNER JOIN EMPRESAS AS E ON E.ID = O.EMPRESA                
+WHERE 1=1";
 
 
                 if (linea != null && linea.Count > 0)
@@ -194,6 +197,10 @@ namespace Negocio
                     aux.Obra.Contrata = new Contrata();
                     aux.Obra.Contrata.Id = (int)datos.Lector["ID_CONTRATA"]; // Usa "ID_CONTRATA" (añadido al SELECT)
                     aux.Obra.Contrata.Nombre = (string)datos.Lector["CONTRATA"]; // Usa "CONTRATA" (el CONCAT)
+
+                    aux.Obra.Empresa = new Empresa();
+                    aux.Obra.Empresa.Id = (int)datos.Lector["ID_EMPRESA"];
+                    aux.Obra.Empresa.Nombre = (string)datos.Lector["EMPRESA"];
 
                     aux.LineaGestion = new LineaGestion();
                     aux.LineaGestion.Id = (int)datos.Lector["ID_LINEA"]; // Usa "ID_LINEA"

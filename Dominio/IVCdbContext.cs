@@ -35,8 +35,8 @@ namespace Dominio
         public DbSet<EmpresaEF> Empresas { get; set; }
         public DbSet<ContrataEF> Contratas { get; set; }
         public DbSet<BarrioEF> Barrios { get; set; }
-    // Usuarios (mappea la tabla Usuarios)
-    public DbSet<UsuarioEF> Usuarios { get; set; }
+        // Usuarios (mappea la tabla Usuarios)
+        public DbSet<UsuarioEF> Usuarios { get; set; }
         public DbSet<AreaEF> Areas { get; set; }
         public DbSet<LineaGestionEF> LineasGestion { get; set; }
         public DbSet<LineaGestionFFEF> LineasGestionFF { get; set; }
@@ -106,6 +106,12 @@ namespace Dominio
                 .HasRequired(c => c.TipoPago)
                 .WithMany(tp => tp.Certificados)
                 .HasForeignKey(c => c.TipoPagoId);
+
+            // Relación Redeterminacion - Usuario (muchos a uno, opcional)
+            modelBuilder.Entity<RedeterminacionEF>()
+                .HasOptional(r => r.Usuario)
+                .WithMany()
+                .HasForeignKey(r => r.UsuarioId);
 
             // Relación Obra - Formulacion (1 a muchos)
             modelBuilder.Entity<ObraEF>()
