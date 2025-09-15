@@ -11,6 +11,7 @@ namespace Dominio
         [Key]
         public int Id { get; set; }
 
+        [NotMapped]
         public virtual AutorizanteEF Autorizante { get; set; }
 
         [Column("CODIGO_AUTORIZANTE")]
@@ -25,7 +26,7 @@ namespace Dominio
         public string Tipo { get; set; }
 
         [Column("ETAPA")]
-        public int EstadoRedetEFId { get; set; }
+        public int? EstadoRedetEFId { get; set; }
 
 
         [ForeignKey("EstadoRedetEFId")]
@@ -33,11 +34,20 @@ namespace Dominio
 
         public string Observaciones { get; set; }
 
+        // Columna calculada en BD: se lee pero no se envía en INSERT/UPDATE
         [Column("Codigo_Redet")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string CodigoRedet { get; set; }
 
         [Column("PORCENTAJE_PONDERACION")]
         public decimal? Porcentaje { get; set; }
+
+
+        [Column("ID_USUARIO")]
+        public int? UsuarioId { get; set; }
+
+        [ForeignKey("UsuarioId")]
+        public virtual UsuarioEF Usuario { get; set; }
 
         [NotMapped]
         public string Empresa { get; set; }

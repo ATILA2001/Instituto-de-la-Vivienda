@@ -47,6 +47,7 @@ namespace Dominio
 
         // NOTA: La colección de Certificados se eliminó para evitar conflictos de mapeo en EF.
         // La relación se manejará manualmente en la capa de negocio usando CodigoAutorizante.
+        [NotMapped]
         public virtual ICollection<RedeterminacionEF> Redeterminaciones { get; set; }
     }
 }
