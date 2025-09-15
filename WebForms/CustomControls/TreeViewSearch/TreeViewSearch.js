@@ -121,6 +121,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (!checkbox) return;
 
+                // Determinar la celda que contiene el texto/label del nodo (solo ahí permitimos toggle).
+                const parentTable = checkbox.closest('table');
+                const labelCell = parentTable ? parentTable.querySelector('tr td:last-child') : null;
+
+                // Si el click NO ocurrió dentro de la celda de texto del nodo, no togglear (evita activar al hacer click en el botón expand/collapse).
+                if (labelCell && !labelCell.contains(target)) {
+                    return;
+                }
+
                 // Si el click ocurrió dentro de un anchor del nodo, prevenir postback/link default
                 if (target.closest('a[id*="chkListn"]')) {
                     event.preventDefault();
