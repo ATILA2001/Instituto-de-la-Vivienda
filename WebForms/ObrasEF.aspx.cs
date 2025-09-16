@@ -12,7 +12,7 @@ namespace WebForms
 {
     public partial class ObrasEF : Page
     {
-        private readonly ObraNegocioEF Negocio = new ObraNegocioEF();
+        private readonly ObraNegocioEF _negocio = new ObraNegocioEF();
 
         readonly bool IsPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
 
@@ -49,9 +49,9 @@ namespace WebForms
                 {
                     // Cargar la lista completa de obras o filtrarla por área.
                     if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(AreaIdRedet))
-                        todasLasObras = Negocio.ListarTodo();
+                        todasLasObras = _negocio.ListarTodo();
                     else
-                        todasLasObras = Negocio.ListarPorArea(UserHelper.GetUserAreaId());
+                        todasLasObras = _negocio.ListarPorArea(UserHelper.GetUserAreaId());
 
                     Session["ObrasCompleto"] = todasLasObras;
                 }
@@ -346,7 +346,7 @@ namespace WebForms
             int? editingId = Session["EditingObraId"] as int?;
 
             // Crear o cargar la obra según si es edición o nueva
-            ObraEF obra = editingId != null ? Negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new ObraEF();
+            ObraEF obra = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new ObraEF();
 
             int.TryParse(txtNumero.Text.Trim(), out int numero);
             int.TryParse(txtAnio.Text.Trim(), out int anio);
@@ -371,7 +371,7 @@ namespace WebForms
             if (editingId != null)
             {
 
-                if (Negocio.Modificar(obra))
+                if (_negocio.Modificar(obra))
                 {
                     lblMensaje.Text = "Obra modificada exitosamente!";
                     lblMensaje.CssClass = "alert alert-success";
@@ -387,7 +387,7 @@ namespace WebForms
             else
             {
                 // Nueva obra
-                if (Negocio.Agregar(obra))
+                if (_negocio.Agregar(obra))
                 {
                     lblMensaje.Text = "Obra agregada exitosamente!";
                     lblMensaje.CssClass = "alert alert-success";
@@ -526,7 +526,7 @@ namespace WebForms
             try
             {
                 var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
-                if (Negocio.Eliminar(id))
+                if (_negocio.Eliminar(id))
                 {
                     lblMensaje.Text = "Obra eliminada exitosamente";
                     lblMensaje.CssClass = "alert alert-success";
@@ -574,8 +574,8 @@ namespace WebForms
 
             List<ObraDTO> obrasCompleto = (List<ObraDTO>)Session["ObrasCompleto"];
 
-            bindFilter("cblsHeaderArea", Negocio.ListarAreas().Select(a => new { a.Id, a.Nombre }).ToList(), "Nombre", "Id");
-            bindFilter("cblsHeaderEmpresa", Negocio.ListarEmpresas().Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
+            bindFilter("cblsHeaderArea", _negocio.ListarAreas().Select(a => new { a.Id, a.Nombre }).ToList(), "Nombre", "Id");
+            bindFilter("cblsHeaderEmpresa", _negocio.ListarEmpresas().Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
             // bindFilter("cblsHeaderBarrio", Negocio.ListarBarrios().Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
             var barriosDesdeObras = obrasCompleto
                     .Select(o => new
