@@ -225,11 +225,27 @@ namespace WebForms.CustomControls
                                 // Iterar sobre los grupos
                                 foreach (var group in groupedItems)
                                 {
-                                    var firstItem = group.First();
+                                    var itemsInGroup = group.ToList();
 
                                     // Manejar valores vacíos con "(Vacíos)"
                                     var text = string.IsNullOrEmpty(group.Key) ? "(Vacíos)" : group.Key;
-                                    var value = GetPropertyValue(firstItem, DataValueField);
+
+                                    // Recolectar todos los valores distintos del grupo y concatenarlos por comas.
+                                    var distinctValues = itemsInGroup
+                                        .Select(item => GetPropertyValue(item, DataValueField))
+                                        .Where(v => !string.IsNullOrEmpty(v))
+                                        .Distinct()
+                                        .ToList();
+
+                                    string value;
+                                    if (!distinctValues.Any())
+                                    {
+                                        value = string.Empty;
+                                    }
+                                    else
+                                    {
+                                        value = string.Join(",", distinctValues);
+                                    }
 
                                     var node = new TreeNode(text, value)
                                     {
@@ -253,6 +269,8 @@ namespace WebForms.CustomControls
             {
                 // Restaura selecciones preservadas del repoblado
                 RestaurarSeleccionesPorValor(seleccionesActuales);
+                // Asegurar que el nodo "select-all" se sincronice con los hijos tras restaurar
+                SyncSelectAllNodeState();
             }
             else
             {
@@ -262,9 +280,15 @@ namespace WebForms.CustomControls
                     var selectedValues = LoadSelectedValuesFromSession();
                     if (selectedValues.Any())
                     {
+                        var savedValuesSet = new HashSet<string>(selectedValues);
                         foreach (var node in chkList.Nodes.Cast<TreeNode>().SelectMany(GetAllNodes))
                         {
-                            if (selectedValues.Contains(node.Value))
+                            var nodeValue = node.Value ?? string.Empty;
+                            if (string.IsNullOrEmpty(nodeValue)) continue;
+
+                            var idsInNode = nodeValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+
+                            if (idsInNode.Any(id => savedValuesSet.Contains(id)) || savedValuesSet.Contains(nodeValue))
                             {
                                 node.Checked = true;
 
@@ -277,6 +301,8 @@ namespace WebForms.CustomControls
                                 }
                             }
                         }
+                        // Después de marcar por session, sincronizar select-all
+                        SyncSelectAllNodeState();
                     }
                 }
                 catch (Exception ex)
@@ -351,10 +377,22 @@ namespace WebForms.CustomControls
                         .SelectMany(GetAllNodesRecursive)
                         .ToList();
 
-                    // Marcar como seleccionados solo los nodos cuyos valores coincidan
+                    // Marcar como seleccionados los nodos cuyos valores contengan alguno de los ids guardados
+                    // o, alternativamente, cuando el valor guardado sea el conjunto concatenado que coincide con el nodo.
+                    var valoresBuscados = new HashSet<string>(valoresSeleccionados);
+
                     foreach (var nodo in todosLosNodosActuales)
                     {
-                        if (valoresSeleccionados.Contains(nodo.Value))
+                        var nodeValue = nodo.Value ?? string.Empty;
+
+                        // Si el valor del nodo está vacío, ignorar
+                        if (string.IsNullOrEmpty(nodeValue)) continue;
+
+                        // Separar los ids del nodo (si vienen concatenados por comas)
+                        var idsEnNodo = nodeValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+
+                        // Si alguno de los ids del nodo está en los valores guardados, marcar el nodo
+                        if (idsEnNodo.Any(id => valoresBuscados.Contains(id)))
                         {
                             nodo.Checked = true;
 
@@ -364,6 +402,20 @@ namespace WebForms.CustomControls
                             {
                                 padre.Expanded = true;
                                 padre = padre.Parent;
+                            }
+                        }
+                        else
+                        {
+                            // También soportar el caso donde el valor guardado es exactamente el conjunto concatenado
+                            if (valoresBuscados.Contains(nodeValue))
+                            {
+                                nodo.Checked = true;
+                                var padre = nodo.Parent;
+                                while (padre != null)
+                                {
+                                    padre.Expanded = true;
+                                    padre = padre.Parent;
+                                }
                             }
                         }
                     }
@@ -774,6 +826,42 @@ namespace WebForms.CustomControls
         {
             var savedValues = LoadSelectedValuesFromSession();
             return savedValues != null && savedValues.Any();
+        }
+
+        /// <summary>
+        /// Sincroniza el estado del nodo "select-all" en el servidor según los hijos marcados.
+        /// Marca el select-all si todas las hojas están marcadas.
+        /// </summary>
+        private void SyncSelectAllNodeState()
+        {
+            try
+            {
+                if (chkList == null || chkList.Nodes.Count == 0) return;
+
+                var root = chkList.Nodes[0];
+                if (root == null || root.Value != "select-all") return;
+
+                // Obtener todos los nodos hoja (excluyendo el propio select-all)
+                var leafNodes = chkList.Nodes
+                    .Cast<TreeNode>()
+                    .Skip(1)
+                    .SelectMany(GetAllNodes)
+                    .Where(n => n.ChildNodes.Count == 0)
+                    .ToList();
+
+                if (!leafNodes.Any())
+                {
+                    root.Checked = false;
+                    return;
+                }
+
+                bool allChecked = leafNodes.All(n => n.Checked);
+                root.Checked = allChecked;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error synchronizing select-all state: {ex.Message}");
+            }
         }
 
 

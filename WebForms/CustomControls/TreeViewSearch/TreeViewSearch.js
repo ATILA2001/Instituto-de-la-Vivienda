@@ -91,6 +91,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        // Asegurar que el estado del checkbox "Seleccionar todos" refleje los hijos
+        if (typeof updateSelectAllState === 'function') {
+            updateSelectAllState(treeViewContainer);
+        }
+
         // saveInitialState podría ser para una funcionalidad de "Cancelar" que revierte cambios
         // hechos en el cliente *antes* de un postback. Se mantiene por ahora.
         if (typeof saveInitialState === 'function') {
@@ -374,6 +379,26 @@ function toggleDropdown(dropdownId) {
     dropdown.style.display = isVisible ? 'none' : 'block';
 
     if (!isVisible) {
+        // Antes de mostrar, restaurar el estado definitivo y sincronizar select-all
+        try {
+            const treeViewContainer = document.getElementById(treeId);
+            if (treeViewContainer) {
+                if (typeof restoreState === 'function') {
+                    restoreState(treeViewContainer);
+                }
+                if (typeof initializeIndeterminateStatesForContainer === 'function') {
+                    initializeIndeterminateStatesForContainer(treeViewContainer);
+                }
+                if (typeof updateSelectAllState === 'function') {
+                    updateSelectAllState(treeViewContainer);
+                }
+                if (typeof updateDropdownIcon === 'function') {
+                    updateDropdownIcon(treeViewContainer);
+                }
+            }
+        } catch (err) {
+            console.debug('Error sincronizando estados al abrir dropdown', err);
+        }
         const searchInput = document.getElementById(searchInputId);
         if (searchInput) {
             setTimeout(() => {
@@ -518,17 +543,26 @@ function handleTreeViewCheckboxChange(checkbox, treeViewContainer) {
  * @param {HTMLElement} treeViewContainer - El contenedor principal del TreeView.
  */
 function handleSelectAllChange(selectAllCheckbox, treeViewContainer) {
-    const allCheckboxes = treeViewContainer.querySelectorAll('input[type="checkbox"]');
+    // Seleccionar solo los checkboxes visibles (resultado del filtro) en lugar de todos.
     const isChecked = selectAllCheckbox.checked;
 
+    // Buscar todos los checkboxes dentro del contenedor pero aplicar solo a aquellos
+    // cuyas filas (table) están visibles (no tienen style.display === 'none').
+    const allCheckboxes = Array.from(treeViewContainer.querySelectorAll('input[type="checkbox"]'));
+
     allCheckboxes.forEach(cb => {
-        if (cb !== selectAllCheckbox) {
-            if (cb.checked !== isChecked) {
-                cb.checked = isChecked;
-            }
-            if (cb.indeterminate) {
-                cb.indeterminate = false;
-            }
+        if (cb === selectAllCheckbox) return; // saltar el propio select-all
+
+        const cbTable = cb.closest('table');
+        // Si la fila del checkbox no está visible, no la consideramos (está filtrada)
+        const isVisible = cbTable ? window.getComputedStyle(cbTable).display !== 'none' : true;
+        if (!isVisible) return;
+
+        if (cb.checked !== isChecked) {
+            cb.checked = isChecked;
+        }
+        if (cb.indeterminate) {
+            cb.indeterminate = false;
         }
     });
 
@@ -706,7 +740,13 @@ function updateSelectAllState(treeViewContainer) {
         return;
     }
 
-    const firstLevelCheckboxes = firstLevelNodesContainer.querySelectorAll(':scope > table td input[type="checkbox"]');
+    // Considerar solo los nodos visibles (filtrados) al calcular el estado de "select-all"
+    const firstLevelCheckboxesAll = Array.from(firstLevelNodesContainer.querySelectorAll(':scope > table td input[type="checkbox"]'));
+    const firstLevelCheckboxes = firstLevelCheckboxesAll.filter(cb => {
+        const t = cb.closest('table');
+        return t ? window.getComputedStyle(t).display !== 'none' : true;
+    });
+
     const totalFirstLevelNodes = firstLevelCheckboxes.length;
     let checkedFirstLevelCount = 0;
     let indeterminateFirstLevelCount = 0;
@@ -915,6 +955,10 @@ function restoreState(treeViewContainer) {
         // Actualizar el ícono del dropdown después de restaurar y recalcular estados.
         if (typeof updateDropdownIcon === 'function') {
             updateDropdownIcon(treeViewContainer);
+        }
+        // Asegurar que el estado de "Seleccionar todos" sea consistente con los checkeds restaurados
+        if (typeof updateSelectAllState === 'function') {
+            updateSelectAllState(treeViewContainer);
         }
     }
 }

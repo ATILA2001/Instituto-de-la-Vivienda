@@ -108,6 +108,9 @@
     <Content Include="Images\7-IVC.jpg" />
     <Content Include="Images\8-IVC.jpg" />
     <Content Include="Images\9-IVC.jpg" />
+    <Content Include="Images\logo-footer-ba.svg" />
+    <Content Include="Images\logo-footer.svg" />
+    <Content Include="Images\turismo-feature_feature.png" />
     <Content Include="ObrasEF.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -146,7 +149,6 @@
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
-    <Content Include="Redeterminaciones.aspx" />
     <Content Include="RedeterminacionesEF.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -319,20 +321,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Redet.Master.cs">
-      <DependentUpon>Redet.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Redet.Master.designer.cs">
-      <DependentUpon>Redet.Master</DependentUpon>
-    </Compile>
-    <Compile Include="Redeterminaciones.aspx.cs">
-      <DependentUpon>Redeterminaciones.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Redeterminaciones.aspx.designer.cs">
-      <DependentUpon>Redeterminaciones.aspx</DependentUpon>
-    </Compile>
     <Compile Include="RedeterminacionesEF.aspx.cs">
       <DependentUpon>RedeterminacionesEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -492,7 +480,6 @@
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
-    <Content Include="Redet.Master" />
     <Content Include="Styles\readme.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
     <Content Include="Scripts\bootstrap.js.map" />

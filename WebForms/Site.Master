@@ -123,7 +123,7 @@
 									</li>
 
 									<li>
-										<a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
+										<a class="dropdown-item" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
 									</li>
 
 									<li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
@@ -158,9 +158,17 @@
 		</main>
 
 		<footer class="bg-dark text-light py-4">
-			<div class="container text-center">
-				<p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
-				<p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-md-6 text-md-start text-center mb-3 mb-md-0">
+						<img src="Images/logo-footer-ba.svg" alt="Buenos Aires Ciudad" height="40" class="me-3" />
+						<img src="Images/logo-footer.svg" alt="Instituto de la Vivienda" height="40" />
+					</div>
+					<div class="col-md-6 text-md-end text-center">
+						<p class="mb-0">© 2025 Instituto de la Vivienda - Ciudad de Buenos Aires</p>
+						<p>Teléfono: 6065-8100 | Dirección: Av. Piedra Buena 3280, Buenos Aires</p>
+					</div>
+				</div>
 			</div>
 		</footer>
 	</form>
