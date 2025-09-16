@@ -553,7 +553,7 @@ namespace WebForms
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = IsPlanningOpen;
+                if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = UserHelper.IsUserAdmin() || IsPlanningOpen;
             }
         }
 
