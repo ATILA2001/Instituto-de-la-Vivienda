@@ -149,7 +149,7 @@
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
-    <Content Include="Redeterminaciones.aspx" />
+    <Content Include="RedeterminacionesEF.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -321,19 +321,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Redet.Master.cs">
-      <DependentUpon>Redet.Master</DependentUpon>
+    <Compile Include="RedeterminacionesEF.aspx.cs">
+      <DependentUpon>RedeterminacionesEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Redet.Master.designer.cs">
-      <DependentUpon>Redet.Master</DependentUpon>
-    </Compile>
-    <Compile Include="Redeterminaciones.aspx.cs">
-      <DependentUpon>Redeterminaciones.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Redeterminaciones.aspx.designer.cs">
-      <DependentUpon>Redeterminaciones.aspx</DependentUpon>
+    <Compile Include="RedeterminacionesEF.aspx.designer.cs">
+      <DependentUpon>RedeterminacionesEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>
@@ -487,7 +480,6 @@
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
-    <Content Include="Redet.Master" />
     <Content Include="Styles\readme.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
     <Content Include="Scripts\bootstrap.js.map" />

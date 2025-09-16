@@ -1,6 +1,7 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Redet.Master" AutoEventWireup="true" CodeBehind="Redeterminaciones.aspx.cs" Inherits="WebForms.Redeterminaciones" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="RedeterminacionesEF.aspx.cs" Inherits="WebForms.RedeterminacionesEF" %>
 
 <%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
+<%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
@@ -52,7 +53,7 @@
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtSalto" class="form-label">Salto</label>
-										<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" />
+										<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" lang="es-AR"/>
 										<asp:RequiredFieldValidator ID="rfvSalto"
 											ControlToValidate="txtSalto"
 											ValidationGroup="AgregarRedeterminacion"
@@ -213,12 +214,13 @@
 	<div class="gridview-scroll-container">
 
 
-		<asp:GridView ID="dgvRedeterminacion" DataKeyNames="ID" CssClass="table1 table-bordered table-hover  mb-4"
+	<asp:GridView ID="dgvRedeterminacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover  mb-4"
 			OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
 			OnRowDeleting="dgvRedeterminacion_RowDeleting"
-			OnRowDataBound="dgvRedeterminacion_RowDataBound"
+	    OnRowDataBound="dgvRedeterminacion_RowDataBound"
+
 			ShowHeaderWhenEmpty="true"
-			AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvRedeterminacion_PageIndexChanging" runat="server">
+			AutoGenerateColumns="false" AllowPaging="false" runat="server">
 			<Columns>
 				<asp:TemplateField HeaderText="Usuario">
 					<HeaderTemplate>
@@ -227,11 +229,11 @@
 					</HeaderTemplate>
 					<ItemTemplate>
 						<asp:DropDownList ID="ddlUsuario" runat="server" AutoPostBack="true"
-							OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="btn btn-sm dropdown-toggle" Style="background-color: white !important; color: #34495e !important; font-weight: normal; padding: 8px 12px; font-size: 14px;">
+							OnSelectedIndexChanged="ddlUsuario_SelectedIndexChanged" class="form-select form-select-sm w-auto text-center">
 						</asp:DropDownList>
 					</ItemTemplate>
 				</asp:TemplateField>
-				<asp:BoundField HeaderText="ID" DataField="ID" Visible="false" />
+				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 				<asp:TemplateField HeaderText="Obra">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
@@ -255,11 +257,11 @@
 				<asp:TemplateField HeaderText="Etapa">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
-							HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+							HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges"  />
 					</HeaderTemplate>
 					<ItemTemplate>
 						<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
-							OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="btn btn-sm dropdown-toggle">
+							OnSelectedIndexChanged="ddlEtapas_SelectedIndexChanged" class="form-select form-select-sm w-auto text-center">
 						</asp:DropDownList>
 					</ItemTemplate>
 				</asp:TemplateField>
@@ -267,17 +269,17 @@
 				<asp:TemplateField HeaderText="Expediente">
 					<ItemTemplate>
 						<asp:TextBox ID="txtExpediente" runat="server" Text='<%# Bind("Expediente") %>' AutoPostBack="true"
-							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm"></asp:TextBox>
+							OnTextChanged="txtExpediente_TextChanged" CssClass="form-control form-control-sm w-auto text-center"></asp:TextBox>
 					</ItemTemplate>
 				</asp:TemplateField>
 				<asp:BoundField HeaderText="Tipo" DataField="Tipo" />
-				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:dd-MM-yyyy}" />
+				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:d}" />
 				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 				<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
 				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
 				<asp:BoundField HeaderText="Área" DataField="Area" />
 				<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
-				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:d}" />
 
 				<asp:TemplateField HeaderText="Días x Buzón">
 					<ItemTemplate>
@@ -318,6 +320,11 @@
 			</EmptyDataTemplate>
 		</asp:GridView>
 	</div>
+
+	<!-- Control de paginación reutilizable -->
+	<CustomControls:PaginationControl ID="paginationControl" runat="server"
+		OnPageChanged="paginationControl_PageChanged"
+		OnPageSizeChanged="paginationControl_PageSizeChanged" />
 	
 
 	<div class="text-center p-4">

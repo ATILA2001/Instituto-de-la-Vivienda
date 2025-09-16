@@ -39,7 +39,17 @@ namespace WebForms
                 using (var ctx = new IVCdbContext())
                 {
                     var auth = new AuthenticationManager(ctx);
+
+                    var sw = Stopwatch.StartNew();
+                    var startUtc = DateTime.UtcNow;
+                    Debug.WriteLine($"[{startUtc:O}] Authentication started for input='{input}'");
+
                     usuario = auth.Authenticate(input, password);
+
+                    sw.Stop();
+                    var endUtc = DateTime.UtcNow;
+                    var resultInfo = usuario != null ? $"success.UserId={usuario.Id}" : "failure.no-user";
+                    Debug.WriteLine($"[{endUtc:O}] Authentication finished for input='{input}' result={resultInfo} elapsed={sw.ElapsedMilliseconds}ms");
                 }
             }
             catch (Exception)
@@ -79,7 +89,7 @@ namespace WebForms
         {
             if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
             {
-                Response.Redirect("Redeterminaciones.aspx", false);
+                Response.Redirect("RedeterminacionesEF.aspx", false);
             }
             else
             {
@@ -134,9 +144,6 @@ namespace WebForms
             int provided = digits[10] - '0';
             return dv == provided;
         }
-
-
-
 
     }
 }

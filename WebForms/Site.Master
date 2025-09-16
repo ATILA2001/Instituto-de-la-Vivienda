@@ -58,7 +58,7 @@
 								<a id="lnkAutorizantes" runat="server" class="nav-link text-white" href="AutorizantesEF.aspx">Autorizantes</a>
 							</li>
 							<li class="nav-item">
-								<a id="lnkRedeterminaciones" runat="server" class="nav-link text-white" href="Redeterminaciones.aspx">Redeterminaciones</a>
+								<a id="lnkRedeterminaciones" runat="server" class="nav-link text-white" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
 							</li>
 
 							<li class="nav-item">
@@ -123,7 +123,7 @@
 									</li>
 
 									<li>
-										<a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
+										<a class="dropdown-item" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
 									</li>
 
 									<li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>

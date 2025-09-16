@@ -158,6 +158,15 @@ namespace Negocio
             return existing.Estado;
         }
 
+        // Agregado a la clase UsuarioNegocioEF
+        public List<UsuarioEF> ListarDdlRedet()
+        {
+            // Area fijo 16 (ID BD) y solo usuarios activos (Estado == true)
+            return _context.Set<UsuarioEF>()
+                           .Where(u => u.Estado && u.AreaId.HasValue && u.AreaId.Value == 16)
+                           .OrderBy(u => u.Nombre)
+                           .ToList();
+        }
 
     }
 }
