@@ -518,17 +518,26 @@ function handleTreeViewCheckboxChange(checkbox, treeViewContainer) {
  * @param {HTMLElement} treeViewContainer - El contenedor principal del TreeView.
  */
 function handleSelectAllChange(selectAllCheckbox, treeViewContainer) {
-    const allCheckboxes = treeViewContainer.querySelectorAll('input[type="checkbox"]');
+    // Seleccionar solo los checkboxes visibles (resultado del filtro) en lugar de todos.
     const isChecked = selectAllCheckbox.checked;
 
+    // Buscar todos los checkboxes dentro del contenedor pero aplicar solo a aquellos
+    // cuyas filas (table) están visibles (no tienen style.display === 'none').
+    const allCheckboxes = Array.from(treeViewContainer.querySelectorAll('input[type="checkbox"]'));
+
     allCheckboxes.forEach(cb => {
-        if (cb !== selectAllCheckbox) {
-            if (cb.checked !== isChecked) {
-                cb.checked = isChecked;
-            }
-            if (cb.indeterminate) {
-                cb.indeterminate = false;
-            }
+        if (cb === selectAllCheckbox) return; // saltar el propio select-all
+
+        const cbTable = cb.closest('table');
+        // Si la fila del checkbox no está visible, no la consideramos (está filtrada)
+        const isVisible = cbTable ? window.getComputedStyle(cbTable).display !== 'none' : true;
+        if (!isVisible) return;
+
+        if (cb.checked !== isChecked) {
+            cb.checked = isChecked;
+        }
+        if (cb.indeterminate) {
+            cb.indeterminate = false;
         }
     });
 
@@ -706,7 +715,13 @@ function updateSelectAllState(treeViewContainer) {
         return;
     }
 
-    const firstLevelCheckboxes = firstLevelNodesContainer.querySelectorAll(':scope > table td input[type="checkbox"]');
+    // Considerar solo los nodos visibles (filtrados) al calcular el estado de "select-all"
+    const firstLevelCheckboxesAll = Array.from(firstLevelNodesContainer.querySelectorAll(':scope > table td input[type="checkbox"]'));
+    const firstLevelCheckboxes = firstLevelCheckboxesAll.filter(cb => {
+        const t = cb.closest('table');
+        return t ? window.getComputedStyle(t).display !== 'none' : true;
+    });
+
     const totalFirstLevelNodes = firstLevelCheckboxes.length;
     let checkedFirstLevelCount = 0;
     let indeterminateFirstLevelCount = 0;
