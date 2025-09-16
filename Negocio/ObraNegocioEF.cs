@@ -125,10 +125,7 @@ namespace Negocio
             using (var context = new IVCdbContext())
             {
                 return context.Obras.AsNoTracking()
-                    .Include(o => o.Empresa)
                     .Include(o => o.Area)
-                    .Include(o => o.Barrio)
-                    .Include(o => o.Contrata)
                     .FirstOrDefault(o => o.Id == id);
             }
         }
