@@ -108,6 +108,9 @@
     <Content Include="Images\7-IVC.jpg" />
     <Content Include="Images\8-IVC.jpg" />
     <Content Include="Images\9-IVC.jpg" />
+    <Content Include="Images\logo-footer-ba.svg" />
+    <Content Include="Images\logo-footer.svg" />
+    <Content Include="Images\turismo-feature_feature.png" />
     <Content Include="ObrasEF.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
