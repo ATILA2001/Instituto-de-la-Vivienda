@@ -91,6 +91,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        // Asegurar que el estado del checkbox "Seleccionar todos" refleje los hijos
+        if (typeof updateSelectAllState === 'function') {
+            updateSelectAllState(treeViewContainer);
+        }
+
         // saveInitialState podría ser para una funcionalidad de "Cancelar" que revierte cambios
         // hechos en el cliente *antes* de un postback. Se mantiene por ahora.
         if (typeof saveInitialState === 'function') {
@@ -374,6 +379,26 @@ function toggleDropdown(dropdownId) {
     dropdown.style.display = isVisible ? 'none' : 'block';
 
     if (!isVisible) {
+        // Antes de mostrar, restaurar el estado definitivo y sincronizar select-all
+        try {
+            const treeViewContainer = document.getElementById(treeId);
+            if (treeViewContainer) {
+                if (typeof restoreState === 'function') {
+                    restoreState(treeViewContainer);
+                }
+                if (typeof initializeIndeterminateStatesForContainer === 'function') {
+                    initializeIndeterminateStatesForContainer(treeViewContainer);
+                }
+                if (typeof updateSelectAllState === 'function') {
+                    updateSelectAllState(treeViewContainer);
+                }
+                if (typeof updateDropdownIcon === 'function') {
+                    updateDropdownIcon(treeViewContainer);
+                }
+            }
+        } catch (err) {
+            console.debug('Error sincronizando estados al abrir dropdown', err);
+        }
         const searchInput = document.getElementById(searchInputId);
         if (searchInput) {
             setTimeout(() => {
@@ -930,6 +955,10 @@ function restoreState(treeViewContainer) {
         // Actualizar el ícono del dropdown después de restaurar y recalcular estados.
         if (typeof updateDropdownIcon === 'function') {
             updateDropdownIcon(treeViewContainer);
+        }
+        // Asegurar que el estado de "Seleccionar todos" sea consistente con los checkeds restaurados
+        if (typeof updateSelectAllState === 'function') {
+            updateSelectAllState(treeViewContainer);
         }
     }
 }

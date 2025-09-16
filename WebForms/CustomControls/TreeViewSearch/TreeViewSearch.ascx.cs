@@ -253,6 +253,8 @@ namespace WebForms.CustomControls
             {
                 // Restaura selecciones preservadas del repoblado
                 RestaurarSeleccionesPorValor(seleccionesActuales);
+                // Asegurar que el nodo "select-all" se sincronice con los hijos tras restaurar
+                SyncSelectAllNodeState();
             }
             else
             {
@@ -277,6 +279,8 @@ namespace WebForms.CustomControls
                                 }
                             }
                         }
+                        // Después de marcar por session, sincronizar select-all
+                        SyncSelectAllNodeState();
                     }
                 }
                 catch (Exception ex)
@@ -774,6 +778,42 @@ namespace WebForms.CustomControls
         {
             var savedValues = LoadSelectedValuesFromSession();
             return savedValues != null && savedValues.Any();
+        }
+
+        /// <summary>
+        /// Sincroniza el estado del nodo "select-all" en el servidor según los hijos marcados.
+        /// Marca el select-all si todas las hojas están marcadas.
+        /// </summary>
+        private void SyncSelectAllNodeState()
+        {
+            try
+            {
+                if (chkList == null || chkList.Nodes.Count == 0) return;
+
+                var root = chkList.Nodes[0];
+                if (root == null || root.Value != "select-all") return;
+
+                // Obtener todos los nodos hoja (excluyendo el propio select-all)
+                var leafNodes = chkList.Nodes
+                    .Cast<TreeNode>()
+                    .Skip(1)
+                    .SelectMany(GetAllNodes)
+                    .Where(n => n.ChildNodes.Count == 0)
+                    .ToList();
+
+                if (!leafNodes.Any())
+                {
+                    root.Checked = false;
+                    return;
+                }
+
+                bool allChecked = leafNodes.All(n => n.Checked);
+                root.Checked = allChecked;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error synchronizing select-all state: {ex.Message}");
+            }
         }
 
 
