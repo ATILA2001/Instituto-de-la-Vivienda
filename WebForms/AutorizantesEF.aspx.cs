@@ -237,24 +237,6 @@ namespace WebForms
                 if (Session["GridDataAutorizantes"] == null) return;
                 var datosParaExportar = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
 
-                // Aplicar los mismos filtros que tiene la grilla
-                string filtro = txtBuscar.Text.Trim().ToLower();
-                if (!string.IsNullOrEmpty(filtro))
-                {
-                    datosParaExportar = datosParaExportar.Where(a =>
-                        (a.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Detalle?.ToLower().Contains(filtro) ?? false) ||
-                        (a.Expediente?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-                        (a.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.ConceptoNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (a.EstadoNombre?.ToLower().Contains(filtro) ?? false)
-                    ).ToList();
-                }
-
-                datosParaExportar = AplicarFiltrosTreeViewEnMemoria(datosParaExportar);
 
                 // Definir mapeo de columnas
                 var mapeoColumnas = new Dictionary<string, string>
@@ -263,16 +245,15 @@ namespace WebForms
                     { "Obra", "ObraDescripcion" },
                     { "Contrata", "Contrata" },
                     { "Empresa", "EmpresaNombre" },
+                    { "Barrio", "BarrioNombre" },
                     { "Código Autorizante", "CodigoAutorizante" },
                     { "Expediente", "Expediente" },
                     { "Detalle", "Detalle" },
-                    { "Monto Autorizado", "MontoAutorizado" },
-                    { "Mes Aprobación", "MesAprobacioin" },
-                    { "Mes Base", "MesBase" },
                     { "Concepto", "ConceptoNombre" },
+                    { "Monto Autorizado", "MontoAutorizado" },
+                    { "Mes Aprobación", "MesAprobacion" },
+                    { "Mes Base", "MesBase" },
                     { "Estado", "EstadoNombre" },
-                    { "Barrio", "BarrioNombre" },
-                    { "Proyecto", "ProyectoNombre" },
                     { "Buzón SADE", "BuzonSade" },
                     { "Fecha SADE", "FechaSade" }
                 };
@@ -708,7 +689,7 @@ namespace WebForms
 
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderContrata") is TreeViewSearch cblsHeaderContrata)
                 {
-                    List<AutorizanteDTO> autorizantesCompleto= (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
+                    List<AutorizanteDTO> autorizantesCompleto = (List<AutorizanteDTO>)Session["GridDataAutorizantes"];
                     var items = autorizantesCompleto.Select(a => a.Contrata).Distinct().OrderBy(c => c).Select(c => new { Nombre = c }).ToList();
                     cblsHeaderContrata.DataSource = items;
                     cblsHeaderContrata.DataTextField = "Nombre";
