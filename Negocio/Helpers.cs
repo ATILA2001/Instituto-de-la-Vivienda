@@ -22,13 +22,13 @@ namespace Negocio
     public static class ExcelHelper
     {
         /// <summary>
-        /// Exporta datos de cualquier tipo a Excel, manejando propiedades anidadas
+        /// Exporta datos de cualquier tipo a Excel usando un mapeo (Header -> RutaPropiedad)
         /// </summary>
-        public static void ExportarDatosGenericos<T>(GridView gridView, IEnumerable<T> datos,
+        public static void ExportarDatosGenericos<T>(IEnumerable<T> datos,
             Dictionary<string, string> mapeoColumnas, string fileName)
         {
-            if (gridView == null)
-                throw new ArgumentException("El GridView es nulo");
+            if (mapeoColumnas == null || mapeoColumnas.Count == 0)
+                throw new ArgumentException("El mapeo de columnas está vacío");
 
             if (datos == null || !datos.Any())
                 throw new ArgumentException("No hay datos para exportar");
@@ -43,35 +43,25 @@ namespace Negocio
                 Dictionary<string, string> mapeoNormalizado = new Dictionary<string, string>();
                 foreach (var kvp in mapeoColumnas)
                 {
-                    // Convertir claves a minúsculas y sin acentos para comparación más flexible
+                    // kvp.Key -> texto del encabezado a imprimir
+                    // kvp.Value -> ruta de la propiedad en el objeto
                     string claveNormalizada = NormalizarTexto(kvp.Key);
                     mapeoNormalizado[claveNormalizada] = kvp.Value;
-                }
-
-                // Depuración: imprimir todas las columnas del GridView
-                System.Diagnostics.Debug.WriteLine("Columnas en GridView:");
-                foreach (DataControlField column in gridView.Columns)
-                {
-                    System.Diagnostics.Debug.WriteLine($"- HeaderText: '{column.HeaderText}' | Tipo: {column.GetType().Name} | Visible: {column.Visible}");
                 }
 
                 // Depuración: imprimir mapeo normalizado
                 System.Diagnostics.Debug.WriteLine("Mapeo normalizado:");
                 foreach (var kvp in mapeoNormalizado)
                 {
-                    System.Diagnostics.Debug.WriteLine($"- Clave: '{kvp.Key}' | Ruta: '{kvp.Value}'");
+                    System.Diagnostics.Debug.WriteLine($"- Encabezado: '{kvp.Key}' | Ruta: '{kvp.Value}'");
                 }
 
-                // Agregar encabezados desde el GridView
-                foreach (DataControlField column in gridView.Columns)
+                // Agregar encabezados desde el mapeo (usar la clave original como texto)
+                foreach (var kvp in mapeoColumnas)
                 {
-                    if (column.Visible && !(column is ButtonField) && !(column is CommandField) &&
-                        column.HeaderText != "Acciones")
-                    {
-                        worksheet.Cells[fila, columnaActual].Value = column.HeaderText;
-                        FormatearEncabezado(worksheet.Cells[fila, columnaActual]);
-                        columnaActual++;
-                    }
+                    worksheet.Cells[fila, columnaActual].Value = kvp.Key;
+                    FormatearEncabezado(worksheet.Cells[fila, columnaActual]);
+                    columnaActual++;
                 }
 
                 // Agregar datos
@@ -79,56 +69,31 @@ namespace Negocio
                 foreach (var item in datos)
                 {
                     columnaActual = 1;
-                    foreach (DataControlField column in gridView.Columns)
+                    foreach (var kvp in mapeoColumnas)
                     {
-                        if (column.Visible && !(column is ButtonField) && !(column is CommandField) &&
-                            column.HeaderText != "Acciones")
+                        string header = kvp.Key;
+                        string rutaPropiedad = kvp.Value;
+
+                        object valor = ObtenerValorPorRuta(item, rutaPropiedad);
+                        System.Diagnostics.Debug.WriteLine($"Fila {fila}: Encabezado '{header}' -> Ruta '{rutaPropiedad}' -> Valor: {valor}");
+
+                        // Formatear según tipo de dato
+                        if (valor is decimal || valor is double || valor is float)
                         {
-                            // Obtener expresión de propiedad para esta columna
-                            string headerText = column.HeaderText;
-                            string headerTextNormalizado = NormalizarTexto(headerText);
-
-                            object valor = null;
-                            string rutaPropiedad = null;
-
-                            // Si hay mapeo específico para esta columna, usarlo
-                            if (mapeoNormalizado.TryGetValue(headerTextNormalizado, out rutaPropiedad))
-                            {
-                                valor = ObtenerValorPorRuta(item, rutaPropiedad);
-                                System.Diagnostics.Debug.WriteLine($"Columna: '{headerText}' (norm: '{headerTextNormalizado}') → Ruta: '{rutaPropiedad}' → Valor: {valor}");
-                            }
-                            else
-                            {
-                                // Intentar con BoundField
-                                if (column is BoundField boundField && !string.IsNullOrEmpty(boundField.DataField))
-                                {
-                                    valor = ObtenerValorPorRuta(item, boundField.DataField);
-                                    System.Diagnostics.Debug.WriteLine($"Columna: '{headerText}' (BoundField) → DataField: '{boundField.DataField}' → Valor: {valor}");
-                                }
-                                else
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Columna: '{headerText}' → No se encontró mapeo");
-                                }
-                            }
-
-                            // Formatear según tipo de dato
-                            if (valor is decimal || valor is double || valor is float)
-                            {
-                                worksheet.Cells[fila, columnaActual].Value = Convert.ToDouble(valor);
-                                worksheet.Cells[fila, columnaActual].Style.Numberformat.Format = "#,##0.00";
-                            }
-                            else if (valor is DateTime)
-                            {
-                                worksheet.Cells[fila, columnaActual].Value = (DateTime)valor;
-                                worksheet.Cells[fila, columnaActual].Style.Numberformat.Format = "dd-MM-yyyy";
-                            }
-                            else
-                            {
-                                worksheet.Cells[fila, columnaActual].Value = valor?.ToString();
-                            }
-
-                            columnaActual++;
+                            worksheet.Cells[fila, columnaActual].Value = Convert.ToDouble(valor);
+                            worksheet.Cells[fila, columnaActual].Style.Numberformat.Format = "#,##0.00";
                         }
+                        else if (valor is DateTime)
+                        {
+                            worksheet.Cells[fila, columnaActual].Value = (DateTime)valor;
+                            worksheet.Cells[fila, columnaActual].Style.Numberformat.Format = "dd-MM-yyyy";
+                        }
+                        else
+                        {
+                            worksheet.Cells[fila, columnaActual].Value = valor?.ToString();
+                        }
+
+                        columnaActual++;
                     }
                     fila++;
                 }

@@ -277,7 +277,7 @@ namespace WebForms
                     { "Fecha SADE", "FechaSade" }
                 };
 
-                Negocio.ExcelHelper.ExportarDatosGenericos(gridviewRegistros, datosParaExportar, mapeoColumnas, "Autorizantes");
+                Negocio.ExcelHelper.ExportarDatosGenericos(datosParaExportar, mapeoColumnas, "Autorizantes");
             }
             catch (Exception ex)
             {

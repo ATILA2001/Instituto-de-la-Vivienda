@@ -55,7 +55,7 @@ namespace WebForms
                         { "Observaciones", "Observaciones" },
                         { "Prioridad", "PrioridadEF.Nombre" }
                     };
-                    ExcelHelper.ExportarDatosGenericos(dgvFormulacion, lista, mapeoColumnas, "FormulacionesEF");
+                    ExcelHelper.ExportarDatosGenericos(lista, mapeoColumnas, "FormulacionesEF");
                 }
                 else
                 {

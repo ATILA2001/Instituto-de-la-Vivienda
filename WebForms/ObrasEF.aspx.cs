@@ -291,7 +291,7 @@ namespace WebForms
                         { "Nombre de Obra", "Descripcion" }
                     };
 
-                    ExcelHelper.ExportarDatosGenericos(dgvObra, obrasCompleto, mapeo, "ObrasEF");
+                    ExcelHelper.ExportarDatosGenericos(obrasCompleto, mapeo, "ObrasEF");
                 }
                 else
                 {
