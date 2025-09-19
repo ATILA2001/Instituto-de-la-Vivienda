@@ -298,25 +298,11 @@ namespace WebForms
                     todosLosCertificados = (List<CertificadoDTO>)Session["CertificadosCompleto"];
                 }
 
-                // Aplicar los mismos filtros que tiene la grilla
-                string filtro = txtBuscar.Text.Trim().ToLower();
-                if (!string.IsNullOrEmpty(filtro))
-                {
-                    todosLosCertificados = todosLosCertificados.Where(c =>
-                        (c.ExpedientePago?.ToLower().Contains(filtro) ?? false) ||
-                        (c.EmpresaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (c.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                        (c.ObraDescripcion?.ToLower().Contains(filtro) ?? false) ||
-                        (c.AreaNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (c.BarrioNombre?.ToLower().Contains(filtro) ?? false) ||
-                        (c.TipoPagoNombre?.ToLower().Contains(filtro) ?? false)
-                    ).ToList();
-                }
-
                 // Define mapeo de columnas
                 var mapeoColumnas = new Dictionary<string, string>
                 {
                     { "Área", "AreaNombre" },
+                    { "Contrata", "Contrata" },
                     { "Obra", "ObraDescripcion" },
                     { "Barrio", "BarrioNombre" },
                     { "Proyecto", "ProyectoNombre" },
@@ -324,13 +310,18 @@ namespace WebForms
                     { "Código Autorizante", "CodigoAutorizante" },
                     { "Expediente", "ExpedientePago" },
                     { "Estado", "Estado" },
-                    { "Tipo", "TipoCertificado" },
-                    { "Monto", "MontoTotal" },
+                    { "Tipo", "TipoPagoNombre" },
+                    { "Monto Certificado", "MontoTotal" },
                     { "Mes Certificado", "MesAprobacion" },
-                    { "Línea", "LineaGestionNombre" }
+                    { "Línea", "LineaGestionNombre" },
+                    { "Porcentaje", "Porcentaje" },
+                    { "Sigaf", "Sigaf" },
+                    { "Buzón SADE", "BuzonSade" },
+                    { "Fecha SADE", "FechaSade" },
+
                 };
 
-                ExcelHelper.ExportarDatosGenericos(gridviewRegistros, todosLosCertificados, mapeoColumnas, "Certificados");
+                ExcelHelper.ExportarDatosGenericos(todosLosCertificados, mapeoColumnas, "Certificados");
             }
             catch (Exception ex)
             {

@@ -285,13 +285,24 @@ namespace WebForms
                 {
                     var mapeo = new Dictionary<string, string>
                     {
-                        { "Área", "Area" },
+                         { "Área", "Area" },
                         { "Empresa", "Empresa" },
+                        { "Contrata", "Contrata" },
                         { "Barrio", "Barrio" },
-                        { "Nombre de Obra", "Descripcion" }
+                        { "Nombre de Obra", "Descripcion" },
+                        { "Línea de Gestión", "LineaGestionNombre" },
+                        { "Proyecto", "ProyectoNombre" },
+                        { "Disponible Actual", "AutorizadoNuevo" },
+                        { "Monto Certificado", "MontoCertificado" },
+                        { "Porcentaje", "Porcentaje" },
+                        { "Monto Inicial", "MontoInicial" },
+                        { "Monto Actual", "MontoActual" },
+                        { "Monto Faltante", "MontoFaltante" },
+                        { "Fecha Inicio", "FechaInicio" },
+                        { "Fecha Fin", "FechaFin" }
                     };
 
-                    ExcelHelper.ExportarDatosGenericos(dgvObra, obrasCompleto, mapeo, "ObrasEF");
+                    ExcelHelper.ExportarDatosGenericos(obrasCompleto, mapeo, "ObrasEF");
                 }
                 else
                 {

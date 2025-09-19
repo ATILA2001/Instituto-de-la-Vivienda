@@ -369,13 +369,13 @@ namespace WebForms
         /// Obtiene los datos completos (posiblemente en caché) y aplica los filtros actuales en memoria.
         /// Útil para exportar o calcular subtotales que requieren la colección completa filtrada.
         /// </summary>
-        private List<Dominio.LegitimoEF> ObtenerDatosFiltradosActuales()
+        private List<LegitimoEF> ObtenerDatosFiltradosActuales()
         {
-            var lista = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
+            var lista = Session["legitimosCompletos"] as List<LegitimoEF>;
             if (lista == null)
             {
                 var usuario = UserHelper.GetFullCurrentUser();
-                if (usuario == null) return new List<Dominio.LegitimoEF>();
+                if (usuario == null) return new List<LegitimoEF>();
                 try
                 {
                     lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
@@ -857,19 +857,28 @@ namespace WebForms
         {
             try
             {
-                var todos = ObtenerDatosFiltradosActuales();
+                var todos = (List<LegitimoEF>)Session["legitimosCompletos"];
+
 
                 var mapeo = new Dictionary<string, string>
                 {
+                    { "Área", "ObraEF.Area.Nombre" },
+                    { "Obra", "ObraEF.Descripcion" },
+                    { "Empresa", "Empresa" },
+                    { "Línea Gestión", "Linea" },
+                    { "Código Autorizante", "CodigoAutorizante" },
                     { "Expediente", "Expediente" },
-                    { "Obra", "ObraId" },
-                    { "Autorizante", "CodigoAutorizante" },
+                    { "Inicio Ejecución", "InicioEjecucion" },
+                    { "Fin Ejecución", "FinEjecucion" },
                     { "Certificado", "Certificado" },
-                    { "Mes Aprobacion", "MesAprobacion" },
-                    { "Estado", "Estado" }
+                    { "Mes Aprobación", "MesAprobacion" },
+                    { "Estado", "Estado" },
+                    { "Sigaf", "Sigaf" },
+                    { "Buzón SADE", "BuzonSade" },
+                    { "Fecha SADE", "FechaSade" },
                 };
 
-                ExcelHelper.ExportarDatosGenericos(dgvRegistros, todos, mapeo, "Legitimos");
+                ExcelHelper.ExportarDatosGenericos(todos, mapeo, "Legitimos");
             }
             catch (Exception ex)
             {
