@@ -39,7 +39,6 @@ namespace WebForms
                 using (var ctx = new IVCdbContext())
                 {
                     var auth = new AuthenticationManager(ctx);
-
                     var sw = Stopwatch.StartNew();
                     var startUtc = DateTime.UtcNow;
                     Debug.WriteLine($"[{startUtc:O}] Authentication started for input='{input}'");
@@ -65,7 +64,15 @@ namespace WebForms
                 if (ValidarEstado(usuario))
                 {
                     Session.Add("Usuario", usuario);
-                    RedirigirSegunArea(usuario);
+                    var token_provider = new TokenNegocio();
+                    var token = token_provider.GenerarToken(usuario);
+                    var cookie = new HttpCookie("jwt", "string_prueba");
+                    cookie.Path = "/";
+                    cookie.Expires = DateTime.UtcNow.AddHours(2);
+                    // cookie.HttpOnly = true;
+                    // cookie.Secure = false;
+                    // cookie.SameSite = SameSiteMode.Lax;
+                    RedirigirSegunArea(usuario, cookie);
                     return;
                 }
                 // Usuario encontrado pero inactivo
@@ -85,15 +92,17 @@ namespace WebForms
             return usuario != null && usuario.Estado;
         }
 
-        private void RedirigirSegunArea(UsuarioEF usuario)
+        private void RedirigirSegunArea(UsuarioEF usuario, HttpCookie cookie)
         {
+            Response.Cookies.Add(cookie);
             if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
             {
-                Response.Redirect("RedeterminacionesEF.aspx", false);
+                
+                Response.Redirect("RedeterminacionesEF.aspx", true);
             }
             else
             {
-                Response.Redirect("CertificadosEF.aspx", false);
+                Response.Redirect("CertificadosEF.aspx", true);
             }
         }
 
