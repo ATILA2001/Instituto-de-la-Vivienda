@@ -69,6 +69,7 @@ namespace WebForms
                 if (ValidarEstado(usuario))
                 {
                     Session.Add("Usuario", usuario);
+                    GenerarAuthCookieParaUsuario(usuario);
                     RedirigirSegunArea(usuario);
                     return;
                 }
@@ -91,13 +92,15 @@ namespace WebForms
 
         private void RedirigirSegunArea(UsuarioEF usuario)
         {
-            if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
             {
-                Response.Redirect("RedeterminacionesEF.aspx", false);
-            }
-            else
-            {
-                Response.Redirect("CertificadosEF.aspx", false);
+                if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
+                {
+                    Response.Redirect("RedeterminacionesEF.aspx", false);
+                }
+                else
+                {
+                    Response.Redirect("CertificadosEF.aspx", false);
+                }
             }
         }
 
@@ -149,6 +152,19 @@ namespace WebForms
             return dv == provided;
         }
 
+        private void GenerarAuthCookieParaUsuario(UsuarioEF usuario)
+        {
+            string token = TokenNegocio.Instance.GenerarToken(usuario);
+            HttpCookie authCookie = new HttpCookie("Jwt", token)
+            {
+                HttpOnly = true,
+                Secure = Request.IsSecureConnection,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+            Response.Cookies.Add(authCookie);
+        }
+
         #endregion
 
         #region Register Methods
@@ -174,6 +190,7 @@ namespace WebForms
             try
             {
                 nuevo.Nombre = negocio.registrarUsuario(nuevo);
+                Response.Cookies.Clear();
                 lblRegisterMensaje.Text = "Usuario registrado. Pendiente de habilitación.";
                 lblRegisterMensaje.CssClass = "alert alert-success";
 

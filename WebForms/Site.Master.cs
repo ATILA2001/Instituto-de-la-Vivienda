@@ -177,9 +177,10 @@ namespace WebForms
         }
 
 
-        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en admin.master.cs
         {
             Session.Clear();
+            Context.Request.Cookies.Clear();
             Response.Redirect("Login.aspx", false);
         }
 

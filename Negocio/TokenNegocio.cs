@@ -6,11 +6,17 @@ using System.Text;
 using Dominio;
 
 public class TokenNegocio{
+    private static readonly Lazy<TokenNegocio> _instance = new Lazy<TokenNegocio>(() => new TokenNegocio());
+    
+    public static TokenNegocio Instance => _instance.Value;
+
     private readonly string claveSecreta;
     private readonly SymmetricSecurityKey claveSeguridad;
     private readonly SigningCredentials credenciales;
     private readonly JwtSecurityTokenHandler tokenHandler;
-    public TokenNegocio()
+
+    // 3. Constructor privado para evitar la creación de instancias desde fuera de la clase.
+    private TokenNegocio()
     {
         claveSecreta = Environment.GetEnvironmentVariable("TOKEN_KEY"); // setear en entorno
         claveSeguridad = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(claveSecreta));
@@ -34,25 +40,31 @@ public class TokenNegocio{
 
         return tokenHandler.WriteToken(token);
     }
-    
-    public void ValidarToken(string token){
-        try{
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = claveSeguridad,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-            };
 
-            SecurityToken validatedToken;
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
+    public bool EsTokenValido(string token)
+    {
+        ClaimsPrincipal claims = ObtenerClaimsDesdeToken(token);
+        if (claims == null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }   
+    }
+    public ClaimsPrincipal ObtenerClaimsDesdeToken(string token)
+    {
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = claveSeguridad,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+        };
 
-            var nombreUsuario = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var rol = principal.FindFirst(ClaimTypes.Role)?.Value;
-        }
-        catch (SecurityTokenExpiredException){
-            throw new SecurityTokenExpiredException("Por favor, inicie sesión nuevamente.");
-        }
+        SecurityToken validatedToken;
+        var principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
+        return principal;
     }
 }

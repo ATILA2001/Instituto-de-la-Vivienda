@@ -64,20 +64,12 @@ namespace WebForms
                 if (ValidarEstado(usuario))
                 {
                     Session.Add("Usuario", usuario);
-                    var token_provider = new TokenNegocio();
-                    var token = token_provider.GenerarToken(usuario);
-                    var cookie = new HttpCookie("jwt", "string_prueba");
-                    cookie.Path = "/";
-                    cookie.Expires = DateTime.UtcNow.AddHours(2);
-                    // cookie.HttpOnly = true;
-                    // cookie.Secure = false;
-                    // cookie.SameSite = SameSiteMode.Lax;
-                    RedirigirSegunArea(usuario, cookie);
+                    Response.Redirect("Error.aspx", true);
+                    // RedirigirSegunArea(usuario, cookie);
                     return;
                 }
                 // Usuario encontrado pero inactivo
                 Session["error"] = "Usuario inactivo. Contacte al administrador.";
-                Response.Redirect("Error.aspx", false);
                 return;
             }
 
@@ -94,7 +86,6 @@ namespace WebForms
 
         private void RedirigirSegunArea(UsuarioEF usuario, HttpCookie cookie)
         {
-            Response.Cookies.Add(cookie);
             if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
             {
                 
