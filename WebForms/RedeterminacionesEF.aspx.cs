@@ -649,6 +649,60 @@ namespace WebForms
             lblMensaje.CssClass = "alert alert-success";
         }
 
+
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener datos para la exportación
+                List<RedeterminacionEF> redeterminaciones;
+
+                // Verificar si hay datos en caché
+                if (Session["RedeterminacionesCompleto"] != null)
+                {
+                    redeterminaciones = (List<RedeterminacionEF>)Session["RedeterminacionesCompleto"];
+                }
+                else
+                {
+                    // Si no hay caché, cargamos datos frescos
+                    var negocio = new RedeterminacionNegocioEF();
+                    redeterminaciones = negocio.Listar();
+
+                    // Almacenar en sesión para futuros usos
+                    Session["RedeterminacionesCompleto"] = redeterminaciones;
+                }
+
+                // Definir mapeo de columnas: Nombre visible en Excel -> Propiedad en objeto
+                var mapeoColumnas = new Dictionary<string, string>
+        {   /*{ "Usuario", "Usuario.Nombre" },*/
+            { "Código Redeterminación", "CodigoRedet" },
+            { "Código Autorizante", "CodigoAutorizante" },
+            { "Obra", "Autorizante.Obra.Descripcion" },
+            { "Empresa", "Empresa" },
+            { "Área", "Area" },
+            { "Expediente", "Expediente" },
+            { "Salto", "Salto" },
+            { "Tipo", "Tipo" },
+            { "Etapa", "Etapa.Nombre" },
+            { "Porcentaje", "Porcentaje" },
+            { "Observaciones", "Observaciones" },
+            { "Buzón SADE", "BuzonSade" },
+            { "Fecha SADE", "FechaSade" }
+        };
+
+                // Llamar al helper de exportación
+                ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
+
+                lblMensaje.Text = "Exportación completada con éxito.";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
         private void BindGrid()
         {
             string filtroGeneral = txtBuscar?.Text?.Trim();

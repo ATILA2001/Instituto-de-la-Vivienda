@@ -145,13 +145,11 @@
     <Content Include="Images\IVC-Celeste.png" />
     <Content Include="LineasGestion.aspx" />
     <Content Include="LineasGestionFF.aspx" />
-    <Content Include="Login.aspx" />
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
     <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
     <Content Include="RedeterminacionesEF.aspx" />
-    <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -277,13 +275,6 @@
     <Compile Include="LineasGestionFF.aspx.designer.cs">
       <DependentUpon>LineasGestionFF.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Login.aspx.cs">
-      <DependentUpon>Login.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Login.aspx.designer.cs">
-      <DependentUpon>Login.aspx</DependentUpon>
-    </Compile>
     <Compile Include="LoginRegister.Master.cs">
       <DependentUpon>LoginRegister.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -338,13 +329,6 @@
     </Compile>
     <Compile Include="RedeterminacionesEF.aspx.designer.cs">
       <DependentUpon>RedeterminacionesEF.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Register.aspx.cs">
-      <DependentUpon>Register.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Register.aspx.designer.cs">
-      <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

@@ -50,8 +50,7 @@ namespace Negocio
                 }
 
                 var lista = query
-                    .OrderBy(r => r.CodigoAutorizante)
-                    .ThenBy(r => r.Nro)
+                    .OrderByDescending(r => r.Id)
                     .ToList();
 
                 // Cargar manualmente Autorizantes relacionados para que UI pueda leer Obra/Empresa/Area
