@@ -60,6 +60,8 @@ public class TokenNegocio{
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = claveSeguridad,
             ValidateLifetime = true,
+            ValidateAudience = false,
+            ValidateIssuer = false,
             ClockSkew = TimeSpan.Zero,
         };
 

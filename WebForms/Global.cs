@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.UI;
+using Negocio;
 
 namespace WebForms
 {
@@ -8,7 +12,7 @@ namespace WebForms
     {
         void Application_Start(object sender, EventArgs e)
         {
-            // Configurar el modo de validaci髇 no intrusiva
+            // Configurar el modo de validaci锟絥 no intrusiva
             ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.WebForms;
 
             // Agregar el mapping de jQuery
@@ -21,5 +25,60 @@ namespace WebForms
                     CdnDebugPath = "https://code.jquery.com/jquery-3.6.0.js"
                 });
         }
+
+        /// <summary>
+        /// Este evento se dispara en cada petici贸n y es el lugar ideal para la l贸gica de autenticaci贸n/autorizaci贸n.
+        /// </summary>
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            string requestedPath = Context.Request.Path;
+
+            // Lista de rutas p煤blicas que no requieren autenticaci贸n.
+            var publicPaths = new List<string>
+            {
+                "/Authentication.aspx",
+                "/Error.aspx",
+                "/",
+                "/ScriptResource.axd",
+                "/WebResource.axd",
+            };
+
+            if (publicPaths.Any(p => requestedPath.EndsWith(p)))
+            {
+                return;
+            }
+
+            HttpCookie authCookie = Context.Request.Cookies["Jwt"];
+            ControlarQueELUsuarioEsteLogueadoYAutorizado(requestedPath, authCookie);
+        }
+
+        private void ControlarQueELUsuarioEsteLogueadoYAutorizado(string requestedPath, HttpCookie authCookie)
+        {
+            if (NoHayCookie(authCookie) || NoEsUnTokenValido(authCookie.Value))
+            {
+                RedirectToLogin();
+                return;
+            }
+
+            ControlarQueELUsuarioEsteAutorizado(requestedPath, authCookie.Value);
+        }
+
+        private void ControlarQueELUsuarioEsteAutorizado(string requestedPath, string token)
+        {
+            //TODO
+        }
+
+        private bool NoHayCookie(HttpCookie authCookie)
+        {
+            return authCookie == null || string.IsNullOrEmpty(authCookie.Value);
+        }
+
+        private bool NoEsUnTokenValido(string token)
+        {
+            return !TokenNegocio.Instance.EsTokenValido(token);
+        }
+
+        private void RedirectToLogin() => Context.Response.Redirect("~/Authentication.aspx", true);
+
     }
 }
