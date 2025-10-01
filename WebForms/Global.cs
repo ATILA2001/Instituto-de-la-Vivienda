@@ -26,10 +26,7 @@ namespace WebForms
                 });
         }
 
-        /// <summary>
-        /// Este evento se dispara en cada petición y es el lugar ideal para la lógica de autenticación/autorización.
-        /// </summary>
-        protected void Application_BeginRequest(object sender, EventArgs e)
+        protected void Application_AuthorizeRequest(object sender, EventArgs e)
         {
             string requestedPath = Context.Request.Path;
 
@@ -40,7 +37,7 @@ namespace WebForms
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
-                "/WebResource.axd",
+                "/WebResource.axd",  
             };
 
             if (publicPaths.Any(p => requestedPath.EndsWith(p)))
@@ -49,23 +46,16 @@ namespace WebForms
             }
 
             HttpCookie authCookie = Context.Request.Cookies["Jwt"];
-            ControlarQueELUsuarioEsteLogueadoYAutorizado(requestedPath, authCookie);
+            ControlarQueELUsuarioEsteLogueado(requestedPath, authCookie);
         }
 
-        private void ControlarQueELUsuarioEsteLogueadoYAutorizado(string requestedPath, HttpCookie authCookie)
+        private void ControlarQueELUsuarioEsteLogueado(string requestedPath, HttpCookie authCookie)
         {
             if (NoHayCookie(authCookie) || NoEsUnTokenValido(authCookie.Value))
             {
                 RedirectToLogin();
                 return;
             }
-
-            ControlarQueELUsuarioEsteAutorizado(requestedPath, authCookie.Value);
-        }
-
-        private void ControlarQueELUsuarioEsteAutorizado(string requestedPath, string token)
-        {
-            //TODO
         }
 
         private bool NoHayCookie(HttpCookie authCookie)

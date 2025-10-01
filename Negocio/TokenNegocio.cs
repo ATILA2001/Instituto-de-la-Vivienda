@@ -15,7 +15,6 @@ public class TokenNegocio{
     private readonly SigningCredentials credenciales;
     private readonly JwtSecurityTokenHandler tokenHandler;
 
-    // 3. Constructor privado para evitar la creación de instancias desde fuera de la clase.
     private TokenNegocio()
     {
         claveSecreta = Environment.GetEnvironmentVariable("TOKEN_KEY"); // setear en entorno
@@ -29,13 +28,11 @@ public class TokenNegocio{
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Nombre),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, usuario.Area.Nombre)
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: credenciales);
 
         return tokenHandler.WriteToken(token);
@@ -59,7 +56,7 @@ public class TokenNegocio{
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = claveSeguridad,
-            ValidateLifetime = true,
+            ValidateLifetime = false,
             ValidateAudience = false,
             ValidateIssuer = false,
             ClockSkew = TimeSpan.Zero,
