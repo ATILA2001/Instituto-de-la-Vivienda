@@ -509,7 +509,20 @@ namespace Negocio
                     var contratasDict = context.Contratas.AsNoTracking()
                         .Where(c => contrataIds.Contains(c.Id))
                         .ToDictionary(c => c.Id);
+
+                    // Agregar estos diccionarios para cargar los estados y conceptos
+                    var estadoIds = autorizantesBase.Select(a => a.EstadoId).Distinct().ToList();
+                    var estadosDict = context.EstadosAutorizante.AsNoTracking()
+                        .Where(e => estadoIds.Contains(e.Id))
+                        .ToDictionary(e => e.Id);
+
+                    var conceptoIds = autorizantesBase.Select(a => a.ConceptoId).Distinct().ToList();
+                    var conceptosDict = context.Conceptos.AsNoTracking()
+                        .Where(c => conceptoIds.Contains(c.Id))
+                        .ToDictionary(c => c.Id);
+
                     Debug.WriteLine($"Tiempo datos relacionados: {sw.ElapsedMilliseconds} ms");
+
 
                     // 4. Redeterminaciones optimizadas (carga simple sin Include costoso de Etapa)
                     sw.Restart();
@@ -547,7 +560,12 @@ namespace Negocio
                             if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
                                 auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
                         }
+                        // Asignar estado y concepto al autorizante
+                        if (estadosDict.ContainsKey(auth.EstadoId))
+                            auth.Estado = estadosDict[auth.EstadoId];
 
+                        if (conceptosDict.ContainsKey(auth.ConceptoId))
+                            auth.Concepto = conceptosDict[auth.ConceptoId];
                         // Asignar redeterminaciones desde diccionario
                         auth.Redeterminaciones = redeterminacionesDict.ContainsKey(auth.CodigoAutorizante)
                             ? redeterminacionesDict[auth.CodigoAutorizante]
@@ -620,6 +638,7 @@ namespace Negocio
                                          let lineaGestion = proyecto?.LineaGestionEF
                                          let contrata = obra?.Contrata
                                          let tipoPago = cert.TipoPago
+                                         //let estado= auth.Estado
                                          select new CertificadoDTO
                                          {
                                              Id = cert.Id,
@@ -628,6 +647,7 @@ namespace Negocio
                                              MesAprobacion = cert.MesAprobacion,
                                              AutorizanteId = auth.Id,
                                              CodigoAutorizante = cert.CodigoAutorizante,
+                                             AutorizanteEstado = auth.Estado?.Nombre,
 
                                              ObraId = obra?.Id,
                                              ObraDescripcion = obra?.Descripcion,
@@ -698,6 +718,7 @@ namespace Negocio
                                 EstadoRedetId = redet.EstadoRedetEFId,
                                 AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
                                 CodigoAutorizante = redet.CodigoRedet,
+                                AutorizanteEstado = MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
                                 // Datos de la obra de la redeterminación (no del certificado afectado)
                                 ObraId = obraRedet?.Id,
                                 ObraDescripcion = obraRedet?.Descripcion,
@@ -745,6 +766,9 @@ namespace Negocio
                     Debug.WriteLine($"Tiempo total ListarCertificadosYReliquidaciones OPTIMIZADO: {swTotal.ElapsedMilliseconds} ms");
 
                     Debug.WriteLine($"Cantidad de listaFinalDTO: {listaFinalDTO.Count}");
+
+
+
                     return resultado;
                 }
 
