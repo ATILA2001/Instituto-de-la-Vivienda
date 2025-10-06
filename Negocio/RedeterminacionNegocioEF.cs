@@ -249,7 +249,8 @@ namespace Negocio
         public int ContarConFiltros(string filtroTexto,
             List<int> obrasIds,
             List<int> autorizantesIds,
-            List<int> estadosIds)
+            List<int> estadosIds,
+            List<int> usuariosIds = null)
         {
             try
             {
@@ -290,6 +291,12 @@ namespace Negocio
                         q = q.Where(r => estadosIds.Contains(r.EstadoRedetEFId.Value));
                     }
 
+                    // Aplicar filtro por usuarios
+                    if (usuariosIds != null && usuariosIds.Any())
+                    {
+                        q = q.Where(r => r.UsuarioId.HasValue && usuariosIds.Contains(r.UsuarioId.Value));
+                    }
+
                     return q.Count();
                 }
             }
@@ -310,7 +317,8 @@ namespace Negocio
             string filtroTexto,
             List<int> obrasIds,
             List<int> autorizantesIds,
-            List<int> estadosIds)
+            List<int> estadosIds,
+    List<int> usuariosIds = null)
         {
             try
             {
@@ -349,6 +357,12 @@ namespace Negocio
                     if (estadosIds != null && estadosIds.Any())
                     {
                         q = q.Where(r => estadosIds.Contains(r.EstadoRedetEFId.Value));
+                    }
+
+                    // Aplicar filtro por usuarios
+                    if (usuariosIds != null && usuariosIds.Any())
+                    {
+                        q = q.Where(r => r.UsuarioId.HasValue && usuariosIds.Contains(r.UsuarioId.Value));
                     }
 
                     // Orden, paginación y materialización

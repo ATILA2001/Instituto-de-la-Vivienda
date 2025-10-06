@@ -93,6 +93,7 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderObra");
             ClearHeaderFilter("cblsHeaderAutorizante");
             ClearHeaderFilter("cblsHeaderEstado");
+            ClearHeaderFilter("cblsHeaderUsuario");
             // Reset filtros especiales
             ViewState["BuzonFilterValue"] = "all";
             ShowOnlyMismatchedRecords = false;
@@ -709,6 +710,8 @@ namespace WebForms
             var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
             var selAutorizante = SafeParseIntList(GetSelectedValues("cblsHeaderAutorizante"));
             var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
+            var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
+
 
             string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
             bool mismatch = ShowOnlyMismatchedRecords;
@@ -724,6 +727,11 @@ namespace WebForms
             {
                 // Cargar lista completa filtrada por criterios básicos desde BD
                 fullList = _negocio.Listar(selEstado, selAutorizante, selObra, filtroGeneral);
+                // Aplicar filtro de usuario si es necesario
+                if (selUsuario.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+                }
                 // Aplicar filtros especiales (mismatch / buzón)
                 fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
 
@@ -748,7 +756,7 @@ namespace WebForms
             else
             {
                 // Usar paginación en BD
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObra, selAutorizante, selEstado);
+                int total = _negocio.ContarConFiltros(filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -758,7 +766,7 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObra, selAutorizante, selEstado);
+                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
                 dgvRedeterminacion.DataSource = pagina;
                 dgvRedeterminacion.DataBind();
             }
@@ -798,11 +806,14 @@ namespace WebForms
                     context.EstadosRedet.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(),
                     "Nombre", "Id");
 
-
+                // Usuario: Id, Nombre
                 bindFilter("cblsHeaderUsuario",
-                    context.Usuarios.AsNoTracking().Where(u => u.AreaId == 16).OrderBy(u => u.Nombre).Select(u => new { u.Id, u.Nombre }).ToList(),
-                    "Nombre", "Id");
-
+           context.Usuarios.AsNoTracking()
+               .Where(u => u.Estado && u.AreaId == 16)  // Solo usuarios activos del área 16
+               .OrderBy(u => u.Nombre)
+               .Select(u => new { u.Id, u.Nombre })
+               .ToList(),
+           "Nombre", "Id");
 
                 // Reaplicar selección del dropdown de Días x Buzón si existe en el header
                 if (dgvRedeterminacion.HeaderRow.FindControl("ddlFiltroBuzon") is DropDownList ddlBuzon && ViewState["BuzonFilterValue"] != null)
