@@ -24,9 +24,10 @@ namespace WebForms
         {
             // ...existing code...
         }
-        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en site.master.cs
         {
             Session.Clear();
+            Context.Request.Cookies.Clear();
             Response.Redirect("Authentication.aspx", false);
         }
     }
