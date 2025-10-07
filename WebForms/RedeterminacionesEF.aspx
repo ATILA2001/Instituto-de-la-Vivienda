@@ -283,8 +283,34 @@
 				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:d}" />
 				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 				<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
-				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-				<asp:BoundField HeaderText="Área" DataField="Area" />
+
+				<asp:TemplateField HeaderText="Empresa">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+							HeaderText="Empresa" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Empresa") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+
+
+
+				<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
+
+				<asp:TemplateField HeaderText="Área">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
+							HeaderText="Area" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Area") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+
+<%--				<asp:BoundField HeaderText="Área" DataField="Area" />--%>
 				<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
 				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:d}" />
 

@@ -94,6 +94,8 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderAutorizante");
             ClearHeaderFilter("cblsHeaderEstado");
             ClearHeaderFilter("cblsHeaderUsuario");
+            ClearHeaderFilter("cblsHeaderEmpresa");
+            ClearHeaderFilter("cblsHeaderArea");
             // Reset filtros especiales
             ViewState["BuzonFilterValue"] = "all";
             ShowOnlyMismatchedRecords = false;
@@ -711,6 +713,8 @@ namespace WebForms
             var selAutorizante = SafeParseIntList(GetSelectedValues("cblsHeaderAutorizante"));
             var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
             var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
+            var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
+            var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
 
 
             string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
@@ -721,17 +725,32 @@ namespace WebForms
 
             List<RedeterminacionEF> fullList;
 
-            bool requiresInMemory = mismatch || buzonFilter != "all";
-
+            bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0;
             if (requiresInMemory)
             {
                 // Cargar lista completa filtrada por criterios básicos desde BD
                 fullList = _negocio.Listar(selEstado, selAutorizante, selObra, filtroGeneral);
+
                 // Aplicar filtro de usuario si es necesario
                 if (selUsuario.Count > 0)
                 {
                     fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
                 }
+
+                // Aplicar filtro de empresa si es necesario
+                if (selEmpresa.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true &&
+                                                 selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                }
+
+                // Aplicar filtro de área si es necesario
+                if (selArea.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true &&
+                                                 selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                }
+
                 // Aplicar filtros especiales (mismatch / buzón)
                 fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
 
@@ -813,7 +832,23 @@ namespace WebForms
                .OrderBy(u => u.Nombre)
                .Select(u => new { u.Id, u.Nombre })
                .ToList(),
-           "Nombre", "Id");
+           "Nombre", "Id");//nuevo bind
+
+                // Empresa: Id, Nombre
+                bindFilter("cblsHeaderEmpresa",
+                    context.Empresas.AsNoTracking()
+                        .OrderBy(e => e.Nombre)
+                        .Select(e => new { e.Id, e.Nombre })
+                        .ToList(),
+                    "Nombre", "Id");
+
+                // Area: Id, Nombre
+                bindFilter("cblsHeaderArea",
+                    context.Areas.AsNoTracking()
+                        .OrderBy(a => a.Nombre)
+                        .Select(a => new { a.Id, a.Nombre })
+                        .ToList(),
+                    "Nombre", "Id");
 
                 // Reaplicar selección del dropdown de Días x Buzón si existe en el header
                 if (dgvRedeterminacion.HeaderRow.FindControl("ddlFiltroBuzon") is DropDownList ddlBuzon && ViewState["BuzonFilterValue"] != null)
