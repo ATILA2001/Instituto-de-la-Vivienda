@@ -28,6 +28,7 @@ namespace Dominio.DTO
 
         // Propiedades aplanadas de entidades relacionadas
         public int? AutorizanteId { get; set; }
+        public string AutorizanteEstado { get; set; }
         public int? ObraId { get; set; }
         public string ObraDescripcion { get; set; }
         public int? AreaId { get; set; }

@@ -6,19 +6,23 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace WebForms
 {
-    public partial class Login : System.Web.UI.Page
+    public partial class Authentication : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!IsPostBack)
+            {
+                CargarDropDownList();
+            }
         }
+
+        #region Login Methods
 
         protected void btnIniciar_Click(object sender, EventArgs e)
         {
@@ -65,6 +69,7 @@ namespace WebForms
                 if (ValidarEstado(usuario))
                 {
                     Session.Add("Usuario", usuario);
+                    GenerarAuthCookieParaUsuario(usuario);
                     RedirigirSegunArea(usuario);
                     return;
                 }
@@ -87,13 +92,15 @@ namespace WebForms
 
         private void RedirigirSegunArea(UsuarioEF usuario)
         {
-            if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
             {
-                Response.Redirect("RedeterminacionesEF.aspx", false);
-            }
-            else
-            {
-                Response.Redirect("CertificadosEF.aspx", false);
+                if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
+                {
+                    Response.Redirect("RedeterminacionesEF.aspx", false);
+                }
+                else
+                {
+                    Response.Redirect("CertificadosEF.aspx", false);
+                }
             }
         }
 
@@ -145,5 +152,110 @@ namespace WebForms
             return dv == provided;
         }
 
+        private void GenerarAuthCookieParaUsuario(UsuarioEF usuario)
+        {
+            string token = TokenNegocio.Instance.GenerarToken(usuario);
+            HttpCookie authCookie = new HttpCookie("Jwt", token)
+            {
+                HttpOnly = true,
+                Secure = Request.IsSecureConnection,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+            Response.Cookies.Add(authCookie);
+        }
+
+        #endregion
+
+        #region Register Methods
+
+        protected void btnRegistrar_Click(object sender, EventArgs e)
+        {
+            // Check if page is valid before proceeding
+            if (!Page.IsValid)
+            {
+                lblRegisterMensaje.Text = "Por favor complete todos los campos correctamente.";
+                lblRegisterMensaje.CssClass = "alert alert-danger";
+                return;
+            }
+
+            UsuarioNegocio negocio = new UsuarioNegocio();
+            Usuario nuevo = new Usuario();
+            nuevo.Correo = txtRegisterEmail.Text.Trim();
+            nuevo.Nombre = txtNombre.Text.Trim();
+            nuevo.Area = new Area();
+            nuevo.Area.Id = int.Parse(ddlAreas.SelectedValue);
+            nuevo.Area.Nombre = ddlAreas.SelectedItem.Text;
+
+            try
+            {
+                nuevo.Nombre = negocio.registrarUsuario(nuevo);
+                Response.Cookies.Clear();
+                lblRegisterMensaje.Text = "Usuario registrado. Pendiente de habilitación.";
+                lblRegisterMensaje.CssClass = "alert alert-success";
+
+                // Clear form fields after successful registration
+                txtRegisterEmail.Text = "";
+                txtNombre.Text = "";
+                ddlAreas.SelectedIndex = 0;
+                txtEmailRep.Text = "";
+
+                // Flip back to login after a short delay
+                ScriptManager.RegisterStartupScript(this, GetType(), "flipBackToLogin",
+                    "setTimeout(function() { flipCard(); }, 2000);", true);
+            }
+            catch (Exception ex)
+            {
+                lblRegisterMensaje.Text = "Error al registrar el usuario: " + ex.Message;
+                lblRegisterMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        private void CargarDropDownList()
+        {
+            AreaNegocio negocio = new AreaNegocio();
+
+            try
+            {
+                List<Area> listaAreas = negocio.listar();
+
+                ddlAreas.DataSource = listaAreas;
+                ddlAreas.DataTextField = "Nombre";
+                ddlAreas.DataValueField = "Id";
+                ddlAreas.DataBind();
+
+                ddlAreas.Items.Insert(0, new ListItem("Seleccione un área", "0"));
+            }
+            catch (Exception ex)
+            {
+                lblRegisterMensaje.Text = "Error al cargar las áreas: " + ex.Message;
+                lblRegisterMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
+        #endregion
+
+        #region Panel Navigation
+
+        protected void lnkShowRegister_Click(object sender, EventArgs e)
+        {
+            RegistrarScriptFlip();
+        }
+
+        protected void lnkShowLogin_Click(object sender, EventArgs e)
+        {
+            RegistrarScriptFlip();
+        }
+
+        private void RegistrarScriptFlip(int delay = 0)
+        {
+            string script = delay > 0
+                ? $"setTimeout(function() {{ flipCard(); }}, {delay});"
+                : "flipCard();";
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "flipCard_" + Guid.NewGuid().ToString(), script, true);
+        }
+
+        #endregion
     }
 }

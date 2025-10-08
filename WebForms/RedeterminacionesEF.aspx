@@ -53,7 +53,7 @@
 								<div class="col-6">
 									<div class="mb-3">
 										<label for="txtSalto" class="form-label">Salto</label>
-										<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" lang="es-AR"/>
+										<asp:TextBox ID="txtSalto" CssClass="form-control" runat="server" TextMode="Date" lang="es-AR" />
 										<asp:RequiredFieldValidator ID="rfvSalto"
 											ControlToValidate="txtSalto"
 											ValidationGroup="AgregarRedeterminacion"
@@ -201,6 +201,13 @@
 				</div>
 
 				<div class="form-group">
+					<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
+						data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+        <i class="bi bi-download"></i>
+					</asp:LinkButton>
+				</div>
+
+				<div class="form-group">
 					<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
         <i class="bi bi-plus-lg"></i> Agregar
 					</asp:LinkButton>
@@ -214,11 +221,10 @@
 	<div class="gridview-scroll-container">
 
 
-	<asp:GridView ID="dgvRedeterminacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover  mb-4"
+		<asp:GridView ID="dgvRedeterminacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover  mb-4"
 			OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
 			OnRowDeleting="dgvRedeterminacion_RowDeleting"
-	    OnRowDataBound="dgvRedeterminacion_RowDataBound"
-
+			OnRowDataBound="dgvRedeterminacion_RowDataBound"
 			ShowHeaderWhenEmpty="true"
 			AutoGenerateColumns="false" AllowPaging="false" runat="server">
 			<Columns>
@@ -233,6 +239,7 @@
 						</asp:DropDownList>
 					</ItemTemplate>
 				</asp:TemplateField>
+
 				<asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
 				<asp:TemplateField HeaderText="Obra">
 					<HeaderTemplate>
@@ -257,7 +264,7 @@
 				<asp:TemplateField HeaderText="Etapa">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderEstado" runat="server"
-							HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges"  />
+							HeaderText="Estado" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
 						<asp:DropDownList ID="ddlEtapas" runat="server" AutoPostBack="true"
@@ -276,8 +283,34 @@
 				<asp:BoundField HeaderText="Salto" DataField="Salto" DataFormatString="{0:d}" />
 				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:N2}%" />
 				<asp:BoundField HeaderText="Observaciones" DataField="Observaciones" />
-				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />
-				<asp:BoundField HeaderText="Área" DataField="Area" />
+
+				<asp:TemplateField HeaderText="Empresa">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+							HeaderText="Empresa" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Empresa") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+
+
+
+				<%--				<asp:BoundField HeaderText="Empresa" DataField="Empresa" />--%>
+
+				<asp:TemplateField HeaderText="Área">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
+							HeaderText="Area" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Area") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
+
+<%--				<asp:BoundField HeaderText="Área" DataField="Area" />--%>
 				<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
 				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:d}" />
 
@@ -289,7 +322,7 @@
         !new List<int>{12, 22, 33, 34, 35, 36, 37, 38, 39}.Contains((int)Eval("Etapa.Id"))) ? 
         FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
         string.Empty 
-        %>
+						%>
 					</ItemTemplate>
 				</asp:TemplateField>
 				<asp:TemplateField HeaderText="Acciones">
@@ -325,7 +358,7 @@
 	<CustomControls:PaginationControl ID="paginationControl" runat="server"
 		OnPageChanged="paginationControl_PageChanged"
 		OnPageSizeChanged="paginationControl_PageSizeChanged" />
-	
+
 
 	<div class="text-center p-4">
 		<asp:Label ID="lblMensaje" Text="" runat="server" />

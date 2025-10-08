@@ -308,6 +308,7 @@ namespace WebForms
                     { "Proyecto", "ProyectoNombre" },
                     { "Empresa", "EmpresaNombre" },
                     { "Código Autorizante", "CodigoAutorizante" },
+                    { "Estado Autorizante", "AutorizanteEstado" },
                     { "Expediente", "ExpedientePago" },
                     { "Estado", "Estado" },
                     { "Tipo", "TipoPagoNombre" },
@@ -721,6 +722,7 @@ namespace WebForms
                 bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(), "CodigoAutorizante", "Id");
                 bindFilter("cblsHeaderTipo", context.TiposPago.AsNoTracking().OrderBy(t => t.Nombre).Select(t => new { t.Id, t.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderLinea", context.LineasGestion.AsNoTracking().OrderBy(l => l.Nombre).Select(l => new { l.Id, l.Nombre }).ToList(), "Nombre", "Id");
+                bindFilter("cblsHeaderAutorizanteEstado", context.EstadosAutorizante.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, Estado = e.Nombre }).ToList(), "Estado", "Id");
 
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
@@ -1120,6 +1122,7 @@ namespace WebForms
                 var cblsHeaderTipo = find("cblsHeaderTipo");
                 var cblsHeaderMesCertificado = find("cblsHeaderMesCertificado");
                 var cblsHeaderLinea = find("cblsHeaderLinea");
+                var cblsHeaderAutorizanteEstado = find("cblsHeaderAutorizanteEstado");
 
                 var selectedAreaIds = cblsHeaderArea != null && cblsHeaderArea.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderArea) : null;
                 var selectedObraIds = cblsHeaderObra != null && cblsHeaderObra.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderObra) : null;
@@ -1129,6 +1132,7 @@ namespace WebForms
                 var selectedAutorizanteIds = cblsHeaderCodigoAutorizante != null && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderCodigoAutorizante) : null;
                 var selectedTipoIds = cblsHeaderTipo != null && cblsHeaderTipo.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderTipo) : null;
                 var selectedLineaIds = cblsHeaderLinea != null && cblsHeaderLinea.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderLinea) : null;
+                var selectedAutorizanteEstadoIds = cblsHeaderAutorizanteEstado != null && cblsHeaderAutorizanteEstado.ExpandedSelectedValues.Any() ? getSelectedIds(cblsHeaderAutorizanteEstado) : null;
 
                 // Aplicar filtro por Área
                 if (selectedAreaIds != null) data = data.Where(c => c.AreaId.HasValue && selectedAreaIds.Contains(c.AreaId.Value)).ToList();
@@ -1170,6 +1174,23 @@ namespace WebForms
 
                 // Aplicar filtro por Línea de Gestión
                 if (selectedLineaIds != null) data = data.Where(c => c.LineaGestionId.HasValue && selectedLineaIds.Contains(c.LineaGestionId.Value)).ToList();
+                if (selectedAutorizanteEstadoIds != null)
+                {
+                    // Get the estado names from the database for comparison
+                    using (var context = new IVCdbContext())
+                    {
+                        var estadoNames = context.EstadosAutorizante
+                            .AsNoTracking()
+                            .Where(e => selectedAutorizanteEstadoIds.Contains(e.Id))
+                            .Select(e => e.Nombre)
+                            .ToList();
+
+                        // Filter by matching the estado names as strings
+                        data = data.Where(c => !string.IsNullOrEmpty(c.AutorizanteEstado) &&
+                                          estadoNames.Contains(c.AutorizanteEstado)).ToList();
+                    }
+                }
+
             }
             catch (Exception ex)
             {

@@ -93,6 +93,9 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderObra");
             ClearHeaderFilter("cblsHeaderAutorizante");
             ClearHeaderFilter("cblsHeaderEstado");
+            ClearHeaderFilter("cblsHeaderUsuario");
+            ClearHeaderFilter("cblsHeaderEmpresa");
+            ClearHeaderFilter("cblsHeaderArea");
             // Reset filtros especiales
             ViewState["BuzonFilterValue"] = "all";
             ShowOnlyMismatchedRecords = false;
@@ -649,12 +652,70 @@ namespace WebForms
             lblMensaje.CssClass = "alert alert-success";
         }
 
+
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener datos para la exportación
+                List<RedeterminacionEF> redeterminaciones;
+
+                // Verificar si hay datos en caché
+                if (Session["RedeterminacionesCompleto"] != null)
+                {
+                    redeterminaciones = (List<RedeterminacionEF>)Session["RedeterminacionesCompleto"];
+                }
+                else
+                {
+                    // Si no hay caché, cargamos datos frescos
+                    var negocio = new RedeterminacionNegocioEF();
+                    redeterminaciones = negocio.Listar();
+
+                    // Almacenar en sesión para futuros usos
+                    Session["RedeterminacionesCompleto"] = redeterminaciones;
+                }
+
+                // Definir mapeo de columnas: Nombre visible en Excel -> Propiedad en objeto
+                var mapeoColumnas = new Dictionary<string, string>
+        {   /*{ "Usuario", "Usuario.Nombre" },*/
+            { "Código Redeterminación", "CodigoRedet" },
+            { "Código Autorizante", "CodigoAutorizante" },
+            { "Obra", "Autorizante.Obra.Descripcion" },
+            { "Empresa", "Empresa" },
+            { "Área", "Area" },
+            { "Expediente", "Expediente" },
+            { "Salto", "Salto" },
+            { "Tipo", "Tipo" },
+            { "Etapa", "Etapa.Nombre" },
+            { "Porcentaje", "Porcentaje" },
+            { "Observaciones", "Observaciones" },
+            { "Buzón SADE", "BuzonSade" },
+            { "Fecha SADE", "FechaSade" }
+        };
+
+                // Llamar al helper de exportación
+                ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
+
+                lblMensaje.Text = "Exportación completada con éxito.";
+                lblMensaje.CssClass = "alert alert-success";
+            }
+            catch (Exception ex)
+            {
+                lblMensaje.Text = "Error al exportar: " + ex.Message;
+                lblMensaje.CssClass = "alert alert-danger";
+            }
+        }
+
         private void BindGrid()
         {
             string filtroGeneral = txtBuscar?.Text?.Trim();
             var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
             var selAutorizante = SafeParseIntList(GetSelectedValues("cblsHeaderAutorizante"));
             var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
+            var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
+            var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
+            var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
+
 
             string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
             bool mismatch = ShowOnlyMismatchedRecords;
@@ -664,12 +725,32 @@ namespace WebForms
 
             List<RedeterminacionEF> fullList;
 
-            bool requiresInMemory = mismatch || buzonFilter != "all";
-
+            bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0;
             if (requiresInMemory)
             {
                 // Cargar lista completa filtrada por criterios básicos desde BD
                 fullList = _negocio.Listar(selEstado, selAutorizante, selObra, filtroGeneral);
+
+                // Aplicar filtro de usuario si es necesario
+                if (selUsuario.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+                }
+
+                // Aplicar filtro de empresa si es necesario
+                if (selEmpresa.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true &&
+                                                 selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                }
+
+                // Aplicar filtro de área si es necesario
+                if (selArea.Count > 0)
+                {
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true &&
+                                                 selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                }
+
                 // Aplicar filtros especiales (mismatch / buzón)
                 fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
 
@@ -694,7 +775,7 @@ namespace WebForms
             else
             {
                 // Usar paginación en BD
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObra, selAutorizante, selEstado);
+                int total = _negocio.ContarConFiltros(filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -704,7 +785,7 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObra, selAutorizante, selEstado);
+                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
                 dgvRedeterminacion.DataSource = pagina;
                 dgvRedeterminacion.DataBind();
             }
@@ -744,11 +825,30 @@ namespace WebForms
                     context.EstadosRedet.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(),
                     "Nombre", "Id");
 
-
+                // Usuario: Id, Nombre
                 bindFilter("cblsHeaderUsuario",
-                    context.Usuarios.AsNoTracking().Where(u => u.AreaId == 16).OrderBy(u => u.Nombre).Select(u => new { u.Id, u.Nombre }).ToList(),
+           context.Usuarios.AsNoTracking()
+               .Where(u => u.Estado && u.AreaId == 16)  // Solo usuarios activos del área 16
+               .OrderBy(u => u.Nombre)
+               .Select(u => new { u.Id, u.Nombre })
+               .ToList(),
+           "Nombre", "Id");//nuevo bind
+
+                // Empresa: Id, Nombre
+                bindFilter("cblsHeaderEmpresa",
+                    context.Empresas.AsNoTracking()
+                        .OrderBy(e => e.Nombre)
+                        .Select(e => new { e.Id, e.Nombre })
+                        .ToList(),
                     "Nombre", "Id");
 
+                // Area: Id, Nombre
+                bindFilter("cblsHeaderArea",
+                    context.Areas.AsNoTracking()
+                        .OrderBy(a => a.Nombre)
+                        .Select(a => new { a.Id, a.Nombre })
+                        .ToList(),
+                    "Nombre", "Id");
 
                 // Reaplicar selección del dropdown de Días x Buzón si existe en el header
                 if (dgvRedeterminacion.HeaderRow.FindControl("ddlFiltroBuzon") is DropDownList ddlBuzon && ViewState["BuzonFilterValue"] != null)

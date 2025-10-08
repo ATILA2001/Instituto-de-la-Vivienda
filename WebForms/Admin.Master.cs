@@ -14,7 +14,7 @@ namespace WebForms
             // Comprobación básica de usuario logueado
             if (Session["Usuario"] == null)
             {
-                Response.Redirect("Login.aspx", false);
+                Response.Redirect("Authentication.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();
             }
@@ -24,10 +24,11 @@ namespace WebForms
         {
             // ...existing code...
         }
-        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en site.master.cs
         {
             Session.Clear();
-            Response.Redirect("Login.aspx", false);
+            Context.Request.Cookies.Clear();
+            Response.Redirect("Authentication.aspx", false);
         }
     }
 }
