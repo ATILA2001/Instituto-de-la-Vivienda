@@ -98,8 +98,23 @@ namespace Negocio
             {
                 using (var context = new IVCdbContext())
                 {
-                    var obras = context.Obras.AsNoTracking()
-                        .Where(o => o.AreaId == areaId)
+                    IQueryable<ObraEF> query;
+
+                    // NUEVO: Caso especial para AreaId 18 - acceso a áreas 1, 2 y 3
+                    if (areaId == 18)
+                    {
+                        var areasPermitidas = new List<int> { 1, 2, 3 };
+                        query = context.Obras.AsNoTracking()
+                            .Where(o => o.AreaId.HasValue && areasPermitidas.Contains(o.AreaId.Value));
+                    }
+                    else
+                    {
+                        query = context.Obras.AsNoTracking()
+                            .Where(o => o.AreaId == areaId);
+                    }
+
+                    // Continuar con las inclusiones necesarias
+                    var obras = query
                         .Include(o => o.Empresa)
                         .Include(o => o.Area)
                         .Include(o => o.Barrio)
@@ -119,7 +134,6 @@ namespace Negocio
                 throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
             }
         }
-
         public ObraEF ObtenerPorId(int id)
         {
             using (var context = new IVCdbContext())
