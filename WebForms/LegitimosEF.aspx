@@ -206,10 +206,10 @@
 
     <div class="gridview-scroll-container">
 
-        <asp:GridView ID="dgvRegistros" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
-                OnSelectedIndexChanged="dgvRegistros_SelectedIndexChanged"        
-                OnRowDeleting="dgvRegistros_RowDeleting"
-                OnRowDataBound="dgvRegistros_RowDataBound"
+        <asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+                OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"        
+                OnRowDeleting="gridviewRegistros_RowDeleting"
+                OnRowDataBound="gridviewRegistros_RowDataBound"
                 ShowHeaderWhenEmpty="true"
                 AutoGenerateColumns="false"
                 AllowPaging="false"

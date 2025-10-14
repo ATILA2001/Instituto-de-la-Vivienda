@@ -240,13 +240,13 @@ namespace WebForms
         protected global::System.Web.UI.WebControls.LinkButton btnShowAddModal;
 
         /// <summary>
-    /// dgvRegistros control.
+    /// gridviewRegistros control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-    protected global::System.Web.UI.WebControls.GridView dgvRegistros;
+    protected global::System.Web.UI.WebControls.GridView gridviewRegistros;
 
         /// <summary>
         /// paginationControl control.

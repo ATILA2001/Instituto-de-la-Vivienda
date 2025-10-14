@@ -32,6 +32,8 @@ namespace WebForms
             bool isAdmin = currentUser?.Tipo == true;
             // Determinar si el usuario pertenece al área de Redeterminaciones
             bool isRedeterminacionesUser = currentUser?.AreaId == 16;
+            bool isSecretariaUser = currentUser?.AreaId == 19;
+
 
             // Aplicar la configuración de navegación según el tipo de usuario
             if (isAdmin)
@@ -56,9 +58,17 @@ namespace WebForms
                 ShowOrHideTechosAndPpiTextBoxes(false);
                 lnkFormulacion.Visible = true;
 
-
                 // Configuración adicional para usuarios normales
-                ShowOrHideUserControlsByPlanningOrFormulationStatus();
+                if (isSecretariaUser)
+                {
+                    // Para usuarios del área 19, forzamos que todos los controles estén ocultos
+                    HideAllUserControls();
+                }
+                else
+                {
+                    // Para el resto de usuarios normales, aplicamos la configuración estándar
+                    ShowOrHideUserControlsByPlanningOrFormulationStatus();
+                }
             }
         }
 
@@ -136,10 +146,30 @@ namespace WebForms
             bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
             bool isFormulationOpen = ABMPlaniNegocio.GetIsFormulationOpen();
 
-            var content = ContentPlaceHolder1;
+            // Use the common method with the dynamic values
+            ConfigureUserControls(isPlanningOpen, isFormulationOpen);
+        }
 
+        /// <summary>
+        /// Oculta todos los controles de usuario, independientemente del estado de planificación o formulación
+        /// </summary>
+        protected void HideAllUserControls()
+        {
+            // Use the common method with all values set to false
+            ConfigureUserControls(false, false);
+        }
+
+        /// <summary>
+        /// Configura la visibilidad de los controles de usuario según los parámetros especificados
+        /// </summary>
+        /// <param name="showPlanningControls">Si es true, muestra los controles de planificación</param>
+        /// <param name="showFormulationControls">Si es true, muestra los controles de formulación</param>
+        private void ConfigureUserControls(bool showPlanningControls, bool showFormulationControls)
+        {
+            var content = ContentPlaceHolder1;
             if (content == null) return;
 
+            // Configurar columna de acciones en gridviewRegistros
             if (content.FindControl("gridviewRegistros") is GridView grid)
             {
                 var actionsColumn = grid.Columns
@@ -148,10 +178,11 @@ namespace WebForms
 
                 if (actionsColumn != null)
                 {
-                    actionsColumn.Visible = isPlanningOpen;
+                    actionsColumn.Visible = showPlanningControls;
                 }
             }
 
+            // Configurar columna de acciones en dgvFormulacion
             if (content.FindControl("dgvFormulacion") is GridView formulationGrid)
             {
                 var actionsColumn = formulationGrid.Columns
@@ -160,20 +191,21 @@ namespace WebForms
 
                 if (actionsColumn != null)
                 {
-                    actionsColumn.Visible = isFormulationOpen;
+                    actionsColumn.Visible = showFormulationControls;
                 }
             }
 
+            // Configurar panel de botón de agregar para planificación
             if (content.FindControl("panelShowAddButton") is Panel panelShowAddButton)
             {
-                panelShowAddButton.Visible = isPlanningOpen;
+                panelShowAddButton.Visible = showPlanningControls;
             }
 
+            // Configurar panel de botón de agregar para formulación
             if (content.FindControl("panelFormulationShowAddButton") is Panel panelFormulationShowAddButton)
             {
-                panelFormulationShowAddButton.Visible = isFormulationOpen;
+                panelFormulationShowAddButton.Visible = showFormulationControls;
             }
-
         }
 
 
