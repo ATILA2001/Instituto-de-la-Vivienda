@@ -109,7 +109,7 @@ namespace Negocio
                     if (usuario != null && usuario.Tipo == false && usuario.AreaId != 16) // Usuario normal (no administrador)
                     {
                         // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                        if (usuario.AreaId == 18)
+                        if (usuario.AreaId == 19)
                         {
                             var areasPermitidas = new List<int> { 1, 2, 3 };
                             var obrasDelArea = context.Obras.AsNoTracking()
@@ -460,7 +460,7 @@ namespace Negocio
                     if (usuario != null && usuario.Tipo == false) // Usuario normal (no administrador)
                     {
                         // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                        if (usuario.AreaId == 18)
+                        if (usuario.AreaId == 19)
                         {
                             var areasPermitidas = new List<int> { 1, 2, 3 };
                             var obrasDelArea = context.Obras.AsNoTracking()

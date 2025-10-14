@@ -23,7 +23,7 @@ namespace Negocio
                 if (!usuario.Tipo)
                 {
                     // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 18)
+                    if (usuario.AreaId == 19)
                     {
                         var areasPermitidas = new List<int> { 1, 2, 3 };
                         query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
@@ -100,7 +100,7 @@ namespace Negocio
                 if (!usuario.Tipo)
                 {
                     // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 18)
+                    if (usuario.AreaId == 19)
                     {
                         var areasPermitidas = new List<int> { 1, 2, 3 };
                         query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
@@ -138,7 +138,7 @@ namespace Negocio
             if (!usuario.Tipo)
             {
                 // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                if (usuario.AreaId == 18)
+                if (usuario.AreaId == 19)
                 {
                     var areasPermitidas = new List<int> { 1, 2, 3 };
                     query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
@@ -340,7 +340,7 @@ namespace Negocio
                 if (!usuario.Tipo)
                 {
                     // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 18)
+                    if (usuario.AreaId == 19)
                     {
                         var areasPermitidas = new List<int> { 1, 2, 3 };
                         query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));

@@ -101,7 +101,7 @@ namespace Negocio
                     IQueryable<ObraEF> query;
 
                     // NUEVO: Caso especial para AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (areaId == 18)
+                    if (areaId == 19)
                     {
                         var areasPermitidas = new List<int> { 1, 2, 3 };
                         query = context.Obras.AsNoTracking()

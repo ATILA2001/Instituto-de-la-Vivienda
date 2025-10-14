@@ -123,9 +123,9 @@ namespace WebForms
             }
         }
 
-        protected void dgvRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            var key = dgvRegistros.DataKeys[e.RowIndex].Value;
+            var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
             if (key == null)
             {
                 lblMensaje.Text = "Id inválido.";
@@ -207,11 +207,11 @@ namespace WebForms
             }
         }
 
-        protected void dgvRegistros_SelectedIndexChanged(object sender, EventArgs e)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
-                int id = Convert.ToInt32(dgvRegistros.SelectedDataKey.Value);
+                int id = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
                 var lista = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
                 var legitimo = lista?.FirstOrDefault(l => l.Id == id);
                 if (legitimo == null)
@@ -313,8 +313,8 @@ namespace WebForms
 
             var items = listaFiltrada.Skip(page * size).Take(size).ToList();
 
-            dgvRegistros.DataSource = items;
-            dgvRegistros.DataBind();
+            gridviewRegistros.DataSource = items;
+            gridviewRegistros.DataBind();
 
             // calculando subtotal en memoria
             var subtotalGlobal = listaFiltrada.Sum(l => l.Certificado ?? 0m);
@@ -328,8 +328,8 @@ namespace WebForms
 
         private List<string> GetSelectedValues(string controlId)
         {
-            if (dgvRegistros.HeaderRow == null) return new List<string>();
-            var control = dgvRegistros.HeaderRow.FindControl(controlId) as TreeViewSearch;
+            if (gridviewRegistros.HeaderRow == null) return new List<string>();
+            var control = gridviewRegistros.HeaderRow.FindControl(controlId) as TreeViewSearch;
             if (control == null) return new List<string>();
             return control.SelectedValues ?? new List<string>();
         }
@@ -427,41 +427,41 @@ namespace WebForms
 
         private List<Dominio.LegitimoEF> AplicarFiltrosTreeViewEnMemoria(List<Dominio.LegitimoEF> data)
         {
-            if (dgvRegistros.HeaderRow == null) return data;
+            if (gridviewRegistros.HeaderRow == null) return data;
 
             try
             {
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && cblsHeaderArea.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && cblsHeaderArea.ExpandedSelectedValues.Any())
                 {
                     var selected = cblsHeaderArea.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
                     if (selected.Any()) data = data.Where(d => d.ObraEF?.Area != null && selected.Contains(d.ObraEF.Area.Id)).ToList();
                 }
 
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
                 {
                     var selected = cblsHeaderEmpresa.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
                     if (selected.Any()) data = data.Where(d => d.ObraEF?.Empresa != null && selected.Contains(d.ObraEF.Empresa.Id)).ToList();
                 }
 
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderAutorizante") is TreeViewSearch cblsHeaderAutorizante && cblsHeaderAutorizante.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderAutorizante") is TreeViewSearch cblsHeaderAutorizante && cblsHeaderAutorizante.ExpandedSelectedValues.Any())
                 {
                     var selected = cblsHeaderAutorizante.ExpandedSelectedValues;
                     if (selected.Any()) data = data.Where(d => !string.IsNullOrEmpty(d.CodigoAutorizante) && selected.Contains(d.CodigoAutorizante)).ToList();
                 }
 
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && cblsHeaderEstado.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && cblsHeaderEstado.ExpandedSelectedValues.Any())
                 {
                     var selected = cblsHeaderEstado.ExpandedSelectedValues;
                     if (selected.Any()) data = data.Where(d => !string.IsNullOrEmpty(d.Estado) && selected.Contains(d.Estado)).ToList();
                 }
 
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderMesAprobacion") is TreeViewSearch cblsHeaderMes && cblsHeaderMes.SelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesAprobacion") is TreeViewSearch cblsHeaderMes && cblsHeaderMes.SelectedValues.Any())
                 {
                     var selectedDates = cblsHeaderMes.SelectedValues.Select(s => { DateTime dt; return DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt) ? (DateTime?)dt.Date : null; }).Where(d => d.HasValue).Select(d => d.Value).ToList();
                     if (selectedDates.Any()) data = data.Where(d => d.MesAprobacion.HasValue && selectedDates.Contains(d.MesAprobacion.Value.Date)).ToList();
                 }
 
-                if (dgvRegistros.HeaderRow.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
+                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
                 {
                     var selected = cblsHeaderLinea.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
                     if (selected.Any()) data = data.Where(d => d.ObraEF?.Proyecto?.LineaGestionEF != null && selected.Contains(d.ObraEF.Proyecto.LineaGestionEF.Id)).ToList();
@@ -523,9 +523,9 @@ namespace WebForms
             BindGrid();
         }
 
-        protected void dgvRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            dgvRegistros.PageIndex = e.NewPageIndex;
+            gridviewRegistros.PageIndex = e.NewPageIndex;
             currentPageIndex = e.NewPageIndex;
             ViewState["CurrentPageIndex"] = currentPageIndex;
 
@@ -560,7 +560,7 @@ namespace WebForms
         }
         #endregion
 
-        protected void dgvRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.Header)
             {
@@ -918,8 +918,8 @@ namespace WebForms
 
             var items = listaFiltrada.Skip(page * size).Take(size).ToList();
 
-            dgvRegistros.DataSource = items;
-            dgvRegistros.DataBind();
+            gridviewRegistros.DataSource = items;
+            gridviewRegistros.DataBind();
 
             var subtotalGlobal = listaFiltrada.Sum(l => l.Certificado ?? 0m);
             if (FindControlRecursive(this, "paginationControl") is PaginationControl pag)
