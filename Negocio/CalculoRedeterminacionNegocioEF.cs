@@ -108,20 +108,35 @@ namespace Negocio
                     List<AutorizanteEF> autorizantes;
                     if (usuario != null && usuario.Tipo == false && usuario.AreaId != 16) // Usuario normal (no administrador)
                     {
-                        var obrasDelArea = context.Obras.AsNoTracking()
-                            .Where(o => o.AreaId == usuario.AreaId)
-                            .Select(o => o.Id)
-                            .ToList();
-                        autorizantes = context.Autorizantes.AsNoTracking()
-                            .Where(a => obrasDelArea.Contains(a.ObraId))
-                            .ToList();
+                        // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
+                        if (usuario.AreaId == 19)
+                        {
+                            var areasPermitidas = new List<int> { 1, 2, 3 };
+                            var obrasDelArea = context.Obras.AsNoTracking()
+                                .Where(o => o.AreaId.HasValue && areasPermitidas.Contains(o.AreaId.Value))
+                                .Select(o => o.Id)
+                                .ToList();
+                            autorizantes = context.Autorizantes.AsNoTracking()
+                                .Where(a => obrasDelArea.Contains(a.ObraId))
+                                .ToList();
+                        }
+                        else // Caso normal: filtrar por el área del usuario
+                        {
+                            var obrasDelArea = context.Obras.AsNoTracking()
+                                .Where(o => o.AreaId == usuario.AreaId)
+                                .Select(o => o.Id)
+                                .ToList();
+                            autorizantes = context.Autorizantes.AsNoTracking()
+                                .Where(a => obrasDelArea.Contains(a.ObraId))
+                                .ToList();
+                        }
                     }
-                    else // Administrador o sin filtro de área
+                    else // Administrador o usuario con AreaId 16
                     {
                         autorizantes = context.Autorizantes.AsNoTracking().ToList();
                     }
-
                     // Cargar obras y entidades relacionadas
+
                     var obraIds = autorizantes.Select(a => a.ObraId).Distinct().ToList();
                     var obrasDict = context.Obras.AsNoTracking().Where(o => obraIds.Contains(o.Id)).ToDictionary(o => o.Id);
 
@@ -444,20 +459,40 @@ namespace Negocio
 
                     if (usuario != null && usuario.Tipo == false) // Usuario normal (no administrador)
                     {
-                        // OPTIMIZACIÓN: Consulta en dos pasos para evitar JOIN costoso sin índices
-                        // Paso 1: Obtener IDs de obras del área específica (~20ms)
-                        var obrasDelArea = context.Obras.AsNoTracking()
-                            .Where(o => o.AreaId == usuario.AreaId)
-                            .Select(o => o.Id)
-                            .ToList();
-                        Debug.WriteLine($"Tiempo obras del área {usuario.AreaId} ({obrasDelArea.Count} obras): {sw.ElapsedMilliseconds} ms");
+                        // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
+                        if (usuario.AreaId == 19)
+                        {
+                            var areasPermitidas = new List<int> { 1, 2, 3 };
+                            var obrasDelArea = context.Obras.AsNoTracking()
+                                .Where(o => o.AreaId.HasValue && areasPermitidas.Contains(o.AreaId.Value))
+                                .Select(o => o.Id)
+                                .ToList();
+                            Debug.WriteLine($"Tiempo obras de áreas permitidas para usuario 18 ({obrasDelArea.Count} obras): {sw.ElapsedMilliseconds} ms");
 
-                        // Paso 2: Filtrar autorizantes usando Contains con la lista de IDs (~50ms)
-                        sw.Restart();
-                        autorizantesBase = context.Autorizantes.AsNoTracking()
-                            .Where(a => obrasDelArea.Contains(a.ObraId))
-                            .ToList();
-                        Debug.WriteLine($"Tiempo autorizantes filtrados por área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
+                            // Filtrar autorizantes usando Contains con la lista de IDs
+                            sw.Restart();
+                            autorizantesBase = context.Autorizantes.AsNoTracking()
+                                .Where(a => obrasDelArea.Contains(a.ObraId))
+                                .ToList();
+                            Debug.WriteLine($"Tiempo autorizantes filtrados por áreas permitidas ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
+                        }
+                        else // Caso normal: filtrar por el área del usuario
+                        {
+                            // OPTIMIZACIÓN: Consulta en dos pasos para evitar JOIN costoso sin índices
+                            // Paso 1: Obtener IDs de obras del área específica (~20ms)
+                            var obrasDelArea = context.Obras.AsNoTracking()
+                                .Where(o => o.AreaId == usuario.AreaId)
+                                .Select(o => o.Id)
+                                .ToList();
+                            Debug.WriteLine($"Tiempo obras del área {usuario.AreaId} ({obrasDelArea.Count} obras): {sw.ElapsedMilliseconds} ms");
+
+                            // Paso 2: Filtrar autorizantes usando Contains con la lista de IDs (~50ms)
+                            sw.Restart();
+                            autorizantesBase = context.Autorizantes.AsNoTracking()
+                                .Where(a => obrasDelArea.Contains(a.ObraId))
+                                .ToList();
+                            Debug.WriteLine($"Tiempo autorizantes filtrados por área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
+                        }
                     }
                     else // Administrador o sin filtro de área
                     {
