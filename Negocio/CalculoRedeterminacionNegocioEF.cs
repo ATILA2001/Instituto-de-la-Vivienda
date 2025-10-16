@@ -203,6 +203,8 @@ namespace Negocio
                         .ToList();
 
                     var datosSade = BuscarMuchosDatosSade(expedientesValidos);
+                    // Después de obtener datosSade, agrega:
+                    var datosAcdir = AcdirHelper.ObtenerInfoACDIRBulk(expedientesValidos);
 
 
                     // Convertir autorizantes a DTO
@@ -232,7 +234,7 @@ namespace Negocio
                             MesBase = auth.MesBase,
                             BuzonSade = datosSade.TryGetValue(auth.Expediente, out var sadeInfo) ? sadeInfo.Buzon : null,
                             FechaSade = datosSade.TryGetValue(auth.Expediente, out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
-
+                            Acdir = datosAcdir.TryGetValue(auth.Expediente ?? "", out var acdirInfo) ? acdirInfo : null
                         };
                         autorizantesYRedeterminaciones.Add(dto);
                     }
@@ -268,11 +270,9 @@ namespace Negocio
                             MontoAutorizado = redet.MontoRedet ?? 0,
                             MesAprobacion = redet.Salto,
                             MesBase = null,
-                            //BuzonSade = (!string.IsNullOrEmpty(redet.Autorizante?.Expediente) && datosSade.ContainsKey(redet.Autorizante.Expediente)) ? datosSade[redet.Autorizante.Expediente].Buzon : null,
-                            //FechaSade = (!string.IsNullOrEmpty(redet.Autorizante?.Expediente) && datosSade.ContainsKey(redet.Autorizante.Expediente)) ? datosSade[redet.Autorizante.Expediente].Fecha : (DateTime?)null,
-
                             BuzonSade = datosSade.TryGetValue(redet.Expediente, out var sadeInfo) ? sadeInfo.Buzon : null,
                             FechaSade = datosSade.TryGetValue(redet.Expediente, out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
+                            Acdir = datosAcdir.TryGetValue(redet.Expediente ?? "", out var acdirInfo) ? acdirInfo : null
                         };
                         autorizantesYRedeterminaciones.Add(dto);
 
@@ -1406,6 +1406,7 @@ namespace Negocio
             return BuscarMuchosDatosSade(expedientes ?? new List<string>());
         }
 
+
         /// <summary>
         /// Wrapper público para exponer la consulta bulk de SIGAF a otras clases.
         /// </summary>
@@ -1413,6 +1414,16 @@ namespace Negocio
         {
             // Llama al método privado que realiza la consulta bulk para SIGAF
             return BuscarMuchosNumerosSigaf(expedientes ?? new List<string>());
+        }
+
+        /// <summary>
+        /// Wrapper público para exponer la consulta bulk de ACDIR a otras clases.
+        /// Mantiene consistencia con el patrón de acceso de ObtenerDatosSadeBulk.
+        /// </summary>
+        public Dictionary<string, string> ObtenerAcdirBulk(List<string> expedientes)
+        {
+            // Delega la implementación a AcdirHelper, manteniendo la separación de responsabilidades
+            return AcdirHelper.ObtenerInfoACDIRBulk(expedientes ?? new List<string>());
         }
 
         /// <summary>

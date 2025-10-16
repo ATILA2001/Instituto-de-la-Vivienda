@@ -5,6 +5,7 @@ using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -13,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI.WebControls;
+using System.Data.SqlClient;
 
 namespace Negocio
 {
@@ -476,6 +478,203 @@ namespace Negocio
     }
 
 
+    /// <summary>
+    /// Clase helper para información relacionada con ACDIR (Administración Central de Dirección)
+    /// </summary>
+    public static class AcdirHelper
+    {
+        // DTO for SQL results
+        private class AcdirRowDto
+        {
+            public string Expediente { get; set; }
+            public string Acdir { get; set; }
+            public DateTime? Fecha { get; set; }
+        }
+
+        /// <summary>
+        /// Obtiene la información de ACDIR para un expediente específico
+        /// </summary>
+        /// <param name="expediente">Número de expediente</param>
+        /// <returns>Número especial ACDIR (GEDO)</returns>
+        public static string ObtenerInfoACDIR(string expediente)
+        {
+            if (string.IsNullOrEmpty(expediente))
+                return null;
+
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Pruebe ambas columnas posibles
+                datos.setearConsulta(@"
+                    SELECT TOP 1 
+                        NRO_ESPECIAL 
+                    FROM GEDO 
+                    WHERE NRO_EXPEDIENTE = @EXPEDIENTE 
+                    COLLATE SQL_Latin1_General_CP1_CI_AS
+                    ORDER BY FECHA_FIRMA DESC");
+
+                datos.agregarParametro("@EXPEDIENTE", expediente);
+                datos.ejecutarLectura();
+
+                if (datos.Lector.Read())
+                {
+                    string acdir = datos.Lector["NRO_ESPECIAL"]?.ToString();
+                    return acdir;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error en ObtenerInfoACDIR: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene información de ACDIR para múltiples expedientes en una sola consulta
+        /// Implementación optimizada: usa EF bulk query in batches y cache en sesión para evitar N+1.
+        /// Ahora selecciona únicamente la fila más reciente por FECHA_FIRMA para cada expediente.
+        /// </summary>
+        /// <param name="expedientes">Lista de números de expediente</param>
+        /// <returns>Diccionario con expediente como clave y número ACDIR (GEDO) como valor</returns>
+        public static Dictionary<string, string> ObtenerInfoACDIRBulk(List<string> expedientes)
+        {
+            var resultado = new Dictionary<string, string>();
+            Stopwatch sw = Stopwatch.StartNew();
+
+            if (expedientes == null || !expedientes.Any())
+            {
+                Debug.WriteLine("ACDIR: No hay expedientes para consultar");
+                return resultado;
+            }
+
+            Debug.WriteLine($"ACDIR: Consultando {expedientes.Count} expedientes (bulk)");
+
+            // Filtrar expedientes vacíos y duplicados
+            var expedientesValidos = expedientes
+                .Where(e => !string.IsNullOrEmpty(e))
+                .Distinct()
+                .ToList();
+
+            if (expedientesValidos.Count == 0)
+                return resultado;
+
+            try
+            {
+                // Obtener cache de sesión si existe
+                var cacheActual = ObtenerCacheAcdir() ?? new Dictionary<string, string>();
+
+                // Determinar expedientes que faltan en cache
+                var missing = expedientesValidos.Where(e => !cacheActual.ContainsKey(e)).ToList();
+
+                // Batching to avoid large IN clauses / parameter limits
+                const int batchSize = 800;
+
+                if (missing.Any())
+                {
+                    for (int i = 0; i < missing.Count; i += batchSize)
+                    {
+                        var batch = missing.Skip(i).Take(batchSize).ToList();
+
+                        try
+                        {
+                            using (var context = new IVCdbContext())
+                            {
+                                // Build parameterized IN list
+                                var sqlParams = new List<SqlParameter>();
+                                var inList = new List<string>();
+                                for (int p = 0; p < batch.Count; p++)
+                                {
+                                    var paramName = "@p" + p;
+                                    inList.Add(paramName);
+                                    sqlParams.Add(new SqlParameter(paramName, batch[p]));
+                                }
+
+                                // Raw SQL: select rows from GEDO where FECHA_FIRMA is max per expediente
+                                var sql = $@"
+SELECT g.NRO_EXPEDIENTE AS Expediente, g.NRO_ESPECIAL AS Acdir, g.FECHA_FIRMA AS Fecha
+FROM GEDO g
+INNER JOIN (
+    SELECT NRO_EXPEDIENTE, MAX(FECHA_FIRMA) AS MaxFecha
+    FROM GEDO
+    WHERE NRO_EXPEDIENTE IN ({string.Join(",", inList)})
+    GROUP BY NRO_EXPEDIENTE
+) m ON g.NRO_EXPEDIENTE = m.NRO_EXPEDIENTE AND g.FECHA_FIRMA = m.MaxFecha
+";
+
+                                var rows = context.Database.SqlQuery<AcdirRowDto>(sql, sqlParams.ToArray()).ToList();
+
+                                // Store found values in cache
+                                foreach (var r in rows)
+                                {
+                                    cacheActual[r.Expediente] = r.Acdir;
+                                }
+
+                                // Mark not-found items explicitly in cache (null)
+                                var foundExpedientes = new HashSet<string>(rows.Select(r => r.Expediente));
+                                foreach (var exp in batch)
+                                {
+                                    if (!foundExpedientes.Contains(exp))
+                                    {
+                                        cacheActual[exp] = null;
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception exBatch)
+                        {
+                            Debug.WriteLine($"ACDIR: Error en batch query: {exBatch.Message}");
+                            // Continue with other batches
+                        }
+                    }
+
+                    // Persistir cache en sesión
+                    GuardarCacheAcdir(cacheActual);
+                }
+
+                // Construir resultado sólo con entradas que tienen valor (replica comportamiento previo de solo agregar si se encontró)
+                foreach (var exp in expedientesValidos)
+                {
+                    if (cacheActual.TryGetValue(exp, out var val) && !string.IsNullOrEmpty(val))
+                    {
+                        resultado[exp] = val;
+                    }
+                }
+
+                sw.Stop();
+                Debug.WriteLine($"ACDIR: Encontrados {resultado.Count} de {expedientesValidos.Count} expedientes en {sw.ElapsedMilliseconds}ms (bulk)");
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ACDIR: Error en consulta bulk: {ex.Message}");
+                return resultado;
+            }
+        }
+
+        // Session cache helpers for ACDIR
+        private static Dictionary<string, string> ObtenerCacheAcdir()
+        {
+            if (HttpContext.Current?.Session == null) return null;
+            return HttpContext.Current.Session["CacheAcdir"] as Dictionary<string, string>;
+        }
+
+        private static void GuardarCacheAcdir(Dictionary<string, string> cache)
+        {
+            if (HttpContext.Current?.Session != null)
+            {
+                HttpContext.Current.Session["CacheAcdir"] = cache;
+            }
+        }
+    }
+
+
     public static class UserHelper
     {
 
@@ -539,5 +738,5 @@ namespace Negocio
         }
 
     }
-
 }
+

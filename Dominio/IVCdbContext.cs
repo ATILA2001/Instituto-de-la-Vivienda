@@ -13,7 +13,7 @@ namespace Dominio
     public class IVCdbContext : DbContext
     {
         // Constructor que usa la cadena de conexión "IVCDbContext" del Web.config
-        public IVCdbContext() : base("name=IVC_TEST")
+        public IVCdbContext() : base("name=IVC_PROD")
         {
             // Opcional: Deshabilita la creación automática de la base de datos
             Database.SetInitializer<IVCdbContext>(null);
@@ -48,6 +48,7 @@ namespace Dominio
 
         // Nuevas tablas para consultas EF
         public DbSet<PaseSadeEF> PasesSade { get; set; }
+        public DbSet<AcdirEF> Acdirs { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

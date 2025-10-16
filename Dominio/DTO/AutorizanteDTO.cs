@@ -61,6 +61,9 @@ namespace Dominio.DTO
         public DateTime? FechaSade { get; set; }
         public string BuzonSade { get; set; }
 
+        // Propiedades ACDIR (calculadas externamente)
+        public string Acdir { get; set; }
+
         // Constructor vacío
         public AutorizanteDTO() { }
 

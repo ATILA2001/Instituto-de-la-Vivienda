@@ -24,7 +24,9 @@ namespace Negocio
         }
         public AccesoDatos()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringTest"].ConnectionString;
+            //var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringTest"].ConnectionString; // TEST.
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringProd"].ConnectionString; // PRODUCCION.
+
             Console.WriteLine(connectionString);
             conexion = new SqlConnection(connectionString);
             comando = new SqlCommand();

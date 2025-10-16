@@ -472,6 +472,7 @@
 
                 <asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" />
                 <asp:BoundField HeaderText="Fecha sade" DataField="FechaSade" DataFormatString="{0:dd-MM-yyyy}" />
+                <asp:BoundField HeaderText="Gedo" DataField="Acdir" />
 
                 <asp:TemplateField HeaderText="Acciones">
                     <ItemTemplate>
