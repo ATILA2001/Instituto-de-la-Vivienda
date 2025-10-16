@@ -5,6 +5,7 @@ using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -476,6 +477,110 @@ namespace Negocio
     }
 
 
+    /// <summary>
+    /// Clase helper para información relacionada con ACDIR (Administración Central de Dirección)
+    /// </summary>
+    public static class AcdirHelper
+    {
+        /// <summary>
+        /// Obtiene la información de ACDIR para un expediente específico
+        /// </summary>
+        /// <param name="expediente">Número de expediente</param>
+        /// <returns>Número especial ACDIR (GEDO)</returns>
+        public static string ObtenerInfoACDIR(string expediente)
+        {
+            if (string.IsNullOrEmpty(expediente))
+                return null;
+
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                // Pruebe ambas columnas posibles
+                datos.setearConsulta(@"
+                    SELECT TOP 1 
+                        NRO_ESPECIAL 
+                    FROM GEDO 
+                    WHERE NRO_EXPEDIENTE = @EXPEDIENTE 
+                    COLLATE SQL_Latin1_General_CP1_CI_AS
+                    ORDER BY FECHA_FIRMA DESC");
+
+                datos.agregarParametro("@EXPEDIENTE", expediente);
+                datos.ejecutarLectura();
+
+                if (datos.Lector.Read())
+                {
+                    string acdir = datos.Lector["NRO_ESPECIAL"]?.ToString();
+                    return acdir;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error en ObtenerInfoACDIR: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene información de ACDIR para múltiples expedientes en una sola consulta
+        /// </summary>
+        /// <param name="expedientes">Lista de números de expediente</param>
+        /// <returns>Diccionario con expediente como clave y número ACDIR (GEDO) como valor</returns>
+        public static Dictionary<string, string> ObtenerInfoACDIRBulk(List<string> expedientes)
+        {
+            var resultado = new Dictionary<string, string>();
+            Stopwatch sw = Stopwatch.StartNew();
+
+            if (expedientes == null || !expedientes.Any())
+            {
+                Debug.WriteLine("ACDIR: No hay expedientes para consultar");
+                return resultado;
+            }
+
+            Debug.WriteLine($"ACDIR: Consultando {expedientes.Count} expedientes");
+
+            // Filtrar expedientes vacíos y duplicados
+            var expedientesValidos = expedientes
+                .Where(e => !string.IsNullOrEmpty(e))
+                .Distinct()
+                .ToList();
+
+            if (expedientesValidos.Count == 0)
+                return resultado;
+
+            try
+            {
+                AccesoDatos datos = new AccesoDatos();
+
+                // Enfoque directo: consultar cada expediente individualmente para mayor confiabilidad
+                foreach (var expediente in expedientesValidos)
+                {
+                    string infoAcdir = ObtenerInfoACDIR(expediente);
+                    if (!string.IsNullOrEmpty(infoAcdir))
+                    {
+                        resultado[expediente] = infoAcdir;
+                    }
+                }
+
+                sw.Stop();
+                Debug.WriteLine($"ACDIR: Encontrados {resultado.Count} de {expedientesValidos.Count} expedientes en {sw.ElapsedMilliseconds}ms");
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ACDIR: Error en consulta bulk: {ex.Message}");
+                return resultado;
+            }
+        }
+    }
+
+
     public static class UserHelper
     {
 
@@ -539,5 +644,5 @@ namespace Negocio
         }
 
     }
-
 }
+

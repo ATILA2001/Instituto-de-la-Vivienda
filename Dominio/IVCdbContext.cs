@@ -48,6 +48,7 @@ namespace Dominio
 
         // Nuevas tablas para consultas EF
         public DbSet<PaseSadeEF> PasesSade { get; set; }
+        public DbSet<AcdirEF> Acdirs { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
