@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using WebForms.CustomControls;
@@ -652,19 +650,21 @@ namespace WebForms
                 bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.CodigoAutorizante }).Distinct().ToList(), "CodigoAutorizante", "CodigoAutorizante");
                 bindFilter("cblsHeaderContrata", context.Contratas.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { c.Id, c.Nombre }).ToList(), "Nombre", "Nombre");
 
-                // Filtro de Concepto con "REDETERMINACION" incluida
-                if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
-                {
-                    var conceptos = context.Conceptos.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { Id = c.Id.ToString(), Nombre = c.Nombre }).ToList();
-                    // Agregar "REDETERMINACION" como concepto especial
-                    conceptos.Add(new { Id = "REDETERMINACION", Nombre = "REDETERMINACION" });
-                    conceptos = conceptos.OrderBy(c => c.Nombre).ToList();
+                bindFilter("cblsHeaderConcepto", context.Conceptos.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
 
-                    cblsHeaderConcepto.DataSource = conceptos;
-                    cblsHeaderConcepto.DataTextField = "Nombre";
-                    cblsHeaderConcepto.DataValueField = "Id";
-                    cblsHeaderConcepto.DataBind();
-                }
+                //// Filtro de Concepto con "REDETERMINACION" incluida
+                //if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderConcepto") is TreeViewSearch cblsHeaderConcepto)
+                //{
+                //    var conceptos = context.Conceptos.AsNoTracking().OrderBy(c => c.Nombre).Select(c => new { Id = c.Id.ToString(), Nombre = c.Nombre }).ToList();
+                //    // Agregar "REDETERMINACION" como concepto especial
+                //    conceptos.Add(new { Id = "REDETERMINACION", Nombre = "REDETERMINACION" });
+                //    conceptos = conceptos.OrderBy(c => c.Nombre).ToList();
+
+                //    cblsHeaderConcepto.DataSource = conceptos;
+                //    cblsHeaderConcepto.DataTextField = "Nombre";
+                //    cblsHeaderConcepto.DataValueField = "Id";
+                //    cblsHeaderConcepto.DataBind();
+                //}
 
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
