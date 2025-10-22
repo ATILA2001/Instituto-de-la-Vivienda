@@ -86,6 +86,7 @@
     <Content Include="AutorizantesEF.aspx" />
     <Content Include="BdProyectos.aspx" />
     <Content Include="CertificadosEF.aspx" />
+    <Content Include="CustomControls\ToastNotification\ToastNotification.ascx" />
     <Content Include="Images\1-IVC.jpg" />
     <Content Include="Images\10-IVC.jpg" />
     <Content Include="Images\11-IVC.jpg" />
@@ -235,6 +236,14 @@
     <Compile Include="CustomControls\PaginationControl\PaginationControl.ascx.designer.cs">
       <DependentUpon>PaginationControl.ascx</DependentUpon>
     </Compile>
+    <Compile Include="CustomControls\ToastNotification\ToastNotification.ascx.cs">
+      <DependentUpon>ToastNotification.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CustomControls\ToastNotification\ToastNotification.ascx.designer.cs">
+      <DependentUpon>ToastNotification.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\ToastNotification\ToastService.cs" />
     <Compile Include="CustomControls\TreeViewSearch\TreeViewSearch.ascx.cs">
       <DependentUpon>TreeViewSearch.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -510,6 +519,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Styles\Pages\" />
+    <Folder Include="Utilities\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

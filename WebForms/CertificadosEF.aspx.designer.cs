@@ -186,12 +186,12 @@ namespace WebForms
         protected global::WebForms.CustomControls.PaginationControl paginationControl;
 
         /// <summary>
-        /// lblMensaje control.
+        /// toastNotification control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMensaje;
+        protected global::WebForms.CustomControls.ToastNotification toastNotification;
     }
 }
