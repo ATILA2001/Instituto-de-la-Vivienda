@@ -321,8 +321,7 @@ namespace WebForms
                 var redet = _negocio.ObtenerPorId(idRedet);
                 if (redet == null)
                 {
-                    lblMensaje.Text = "No se encontró la redeterminación seleccionada.";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    ToastService.Show(this.Page, "No se encontró la redeterminación seleccionada.", ToastService.ToastType.Warning);
                     return;
                 }
 
@@ -363,8 +362,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al cargar datos: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar datos: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -375,15 +373,13 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvRedeterminacion.DataKeys[e.RowIndex].Value);
                 if (_negocio.Eliminar(id))
                 {
-                    lblMensaje.Text = "Redeterminación eliminada correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Redeterminación eliminada correctamente.", ToastService.ToastType.Success);
                     BindGrid();
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al eliminar la redeterminación: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al eliminar la redeterminación: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -411,8 +407,7 @@ namespace WebForms
 
                     if (redetExistente == null)
                     {
-                        lblMensaje.Text = "Error: No se encontró la redet a modificar.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Error: No se encontró la redet a modificar.", ToastService.ToastType.Error);
                         return;
                     }
 
@@ -432,8 +427,7 @@ namespace WebForms
 
                     if (redeterminacionNegocio.Modificar(redetExistente))
                     {
-                        lblMensaje.Text = "Redeterminación modificada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Redeterminación modificada exitosamente!", ToastService.ToastType.Success);
 
                         ViewState["EditingRedeterminacionId"] = null;
                         ViewState["EditingAutorizanteId"] = null;
@@ -441,8 +435,7 @@ namespace WebForms
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al modificar la redeterminación.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al modificar la redeterminación.", ToastService.ToastType.Error);
                     }
                 }
                 else
@@ -465,13 +458,11 @@ namespace WebForms
 
                     if (_negocio.Agregar(redetNueva))
                     {
-                        lblMensaje.Text = "Redeterminación agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Redeterminación agregada exitosamente!", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar la redeterminación.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al agregar la redeterminación.", ToastService.ToastType.Error);
                     }
                 }
 
@@ -490,8 +481,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -573,8 +563,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos iniciales: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos iniciales: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -595,19 +584,16 @@ namespace WebForms
 
                     BindGrid();
 
-                    lblMensaje.Text = "Expediente actualizado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    lblMensaje.Text = "Error al actualizar el expediente.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -633,8 +619,7 @@ namespace WebForms
             _negocio.ActualizarEstado(id, nuevaEtapaId);
             BindGrid();
 
-            lblMensaje.Text = "Etapa actualizada correctamente.";
-            lblMensaje.CssClass = "alert alert-success";
+            ToastService.Show(this.Page, "Etapa actualizada correctamente.", ToastService.ToastType.Success);
         }
 
         protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
@@ -648,8 +633,7 @@ namespace WebForms
             _negocio.ActualizarUsuario(id, nuevoUsuarioId);
             BindGrid();
 
-            lblMensaje.Text = "Usuario actualizado correctamente.";
-            lblMensaje.CssClass = "alert alert-success";
+            ToastService.Show(this.Page, "Usuario actualizado correctamente.", ToastService.ToastType.Success);
         }
 
 
@@ -696,13 +680,11 @@ namespace WebForms
                 // Llamar al helper de exportación
                 ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
 
-                lblMensaje.Text = "Exportación completada con éxito.";
-                lblMensaje.CssClass = "alert alert-success";
+                ToastService.Show(this.Page, "Exportación completada con éxito.", ToastService.ToastType.Success);
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 

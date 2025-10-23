@@ -2,7 +2,6 @@
 
 <%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 <%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
-<%@ Register Src="~/CustomControls/ToastNotification/ToastNotification.ascx" TagPrefix="CustomControls" TagName="ToastNotification" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 </asp:Content>
@@ -366,10 +365,6 @@
 			OnPageChanged="paginationControl_PageChanged"
 			OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
-
-		<!-- Control de notificaciones Toast -->
-		<CustomControls:ToastNotification ID="toastNotification" runat="server" />
-	
 
 
 	<script type="text/javascript">

@@ -226,6 +226,7 @@
                 </div>
             </div>
         </div>
+        </div>
         <hr class="mb-3" />
         <div class="gridview-scroll-container">
 
@@ -400,10 +401,7 @@
             OnPageChanged="paginationControl_PageChanged"
             OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
-        <div class="text-center p-4">
-            <asp:Label ID="lblMensaje" Text="" runat="server" />
-        </div>
-    </div>
+
 
 
     <script type="text/javascript">
