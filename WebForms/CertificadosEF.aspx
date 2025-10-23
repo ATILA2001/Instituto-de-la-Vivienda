@@ -77,7 +77,7 @@
 											ValidationGroup="AgregarCertificado"
 											runat="server"
 											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
-											ErrorMessage="Solo números positivos con hasta 2 decimales"
+											ErrorMessage="Solo números positivos con hasta2 decimales"
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true" />
@@ -142,14 +142,14 @@
 					<div class="form-group mb-2">
 						<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
 							data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
-    <i class="bi bi-download"></i>
+ <i class="bi bi-download"></i>
 						</asp:LinkButton>
 					</div>
 
 					<asp:Panel ID="panelShowAddButton" runat="server">
 						<div class="form-group mb-2">
 							<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
-                                <i class="bi bi-plus-lg"></i> Agregar
+ <i class="bi bi-plus-lg"></i> Agregar
 							</asp:LinkButton>
 						</div>
 					</asp:Panel>
@@ -157,11 +157,12 @@
 				</div>
 			</div>
 		</div>
+		</div>
 
 		<hr class="mb-3" />
 
 		<div class="gridview-scroll-container">
-			<asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1  table-bordered table-hover  mb-4"
+			<asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
 				OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
 				OnRowDeleting="gridviewRegistros_RowDeleting"
 				OnRowDataBound="gridviewRegistros_RowDataBound"
@@ -337,14 +338,14 @@
 									CommandName="Select"
 									CssClass="btn btn-sm btn-warning"
 									ToolTip="Modificar">
-                                    <i class="bi bi-pencil-square"></i>
+ <i class="bi bi-pencil-square"></i>
 								</asp:LinkButton>
 								<asp:LinkButton ID="btnEliminar" runat="server"
 									CommandName="Delete"
 									CssClass="btn btn-sm btn-danger"
 									ToolTip="Eliminar"
 									OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                                    <i class="bi bi-trash"></i>
+ <i class="bi bi-trash"></i>
 								</asp:LinkButton>
 							</div>
 						</ItemTemplate>
@@ -364,10 +365,6 @@
 			OnPageChanged="paginationControl_PageChanged"
 			OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
-		<div class="text-center p-4">
-			<asp:Label ID="lblMensaje" Text="" runat="server" />
-		</div>
-	</div>
 
 
 	<script type="text/javascript">

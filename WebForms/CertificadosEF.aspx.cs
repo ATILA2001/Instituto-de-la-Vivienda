@@ -101,8 +101,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar certificados: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar certificados: {ex.Message}", ToastService.ToastType.Error);
                 System.Diagnostics.Trace.TraceError("Error al cargar certificados: " + ex);
             }
         }
@@ -323,11 +322,11 @@ namespace WebForms
                 };
 
                 ExcelHelper.ExportarDatosGenericos(todosLosCertificados, mapeoColumnas, "Certificados");
+                ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -377,8 +376,7 @@ namespace WebForms
 
                     if (certificadoExistente == null)
                     {
-                        lblMensaje.Text = "Error: No se encontró el certificado a modificar.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Error: No se encontró el certificado a modificar.", ToastService.ToastType.Error);
                         return;
                     }
 
@@ -392,7 +390,10 @@ namespace WebForms
                     certificadoExistente.TipoPagoId = int.Parse(ddlTipo.SelectedValue);
 
                     resultado = negocio.Modificar(certificadoExistente);
-                    lblMensaje.Text = resultado ? "Certificado modificado exitosamente!" : "Hubo un problema al modificar el certificado.";
+                    if (resultado)
+                        ToastService.Show(this.Page, "Certificado modificado exitosamente!", ToastService.ToastType.Success);
+                    else
+                        ToastService.Show(this.Page, "Hubo un problema al modificar el certificado.", ToastService.ToastType.Error);
                 }
                 else
                 {
@@ -407,10 +408,11 @@ namespace WebForms
                     };
 
                     resultado = negocio.Agregar(nuevoCertificado);
-                    lblMensaje.Text = resultado ? "Certificado agregado exitosamente!" : "Hubo un problema al agregar el certificado.";
+                    if (resultado)
+                        ToastService.Show(this.Page, "Certificado agregado exitosamente!", ToastService.ToastType.Success);
+                    else
+                        ToastService.Show(this.Page, "Hubo un problema al agregar el certificado.", ToastService.ToastType.Error);
                 }
-
-                lblMensaje.CssClass = resultado ? "alert alert-success" : "alert alert-danger";
 
                 if (resultado)
                 {
@@ -475,8 +477,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -539,8 +540,7 @@ namespace WebForms
 
                 if (datosFiltradosActuales == null || datosFiltradosActuales.Count == 0)
                 {
-                    lblMensaje.Text = "Error: No hay datos disponibles.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No hay datos disponibles.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -548,8 +548,7 @@ namespace WebForms
                 int indiceReal = (currentPageIndex * pageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
-                    lblMensaje.Text = "Error: Registro no encontrado.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: Registro no encontrado.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -615,15 +614,13 @@ namespace WebForms
                 }
                 else
                 {
-                    lblMensaje.Text = "Error: No se pudo cargar el certificado para edición.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
                 }
 
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos del certificado: {ex.Message}", ToastService.ToastType.Error);
             }
 
         }
@@ -645,8 +642,7 @@ namespace WebForms
                 var id = Convert.ToInt32(gridviewRegistros.DataKeys[e.RowIndex].Value);
                 if (negocio.Eliminar(id))
                 {
-                    lblMensaje.Text = "Certificado eliminado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Certificado eliminado correctamente.", ToastService.ToastType.Success);
 
                     // Obtener cache actual
                     if (Session["CertificadosCompleto"] is List<CertificadoDTO> listaCache)
@@ -678,8 +674,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al eliminar el certificado: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al eliminar el certificado: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -796,8 +791,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                lblMensaje.Text = "Error al cargar los datos del formulario.";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar los datos del formulario.", ToastService.ToastType.Error);
             }
         }
 
@@ -814,16 +808,14 @@ namespace WebForms
                 var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
                 if (datosFiltradosActuales == null)
                 {
-                    lblMensaje.Text = "Error: No hay datos en memoria.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
                     return;
                 }
 
                 int indiceReal = (gridviewRegistros.PageIndex * gridviewRegistros.PageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
-                    lblMensaje.Text = "Error: Índice fuera del rango de datos.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -871,6 +863,7 @@ namespace WebForms
                         var negocioReliq = new ExpedienteReliqNegocioEF();
                         resultado = negocioReliq.GuardarOActualizar(certificado.CodigoAutorizante, certificado.MesAprobacion.Value, "");
 
+
                         if (listaCompleta != null)
                         {
                             // encontrar el id correcto para editar el certificado
@@ -891,13 +884,11 @@ namespace WebForms
 
                     if (resultado)
                     {
-                        lblMensaje.Text = "Expediente eliminado correctamente.";
-                        lblMensaje.CssClass = "alert alert-info";
+                        ToastService.Show(this.Page, "Expediente eliminado correctamente.", ToastService.ToastType.Info);
                     }
                     else
                     {
-                        lblMensaje.Text = "No se detectaron cambios para guardar.";
-                        lblMensaje.CssClass = "alert alert-warning";
+                        ToastService.Show(this.Page, "No se detectaron cambios para guardar.", ToastService.ToastType.Warning);
                     }
 
                 }
@@ -913,8 +904,7 @@ namespace WebForms
                     {
                         if (!certificado.MesAprobacion.HasValue)
                         {
-                            lblMensaje.Text = "Error: La reliquidación no tiene fecha de aprobación.";
-                            lblMensaje.CssClass = "alert alert-danger";
+                            ToastService.Show(this.Page, "Error: La reliquidación no tiene fecha de aprobación.", ToastService.ToastType.Error);
                             return;
                         }
                         var negocioReliq = new ExpedienteReliqNegocioEF();
@@ -954,19 +944,16 @@ namespace WebForms
                     // (Queda incluida en RecalcularYActualizarCache)
 
                     string tipoRegistro = certificado.TipoPagoId == 3 ? "reliquidación" : "certificado";
-                    lblMensaje.Text = $"Expediente de {tipoRegistro} actualizado correctamente.";
-                    lblMensaje.CssClass = "alert alert-info";
+                    ToastService.Show(this.Page, $"Expediente de {tipoRegistro} actualizado correctamente.", ToastService.ToastType.Info);
                 }
                 else
                 {
-                    lblMensaje.Text = "Error al actualizar el expediente.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al actualizar el expediente: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al actualizar el expediente: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
