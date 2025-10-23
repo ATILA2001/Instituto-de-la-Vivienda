@@ -253,7 +253,8 @@ namespace WebForms
                     { "Mes Base", "MesBase" },
                     { "Estado", "EstadoNombre" },
                     { "Buzón SADE", "BuzonSade" },
-                    { "Fecha SADE", "FechaSade" }
+                    { "Fecha SADE", "FechaSade" },
+                    { "GEDO", "Acdir"   }
                 };
 
                 Negocio.ExcelHelper.ExportarDatosGenericos(datosParaExportar, mapeoColumnas, "Autorizantes");
