@@ -388,9 +388,6 @@
         OnPageChanged="paginationControl_PageChanged"
         OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
-    <div class="text-center p-4">
-        <asp:Label ID="lblMensaje" Text="" runat="server" />
-    </div>
 
 
     <script type="text/javascript">

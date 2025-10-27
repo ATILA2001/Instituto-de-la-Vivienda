@@ -87,15 +87,14 @@ namespace WebForms
                 {
                     legitimo.Id = (int)Session["EditingLegitimoEFId"];
                     negocio.Modificar(legitimo);
-                    lblMensaje.Text = "Legítimo modificado exitosamente.";
+                    ToastService.Show(this.Page, "Legítimo modificado exitosamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
                     negocio.Agregar(legitimo);
-                    lblMensaje.Text = "Legítimo agregado exitosamente.";
+                    ToastService.Show(this.Page, "Legítimo agregado exitosamente.", ToastService.ToastType.Success);
                 }
 
-                lblMensaje.CssClass = "alert alert-success";
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingLegitimoEFId"] = null;
@@ -105,8 +104,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error: " + ex.Message, ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -128,14 +126,12 @@ namespace WebForms
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
             if (key == null)
             {
-                lblMensaje.Text = "Id inválido.";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Id inválido.", ToastService.ToastType.Error);
                 return;
             }
             if (!int.TryParse(key.ToString(), out int id))
             {
-                lblMensaje.Text = "Id inválido.";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Id inválido.", ToastService.ToastType.Error);
                 return;
             }
 
@@ -151,8 +147,7 @@ namespace WebForms
 
                 if (ok)
                 {
-                    lblMensaje.Text = "Legítimo eliminado exitosamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Legítimo eliminado exitosamente.", ToastService.ToastType.Success);
 
                     // Update the in-memory cache if it exists
                     if (listaCompleta != null)
@@ -194,15 +189,19 @@ namespace WebForms
                 }
                 else
                 {
-                    lblMensaje.Text = "No se encontró el registro a eliminar.";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    // If no cache exists, invalidate and reload from DB
+                    Session["legitimosCompletos"] = null;
+                    Session["FilteredLegitimos"] = null;
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+
+                    currentPageIndex = 0; // Reset to first page on delete
+                    ViewState["CurrentPageIndex"] = currentPageIndex;
                     BindGrid();
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al eliminar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al eliminar: " + ex.Message, ToastService.ToastType.Error);
                 BindGrid();
             }
         }
@@ -250,8 +249,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -360,8 +358,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al cargar obras: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar obras: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -469,8 +466,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al aplicar filtros: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al aplicar filtros: " + ex.Message, ToastService.ToastType.Error);
             }
 
             return data;
@@ -491,8 +487,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al limpiar formulario: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al limpiar formulario: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -677,16 +672,14 @@ namespace WebForms
                 var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
                 if (datosFiltradosActuales == null)
                 {
-                    lblMensaje.Text = "Error: No hay datos en memoria.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
                     return;
                 }
 
                 int indiceReal = (currentPageIndex * pageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
-                    lblMensaje.Text = "Error: Índice fuera del rango de datos.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -747,19 +740,16 @@ namespace WebForms
                     // Recalcular datos relacionados (SIGAF/SADE) y actualizar cache
                     RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
 
-                    lblMensaje.Text = "Expediente actualizado correctamente.";
-                    lblMensaje.CssClass = "alert alert-info";
+                    ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Info);
                 }
                 else
                 {
-                    lblMensaje.Text = "No se detectaron cambios para guardar.";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    ToastService.Show(this.Page, "No se detectaron cambios para guardar.", ToastService.ToastType.Warning);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -879,11 +869,11 @@ namespace WebForms
                 };
 
                 ExcelHelper.ExportarDatosGenericos(todos, mapeo, "Legitimos");
+                ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 

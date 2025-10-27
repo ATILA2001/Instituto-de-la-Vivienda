@@ -45,10 +45,10 @@ namespace WebForms
                         { "Nombre de Obra", "ObraEF.Descripcion" },
                         { "Proyecto", "ObraEF.Proyecto.Nombre" },
                         { "PPI", "Ppi" },
-                        { "Techos 2026", "Techos" },
-                        { "Monto 2026", "Monto_26" },
-                        { "Monto 2027", "Monto_27" },
-                        { "Monto 2028", "Monto_28" },
+                        { "Techos2026", "Techos" },
+                        { "Monto2026", "Monto_26" },
+                        { "Monto2027", "Monto_27" },
+                        { "Monto2028", "Monto_28" },
                         { "Mes Base", "MesBase" },
                         { "Unidad de Medida", "UnidadMedidaEF.Nombre" },
                         { "Valor de Medida", "ValorMedida" },
@@ -56,17 +56,16 @@ namespace WebForms
                         { "Prioridad", "PrioridadEF.Nombre" }
                     };
                     ExcelHelper.ExportarDatosGenericos(lista, mapeoColumnas, "FormulacionesEF");
+                    ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    lblMensaje.Text = "No hay datos para exportar";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -74,7 +73,7 @@ namespace WebForms
         {
             // Reiniciar a la primera página al aplicar filtros
 
-            paginationControl.CurrentPageIndex = 0;
+            paginationControl.CurrentPageIndex =0;
             paginationControl.UpdatePaginationControls();
 
             BindGrid(); // Cargar datos filtrados y paginados
@@ -200,17 +199,17 @@ namespace WebForms
                 Dominio.FormulacionEF formu = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new Dominio.FormulacionEF();
 
 
-                formu.ObraId            = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
-                formu.Monto_26          = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ','));
-                formu.Monto_27          = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ','));
-                formu.Monto_28          = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ','));
-                formu.MesBase           = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text);
-                formu.Observaciones     = txtObservaciones.Text;
-                formu.Ppi               = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text);
-                formu.Techos            = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ','));
-                formu.UnidadMedidaId    = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue);
-                formu.ValorMedida       = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ','));
-                formu.PrioridadId       = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue);
+                formu.ObraId = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
+                formu.Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ','));
+                formu.Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ','));
+                formu.Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ','));
+                formu.MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text);
+                formu.Observaciones = txtObservaciones.Text;
+                formu.Ppi = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text);
+                formu.Techos = string.IsNullOrWhiteSpace(txtTechos.Text) ? (decimal?)null : decimal.Parse(txtTechos.Text.Replace('.', ','));
+                formu.UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue);
+                formu.ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ','));
+                formu.PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue);
 
 
 
@@ -218,31 +217,26 @@ namespace WebForms
                 {
                     if (_negocio.Modificar(formu))
                     {
-                        lblMensaje.Text = "Formulación modificada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Formulación modificada exitosamente!", ToastService.ToastType.Success);
                         Session["EditingFormulacionId"] = null;
                     }
                     else
-                    {                         
-                        lblMensaje.Text = "No se pudo modificar la formulación.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                    {
+                        ToastService.Show(this.Page, "No se pudo modificar la formulación.", ToastService.ToastType.Error);
                     }
                 }
                 else
                 {
                     if(_negocio.Agregar(formu))
                     {
-                        lblMensaje.Text = "Formulación agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Formulación agregada exitosamente!", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        lblMensaje.Text = "Formulación agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "No se pudo agregar la formulación.", ToastService.ToastType.Error);
                     }
                 }
 
-                lblMensaje.CssClass = "alert alert-success";
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 Session["EditingFormulacionId"] = null;
@@ -252,13 +246,12 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
 
-        // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición.
+        // dgvFormulacion_SelectedIndexChanged:abre el modal en modo edición.
         // - Carga la FormulacionEF seleccionada (desde sesión o desde la BD si falta).
         // - Define Session["EditingFormulacionId"] para indicar modo edición.
         // - Re-carga los dropdowns para incluir la obra vinculada (ddlObra permanecerá oculta en la UI).
@@ -312,8 +305,6 @@ namespace WebForms
                             document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
 
 
-//MODIFICAR ESE COL-12 por el id de lo que queremos ocultar (DDL OBRA)
-
 
                             //$('.col-12:first').hide();
                             $('#modalAgregar').modal('show');
@@ -323,8 +314,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -347,21 +337,18 @@ namespace WebForms
                 int id = Convert.ToInt32(dgvFormulacion.DataKeys[e.RowIndex].Value);
                 if (_negocio.Eliminar(id))
                 {
-                    lblMensaje.Text = "Formulación eliminada correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Formulación eliminada correctamente.", ToastService.ToastType.Success);
 
                     BindGrid();
                 }
                 else
                 {
-                    lblMensaje.Text = "No se pudo eliminar la formulación.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "No se pudo eliminar la formulación.", ToastService.ToastType.Error);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al eliminar: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al eliminar: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -394,8 +381,8 @@ namespace WebForms
 
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
-                    pageIndex = 0;
-                    paginationControl.CurrentPageIndex = 0;
+                    pageIndex =0;
+                    paginationControl.CurrentPageIndex =0;
                 }
                 paginationControl.TotalRecords = total;
                 paginationControl.UpdatePaginationControls();
@@ -409,12 +396,12 @@ namespace WebForms
                 // Precalcular PLURIANUALES para las obras de la página (evita N+1)
                 try
                 {
-                    var obraIds = pagina.Select(f => f.ObraId).Where(id => id != 0).Distinct().ToList();
+                    var obraIds = pagina.Select(f => f.ObraId).Where(id => id !=0).Distinct().ToList();
                     var plurianuales = new Dictionary<int, decimal>();
                     if (obraIds.Any())
                     {
-                        DateTime start = new DateTime(2026, 1, 1);
-                        DateTime end = new DateTime(2028, 12, 31);
+                        DateTime start = new DateTime(2026,1,1);
+                        DateTime end = new DateTime(2028,12,31);
                         using (var ctx = new IVCdbContext())
                         {
                             var certificadosPorObra = (from c in ctx.Certificados
@@ -422,17 +409,17 @@ namespace WebForms
                                                        join a in ctx.Autorizantes on c.CodigoAutorizante equals a.CodigoAutorizante
                                                        where obraIds.Contains(a.ObraId)
                                                        group c by a.ObraId into g
-                                                       select new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.MontoTotal) ?? 0m })
+                                                       select new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.MontoTotal) ??0m })
                                                       .ToList();
 
                             var legitimosPorObra = ctx.Legitimos
                                 .Where(l => obraIds.Contains(l.ObraId) && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start && l.MesAprobacion.Value <= end)
                                 .GroupBy(l => l.ObraId)
-                                .Select(g => new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.Certificado) ?? 0m })
+                                .Select(g => new { ObraId = g.Key, Sum = g.Sum(x => (decimal?)x.Certificado) ??0m })
                                 .ToList();
 
                             // Inicializar
-                            foreach (var id in obraIds) plurianuales[id] = 0m;
+                            foreach (var id in obraIds) plurianuales[id] =0m;
 
                             foreach (var c in certificadosPorObra)
                             {
@@ -456,8 +443,8 @@ namespace WebForms
                 }
 
 
-                decimal totalMonto26Global = 0;
-                if (total > 0)
+                decimal totalMonto26Global =0;
+                if (total >0)
                 {
 
                     using (var context = new IVCdbContext())
@@ -490,18 +477,17 @@ namespace WebForms
                         if (selMontos26.Any()) querySubtotal = querySubtotal.Where(f => f.Monto_26.HasValue && selMontos26.Contains(f.Monto_26.Value));
                         if (selPrioridades.Any()) querySubtotal = querySubtotal.Where(f => f.PrioridadEF != null && selPrioridades.Contains(f.PrioridadEF.Id));
 
-                        totalMonto26Global = querySubtotal.Sum(f => (decimal?)f.Monto_26) ?? 0m;
+                        totalMonto26Global = querySubtotal.Sum(f => (decimal?)f.Monto_26) ??0m;
                     }
                 }
 
-                paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26Global:C} ({total} registros)";
+                paginationControl.SubtotalText = $"Total Monto2026: {totalMonto26Global:C} ({total} registros)";
                 CalcularSubtotal(pagina);
 
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar la grilla: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar la grilla: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -555,25 +541,24 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar listas: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
         private void LimpiarFormulario()
         {
-            ddlObraAgregar.SelectedIndex = 0;
-            ddlObraEditar.SelectedIndex = 0;
+            ddlObraAgregar.SelectedIndex =0;
+            ddlObraEditar.SelectedIndex =0;
             txtMonto26.Text = "";
             txtPpi.Text = "";
             txtTechos.Text = "";
             txtMonto27.Text = "";
             txtMonto28.Text = "";
             txtMesBase.Text = "";
-            ddlUnidadMedida.SelectedIndex = 0;
+            ddlUnidadMedida.SelectedIndex =0;
             txtValorMedida.Text = "";
             txtObservaciones.Text = "";
-            ddlPrioridades.SelectedIndex = 0;
+            ddlPrioridades.SelectedIndex =0;
         }
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -586,14 +571,13 @@ namespace WebForms
                 {
                     string filtroGeneral = txtBuscar?.Text?.Trim();
                     int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
-                    paginationControl.Initialize(totalRecords, 0, paginationControl.PageSize);
+                    paginationControl.Initialize(totalRecords,0, paginationControl.PageSize);
                     BindGrid();
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al filtrar: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al filtrar: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -613,14 +597,13 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
         /// <summary>
         /// Calcula el total plurianual para la OBRA: suma de todos los CertificadoEF.MontoTotal
-        /// y LegitimoEF.Certificado para esa misma OBRA en los años 2026,2027,2028
+        /// y LegitimoEF.Certificado para esa misma OBRA en los años2026,2027,2028
         /// (usa MesAprobacion para filtrar año).
         /// Se acepta como parámetro el ObraId.
         /// </summary>
@@ -640,16 +623,16 @@ namespace WebForms
                     return 0m.ToString("C");
                 }
 
-                DateTime start2026 = new DateTime(2026, 1, 1);
-                DateTime end2028 = new DateTime(2028, 12, 31);
+                DateTime start2026 = new DateTime(2026,1,1);
+                DateTime end2028 = new DateTime(2028,12,31);
 
-                decimal total = 0m;
+                decimal total =0m;
 
                 using (var ctx = new IVCdbContext())
                 {
-                    // 1) Sumar Certificados cuyo MesAprobacion esté entre 2026-01-01 y 2028-12-31
-                    //    y que pertenezcan a la obra: relac. Certificado -> Autorizante (CodigoAutorizante) -> Autorizante.ObraId == obraId
-                    var certificadosQuery = from c in ctx.Certificados
+                    //1) Sumar Certificados cuyo MesAprobacion esté entre2026-01-01 y2028-12-31
+                    // y que pertenezcan a la obra: relac. Certificado -> Autorizante (CodigoAutorizante) -> Autorizante.ObraId == obraId
+                     var certificadosQuery = from c in ctx.Certificados
                                             where c.MesAprobacion.HasValue
                                                   && c.MesAprobacion.Value >= start2026
                                                   && c.MesAprobacion.Value <= end2028
@@ -657,19 +640,19 @@ namespace WebForms
                                             where a.ObraId == obraId
                                             select c.MontoTotal;
 
-                    var sumaCertificados = certificadosQuery.Any() ? certificadosQuery.Sum() : 0m;
+                    var sumaCertificados = certificadosQuery.Any() ? certificadosQuery.Sum() :0m;
 
-                    // 2) Sumar Legitimos donde Legitimo.ObraId == obraId y MesAprobacion en 2026-2028
+                    //2) Sumar Legitimos donde Legitimo.ObraId == obraId y MesAprobacion en2026-2028
                     var legitimosQuery = ctx.Legitimos
                         .Where(l => l.ObraId == obraId && l.MesAprobacion.HasValue && l.MesAprobacion.Value >= start2026 && l.MesAprobacion.Value <= end2028)
-                        .Select(l => l.Certificado ?? 0m);
+                        .Select(l => l.Certificado ??0m);
 
-                    var sumaLegitimos = legitimosQuery.Any() ? legitimosQuery.Sum() : 0m;
+                    var sumaLegitimos = legitimosQuery.Any() ? legitimosQuery.Sum() :0m;
 
                     total = sumaCertificados + sumaLegitimos;
 
 
-                    // Si no hay certificados ni legítimos en 2026-2028, se deja total = 0
+                    // Si no hay certificados ni legítimos en2026-2028, se deja total =0
                 }
 
 
@@ -688,17 +671,17 @@ namespace WebForms
         private void CalcularSubtotal(List<Dominio.FormulacionEF> formulacionesPagina)
         {
 
-            decimal totalMonto26 = 0;
-            int count = formulacionesPagina?.Count ?? 0;
+            decimal totalMonto26 =0;
+            int count = formulacionesPagina?.Count ??0;
 
             if (formulacionesPagina != null)
             {
                 totalMonto26 = formulacionesPagina
-                    .Sum(f => f.Monto_26 ?? 0);
+                    .Sum(f => f.Monto_26 ??0);
             }
 
             var paginationInfo = paginationControl.GetPaginationInfo();
-            paginationControl.SubtotalText = $"Total Monto 2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
+            paginationControl.SubtotalText = $"Total Monto2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
 
         }
 
@@ -719,7 +702,7 @@ namespace WebForms
             {
                 string filtroGeneral = txtBuscar?.Text?.Trim();
                 int totalRecords = _negocio.ContarPorUsuario(usuario, filtroGeneral);
-                paginationControl.Initialize(totalRecords, 0, e.PageSize);
+                paginationControl.Initialize(totalRecords,0, e.PageSize);
                 BindGrid();
             }
         }

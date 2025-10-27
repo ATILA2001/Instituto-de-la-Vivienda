@@ -53,9 +53,9 @@ namespace WebForms
                 $(document).ready(function() {
                     $('#modalAgregar .modal-title').text('Agregar Redeterminación');
                     document.getElementById('" + btnAgregar.ClientID + @"').value = 'Agregar';
-                    $('#autorizanteContainer').show();
-                    $('#modalAgregar').modal('show');
-                });", true);
+ $('#autorizanteContainer').show();
+ $('#modalAgregar').modal('show');
+ });", true);
 
             btnAgregar.Text = "Agregar";
 
@@ -96,6 +96,7 @@ namespace WebForms
             ClearHeaderFilter("cblsHeaderUsuario");
             ClearHeaderFilter("cblsHeaderEmpresa");
             ClearHeaderFilter("cblsHeaderArea");
+            ClearHeaderFilter("cblsHeaderContrata");
             // Reset filtros especiales
             ViewState["BuzonFilterValue"] = "all";
             ShowOnlyMismatchedRecords = false;
@@ -142,15 +143,15 @@ namespace WebForms
 
             if (dayCount < 7)
             {
-                color = "green"; // Verde para menos de 7 días
+                color = "green"; // Verde para menos de7 días
             }
             else if (dayCount >= 7 && dayCount <= 14)
             {
-                color = "orange"; // Amarillo para entre 7 y 14 días
+                color = "orange"; // Amarillo para entre7 y14 días
             }
             else
             {
-                color = "red"; // Rojo para más de 14 días
+                color = "red"; // Rojo para más de14 días
             }
 
             return $"<span style='color: {color}; font-weight: bold;'>{dayCount}</span>";
@@ -173,28 +174,28 @@ namespace WebForms
 
             // Diccionario de correspondencias entre etapas y buzones
             var correspondencias = new Dictionary<string, List<string>>
-            {
-                {"RD-01/11-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
-                {"RD-02/11-Análisis Tecnica", new List<string>{
-                    "IVC-3300 GO PLANEAMIENTO Y EVALUACIÓN",
-                    "IVC-3430 DEPTO OBRAS 1",
-                    "IVC-3400 GO INSPECCIION Y AUDITORIA DE OBRAS",
-                    "11000",
-                    "IVC-2600 GO PLANIFICACION Y CONTROL",
-                    "VLMOHAREM",
-                    "IVC-12400 GO LOGISTICA",
-                    "IVC-3000 DG OBRAS",
-                    "IVC-3420 DEPTO AUDITORIA 2",
-                    "IVC-9500 GO MODERNIZACION"
-        }},
-        {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
-        {"RD-04/11-Dgtal-Dictamen", new List<string>{
-            "IVC-5210 DEPTO OBRAS PUBLICAS",
-            "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
-            "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
-        }},
-        // Mantener las demás correspondencias...
-            };
+ {
+ {"RD-01/11-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+ {"RD-02/11-Análisis Tecnica", new List<string>{
+ "IVC-3300 GO PLANEAMIENTO Y EVALUACIÓN",
+ "IVC-3430 DEPTO OBRAS1",
+ "IVC-3400 GO INSPECCIION Y AUDITORIA DE OBRAS",
+ "11000",
+ "IVC-2600 GO PLANIFICACION Y CONTROL",
+ "VLMOHAREM",
+ "IVC-12400 GO LOGISTICA",
+ "IVC-3000 DG OBRAS",
+ "IVC-3420 DEPTO AUDITORIA2",
+ "IVC-9500 GO MODERNIZACION"
+ }},
+ {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
+ {"RD-04/11-Dgtal-Dictamen", new List<string>{
+ "IVC-5210 DEPTO OBRAS PUBLICAS",
+ "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
+ "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
+ }},
+ // Mantener las demás correspondencias...
+ };
 
             // Verificar si el buzón corresponde a la etapa
             if (correspondencias.ContainsKey(etapaNombre))
@@ -242,8 +243,8 @@ namespace WebForms
                     {
                         // Preferir la navegación cargada (Etapa) y si no, usar la FK (EstadoRedetEFId)
                         string selectedEtapaValue = redetItem.Etapa != null
-                            ? redetItem.Etapa.Id.ToString()
-                            : redetItem.EstadoRedetEFId.ToString();
+                        ? redetItem.Etapa.Id.ToString()
+                        : redetItem.EstadoRedetEFId.ToString();
 
                         ListItem item = ddlEtapas.Items.FindByValue(selectedEtapaValue);
                         if (item != null)
@@ -278,8 +279,8 @@ namespace WebForms
                     if (redetItem != null)
                     {
                         string selectedUsuarioValue = redetItem.UsuarioId.HasValue
-                            ? redetItem.UsuarioId.Value.ToString()
-                            : "-1";
+                        ? redetItem.UsuarioId.Value.ToString()
+                        : "-1";
 
                         ListItem item = ddlUsuario.Items.FindByValue(selectedUsuarioValue);
                         if (item != null)
@@ -317,12 +318,11 @@ namespace WebForms
                 if (dgvRedeterminacion.SelectedDataKey == null) return;
                 int idRedet = Convert.ToInt32(dgvRedeterminacion.SelectedDataKey.Value);
 
-                // Obtener entidad EF directamente (patrón similar a FormulacionEF: consulta puntual)
+                // Obtener entidad EF directamente (patrón parecido a FormulacionEF: consulta puntual)
                 var redet = _negocio.ObtenerPorId(idRedet);
                 if (redet == null)
                 {
-                    lblMensaje.Text = "No se encontró la redeterminación seleccionada.";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    ToastService.Show(this.Page, "No se encontró la redeterminación seleccionada.", ToastService.ToastType.Warning);
                     return;
                 }
 
@@ -355,19 +355,17 @@ namespace WebForms
 
                 // Mostrar modal en modo edición ocultando Autorizante
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowEditModal", @"
-                    $(document).ready(function() {
-                        $('#modalAgregar .modal-title').text('Modificar Redeterminación');
-                        $('#autorizanteContainer').hide();
-                        $('#modalAgregar').modal('show');
-                    });", true);
+ $(document).ready(function() {
+ $('#modalAgregar .modal-title').text('Modificar Redeterminación');
+ $('#autorizanteContainer').hide();
+ $('#modalAgregar').modal('show');
+ });", true);
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al cargar datos: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar datos: " + ex.Message, ToastService.ToastType.Error);
             }
         }
-
         protected void dgvRedeterminacion_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
@@ -375,15 +373,13 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvRedeterminacion.DataKeys[e.RowIndex].Value);
                 if (_negocio.Eliminar(id))
                 {
-                    lblMensaje.Text = "Redeterminación eliminada correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Redeterminación eliminada correctamente.", ToastService.ToastType.Success);
                     BindGrid();
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al eliminar la redeterminación: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al eliminar la redeterminación: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -411,19 +407,18 @@ namespace WebForms
 
                     if (redetExistente == null)
                     {
-                        lblMensaje.Text = "Error: No se encontró la redet a modificar.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Error: No se encontró la redet a modificar.", ToastService.ToastType.Error);
                         return;
                     }
 
                     // Actualizar campos
                     redetExistente.Expediente = txtExpediente.Text.Trim();
                     redetExistente.Salto = string.IsNullOrWhiteSpace(txtSalto.Text)
-                        ? null
-                        : (DateTime?)DateTime.Parse(txtSalto.Text);
+                    ? null
+                    : (DateTime?)DateTime.Parse(txtSalto.Text);
                     redetExistente.Nro = string.IsNullOrWhiteSpace(txtNro.Text)
-                        ? null
-                        : (int?)int.Parse(txtNro.Text);
+                    ? null
+                    : (int?)int.Parse(txtNro.Text);
                     redetExistente.Tipo = txtTipo.Text.Trim();
                     redetExistente.EstadoRedetEFId = int.Parse(ddlEtapa.SelectedValue);
                     redetExistente.Observaciones = txtObservacion.Text.Trim();
@@ -432,8 +427,7 @@ namespace WebForms
 
                     if (redeterminacionNegocio.Modificar(redetExistente))
                     {
-                        lblMensaje.Text = "Redeterminación modificada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Redeterminación modificada exitosamente!", ToastService.ToastType.Success);
 
                         ViewState["EditingRedeterminacionId"] = null;
                         ViewState["EditingAutorizanteId"] = null;
@@ -441,8 +435,7 @@ namespace WebForms
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al modificar la redeterminación.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al modificar la redeterminación.", ToastService.ToastType.Error);
                     }
                 }
                 else
@@ -451,11 +444,11 @@ namespace WebForms
 
                     redetNueva.Expediente = txtExpediente.Text.Trim();
                     redetNueva.Salto = string.IsNullOrWhiteSpace(txtSalto.Text)
-                        ? null
-                        : (DateTime?)DateTime.Parse(txtSalto.Text);
+                    ? null
+                    : (DateTime?)DateTime.Parse(txtSalto.Text);
                     redetNueva.Nro = string.IsNullOrWhiteSpace(txtNro.Text)
-                        ? null
-                        : (int?)int.Parse(txtNro.Text);
+                    ? null
+                    : (int?)int.Parse(txtNro.Text);
                     redetNueva.Tipo = txtTipo.Text.Trim();
                     redetNueva.EstadoRedetEFId = int.Parse(ddlEtapa.SelectedValue);
                     redetNueva.Observaciones = txtObservacion.Text.Trim();
@@ -465,24 +458,22 @@ namespace WebForms
 
                     if (_negocio.Agregar(redetNueva))
                     {
-                        lblMensaje.Text = "Redeterminación agregada exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Redeterminación agregada exitosamente!", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar la redeterminación.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al agregar la redeterminación.", ToastService.ToastType.Error);
                     }
                 }
 
                 LimpiarFormulario();
 
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitle",
-                    "$('#modalAgregar .modal-title').text('Agregar Redeterminación');", true);
+                "$('#modalAgregar .modal-title').text('Agregar Redeterminación');", true);
                 btnAgregar.Text = "Agregar";
 
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
-                    "$('#modalAgregar').modal('hide');", true);
+                "$('#modalAgregar').modal('hide');", true);
 
 
 
@@ -490,8 +481,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -573,136 +563,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos iniciales: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
-
-
-
-        protected void txtExpediente_TextChanged(object sender, EventArgs e)
-        {
-            TextBox txtExpediente = (TextBox)sender;
-            GridViewRow row = (GridViewRow)txtExpediente.NamingContainer;
-
-            int idRedeterminacion = Convert.ToInt32(dgvRedeterminacion.DataKeys[row.RowIndex].Value);
-            string nuevoExpediente = txtExpediente.Text;
-
-            try
-            {
-                if (_negocio.ActualizarExpediente(idRedeterminacion, nuevoExpediente))
-                {
-
-                    BindGrid();
-
-                    lblMensaje.Text = "Expediente actualizado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
-                }
-                else
-                {
-                    lblMensaje.Text = "Error al actualizar el expediente.";
-                    lblMensaje.CssClass = "alert alert-danger";
-                }
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = "Error al actualizar el expediente: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
-            }
-        }
-
-        protected void btnFiltrar_Click(object sender, EventArgs e)
-        {
-            // Reiniciar paginación y recargar con el filtro de texto
-            if (paginationControl != null)
-            {
-                paginationControl.CurrentPageIndex = 0;
-                paginationControl.UpdatePaginationControls();
-            }
-            BindGrid();
-        }
-
-        protected void ddlEtapas_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            DropDownList ddlEtapas = (DropDownList)sender;
-            GridViewRow row = (GridViewRow)ddlEtapas.NamingContainer;
-
-            int id = int.Parse(dgvRedeterminacion.DataKeys[row.RowIndex].Value.ToString());
-            int nuevaEtapaId = int.Parse(ddlEtapas.SelectedValue);
-
-            _negocio.ActualizarEstado(id, nuevaEtapaId);
-            BindGrid();
-
-            lblMensaje.Text = "Etapa actualizada correctamente.";
-            lblMensaje.CssClass = "alert alert-success";
-        }
-
-        protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            DropDownList ddlUsuario = (DropDownList)sender;
-            GridViewRow row = (GridViewRow)ddlUsuario.NamingContainer;
-
-            int id = int.Parse(dgvRedeterminacion.DataKeys[row.RowIndex].Value.ToString());
-            int? nuevoUsuarioId = ddlUsuario.SelectedValue == "-1" ? (int?)null : int.Parse(ddlUsuario.SelectedValue);
-
-            _negocio.ActualizarUsuario(id, nuevoUsuarioId);
-            BindGrid();
-
-            lblMensaje.Text = "Usuario actualizado correctamente.";
-            lblMensaje.CssClass = "alert alert-success";
-        }
-
-
-        protected void btnExportarExcel_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Obtener datos para la exportación
-                List<RedeterminacionEF> redeterminaciones;
-
-                // Verificar si hay datos en caché
-                if (Session["RedeterminacionesCompleto"] != null)
-                {
-                    redeterminaciones = (List<RedeterminacionEF>)Session["RedeterminacionesCompleto"];
-                }
-                else
-                {
-                    // Si no hay caché, cargamos datos frescos
-                    var negocio = new RedeterminacionNegocioEF();
-                    redeterminaciones = negocio.Listar();
-
-                    // Almacenar en sesión para futuros usos
-                    Session["RedeterminacionesCompleto"] = redeterminaciones;
-                }
-
-                // Definir mapeo de columnas: Nombre visible en Excel -> Propiedad en objeto
-                var mapeoColumnas = new Dictionary<string, string>
-        {   /*{ "Usuario", "Usuario.Nombre" },*/
-            { "Código Redeterminación", "CodigoRedet" },
-            { "Código Autorizante", "CodigoAutorizante" },
-            { "Obra", "Autorizante.Obra.Descripcion" },
-            { "Empresa", "Empresa" },
-            { "Área", "Area" },
-            { "Expediente", "Expediente" },
-            { "Salto", "Salto" },
-            { "Tipo", "Tipo" },
-            { "Etapa", "Etapa.Nombre" },
-            { "Porcentaje", "Porcentaje" },
-            { "Observaciones", "Observaciones" },
-            { "Buzón SADE", "BuzonSade" },
-            { "Fecha SADE", "FechaSade" }
-        };
-
-                // Llamar al helper de exportación
-                ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
-
-                lblMensaje.Text = "Exportación completada con éxito.";
-                lblMensaje.CssClass = "alert alert-success";
-            }
-            catch (Exception ex)
-            {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos iniciales: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -715,7 +576,11 @@ namespace WebForms
             var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
             var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
             var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
+            // Contrata: ahora el filtro usa Obra.Id como value (texto mostrado: Contrata Nombre Numero/Año)
+            var selContrataObraIds = SafeParseIntList(GetSelectedValues("cblsHeaderContrata"));
 
+            // Unificar filtros de Obra: Obra seleccionada directamente + Obra por Contrata
+            var selObraFinal = selObra.Concat(selContrataObraIds).Distinct().ToList();
 
             string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
             bool mismatch = ShowOnlyMismatchedRecords;
@@ -725,11 +590,12 @@ namespace WebForms
 
             List<RedeterminacionEF> fullList;
 
+            // Sin filtro en memoria por Contrata; solo requiere memoria para empresa/área/mismatch/buzón
             bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0;
             if (requiresInMemory)
             {
-                // Cargar lista completa filtrada por criterios básicos desde BD
-                fullList = _negocio.Listar(selEstado, selAutorizante, selObra, filtroGeneral);
+                // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra unificada)
+                fullList = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
 
                 // Aplicar filtro de usuario si es necesario
                 if (selUsuario.Count > 0)
@@ -741,17 +607,17 @@ namespace WebForms
                 if (selEmpresa.Count > 0)
                 {
                     fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true &&
-                                                 selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                    selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
                 }
 
                 // Aplicar filtro de área si es necesario
                 if (selArea.Count > 0)
                 {
                     fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true &&
-                                                 selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                    selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
                 }
 
-                // Aplicar filtros especiales (mismatch / buzón)
+                // Filtros especiales (mismatch / buzón)
                 fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
 
                 int total = fullList.Count;
@@ -764,18 +630,21 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
+                // Guardar lista completa en sesión para otros filtros/header
+                Session["RedeterminacionesGridData"] = fullList;
+
                 var pagina = fullList
-                    .Skip(pageIndex * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
 
                 dgvRedeterminacion.DataSource = pagina;
                 dgvRedeterminacion.DataBind();
             }
             else
             {
-                // Usar paginación en BD
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
+                // Usar paginación en BD. El filtro de Contrata (via Obra) ya está en selObraFinal
+                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -785,7 +654,11 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObra, selAutorizante, selEstado, selUsuario);
+                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
+
+                // Guardar la página actual en sesión para otros filtros/header
+                Session["RedeterminacionesGridData"] = pagina;
+
                 dgvRedeterminacion.DataSource = pagina;
                 dgvRedeterminacion.DataBind();
             }
@@ -812,43 +685,53 @@ namespace WebForms
 
                 // Obra: Id, Descripcion
                 bindFilter("cblsHeaderObra",
-                    context.Obras.AsNoTracking().OrderBy(o => o.Descripcion).Select(o => new { o.Id, o.Descripcion }).ToList(),
-                    "Descripcion", "Id");
+                context.Obras.AsNoTracking().OrderBy(o => o.Descripcion).Select(o => new { o.Id, o.Descripcion }).ToList(),
+                "Descripcion", "Id");
 
                 // Autorizante: Id, CodigoAutorizante
                 bindFilter("cblsHeaderAutorizante",
-                    context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(),
-                    "CodigoAutorizante", "Id");
+                context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(),
+                "CodigoAutorizante", "Id");
 
                 // Estado (Etapa Redet): Id, Nombre
                 bindFilter("cblsHeaderEstado",
-                    context.EstadosRedet.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(),
-                    "Nombre", "Id");
+                context.EstadosRedet.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(),
+                "Nombre", "Id");
 
                 // Usuario: Id, Nombre
                 bindFilter("cblsHeaderUsuario",
-           context.Usuarios.AsNoTracking()
-               .Where(u => u.Estado && u.AreaId == 16)  // Solo usuarios activos del área 16
-               .OrderBy(u => u.Nombre)
-               .Select(u => new { u.Id, u.Nombre })
-               .ToList(),
-           "Nombre", "Id");//nuevo bind
+                context.Usuarios.AsNoTracking()
+                .Where(u => u.Estado && u.AreaId == 16) // Solo usuarios activos del área16
+                .OrderBy(u => u.Nombre)
+                .Select(u => new { u.Id, u.Nombre })
+                .ToList(),
+                "Nombre", "Id");//nuevo bind
 
                 // Empresa: Id, Nombre
                 bindFilter("cblsHeaderEmpresa",
-                    context.Empresas.AsNoTracking()
-                        .OrderBy(e => e.Nombre)
-                        .Select(e => new { e.Id, e.Nombre })
-                        .ToList(),
-                    "Nombre", "Id");
+                context.Empresas.AsNoTracking()
+                .OrderBy(e => e.Nombre)
+                .Select(e => new { e.Id, e.Nombre })
+                .ToList(),
+                "Nombre", "Id");
 
                 // Area: Id, Nombre
                 bindFilter("cblsHeaderArea",
-                    context.Areas.AsNoTracking()
-                        .OrderBy(a => a.Nombre)
-                        .Select(a => new { a.Id, a.Nombre })
-                        .ToList(),
-                    "Nombre", "Id");
+                context.Areas.AsNoTracking()
+                .OrderBy(a => a.Nombre)
+                .Select(a => new { a.Id, a.Nombre })
+                .ToList(),
+                "Nombre", "Id");
+
+                // Contrata: value = Obra.Id, text = "Contrata.Nombre Numero/Año" (todas las obras)
+                var obrasContrata = context.Obras.AsNoTracking()
+                .Where(o => o.ContrataId.HasValue)
+                .Select(o => new { o.Id, o.Numero, o.Anio, ContrataNombre = o.Contrata.Nombre })
+                .ToList()
+                .Select(o => new { Id = o.Id, Nombre = (o.Numero.HasValue && o.Anio.HasValue) ? ($"{o.ContrataNombre} {o.Numero}/{o.Anio}") : o.ContrataNombre })
+                .OrderBy(x => x.Nombre)
+                .ToList();
+                bindFilter("cblsHeaderContrata", obrasContrata, "Nombre", "Id");
 
                 // Reaplicar selección del dropdown de Días x Buzón si existe en el header
                 if (dgvRedeterminacion.HeaderRow.FindControl("ddlFiltroBuzon") is DropDownList ddlBuzon && ViewState["BuzonFilterValue"] != null)
@@ -858,10 +741,10 @@ namespace WebForms
             }
         }
 
-
         private List<int> SafeParseIntList(List<string> raw)
         {
             var list = new List<int>();
+            if (raw == null) return list;
             foreach (var s in raw)
             {
                 if (int.TryParse(s, out int v)) list.Add(v);
@@ -901,8 +784,6 @@ namespace WebForms
             return q.ToList();
         }
 
-        // Eliminado: el poblamiento de filtros de header se realiza en PoblarFiltrosHeader()
-
         protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
         {
             paginationControl.CurrentPageIndex = e.PageIndex;
@@ -917,5 +798,127 @@ namespace WebForms
             BindGrid();
         }
 
+        protected void btnFiltrar_Click(object sender, EventArgs e)
+        {
+            // Reiniciar paginación y recargar con el filtro de texto
+            if (paginationControl != null)
+            {
+                paginationControl.CurrentPageIndex = 0;
+                paginationControl.UpdatePaginationControls();
+            }
+            BindGrid();
+        }
+
+        protected void txtExpediente_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txt = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txt.NamingContainer;
+
+            if (dgvRedeterminacion.DataKeys == null || dgvRedeterminacion.DataKeys.Count <= row.RowIndex)
+            {
+                ToastService.Show(this.Page, "No se pudo identificar el registro.", ToastService.ToastType.Error);
+                return;
+            }
+
+            int idRedeterminacion = Convert.ToInt32(dgvRedeterminacion.DataKeys[row.RowIndex].Value);
+            string nuevoExpediente = txt.Text?.Trim();
+
+            try
+            {
+                if (_negocio.ActualizarExpediente(idRedeterminacion, nuevoExpediente))
+                {
+                    BindGrid();
+                    ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Success);
+                }
+                else
+                {
+                    ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Obtener datos para la exportación
+                List<RedeterminacionEF> redeterminaciones;
+
+                if (Session["RedeterminacionesCompleto"] is List<RedeterminacionEF> cache && cache.Any())
+                {
+                    redeterminaciones = cache;
+                }
+                else
+                {
+                    redeterminaciones = new RedeterminacionNegocioEF().Listar();
+                    Session["RedeterminacionesCompleto"] = redeterminaciones;
+                }
+
+                var mapeoColumnas = new Dictionary<string, string>
+ {
+ { "Código Redeterminación", "CodigoRedet" },
+ { "Código Autorizante", "CodigoAutorizante" },
+ { "Obra", "Autorizante.Obra.Descripcion" },
+ { "Empresa", "Empresa" },
+ { "Área", "Area" },
+ { "Expediente", "Expediente" },
+ { "Salto", "Salto" },
+ { "Tipo", "Tipo" },
+ { "Etapa", "Etapa.Nombre" },
+ { "Porcentaje", "Porcentaje" },
+ { "Observaciones", "Observaciones" },
+ { "Buzón SADE", "BuzonSade" },
+ { "Fecha SADE", "FechaSade" }
+ };
+
+                ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
+                ToastService.Show(this.Page, "Exportación completada con éxito.", ToastService.ToastType.Success);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
+
+        protected void ddlEtapas_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                var ddlEtapas = (DropDownList)sender;
+                var row = (GridViewRow)ddlEtapas.NamingContainer;
+                int id = Convert.ToInt32(dgvRedeterminacion.DataKeys[row.RowIndex].Value);
+                int nuevaEtapaId = int.Parse(ddlEtapas.SelectedValue);
+
+                _negocio.ActualizarEstado(id, nuevaEtapaId);
+                BindGrid();
+                ToastService.Show(this.Page, "Etapa actualizada correctamente.", ToastService.ToastType.Success);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al actualizar la etapa: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
+
+        protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                var ddlUsuario = (DropDownList)sender;
+                var row = (GridViewRow)ddlUsuario.NamingContainer;
+                int id = Convert.ToInt32(dgvRedeterminacion.DataKeys[row.RowIndex].Value);
+                int? nuevoUsuarioId = ddlUsuario.SelectedValue == "-1" ? (int?)null : int.Parse(ddlUsuario.SelectedValue);
+
+                _negocio.ActualizarUsuario(id, nuevoUsuarioId);
+                BindGrid();
+                ToastService.Show(this.Page, "Usuario actualizado correctamente.", ToastService.ToastType.Success);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el usuario: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
     }
 }

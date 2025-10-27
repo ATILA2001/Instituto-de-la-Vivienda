@@ -62,5 +62,9 @@ namespace Dominio
 
         [NotMapped]
         public decimal? MontoRedet { get; set; }
+
+        // Nuevo: nombre de la Contrata de la Obra del Autorizante (para UI)
+        [NotMapped]
+        public string Contrata { get; set; }
     }
 }

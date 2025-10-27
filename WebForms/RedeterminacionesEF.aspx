@@ -150,7 +150,7 @@
 			<div class="d-flex gap-3">
 				<div class="d-flex flex-column">
 					<div class="mb-1">
-						<span style="margin-left: 0.8rem;">Días x Buzón</span>
+						<span style="margin-left:0.8rem;">Días x Buzón</span>
 					</div>
 					<div>
 						<asp:DropDownList ID="ddlFiltroBuzon" runat="server" AutoPostBack="true"
@@ -203,13 +203,13 @@
 				<div class="form-group">
 					<asp:LinkButton ID="btnExportarExcel" runat="server" CssClass="btn btn-success" OnClick="btnExportarExcel_Click"
 						data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
-        <i class="bi bi-download"></i>
+ <i class="bi bi-download"></i>
 					</asp:LinkButton>
 				</div>
 
 				<div class="form-group">
 					<asp:LinkButton ID="btnShowAddModal" runat="server" CssClass="btn btn-primary" OnClick="btnShowAddModal_Click">
-        <i class="bi bi-plus-lg"></i> Agregar
+ <i class="bi bi-plus-lg"></i> Agregar
 					</asp:LinkButton>
 				</div>
 			</div>
@@ -221,7 +221,7 @@
 	<div class="gridview-scroll-container">
 
 
-		<asp:GridView ID="dgvRedeterminacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover  mb-4"
+		<asp:GridView ID="dgvRedeterminacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="dgvRedeterminacion_SelectedIndexChanged"
 			OnRowDeleting="dgvRedeterminacion_RowDeleting"
 			OnRowDataBound="dgvRedeterminacion_RowDataBound"
@@ -294,6 +294,16 @@
 					</ItemTemplate>
 				</asp:TemplateField>
 
+				<asp:TemplateField HeaderText="Contrata">
+					<HeaderTemplate>
+						<CustomControls:TreeViewSearch ID="cblsHeaderContrata" runat="server"
+							HeaderText="Contrata" DataTextField="Nombre" DataValueField="Nombre" OnAcceptChanges="OnAcceptChanges" />
+					</HeaderTemplate>
+					<ItemTemplate>
+						<%# Eval("Contrata") %>
+					</ItemTemplate>
+				</asp:TemplateField>
+
 
 
 
@@ -317,11 +327,11 @@
 				<asp:TemplateField HeaderText="Días x Buzón">
 					<ItemTemplate>
 						<%# 
-        (Eval("FechaSade") != DBNull.Value && Eval("FechaSade") != null && 
-        Eval("Etapa.Id") != null && 
-        !new List<int>{12, 22, 33, 34, 35, 36, 37, 38, 39}.Contains((int)Eval("Etapa.Id"))) ? 
-        FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
-        string.Empty 
+ (Eval("FechaSade") != DBNull.Value && Eval("FechaSade") != null && 
+ Eval("Etapa.Id") != null && 
+ !new List<int>{12,22,33,34,35,36,37,38,39}.Contains((int)Eval("Etapa.Id"))) ? 
+ FormatDaysWithColor((DateTime.Now - Convert.ToDateTime(Eval("FechaSade"))).TotalDays) : 
+ string.Empty 
 						%>
 					</ItemTemplate>
 				</asp:TemplateField>
@@ -332,14 +342,14 @@
 								CommandName="Select"
 								CssClass="btn btn-sm btn-warning "
 								ToolTip="Modificar">
-                    <i class="bi bi-pencil-square"></i>
+ <i class="bi bi-pencil-square"></i>
 							</asp:LinkButton>
 							<asp:LinkButton ID="btnEliminar" runat="server"
 								CommandName="Delete"
 								CssClass="btn btn-sm btn-danger "
 								ToolTip="Eliminar"
 								OnClientClick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                    <i class="bi bi-trash"></i>
+ <i class="bi bi-trash"></i>
 							</asp:LinkButton>
 						</div>
 					</ItemTemplate>
@@ -360,12 +370,6 @@
 		OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
 
-	<div class="text-center p-4">
-		<asp:Label ID="lblMensaje" Text="" runat="server" />
-	</div>
-
-
-
 	<script type="text/javascript">
 		function limpiarFormulario() {
 			document.getElementById('<%= txtExpediente.ClientID %>').value = '';
@@ -374,8 +378,8 @@
 			document.getElementById('<%= txtTipo.ClientID %>').value = '';
 			document.getElementById('<%= txtPorcentaje.ClientID %>').value = '';
 			document.getElementById('<%= txtObservacion.ClientID %>').value = '';
-			document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex = 0;
-			document.getElementById('<%= ddlEtapa.ClientID %>').selectedIndex = 0;
+			document.getElementById('<%= ddlAutorizante.ClientID %>').selectedIndex =0;
+			document.getElementById('<%= ddlEtapa.ClientID %>').selectedIndex =0;
 		}
 	</script>
 

@@ -7,6 +7,7 @@ using System.Data;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using WebForms.CustomControls;
 
 namespace WebForms
 {
@@ -65,8 +66,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar obras: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar obras: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -109,8 +109,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error en BindGrid: {ex.Message}" + (ex.InnerException != null ? " - " + ex.InnerException.Message : "");
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error en BindGrid: {ex.Message}" + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""), ToastService.ToastType.Error);
             }
         }
 
@@ -202,8 +201,8 @@ namespace WebForms
                     "MontoFaltante",
                     // Header text / display names
                     "Disponible Actual",
-                    "Planificacion 2025",
-                    "Ejecucion presupuesto 2025",
+                    "Planificacion2025",
+                    "Ejecucion presupuesto2025",
                     "Monto de Obra inicial",
                     "Monto de Obra actual",
                     "Faltante de Obra",
@@ -303,17 +302,16 @@ namespace WebForms
                     };
 
                     ExcelHelper.ExportarDatosGenericos(obrasCompleto, mapeo, "ObrasEF");
+                    ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    lblMensaje.Text = "No hay datos para exportar";
-                    lblMensaje.CssClass = "alert alert-warning";
+                    ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al exportar: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -349,8 +347,7 @@ namespace WebForms
             {
                 // Mostrar errores de validación para ayudar al debugg
                 var errorList = Page.Validators.Cast<System.Web.UI.IValidator>().Where(v => !v.IsValid).Select(v => v.ErrorMessage).ToList();
-                lblMensaje.Text = "Errores de validación: " + string.Join("; ", errorList);
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Errores de validación: " + string.Join("; ", errorList), ToastService.ToastType.Error);
                 return;
             }
 
@@ -384,14 +381,12 @@ namespace WebForms
 
                 if (_negocio.Modificar(obra))
                 {
-                    lblMensaje.Text = "Obra modificada exitosamente!";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Obra modificada exitosamente!", ToastService.ToastType.Success);
                     Session["EditingObraId"] = null;
                 }
                 else
                 {
-                    lblMensaje.Text = "Hubo un problema al modificar la obra.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Hubo un problema al modificar la obra.", ToastService.ToastType.Error);
                 }
 
             }
@@ -400,13 +395,11 @@ namespace WebForms
                 // Nueva obra
                 if (_negocio.Agregar(obra))
                 {
-                    lblMensaje.Text = "Obra agregada exitosamente!";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Obra agregada exitosamente!", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    lblMensaje.Text = "Hubo un problema al agregar la obra.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Hubo un problema al agregar la obra.", ToastService.ToastType.Error);
                 }
 
             }
@@ -448,8 +441,7 @@ namespace WebForms
 
                 if (datosFiltradosActuales == null || datosFiltradosActuales.Count == 0)
                 {
-                    lblMensaje.Text = "Error: No hay datos disponibles.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No hay datos disponibles.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -457,8 +449,7 @@ namespace WebForms
                 int indiceReal = (currentPageIndex * pageSize) + rowIndex;
                 if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
                 {
-                    lblMensaje.Text = "Error: Registro no encontrado.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: Registro no encontrado.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -512,15 +503,13 @@ namespace WebForms
                 }
                 else
                 {
-                    lblMensaje.Text = "Error: No se pudo cargar el certificado para edición.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Error: No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
                 }
 
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar los datos del certificado: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar los datos del certificado: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -539,13 +528,11 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
                 if (_negocio.Eliminar(id))
                 {
-                    lblMensaje.Text = "Obra eliminada exitosamente";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Obra eliminada exitosamente", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    lblMensaje.Text = "No fue posible eliminar la obra";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "No fue posible eliminar la obra", ToastService.ToastType.Error);
                 }
 
                 // Forzar recarga de la lista completa
@@ -555,8 +542,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 
@@ -655,8 +641,7 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cargar listas: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
@@ -731,8 +716,6 @@ namespace WebForms
 
 
 
-
-
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             currentPageIndex = 0; // Reiniciar a la primera página al aplicar filtros
@@ -766,11 +749,9 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
             }
         }
-
 
 
 

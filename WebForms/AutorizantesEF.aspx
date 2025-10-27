@@ -3,6 +3,7 @@
 <%@ Register Src="~/CustomControls/TreeViewSearch/TreeViewSearch.ascx" TagPrefix="CustomControls" TagName="TreeViewSearch" %>
 <%@ Register Src="~/CustomControls/PaginationControl/PaginationControl.ascx" TagPrefix="CustomControls" TagName="PaginationControl" %>
 
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -509,9 +510,7 @@
         OnPageChanged="paginationControl_PageChanged"
         OnPageSizeChanged="paginationControl_PageSizeChanged" />
 
-    <div class="text-center p-4">
-        <asp:Label ID="lblMensaje" Text="" runat="server" />
-    </div>
+
 
     <script type="text/javascript">
         function limpiarFormularioAgregar() {

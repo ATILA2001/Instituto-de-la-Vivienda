@@ -53,7 +53,7 @@ namespace Negocio
                     .OrderByDescending(r => r.Id)
                     .ToList();
 
-                // Cargar manualmente Autorizantes relacionados para que UI pueda leer Obra/Empresa/Area
+                // Cargar manualmente Autorizantes relacionados para que UI pueda leer Obra/Empresa/Area/Contrata
                 var codigos = lista.Select(r => r.CodigoAutorizante).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
                 if (codigos.Any())
                 {
@@ -62,6 +62,7 @@ namespace Negocio
                         .Include(a => a.Obra)
                         .Include("Obra.Area")
                         .Include("Obra.Empresa")
+                        .Include("Obra.Contrata")
                         .ToList();
 
                     var autoresMap = autores.ToDictionary(a => a.CodigoAutorizante, a => a);
@@ -72,6 +73,13 @@ namespace Negocio
                             r.Autorizante = auth;
                             r.Empresa = auth.Obra?.Empresa?.Nombre;
                             r.Area = auth.Obra?.Area?.Nombre;
+                            // Aquí se concatena Contrata con Número y Año de la Obra
+                            var contrataNombre = auth.Obra?.Contrata?.Nombre;
+                            var numero = auth.Obra?.Numero;
+                            var anio = auth.Obra?.Anio;
+                            r.Contrata = !string.IsNullOrWhiteSpace(contrataNombre)
+                                ? (numero.HasValue && anio.HasValue ? $"{contrataNombre} {numero}/{anio}" : contrataNombre)
+                                : null;
                         }
                     }
                 }
@@ -118,7 +126,7 @@ namespace Negocio
                 if (redet == null)
                     return null;
 
-                // Carga manual del Autorizante y su Obra/Empresa/Area usando CodigoAutorizante
+                // Carga manual del Autorizante y su Obra/Empresa/Area/Contrata usando CodigoAutorizante
                 if (!string.IsNullOrEmpty(redet.CodigoAutorizante))
                 {
                     var auth = context.Autorizantes
@@ -126,12 +134,20 @@ namespace Negocio
                         .Include(a => a.Obra)
                         .Include("Obra.Area")
                         .Include("Obra.Empresa")
+                        .Include("Obra.Contrata")
                         .FirstOrDefault(a => a.CodigoAutorizante == redet.CodigoAutorizante);
                     if (auth != null)
                     {
                         redet.Autorizante = auth; // propiedad NotMapped para uso en UI
                         redet.Empresa = auth.Obra?.Empresa?.Nombre;
                         redet.Area = auth.Obra?.Area?.Nombre;
+                        // Aquí se concatena Contrata con Número y Año de la Obra
+                        var contrataNombre = auth.Obra?.Contrata?.Nombre;
+                        var numero = auth.Obra?.Numero;
+                        var anio = auth.Obra?.Anio;
+                        redet.Contrata = !string.IsNullOrWhiteSpace(contrataNombre)
+                            ? (numero.HasValue && anio.HasValue ? $"{contrataNombre} {numero}/{anio}" : contrataNombre)
+                            : null;
                     }
                 }
 
@@ -379,6 +395,7 @@ namespace Negocio
                             .Include(a => a.Obra)
                             .Include("Obra.Area")
                             .Include("Obra.Empresa")
+                            .Include("Obra.Contrata")
                             .ToList();
 
                         var autoresMap = autores.ToDictionary(a => a.CodigoAutorizante, a => a);
@@ -389,6 +406,13 @@ namespace Negocio
                                 r.Autorizante = auth;
                                 r.Empresa = auth.Obra?.Empresa?.Nombre;
                                 r.Area = auth.Obra?.Area?.Nombre;
+                                // Aquí se concatena Contrata con Número y Año de la Obra
+                                var contrataNombre = auth.Obra?.Contrata?.Nombre;
+                                var numero = auth.Obra?.Numero;
+                                var anio = auth.Obra?.Anio;
+                                r.Contrata = !string.IsNullOrWhiteSpace(contrataNombre)
+                                    ? (numero.HasValue && anio.HasValue ? $"{contrataNombre} {numero}/{anio}" : contrataNombre)
+                                    : null;
                             }
                         }
                     }
