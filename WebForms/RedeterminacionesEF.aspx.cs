@@ -576,11 +576,11 @@ namespace WebForms
             var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
             var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
             var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
-            // Contrata: ahora el filtro usa Obra.Id como value (texto mostrado: Contrata Nombre Numero/Año)
-            var selContrataObraIds = SafeParseIntList(GetSelectedValues("cblsHeaderContrata"));
+            // Contrata: aplicar la misma lógica que AutorizantesEF -> valores tipo string (nombres/etiquetas de contrata)
+            var selContrataNombres = GetSelectedValues("cblsHeaderContrata");
 
-            // Unificar filtros de Obra: Obra seleccionada directamente + Obra por Contrata
-            var selObraFinal = selObra.Concat(selContrataObraIds).Distinct().ToList();
+            // Filtros de Obra (directos)
+            var selObraFinal = selObra.Distinct().ToList();
 
             string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
             bool mismatch = ShowOnlyMismatchedRecords;
@@ -590,34 +590,38 @@ namespace WebForms
 
             List<RedeterminacionEF> fullList;
 
-            // Sin filtro en memoria por Contrata; solo requiere memoria para empresa/área/mismatch/buzón
-            bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0;
+            // Forzar filtrado en memoria si hay filtros especiales o filtro de contrata (por nombre/etiqueta)
+            bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0 || (selContrataNombres != null && selContrataNombres.Count > 0);
             if (requiresInMemory)
             {
-                // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra unificada)
+                // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra directa)
                 fullList = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
 
-                // Aplicar filtro de usuario si es necesario
+                // Aplicar filtros simples en memoria (usuario/empresa/área)
                 if (selUsuario.Count > 0)
-                {
                     fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
-                }
 
-                // Aplicar filtro de empresa si es necesario
                 if (selEmpresa.Count > 0)
-                {
-                    fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true &&
-                    selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
-                }
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
 
-                // Aplicar filtro de área si es necesario
                 if (selArea.Count > 0)
+                    fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+
+                // Guardar dataset completo para poblar encabezados (antes de aplicar filtro de Contrata)
+                var headerFull = AplicarFiltrosEspeciales(fullList.ToList(), buzonFilter, mismatch);
+                Session["RedeterminacionesHeaderFull"] = headerFull;
+
+                // Aplicar filtro de contrata por nombre/etiqueta (case-insensitive) para la grilla
+                if (selContrataNombres != null && selContrataNombres.Count > 0)
                 {
-                    fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true &&
-                    selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                    var nombresContrata = new HashSet<string>(selContrataNombres.Where(s => !string.IsNullOrWhiteSpace(s)), StringComparer.OrdinalIgnoreCase);
+                    fullList = fullList.Where(r =>
+ (!string.IsNullOrWhiteSpace(r.Contrata) && nombresContrata.Contains(r.Contrata)) ||
+ (r.Autorizante?.Obra?.Contrata != null && !string.IsNullOrWhiteSpace(r.Autorizante.Obra.Contrata.Nombre) && nombresContrata.Contains(r.Autorizante.Obra.Contrata.Nombre))
+ ).ToList();
                 }
 
-                // Filtros especiales (mismatch / buzón)
+                // Filtros especiales (mismatch / buzón) para la grilla
                 fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
 
                 int total = fullList.Count;
@@ -630,7 +634,7 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                // Guardar lista completa en sesión para otros filtros/header
+                // Guardar lista completa en sesión para otros usos (p. ej., export)
                 Session["RedeterminacionesGridData"] = fullList;
 
                 var pagina = fullList
@@ -643,7 +647,7 @@ namespace WebForms
             }
             else
             {
-                // Usar paginación en BD. El filtro de Contrata (via Obra) ya está en selObraFinal
+                // Usar paginación en BD para grilla
                 int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
@@ -656,7 +660,19 @@ namespace WebForms
 
                 var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
 
-                // Guardar la página actual en sesión para otros filtros/header
+                // Para encabezados: armar dataset completo con filtros básicos (sin paginación)
+                var headerFull = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
+                if (selUsuario.Count > 0)
+                    headerFull = headerFull.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+                if (selEmpresa.Count > 0)
+                    headerFull = headerFull.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                if (selArea.Count > 0)
+                    headerFull = headerFull.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                headerFull = AplicarFiltrosEspeciales(headerFull, buzonFilter, mismatch);
+                // Nota: no aplicar aquí el filtro de Contrata para que el header muestre todas las opciones
+                Session["RedeterminacionesHeaderFull"] = headerFull;
+
+                // Guardar la página actual en sesión para otros usos
                 Session["RedeterminacionesGridData"] = pagina;
 
                 dgvRedeterminacion.DataSource = pagina;
@@ -723,15 +739,28 @@ namespace WebForms
                 .ToList(),
                 "Nombre", "Id");
 
-                // Contrata: value = Obra.Id, text = "Contrata.Nombre Numero/Año" (todas las obras)
-                var obrasContrata = context.Obras.AsNoTracking()
-                .Where(o => o.ContrataId.HasValue)
-                .Select(o => new { o.Id, o.Numero, o.Anio, ContrataNombre = o.Contrata.Nombre })
-                .ToList()
-                .Select(o => new { Id = o.Id, Nombre = (o.Numero.HasValue && o.Anio.HasValue) ? ($"{o.ContrataNombre} {o.Numero}/{o.Anio}") : o.ContrataNombre })
-                .OrderBy(x => x.Nombre)
-                .ToList();
-                bindFilter("cblsHeaderContrata", obrasContrata, "Nombre", "Id");
+                // Contrata: usar dataset completo en memoria según filtros actuales (sin paginación)
+                var headerFull = Session["RedeterminacionesHeaderFull"] as List<RedeterminacionEF>;
+                if (headerFull != null && headerFull.Count > 0)
+                {
+                    var items = headerFull
+                    .Where(r => !string.IsNullOrWhiteSpace(r.Contrata) || (r.Autorizante?.Obra?.Contrata != null && !string.IsNullOrWhiteSpace(r.Autorizante.Obra.Contrata.Nombre)))
+                    .Select(r => !string.IsNullOrWhiteSpace(r.Contrata) ? r.Contrata : r.Autorizante.Obra.Contrata.Nombre)
+                    .Distinct()
+                    .OrderBy(n => n)
+                    .Select(n => new { Nombre = n })
+                    .ToList();
+                    bindFilter("cblsHeaderContrata", items, "Nombre", "Nombre");
+                }
+                else
+                {
+                    // Fallback a catálogo de contratas (solo nombre)
+                    var contratasDb = context.Contratas.AsNoTracking()
+                    .OrderBy(c => c.Nombre)
+                    .Select(c => new { Nombre = c.Nombre })
+                    .ToList();
+                    bindFilter("cblsHeaderContrata", contratasDb, "Nombre", "Nombre");
+                }
 
                 // Reaplicar selección del dropdown de Días x Buzón si existe en el header
                 if (dgvRedeterminacion.HeaderRow.FindControl("ddlFiltroBuzon") is DropDownList ddlBuzon && ViewState["BuzonFilterValue"] != null)
