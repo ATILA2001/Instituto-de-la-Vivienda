@@ -639,6 +639,7 @@ namespace Negocio
                                                          .Distinct()
                                                          .ToList();
                     Debug.WriteLine($"Tiempo procesamiento todosLosExpedientes: {sw.ElapsedMilliseconds} ms");
+                    todosLosExpedientes = todosLosExpedientes.Union(expedientesReliq.Values.Where(e => !string.IsNullOrWhiteSpace(e))).ToList();
 
                     // PARALELISMO CONSERVADOR: Solo SIGAF y SADE en paralelo
                     sw.Restart();
