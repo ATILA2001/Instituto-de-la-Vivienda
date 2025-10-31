@@ -154,7 +154,7 @@
 					</div>
 					<div>
 						<asp:DropDownList ID="ddlFiltroBuzon" runat="server" AutoPostBack="true"
-							CssClass="dropdown-button"
+							CssClass="form-select"
 							OnSelectedIndexChanged="ddlFiltroBuzon_SelectedIndexChanged">
 							<asp:ListItem Text="Todos" Value="all" Selected="True"></asp:ListItem>
 							<asp:ListItem Text="En curso" Value="0"></asp:ListItem>

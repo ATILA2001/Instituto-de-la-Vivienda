@@ -15,6 +15,7 @@
 	<link href="<%= ResolveUrl("~/Content/bootstrap.min.css") %>" rel="stylesheet">
 	<script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.min.js") %>"></script>
 	<link rel="stylesheet" href="<%= ResolveUrl("~/Styles/site.css") %>" />
+	<link rel="stylesheet" href="<%= ResolveUrl("~/Styles/DarkMode.css") %>" />
 
 
 
@@ -29,10 +30,16 @@
 		});
 	</script>
 
-
-
 </head>
 <body class="bg-light">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
 	<form id="form1" runat="server">
 		<asp:ScriptManager ID="ScriptManager1" runat="server" />
 
@@ -141,6 +148,15 @@
 
 						</ul>
 
+						<!-- Dark Mode Toggle -->
+						<ul class="navbar-nav">
+							<li class="nav-item d-flex align-items-center me-3">
+								<a id="themeToggle" style="cursor: pointer;" class="nav-link">
+									<i id="themeIcon" class="bi"></i>
+								</a>
+							</li>
+						</ul>
+
 						<!-- Botón Cerrar Sesión -->
 						<ul class="navbar-nav">
 							<li class="nav-item">
@@ -172,6 +188,49 @@
 			</div>
 		</footer>
 	</form>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', (event) => {
+			const themeToggle = document.getElementById('themeToggle');
+			const themeIcon = document.getElementById('themeIcon');
+			const body = document.body;
+
+			const applyTheme = (isDarkMode) => {
+				if (isDarkMode) {
+					body.classList.add('dark-mode');
+					if (themeIcon) {
+						themeIcon.classList.remove('bi-moon-fill');
+						themeIcon.classList.add('bi-brightness-high-fill');
+					}
+				} else {
+					body.classList.remove('dark-mode');
+					if (themeIcon) {
+						themeIcon.classList.remove('bi-brightness-high-fill');
+						themeIcon.classList.add('bi-moon-fill');
+					}
+				}
+			};
+
+			// Check for saved theme preference
+			const savedTheme = localStorage.getItem('theme');
+			applyTheme(savedTheme === 'dark');
+
+			// Toggle event listener
+			if (themeToggle) {
+				themeToggle.addEventListener('click', (e) => {
+					e.preventDefault();
+					const isDarkMode = body.classList.contains('dark-mode');
+					if (isDarkMode) {
+						localStorage.setItem('theme', 'light');
+						applyTheme(false);
+					} else {
+						localStorage.setItem('theme', 'dark');
+						applyTheme(true);
+					}
+				});
+			}
+		});
+	</script>
 
 </body>
 
