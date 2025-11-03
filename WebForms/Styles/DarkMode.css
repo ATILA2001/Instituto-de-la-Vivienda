@@ -1,0 +1,245 @@
+body.dark-mode {
+    background-color: #1E2A35 !important; /* Usar !important para asegurar que sobreescriba otros estilos */
+    color: #E0E0E0;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.dark-mode .navbar-3d {
+    box-shadow: none;
+}
+
+/* Estilos para los menús desplegables del Navbar en modo oscuro */
+.dark-mode .dropdown-menu {
+    background-color: #243341; /* Tono gris azulado, como otros desplegables */
+    border: 1px solid #3A4A55;
+    color: #E0E0E0;
+}
+
+    .dark-mode .dropdown-menu .dropdown-item {
+        color: #E0E0E0;
+    }
+
+        .dark-mode .dropdown-menu .dropdown-item:hover,
+        .dark-mode .dropdown-menu .dropdown-item:focus {
+            background-color: #2C3E50; /* Mismo color que el hover de las tablas */
+            color: #ffffff;
+        }
+
+    .dark-mode .dropdown-menu .dropdown-divider {
+        border-top: 1px solid #3A4A55;
+    }
+
+    .dark-mode .dropdown-menu .dropdown-header {
+        color: #9CA3AF; /* Color de texto silenciado */
+    }
+
+
+
+/* Estilos para GridView (tablas) en modo oscuro */
+/*.dark-mode .table {
+    background-color: #212529;
+    color: #ffffff;
+}*/
+
+.dark-mode .table1 th,
+.dark-mode .table1 td {
+    border: 1px solid #353935;
+}
+
+.dark-mode .table1 th {
+    font-weight: 600;
+    color: #F0F0F0;
+    border-bottom: 1px solid #2E3A45;
+}
+
+.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #232F3A;
+}
+
+.dark-mode .table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.dark-mode .table-hover tbody tr:hover {
+    background-color: #2C3E50;
+}
+
+/* Estilos para tarjetas y modales en modo oscuro */
+.dark-mode .card {
+    background-color: #243341; /* Tono gris azulado, igual que el dropdown */
+    border: 1px solid #3A4A55;
+    color: #E0E0E0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.dark-mode .modal-content {
+    background-color: #1E2A35; /* Fondo más oscuro para el cuerpo del modal */
+    border: 1px solid #3A4A55;
+    color: #E0E0E0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.dark-mode .modal-header,
+.dark-mode .modal-footer {
+    background-color: #243341; /* Tono gris azulado para header/footer */
+    border-bottom-color: #3A4A55;
+    border-top-color: #3A4A55;
+}
+
+.dark-mode .modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+
+
+/* Anular text-dark en modo oscuro */
+.dark-mode .badge.text-dark {
+    color: #ffffff !important;
+}
+
+.dark-mode .text-muted {
+    color: #9CA3AF !important;
+}
+
+/* Estilos para el control de paginación en modo oscuro */
+.dark-mode .btn-outline-primary {
+    --bs-btn-color: #ffffff;
+    --bs-btn-border-color: #212529;
+    --bs-btn-hover-bg: var(--inst-cyan);
+    --bs-btn-hover-border-color:#212529;
+}
+
+.dark-mode .form-control {
+    background-color: #1E2A35;
+    color: #E0E0E0;
+    border: 1px solid #3A4A55;
+    border-radius: 4px;
+}
+    .dark-mode .form-control::placeholder {
+        color: #8899A6;
+    }
+
+.dark-mode .form-select {
+    background-color: #1E2A35;
+    color: #E0E0E0;
+    border-color: #3A4A55;
+    border-radius: 4px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23E0E0E0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Estilos para input de fecha en modo oscuro */
+.dark-mode .form-control[type="date"] {
+    color-scheme: dark;
+}
+
+    .dark-mode .form-control[type="date"]::-webkit-calendar-picker-indicator {
+        filter: brightness(0) invert(1);
+    }
+
+/* Estilos para TreeViewSearch en modo oscuro */
+.dark-mode .dropdown-content {
+    background-color: #243341; /* Tono gris azulado */
+    border: 1px solid #3A4A55;
+    color: #E0E0E0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); /* Sombra sutil */
+}
+
+.dark-mode .search-container,
+.dark-mode .action-buttons {
+    background-color: #1E2A35; /* Fondo más oscuro para contraste */
+    border-color: #3A4A55;
+}
+
+.dark-mode .dropdown-content input[type='text'] {
+    background-color: #1E2A35;
+    color: #E0E0E0;
+    border: 1px solid #3A4A55;
+    border-radius: 4px;
+}
+
+    .dark-mode .dropdown-content input[type='text']::placeholder {
+        color: #8899A6;
+    }
+
+/* Estilos para checkboxes personalizados en modo oscuro */
+.dark-mode .date-tree-view input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #1E2A35;
+    border: 1px solid #3A4A55;
+    border-radius: 4px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+    .dark-mode .date-tree-view input[type="checkbox"]:checked {
+        background-color: #38BDF8; /* Celeste acento */
+        border-color: #38BDF8;
+    }
+
+    .dark-mode .date-tree-view input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 1px;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+.dark-mode .date-tree-view,
+.dark-mode .date-tree-view table,
+.dark-mode .date-tree-view td,
+.dark-mode .date-tree-view label {
+    color: #ffffff !important;
+}
+
+.dark-mode .date-tree-view a {
+    color: #0d6efd !important;
+}
+
+.dark-mode .dropdown-button {
+    color: #ffffff;
+}
+
+    .dark-mode .dropdown-button:hover {
+        border-color: #ffffff;
+    }
+
+.dark-mode .date-tree-view td img {
+    filter: invert(1);
+}
+.dark-mode .checkbox-container table td {
+    border: none;
+}
+
+/* Estilos para la barra de scroll en modo oscuro */
+.dark-mode *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.dark-mode *::-webkit-scrollbar-track {
+    background: #212529;
+}
+
+.dark-mode *::-webkit-scrollbar-thumb {
+    background-color: #3A4752;
+    border-radius: 10px;
+    border: 3px solid #212529;
+}
+
+.dark-mode *::-webkit-scrollbar-thumb:hover {
+    background-color: #4a5762;
+}
+
+.dark-mode *::-webkit-scrollbar-corner {
+    background: #212529; /* Mismo color que el track para consistencia */
+}

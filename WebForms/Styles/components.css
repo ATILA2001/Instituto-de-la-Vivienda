@@ -58,7 +58,7 @@
 
 /*MEJORAR*/
 
-.table-bordered th, .table-bordered td {
+.table1 th, .table1 td {
 	border: 1px solid #dddddd;
 	text-align: center;
 }
