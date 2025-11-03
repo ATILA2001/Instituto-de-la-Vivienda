@@ -150,10 +150,10 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <button type="button" class="btn btn-secondary" id="btnLimpiarAgregar" onclick="limpiarFormularioAgregar()">Limpiar</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnLimpiarAgregar" onclick="limpiarFormularioAgregar()"><i class="bi bi-trash3-fill"></i></button>
                     <div class="d-flex gap-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarAutorizante" />
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i></button>
+                        <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-success" runat="server" ValidationGroup="AgregarAutorizante" />
                     </div>
                 </div>
             </div>
@@ -279,10 +279,10 @@
 
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
-                    <button type="button" class="btn btn-secondary" id="btnLimpiarEditar" onclick="limpiarFormularioEditar()">Limpiar</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnLimpiarEditar" onclick="limpiarFormularioEditar()"><i class="bi bi-trash3-fill"></i></button>
                     <div class="d-flex gap-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <asp:Button Text="Editar" ID="btnEditar" OnClick="btnEditar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="EditarAutorizante" />
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i></button>
+                        <asp:Button Text="Actualizar" ID="btnEditar" OnClick="btnEditar_Click" CssClass="btn btn-success" runat="server" ValidationGroup="EditarAutorizante" />
                     </div>
                 </div>
             </div>

@@ -132,10 +132,10 @@
 					</div>
 				</div>
 				<div class="modal-footer d-flex justify-content-between px-4">
-					<button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+					<button type="button" class="btn btn-outline-secondary" onclick="limpiarFormulario()"><i class="bi bi-trash3-fill"></i></button>
 					<div class="d-flex gap-4">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarRedeterminacion" />
+						<button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i></button>
+						<asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-success" runat="server" ValidationGroup="AgregarRedeterminacion" />
 					</div>
 				</div>
 			</div>
