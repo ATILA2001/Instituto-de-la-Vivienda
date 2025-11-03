@@ -164,10 +164,10 @@
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-between px-4">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+                    <div class="d-flex gap-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <asp:Button Text="Agregar" ID="btnAgregar" OnClick="btnAgregar_Click" CssClass="btn btn-primary" runat="server" ValidationGroup="AgregarObra" />
-                    <button type="button" class="btn btn-outline-secondary" onclick="limpiarFormulario()" data-bs-toggle="tooltip" title="Limpiar formulario"><i class="bi bi-trash3-fill"></i></button>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="tooltip" title="Cancelar"><i class="bi bi-x-lg"></i></button>
                     </div>
                 </div>
             </div>

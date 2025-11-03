@@ -244,7 +244,7 @@ namespace WebForms
                         });", true);
 
                     ddlObra.Enabled = false; // No permitir cambiar obra al editar
-                    btnAgregar.Text = "Actualizar";
+                    btnAgregar.Text = "Modificar";
                 }
             }
             catch (Exception ex)
