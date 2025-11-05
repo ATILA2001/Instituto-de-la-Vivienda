@@ -18,7 +18,7 @@ namespace Negocio
         /// </summary>
         public List<RedeterminacionEF> Listar(
             List<int> etapasIds = null,
-            List<int> autorizantesIds = null,
+              List<string> autorizanteCodigos = null,
             List<int> obrasIds = null,
             string filtro = null)
         {
@@ -29,9 +29,11 @@ namespace Negocio
                 if (etapasIds != null && etapasIds.Any())
                     query = query.Where(r => etapasIds.Contains(r.EstadoRedetEFId.Value));
 
-                // Filtrar por autorizantes mediante subconsulta sobre Autorizantes (join por CodigoAutorizante)
-                if (autorizantesIds != null && autorizantesIds.Any())
-                    query = query.Where(r => context.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && autorizantesIds.Contains(a.Id)));
+                // Filtrar por CodigoRedet (lista de strings)
+                if (autorizanteCodigos != null && autorizanteCodigos.Any())
+                {
+                    query = query.Where(r => autorizanteCodigos.Contains(r.CodigoRedet));
+                }
 
                 // Filtrar por obras mediante subconsulta sobre Autorizantes -> ObraId
                 if (obrasIds != null && obrasIds.Any())
@@ -264,7 +266,7 @@ namespace Negocio
         /// </summary>
         public int ContarConFiltros(string filtroTexto,
             List<int> obrasIds,
-            List<int> autorizantesIds,
+            List<string> autorizanteCodigos,
             List<int> estadosIds,
             List<int> usuariosIds = null)
         {
@@ -295,10 +297,10 @@ namespace Negocio
                         q = q.Where(r => ctx.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && obrasIds.Contains(a.ObraId)));
                     }
 
-                    // Aplicar filtro por autorizantes (Autorizantes.Id)
-                    if (autorizantesIds != null && autorizantesIds.Any())
+                    // Aplicar filtro por autorizantes (lista de CodigoRedet)
+                    if (autorizanteCodigos != null && autorizanteCodigos.Any())
                     {
-                        q = q.Where(r => ctx.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && autorizantesIds.Contains(a.Id)));
+                        q = q.Where(r => autorizanteCodigos.Contains(r.CodigoRedet));
                     }
 
                     // Aplicar filtro por estado/etapa (EstadoRedetEFId)
@@ -332,7 +334,7 @@ namespace Negocio
             int pageSize,
             string filtroTexto,
             List<int> obrasIds,
-            List<int> autorizantesIds,
+            List<string> autorizanteCodigos,
             List<int> estadosIds,
     List<int> usuariosIds = null)
         {
@@ -363,10 +365,10 @@ namespace Negocio
                         q = q.Where(r => ctx.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && obrasIds.Contains(a.ObraId)));
                     }
 
-                    // Aplicar filtro por autorizantes
-                    if (autorizantesIds != null && autorizantesIds.Any())
+                    // Aplicar filtro por autorizantes (lista de CodigoRedet)
+                    if (autorizanteCodigos != null && autorizanteCodigos.Any())
                     {
-                        q = q.Where(r => ctx.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && autorizantesIds.Contains(a.Id)));
+                        q = q.Where(r => autorizanteCodigos.Contains(r.CodigoRedet));
                     }
 
                     // Aplicar filtro por estados/etapas

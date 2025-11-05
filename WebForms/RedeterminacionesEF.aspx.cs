@@ -538,7 +538,7 @@ namespace WebForms
         {
             string filtroGeneral = txtBuscar?.Text?.Trim();
             var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
-            var selAutorizante = SafeParseIntList(GetSelectedValues("cblsHeaderAutorizante"));
+            var selAutorizanteCodigos = GetSelectedValues("cblsHeaderAutorizante");
             var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
             var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
             var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
@@ -562,7 +562,7 @@ namespace WebForms
             if (requiresInMemory)
             {
                 // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra directa)
-                fullList = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
+                fullList = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
 
                 // Aplicar filtros simples en memoria (usuario/empresa/área)
                 if (selUsuario.Count > 0)
@@ -615,7 +615,7 @@ namespace WebForms
             else
             {
                 // Usar paginación en BD para grilla
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
+                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -625,10 +625,10 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
+                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
 
                 // Para encabezados: armar dataset completo con filtros básicos (sin paginación)
-                var headerFull = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
+                var headerFull = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
                 if (selUsuario.Count > 0)
                     headerFull = headerFull.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
                 if (selEmpresa.Count > 0)
@@ -671,10 +671,15 @@ namespace WebForms
                 context.Obras.AsNoTracking().OrderBy(o => o.Descripcion).Select(o => new { o.Id, o.Descripcion }).ToList(),
                 "Descripcion", "Id");
 
-                // Autorizante: Id, CodigoAutorizante
-                bindFilter("cblsHeaderAutorizante",
-                context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(),
-                "CodigoAutorizante", "Id");
+                // Autorizante: CodigoRedet (string)
+                var autorizanteSource = context.Redeterminaciones
+                    .AsNoTracking()
+                    .Where(r => r.CodigoRedet != null && r.CodigoRedet != "")
+                    .Select(r => new { CodigoRedet = r.CodigoRedet })
+                    .Distinct()
+                    .OrderBy(r => r.CodigoRedet)
+                    .ToList();
+                bindFilter("cblsHeaderAutorizante", autorizanteSource, "CodigoRedet", "CodigoRedet");
 
                 // Estado (Etapa Redet): Id, Nombre
                 bindFilter("cblsHeaderEstado",
