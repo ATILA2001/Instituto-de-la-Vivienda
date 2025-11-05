@@ -50,7 +50,8 @@ namespace Negocio
             {"RD-10/11-Notificar a la empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
             {"RD-11/11-Notificada", new List<string>{
                 "IVC-4010 DEPTO REDETERMINACIONES",
-                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION"
+                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION",
+                "MGEYA-D.G.MESA DE ENTRADAS SALIDAS Y ARCHIVO"
             }},
             {"Rectificacion", new List<string>{"IVC-3160 DEPTO PROYECTOS"}},
             {"RO-01/11-Creacion Expediente", new List<string>{"IVC-2320 DEPTO ORGANIZACION Y CAPACITACION CONSORCIAL"}},
@@ -90,7 +91,8 @@ namespace Negocio
             {"RO-10/11-Notificar a la empresa", new List<string>{"IVC-6230 DEPTO SOCIAL Y ADMINISTRATIVO"}},
             {"RO-11/11-Notificada", new List<string>{
                 "IVC-9510 DEPTO TECNOLOGIA",
-                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION"
+                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION",
+                "MGEYA-D.G.MESA DE ENTRADAS SALIDAS Y ARCHIVO"
             }},
             {"RP-01/09-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
             {"RP-02/09-Análisis Tecnica", new List<string>{
@@ -127,7 +129,8 @@ namespace Negocio
             {"RP-08/09-Notificar a la empresa", new List<string>{"IVC-ALS_MIGRADO_EX_UGIS ADMINISTRADOR LOCAL SUME"}},
             {"RP-09/09-Notificada", new List<string>{
                 "IVC-1260 DEPTO GESTION DE ALQUILERES",
-                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION"
+                "IVC-1860 DEPTO REGISTRO Y GUARDA DE DOCUMENTACION",
+                "MGEYA-D.G.MESA DE ENTRADAS SALIDAS Y ARCHIVO"
             }}
         };
 
