@@ -714,7 +714,20 @@ namespace WebForms
                 bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderProyecto", context.Proyectos.AsNoTracking().OrderBy(p => p.Nombre).Select(p => new { p.Id, p.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderCodigoAutorizante", context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(), "CodigoAutorizante", "Id");
+
+
+                if (Session["CertificadosCompleto"] == null)
+                    CargarListaCertificadosCompleta();
+
+                List<CertificadoDTO> certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+                var codigosAutorizante = certificadosCompleta
+                    .Select(c => new { c.CodigoAutorizante })
+                    .Distinct()
+                    .OrderBy(c => c.CodigoAutorizante)
+                    .ToList();
+
+
+                bindFilter("cblsHeaderCodigoAutorizante", codigosAutorizante , "CodigoAutorizante", "CodigoAutorizante");
                 bindFilter("cblsHeaderTipo", context.TiposPago.AsNoTracking().OrderBy(t => t.Nombre).Select(t => new { t.Id, t.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderLinea", context.LineasGestion.AsNoTracking().OrderBy(l => l.Nombre).Select(l => new { l.Id, l.Nombre }).ToList(), "Nombre", "Id");
                 bindFilter("cblsHeaderAutorizanteEstado", context.EstadosAutorizante.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, Estado = e.Nombre }).ToList(), "Estado", "Id");
@@ -1136,9 +1149,13 @@ namespace WebForms
                 // Aplicar filtro por Empresa
                 if (selectedEmpresaIds != null) data = data.Where(c => c.EmpresaId.HasValue && selectedEmpresaIds.Contains(c.EmpresaId.Value)).ToList();
 
-                // Aplicar filtro por Código Autorizante
-                if (selectedAutorizanteIds != null) data = data.Where(c => c.AutorizanteId.HasValue && selectedAutorizanteIds.Contains(c.AutorizanteId.Value)).ToList();
-
+                // Aplicar filtro por Código Autorizante (texto)
+                if (cblsHeaderCodigoAutorizante != null && cblsHeaderCodigoAutorizante.ExpandedSelectedValues.Any())
+                {
+                    var selectedCodigosAutorizante = cblsHeaderCodigoAutorizante.ExpandedSelectedValues;
+                    data = data.Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante) && selectedCodigosAutorizante.Contains(c.CodigoAutorizante)).ToList();
+                }
+                
                 // Aplicar filtro por Estado (texto)
                 if (cblsHeaderEstado != null && cblsHeaderEstado.ExpandedSelectedValues.Any())
                 {
