@@ -12,6 +12,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using WebForms.CustomControls;
 
+
 namespace WebForms
 {
     public partial class RedeterminacionesEF : System.Web.UI.Page
@@ -169,42 +170,7 @@ namespace WebForms
         }
         protected bool IsBuzonEtapaMismatch(string etapaNombre, string buzonSade)
         {
-            if (string.IsNullOrEmpty(etapaNombre) || string.IsNullOrEmpty(buzonSade))
-                return false;
-
-            // Diccionario de correspondencias entre etapas y buzones
-            var correspondencias = new Dictionary<string, List<string>>
- {
- {"RD-01/11-Subsanacion Empresa", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
- {"RD-02/11-Análisis Tecnica", new List<string>{
- "IVC-3300 GO PLANEAMIENTO Y EVALUACIÓN",
- "IVC-3430 DEPTO OBRAS1",
- "IVC-3400 GO INSPECCIION Y AUDITORIA DE OBRAS",
- "11000",
- "IVC-2600 GO PLANIFICACION Y CONTROL",
- "VLMOHAREM",
- "IVC-12400 GO LOGISTICA",
- "IVC-3000 DG OBRAS",
- "IVC-3420 DEPTO AUDITORIA2",
- "IVC-9500 GO MODERNIZACION"
- }},
- {"RD-03/11-Análisis DGAyF", new List<string>{"IVC-4010 DEPTO REDETERMINACIONES"}},
- {"RD-04/11-Dgtal-Dictamen", new List<string>{
- "IVC-5210 DEPTO OBRAS PUBLICAS",
- "IVC-5220 DEPTO SUMINISTROS Y OBRAS MENORES",
- "IVC-5200 GO ASESORAMIENTO Y CONTROL DE LEGALIDAD OBRA PUBLICA Y SUMINISTROS"
- }},
- // Mantener las demás correspondencias...
- };
-
-            // Verificar si el buzón corresponde a la etapa
-            if (correspondencias.ContainsKey(etapaNombre))
-            {
-                bool coincide = correspondencias[etapaNombre].Any(b => buzonSade.Contains(b));
-                return !coincide; // Retorna true si NO coincide (hay mismatch)
-            }
-
-            return false;
+            return BuzonEtapaMatcher.IsMismatch(etapaNombre, buzonSade);
         }
 
         protected void ddlFiltroBuzon_SelectedIndexChanged(object sender, EventArgs e)
@@ -474,6 +440,7 @@ namespace WebForms
 
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal",
                 "$('#modalAgregar').modal('hide');", true);
+;
 
 
 
@@ -571,7 +538,7 @@ namespace WebForms
         {
             string filtroGeneral = txtBuscar?.Text?.Trim();
             var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
-            var selAutorizante = SafeParseIntList(GetSelectedValues("cblsHeaderAutorizante"));
+            var selAutorizanteCodigos = GetSelectedValues("cblsHeaderAutorizante");
             var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
             var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
             var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
@@ -595,7 +562,7 @@ namespace WebForms
             if (requiresInMemory)
             {
                 // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra directa)
-                fullList = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
+                fullList = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
 
                 // Aplicar filtros simples en memoria (usuario/empresa/área)
                 if (selUsuario.Count > 0)
@@ -648,7 +615,7 @@ namespace WebForms
             else
             {
                 // Usar paginación en BD para grilla
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
+                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
                 if (pageIndex * pageSize >= Math.Max(1, total))
                 {
                     pageIndex = 0;
@@ -658,10 +625,10 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
                 paginationControl.SubtotalText = $"Total: {total} registros";
 
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizante, selEstado, selUsuario);
+                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
 
                 // Para encabezados: armar dataset completo con filtros básicos (sin paginación)
-                var headerFull = _negocio.Listar(selEstado, selAutorizante, selObraFinal, filtroGeneral);
+                var headerFull = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
                 if (selUsuario.Count > 0)
                     headerFull = headerFull.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
                 if (selEmpresa.Count > 0)
@@ -704,10 +671,15 @@ namespace WebForms
                 context.Obras.AsNoTracking().OrderBy(o => o.Descripcion).Select(o => new { o.Id, o.Descripcion }).ToList(),
                 "Descripcion", "Id");
 
-                // Autorizante: Id, CodigoAutorizante
-                bindFilter("cblsHeaderAutorizante",
-                context.Autorizantes.AsNoTracking().OrderBy(a => a.CodigoAutorizante).Select(a => new { a.Id, a.CodigoAutorizante }).ToList(),
-                "CodigoAutorizante", "Id");
+                // Autorizante: CodigoRedet (string)
+                var autorizanteSource = context.Redeterminaciones
+                    .AsNoTracking()
+                    .Where(r => r.CodigoRedet != null && r.CodigoRedet != "")
+                    .Select(r => new { CodigoRedet = r.CodigoRedet })
+                    .Distinct()
+                    .OrderBy(r => r.CodigoRedet)
+                    .ToList();
+                bindFilter("cblsHeaderAutorizante", autorizanteSource, "CodigoRedet", "CodigoRedet");
 
                 // Estado (Etapa Redet): Id, Nombre
                 bindFilter("cblsHeaderEstado",
