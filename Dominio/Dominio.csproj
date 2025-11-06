@@ -57,6 +57,7 @@
     <Compile Include="AreaEF.cs" />
     <Compile Include="Autorizante.cs" />
     <Compile Include="AutorizanteEF.cs" />
+    <Compile Include="AutorizantePresupuestoEF.cs" />
     <Compile Include="Barrio.cs" />
     <Compile Include="BarrioEF.cs" />
     <Compile Include="BdProyecto.cs" />
