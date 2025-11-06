@@ -50,7 +50,7 @@ namespace Dominio
         public DbSet<PaseSadeEF> PasesSade { get; set; }
         public DbSet<AcdirEF> Acdirs { get; set; }
 
-        //public DbSet<AutorizantePresupuestoEF> AutorizantesPresupuestos { get; set; }
+        public DbSet<AutorizantePresupuestoEF> AutorizantesPresupuestos { get; set; }
 
 
 
@@ -124,10 +124,9 @@ namespace Dominio
                 .WithRequired(f => f.ObraEF)   // Cada Formulación requiere una Obra
                 .HasForeignKey(f => f.ObraId); // Clave foránea en Formulación
 
-            //// Relación Autorizante - AutorizantePresupuesto (1 a 0..1)
-            //modelBuilder.Entity<AutorizanteEF>()
-            //    .HasOptional(a => a.Presupuesto) // Un Autorizante puede tener o no un Presupuesto
-            //    .WithRequired(p => p.Autorizante); // Un Presupuesto requiere un Autorizante
+           // Configuración de AutorizantePresupuestoEF -sin relaciones de navegación
+            modelBuilder.Entity<AutorizantePresupuestoEF>()
+                .ToTable("AUTORIZANTES_PRESUPUESTO");
 
             base.OnModelCreating(modelBuilder);
         }

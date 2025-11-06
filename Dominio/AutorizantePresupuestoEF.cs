@@ -15,23 +15,21 @@ namespace Dominio
         public int Id { get; set; }
 
         [Required]
-        [Index("IX_AutorizanteId_Unique", IsUnique = true)]
+        //[Index("IX_AutorizanteId_Unique", IsUnique = true)]
         public int AutorizanteId { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18, 2)")]
+       
         public decimal Importe { get; set; }
 
         [Required]
-        [StringLength(255)]
+      
         public string Norma { get; set; }
 
         [Required]
-        [Column(TypeName = "date")]
+        
         public DateTime FechaNorma { get; set; }
 
-        // Propiedad de navegación para la relación uno a uno
-        [ForeignKey("AutorizanteId")]
-        public virtual AutorizanteEF Autorizante { get; set; }
+   
     }
 }

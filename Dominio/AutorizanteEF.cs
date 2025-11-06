@@ -49,8 +49,9 @@ namespace Dominio
         // La relación se manejará manualmente en la capa de negocio usando CodigoAutorizante.
         [NotMapped]
         public virtual ICollection<RedeterminacionEF> Redeterminaciones { get; set; }
-          // Propiedad de navegación para la relación uno a uno con el presupuesto
-        //public virtual AutorizantePresupuesto Presupuesto { get; set; }
 
+        // Propiedad NotMapped para cargar el presupuesto manualmente en la capa de negocio
+        [NotMapped]
+        public virtual AutorizantePresupuestoEF Presupuesto { get; set; }
     }
 }
