@@ -130,6 +130,7 @@
     <Compile Include="AreaNegocio.cs" />
     <Compile Include="AutorizanteNegocio.cs" />
     <Compile Include="AutorizanteNegocioEF.cs" />
+    <Compile Include="AutorizantePresupuestoNegocio.cs" />
     <Compile Include="BarrioNegocio.cs" />
     <Compile Include="BdProyectoNegocio.cs" />
     <Compile Include="BuzonEtapaMatcher.cs" />

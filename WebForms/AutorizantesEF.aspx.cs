@@ -63,6 +63,7 @@ namespace WebForms
 
 
         private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
+        private readonly int AreaIdPresupuesto = 12; // Id del Área Presupuesto en la BD.
 
         #endregion
 
@@ -1408,6 +1409,7 @@ namespace WebForms
             {
                 DropDownList ddlEstadoAutorizante = (DropDownList)e.Row.FindControl("ddlEstadoAutorizante");
                 TextBox txtExpediente = e.Row.FindControl("txtExpediente") as TextBox;
+                LinkButton btnGestionarPresupuesto = e.Row.FindControl("btnGestionarPresupuesto") as LinkButton;
 
                 if (ddlEstadoAutorizante != null)
                 {
@@ -1427,6 +1429,15 @@ namespace WebForms
                         {
                             ddlEstadoAutorizante.SelectedValue = autorizante.EstadoId.ToString();
                         }
+                    }
+
+                    // Mostrar botón de gestionar presupuesto solo para usuarios del área Presupuesto
+                    // y solo para autorizantes reales (no redeterminaciones virtuales)
+                    if (btnGestionarPresupuesto != null)
+                    {
+                        bool esUsuarioPresupuesto = UserHelper.IsUserInArea(AreaIdPresupuesto);
+                        bool esAutorizanteReal = autorizante != null && autorizante.IdRedeterminacion == 0;
+                        btnGestionarPresupuesto.Visible = esUsuarioPresupuesto && esAutorizanteReal;
                     }
 
                     // Si es redeterminación virtual (IdRedeterminacion > 0) ocultar acciones
@@ -1637,6 +1648,264 @@ namespace WebForms
             _currentPageIndex = 0;
             ViewState["CurrentPageIndex"] = _currentPageIndex;
             CargarPaginaActual();
+        }
+
+        #endregion
+
+        #region Gestión de Presupuestos
+
+        /// <summary>
+        /// Maneja el clic en el botón de Gestionar Presupuesto del GridView.
+        /// Abre el modal con la información del autorizante y el presupuesto existente (si hay).
+        /// </summary>
+        protected void btnGestionarPresupuesto_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                LinkButton btn = (LinkButton)sender;
+                GridViewRow row = (GridViewRow)btn.NamingContainer;
+
+                // Obtener el ID del autorizante desde DataKeys
+                int autorizanteId = 0;
+                if (gridviewRegistros.DataKeys != null && gridviewRegistros.DataKeys.Count > row.RowIndex)
+                {
+                    var dataKey = gridviewRegistros.DataKeys[row.RowIndex];
+                    if (dataKey != null && dataKey.Values != null && dataKey.Values["Id"] != null)
+                    {
+                        int.TryParse(dataKey.Values["Id"].ToString(), out autorizanteId);
+                    }
+                }
+
+                if (autorizanteId <= 0)
+                {
+                    ToastService.Show(this.Page, "Error: No se pudo identificar el autorizante.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                using (var context = new IVCdbContext())
+                {
+                    // Obtener datos completos del autorizante CON includes para evitar disposed context
+                    var autorizante = context.Autorizantes
+         .Include(a => a.Obra)
+                        .Include(a => a.Obra.Barrio)
+                  .Include(a => a.Obra.Empresa)
+                 .FirstOrDefault(a => a.Id == autorizanteId);
+
+                    if (autorizante == null)
+                    {
+                        ToastService.Show(this.Page, "Error: No se encontró el autorizante.", ToastService.ToastType.Error);
+                        return;
+                    }
+
+                    
+                    // Guardar ID en Session para usar al guardar
+                    Session["EditingAutorizanteIdPresupuesto"] = autorizanteId;
+
+                    // Verificar si ya existe un presupuesto para este autorizante
+                    var presupuestoNegocio = new AutorizantePresupuestoNegocio(context);
+                    var presupuestoExistente = presupuestoNegocio.GetByAutorizanteId(autorizanteId);
+
+                    if (presupuestoExistente != null)
+                    {
+                        // MODO EDICIÓN: Cargar datos existentes
+                        txtImportePresupuesto.Text = presupuestoExistente.Importe.ToString("0.00");
+                        txtNormaPresupuesto.Text = presupuestoExistente.Norma;
+                        txtFechaNormaPresupuesto.Text = presupuestoExistente.FechaNorma.ToString("yyyy-MM-dd");
+
+                        btnEliminarPresupuesto.Visible = true;
+                        Session["EditingPresupuestoId"] = presupuestoExistente.Id;
+                    }
+                    else
+                    {
+                        // MODO AGREGAR: Limpiar campos
+                        LimpiarFormularioPresupuesto();
+                        btnEliminarPresupuesto.Visible = false;
+                        Session["EditingPresupuestoId"] = null;
+                    }
+                }
+
+                // Mostrar el modal
+                ScriptManager.RegisterStartupScript(this, GetType(), "ShowPresupuestoModal", @"
+        $(document).ready(function() {
+         $('#modalGestionarPresupuesto').modal('show');
+ });", true);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, $"Error al abrir el modal de presupuesto: {ex.Message}", ToastService.ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Guarda o actualiza el presupuesto del autorizante.
+        /// </summary>
+        protected void btnGuardarPresupuesto_Click(object sender, EventArgs e)
+        {
+            if (!Page.IsValid) return;
+
+            try
+            {
+                // Obtener ID del autorizante desde Session
+                if (Session["EditingAutorizanteIdPresupuesto"] == null)
+                {
+                    ToastService.Show(this.Page, "Error: No se identificó el autorizante.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                int autorizanteId = (int)Session["EditingAutorizanteIdPresupuesto"];
+
+                // Parsear importe (reemplazar coma por punto para decimal)
+                string importeTexto = txtImportePresupuesto.Text.Trim().Replace(",", ".");
+                if (!decimal.TryParse(importeTexto, System.Globalization.NumberStyles.Any,
+                       System.Globalization.CultureInfo.InvariantCulture, out decimal importe))
+                {
+                    ToastService.Show(this.Page, "Error: Formato de importe inválido.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                // Parsear fecha
+                if (!DateTime.TryParse(txtFechaNormaPresupuesto.Text, out DateTime fechaNorma))
+                {
+                    ToastService.Show(this.Page, "Error: Formato de fecha inválido.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                using (var context = new IVCdbContext())
+                {
+                    var presupuestoNegocio = new AutorizantePresupuestoNegocio(context);
+
+                    // Verificar si es modo edición o agregar
+                    int? presupuestoId = Session["EditingPresupuestoId"] as int?;
+
+                    if (presupuestoId.HasValue && presupuestoId.Value > 0)
+                    {
+                        // MODO EDICIÓN
+                        var presupuestoExistente = presupuestoNegocio.GetById(presupuestoId.Value);
+                        if (presupuestoExistente != null)
+                        {
+                            presupuestoExistente.Importe = importe;
+                            presupuestoExistente.Norma = txtNormaPresupuesto.Text.Trim();
+                            presupuestoExistente.FechaNorma = fechaNorma;
+
+                            var actualizado = presupuestoNegocio.Update(presupuestoExistente);
+                            if (actualizado != null)
+                            {
+                                ToastService.Show(this.Page, "Presupuesto actualizado exitosamente.", ToastService.ToastType.Success);
+                            }
+                            else
+                            {
+                                ToastService.Show(this.Page, "Error al actualizar el presupuesto.", ToastService.ToastType.Error);
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // MODO AGREGAR
+                        var nuevoPresupuesto = new AutorizantePresupuestoEF
+                        {
+                            AutorizanteId = autorizanteId,
+                            Importe = importe,
+                            Norma = txtNormaPresupuesto.Text.Trim(),
+                            FechaNorma = fechaNorma
+                        };
+
+                        var agregado = presupuestoNegocio.Add(nuevoPresupuesto);
+                        if (agregado != null)
+                        {
+                            ToastService.Show(this.Page, "Presupuesto agregado exitosamente.", ToastService.ToastType.Success);
+                        }
+                        else
+                        {
+                            ToastService.Show(this.Page, "Error al agregar el presupuesto.", ToastService.ToastType.Error);
+                            return;
+                        }
+                    }
+                }
+
+                // Limpiar estado y cerrar modal
+                LimpiarEstadoPresupuesto();
+                ScriptManager.RegisterStartupScript(this, GetType(), "HidePresupuestoModal",
+           "$('#modalGestionarPresupuesto').modal('hide');", true);
+
+                // Recargar datos
+                Session["GridDataAutorizantes"] = null;
+                ViewState["NecesitaRecarga"] = true;
+                CargarPaginaActual();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ToastService.Show(this.Page, $"Validación: {ex.Message}", ToastService.ToastType.Warning);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, $"Error al guardar presupuesto: {ex.Message}", ToastService.ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Elimina el presupuesto del autorizante.
+        /// </summary>
+        protected void btnEliminarPresupuesto_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int? presupuestoId = Session["EditingPresupuestoId"] as int?;
+                if (!presupuestoId.HasValue || presupuestoId.Value <= 0)
+                {
+                    ToastService.Show(this.Page, "Error: No se identificó el presupuesto a eliminar.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                using (var context = new IVCdbContext())
+                {
+                    var presupuestoNegocio = new AutorizantePresupuestoNegocio(context);
+                    bool eliminado = presupuestoNegocio.Delete(presupuestoId.Value);
+
+                    if (eliminado)
+                    {
+                        ToastService.Show(this.Page, "Presupuesto eliminado exitosamente.", ToastService.ToastType.Success);
+
+                        // Limpiar estado y cerrar modal
+                        LimpiarEstadoPresupuesto();
+                        ScriptManager.RegisterStartupScript(this, GetType(), "HidePresupuestoModal",
+                      "$('#modalGestionarPresupuesto').modal('hide');", true);
+
+                        // Recargar datos
+                        Session["GridDataAutorizantes"] = null;
+                        ViewState["NecesitaRecarga"] = true;
+                        CargarPaginaActual();
+                    }
+                    else
+                    {
+                        ToastService.Show(this.Page, "Error al eliminar el presupuesto.", ToastService.ToastType.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, $"Error al eliminar presupuesto: {ex.Message}", ToastService.ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Limpia el formulario de presupuesto.
+        /// </summary>
+        private void LimpiarFormularioPresupuesto()
+        {
+            txtImportePresupuesto.Text = string.Empty;
+            txtNormaPresupuesto.Text = string.Empty;
+            txtFechaNormaPresupuesto.Text = string.Empty;
+        }
+
+        /// <summary>
+        /// Limpia el estado de edición de presupuesto en Session.
+        /// </summary>
+        private void LimpiarEstadoPresupuesto()
+        {
+            Session["EditingAutorizanteIdPresupuesto"] = null;
+            Session["EditingPresupuestoId"] = null;
+            LimpiarFormularioPresupuesto();
         }
 
         #endregion
