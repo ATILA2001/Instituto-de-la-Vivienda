@@ -298,7 +298,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("AutorizadoNuevo", "{0:C}") %>
+                                <%# Eval("Autorizado2026", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>

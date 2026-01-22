@@ -13,7 +13,7 @@ namespace Negocio
         /// Calcula los valores financieros por obra usando consultas EF (no legacy ADO).
         /// Devuelve un diccionario { ObraId -> aggregate primitive values } y no depende de DTO auxiliares.
         /// </summary>
-        public Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(List<int> obraIds = null)
+        public Dictionary<int, (decimal? Autorizado2026, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> ObtenerFinanzasPorObras(List<int> obraIds = null)
         {
             try
             {
@@ -42,10 +42,10 @@ namespace Negocio
                     // No usamos año en el cálculo; se calcula el total histórico por obra.
                     var proyectos = context.Proyectos.AsNoTracking()
                         .Where(p => obraIds.Contains(p.ObraId))
-                        .Select(p => new { p.ObraId, p.AutorizadoNuevo })
+                        .Select(p => new { p.ObraId, p.Autorizado2026 })
                         .ToList();
 
-                    var dictAutorizadoNuevo = proyectos.ToDictionary(p => p.ObraId, p => (decimal?)p.AutorizadoNuevo);
+                    var dictAutorizado2026 = proyectos.ToDictionary(p => p.ObraId, p => (decimal?)p.Autorizado2026);
 
                     var autorizantesGroup = context.Autorizantes.AsNoTracking()
                         .Where(a => obraIds.Contains(a.ObraId))
@@ -92,8 +92,8 @@ namespace Negocio
                     var result = new Dictionary<int, (decimal?, decimal?, decimal?, decimal?, decimal?, decimal?, DateTime?, DateTime?)>();
                     foreach (var id in obraIds)
                     {
-                        decimal? autorizadoNuevo = null;
-                        dictAutorizadoNuevo.TryGetValue(id, out autorizadoNuevo);
+                        decimal? Autorizado2026 = null;
+                        dictAutorizado2026.TryGetValue(id, out Autorizado2026);
 
                         decimal sumAutorizantes = 0m, sumAutorizantesConcepto4 = 0m;
                         if (dictAutorizantes.TryGetValue(id, out var ag)) { sumAutorizantes = ag.SumAutorizantes.GetValueOrDefault(0m); sumAutorizantesConcepto4 = ag.SumAutorizantesConcepto4.GetValueOrDefault(0m); }
@@ -121,12 +121,12 @@ namespace Negocio
                         if (maxs.Any()) fechaFin = maxs.Max();
 
                         decimal? porcentaje = null;
-                        if (autorizadoNuevo.HasValue && autorizadoNuevo.Value > 0)
+                        if (Autorizado2026.HasValue && Autorizado2026.Value > 0)
                         {
-                            porcentaje = (montoCertificado.HasValue ? (montoCertificado.Value / autorizadoNuevo.Value) * 100m : 0m);
+                            porcentaje = (montoCertificado.HasValue ? (montoCertificado.Value / Autorizado2026.Value) * 100m : 0m);
                         }
 
-                        result[id] = (autorizadoNuevo, montoCertificado, porcentaje, montoInicial, montoActual, montoFaltante, fechaInicio, fechaFin);
+                        result[id] = (Autorizado2026, montoCertificado, porcentaje, montoInicial, montoActual, montoFaltante, fechaInicio, fechaFin);
                     }
 
                     return result;
@@ -141,7 +141,7 @@ namespace Negocio
         /// <summary>
         /// Construye una lista de ObraDTO a partir de entidades ObraEF y el diccionario financiero.
         /// </summary>
-        public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? AutorizadoNuevo, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas)
+        public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? Autorizado2026, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas)
         {
             var listaDto = obras.Select(o => new ObraDTO
             {
@@ -162,7 +162,7 @@ namespace Negocio
                 LineaGestionNombre = o.Proyecto?.LineaGestionEF?.Nombre,
                 ProyectoNombre = o.Proyecto?.Nombre,
                 ProyectoId = o.Proyecto != null ? o.Proyecto.Id : (int?)null,
-                AutorizadoNuevo = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].AutorizadoNuevo : (decimal?)null,
+                Autorizado2026 = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].Autorizado2026 : (decimal?)null,
                 MontoCertificado = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoCertificado : (decimal?)null,
                 Porcentaje = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].Porcentaje : (decimal?)null,
                 MontoInicial = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoInicial : (decimal?)null,

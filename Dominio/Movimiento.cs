@@ -15,7 +15,7 @@ namespace Dominio
         public string Proyecto { get; set; } = string.Empty;
         public string SubProyecto { get; set; } = string.Empty;
         public string Linea { get; set; } = string.Empty;
-        public decimal? AutorizadoNuevo { get; set; }
+        public decimal? Autorizado2026 { get; set; }
 
 
     }

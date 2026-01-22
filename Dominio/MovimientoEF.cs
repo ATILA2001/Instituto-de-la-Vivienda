@@ -20,7 +20,7 @@ namespace Dominio
         [Column("Sub_Proyecto")]
         public string SubProyecto { get; set; }
         public string Linea { get; set; }
-        [Column("Autorizado_Nuevo")]
-        public decimal? AutorizadoNuevo { get; set; }
+        [Column("AUTORIZADO2026")]
+        public decimal? Autorizado2026 { get; set; }
     }
 }

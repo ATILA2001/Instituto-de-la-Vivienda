@@ -26,9 +26,9 @@ namespace Negocio
                                 BD.SUBPROYECTO,LG.NOMBRE as LINEA,
                                 M.MOVIMIENTO,
                                 M.FECHA,
-                                BD.AUTORIZADO_INICIAL + ISNULL((SELECT SUM(M2.MOVIMIENTO)
+                                BD.AUTORIZADO2025 + ISNULL((SELECT SUM(M2.MOVIMIENTO)
                                 FROM MOVIMIENTOS_GESTION M2
-                                WHERE M2.ID_BASE = M.ID_BASE), 0) AS AUTORIZADO_NUEVO
+                                WHERE M2.ID_BASE = M.ID_BASE), 0) AS AUTORIZADO2026
                                 FROM MOVIMIENTOS_GESTION M 
                                 INNER JOIN OBRAS O ON M.ID_BASE = O.ID
                                 LEFT JOIN BD_PROYECTOS BD on O.ID = BD.ID_BASE
@@ -65,8 +65,8 @@ namespace Negocio
                     aux.Obra.Descripcion = datos.Lector["OBRA"] as string;
                     aux.Monto = (decimal)datos.Lector["MOVIMIENTO"];
                     aux.Fecha = (DateTime)datos.Lector["FECHA"];
-                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] != DBNull.Value
-                        ? (decimal?)datos.Lector["AUTORIZADO_NUEVO"]
+                    aux.Autorizado2026 = datos.Lector["AUTORIZADO2026"] != DBNull.Value
+                        ? (decimal?)datos.Lector["AUTORIZADO2026"]
                         : null;
                     aux.Proyecto = datos.Lector["PROYECTO"] != DBNull.Value ? datos.Lector["PROYECTO"] as string : null;
                     aux.SubProyecto = datos.Lector["SUBPROYECTO"] != DBNull.Value ? datos.Lector["SUBPROYECTO"] as string : null;

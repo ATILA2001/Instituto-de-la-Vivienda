@@ -25,7 +25,7 @@ namespace Dominio.DTO
         public int? ProyectoId { get; set; }
 
         // Campos financieros precalculados
-        public decimal? AutorizadoNuevo { get; set; }
+        public decimal? Autorizado2026 { get; set; }
         public decimal? MontoCertificado { get; set; }
         public decimal? Porcentaje { get; set; }
         public decimal? MontoInicial { get; set; }
