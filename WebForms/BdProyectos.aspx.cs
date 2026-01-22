@@ -172,7 +172,7 @@ namespace WebForms
                     // Load the project data into the form fields
                     txtProyecto.Text = proyectoSeleccionado.Proyecto;
                     txtSubProyecto.Text = proyectoSeleccionado.SubProyecto;
-                    txtMontoAutorizado2025.Text = proyectoSeleccionado.Autorizado2025.ToString("0.00");
+                    txtMontoAutorizado2026.Text = proyectoSeleccionado.Autorizado2026.ToString("0.00");
 
                     // Select the corresponding values in the dropdowns
                     if (proyectoSeleccionado.LineaGestion != null)
@@ -333,7 +333,7 @@ namespace WebForms
                 proyecto.LineaGestion = new LineaGestion();
                 proyecto.LineaGestion.Id = int.Parse(ddlLineaGestion.SelectedValue);
                 proyecto.LineaGestion.Nombre = ddlLineaGestion.SelectedItem.Text;
-                proyecto.Autorizado2025 = Convert.ToDecimal(txtMontoAutorizado2025.Text);
+                proyecto.Autorizado2026 = Convert.ToDecimal(txtMontoAutorizado2026.Text);
 
                 if (ViewState["EditingProyectoId"] != null)
                 {
@@ -406,7 +406,7 @@ namespace WebForms
         {
             txtProyecto.Text = string.Empty;
             txtSubProyecto.Text = string.Empty;
-            txtMontoAutorizado2025.Text = string.Empty;
+            txtMontoAutorizado2026.Text = string.Empty;
             ddlObra.SelectedIndex = 0;
             ddlLineaGestion.SelectedIndex = 0;
         }

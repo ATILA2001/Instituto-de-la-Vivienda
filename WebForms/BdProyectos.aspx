@@ -49,10 +49,10 @@
 									</div>
 
 									<div class="mb-3">
-										<label for="txtMontoAutorizado2025" class="form-label">Monto Autorizado</label>
-										<asp:TextBox ID="txtMontoAutorizado2025" CssClass="form-control" runat="server" placeHolder="0,00" />
+										<label for="txtMontoAutorizado2026" class="form-label">Monto Autorizado 2026</label>
+										<asp:TextBox ID="txtMontoAutorizado2026" CssClass="form-control" runat="server" placeHolder="0,00" />
 										<asp:RequiredFieldValidator ID="rfvMontoAutorizado"
-											ControlToValidate="txtMontoAutorizado2025"
+											ControlToValidate="txtMontoAutorizado2026"
 											ValidationGroup="AgregarProyecto"
 											runat="server"
 											ErrorMessage="El monto es requerido"
@@ -60,7 +60,7 @@
 											CssClass="text-danger"
 											EnableClientScript="true" />
 										<asp:RegularExpressionValidator ID="revMontoAutorizado"
-											ControlToValidate="txtMontoAutorizado2025"
+											ControlToValidate="txtMontoAutorizado2026"
 											ValidationGroup="AgregarProyecto"
 											runat="server"
 											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
@@ -190,8 +190,8 @@
 						</ItemTemplate>
 					</asp:TemplateField>
 
-					<asp:BoundField HeaderText="Monto Inicial" DataField="Autorizado2025" DataFormatString="{0:C}" />
-					<asp:BoundField HeaderText="Monto Nuevo" DataField="Autorizado2026" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Autorizado 2025" DataField="Autorizado2025" DataFormatString="{0:C}" />
+					<asp:BoundField HeaderText="Autorizado 2026" DataField="Autorizado2026" DataFormatString="{0:C}" />
 					<asp:TemplateField HeaderText="Acciones">
 						<ItemTemplate>
 							<div class="d-flex justify-content-center gap-2">
@@ -248,7 +248,7 @@
 			});
 
 			// Validación en tiempo real
-			$('#<%= txtMontoAutorizado2025.ClientID %>').on('change keyup', function () {
+			$('#<%= txtMontoAutorizado2026.ClientID %>').on('change keyup', function () {
 				if (typeof Page_ClientValidate === 'function') {
 					ValidatorValidate(document.getElementById('<%= rfvMontoAutorizado.ClientID %>'));
 					ValidatorValidate(document.getElementById('<%= revMontoAutorizado.ClientID %>'));
@@ -264,7 +264,7 @@
 		function limpiarFormulario() {
 			document.getElementById('<%= txtProyecto.ClientID %>').value = '';
 			document.getElementById('<%= txtSubProyecto.ClientID %>').value = '';
-			document.getElementById('<%= txtMontoAutorizado2025.ClientID %>').value = '';
+			document.getElementById('<%= txtMontoAutorizado2026.ClientID %>').value = '';
 			document.getElementById('<%= ddlObra.ClientID %>').selectedIndex = 0;
 			document.getElementById('<%= ddlLineaGestion.ClientID %>').selectedIndex = 0;
 		}
