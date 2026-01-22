@@ -184,7 +184,7 @@ namespace WebForms
                         (m.SubProyecto?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
                         (m.Linea?.ToUpper().Contains(filtroTextoGeneral) ?? false) ||
                         (m.Monto.ToString().Contains(filtroTextoGeneral)) ||
-                        (m.AutorizadoNuevo?.ToString().Contains(filtroTextoGeneral) ?? false)
+                        (m.Autorizado2026?.ToString().Contains(filtroTextoGeneral) ?? false)
                     );
                 }
 

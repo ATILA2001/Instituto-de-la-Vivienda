@@ -65,13 +65,13 @@ namespace Negocio
             SUBPROYECTO = @subProyecto, 
             PROYECTO = @proyecto, 
             LINEA_DE_GESTION = @lineaGestion, 
-            AUTORIZADO_INICIAL = @autorizadoInicial
+            AUTORIZADO2025 = @Autorizado2025
         WHERE ID = @id");
 
                 datos.agregarParametro("@subProyecto", proyecto.SubProyecto);
                 datos.agregarParametro("@proyecto", proyecto.Proyecto);
                 datos.agregarParametro("@lineaGestion", proyecto.LineaGestion.Id);
-                datos.agregarParametro("@autorizadoInicial", proyecto.AutorizadoInicial);
+                datos.agregarParametro("@Autorizado2025", proyecto.Autorizado2025);
                 datos.agregarParametro("@id", proyecto.Id);
 
                 datos.ejecutarAccion();
@@ -101,14 +101,8 @@ namespace Negocio
                     PROYECTO,
                     SUBPROYECTO,
                     L.NOMBRE AS NombreLineaGestion,
-                    AUTORIZADO_INICIAL,
-                    AUTORIZADO_INICIAL + ISNULL(
-                        (
-                            SELECT SUM(MG.MOVIMIENTO)
-                            FROM MOVIMIENTOS_GESTION AS MG
-                            WHERE MG.ID_BASE = BD.ID_BASE
-                        ), 0
-                    ) AS AUTORIZADO_NUEVO,
+                    AUTORIZADO2025,
+                    AUTORIZADO2026,
                     O.ID as ID_OBRA,
                     L.ID as ID_LINEA,
                     A.ID AS ID_AREA,
@@ -183,8 +177,8 @@ WHERE 1=1";
                     aux.Id = (int)datos.Lector["ID"]; // Usa "ID" del SELECT
                     aux.Proyecto = (string)datos.Lector["PROYECTO"]; // Usa "PROYECTO" del SELECT
                     aux.SubProyecto = datos.Lector["SUBPROYECTO"] != DBNull.Value ? (string)datos.Lector["SUBPROYECTO"] : ""; // Usa "SUBPROYECTO"
-                    aux.AutorizadoInicial = (decimal)datos.Lector["AUTORIZADO_INICIAL"]; // Usa "AUTORIZADO_INICIAL"
-                    aux.AutorizadoNuevo = (decimal)datos.Lector["AUTORIZADO_NUEVO"]; // Usa "AUTORIZADO_NUEVO"
+                    aux.Autorizado2025 = (decimal)datos.Lector["AUTORIZADO2025"]; // Usa "AUTORIZADO2025"
+                    aux.Autorizado2026 = (decimal)datos.Lector["AUTORIZADO2026"]; // Usa "AUTORIZADO2026"
 
                     aux.Obra = new Obra();
                     aux.Obra.Id = (int)datos.Lector["ID_OBRA"]; // Usa "ID_OBRA"
@@ -248,9 +242,9 @@ WHERE 1=1";
             {
                 string query = @"
                     INSERT INTO BD_PROYECTOS 
-                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO_INICIAL) 
+                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO2025) 
                     VALUES 
-                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO_INICIAL)";
+                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO2025)";
 
                 datos.setearConsulta(query);
 
@@ -258,7 +252,7 @@ WHERE 1=1";
                 datos.agregarParametro("@SUBPROYECTO", proyecto.SubProyecto);
                 datos.agregarParametro("@PROYECTO", proyecto.Proyecto);
                 datos.agregarParametro("@LINEA_DE_GESTION", proyecto.LineaGestion.Id);
-                datos.agregarParametro("@AUTORIZADO_INICIAL", proyecto.AutorizadoInicial);
+                datos.agregarParametro("@AUTORIZADO2025", proyecto.Autorizado2025);
 
                 datos.ejecutarAccion();
                 return true;

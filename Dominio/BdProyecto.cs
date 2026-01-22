@@ -14,7 +14,7 @@ namespace Dominio
         public string Proyecto { get; set; }
         public string SubProyecto { get; set; }
         public LineaGestion LineaGestion { get; set; }
-        public decimal AutorizadoInicial { get; set; }
-        public decimal AutorizadoNuevo { get; set; }
+        public decimal Autorizado2025 { get; set; }
+        public decimal Autorizado2026 { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Negocio
             try
             {
                 string query = @"SELECT O.ID, A.NOMBRE AS AREA, E.NOMBRE AS EMPRESA, E.ID AS EMPRESA_ID, NUMERO, C.NOMBRE AS CONTRATA, C.ID AS CONTRATA_ID, AÑO,
-                ETAPA, OBRA, B.NOMBRE AS BARRIO, B.ID AS BARRIO_ID, DESCRIPCION, LG.NOMBRE AS LINEA_GESTION,LG.ID as LINEA_ID, BD.AUTORIZADO_INICIAL, BD.AUTORIZADO_NUEVO, 
+                ETAPA, OBRA, B.NOMBRE AS BARRIO, B.ID AS BARRIO_ID, DESCRIPCION, LG.NOMBRE AS LINEA_GESTION,LG.ID as LINEA_ID, BD.AUTORIZADO2025, BD.AUTORIZADO2026, 
                 (SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
                 FROM CERTIFICADOS AS C INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025) AS MONTO_CERTIFICADO, ((SELECT COALESCE(SUM(A.MONTO_AUTORIZADO), 0) 
 FROM AUTORIZANTES AS A WHERE A.OBRA = O.ID AND A.CONCEPTO = 4) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID)) AS MONTO_DE_OBRA_INICIAL
@@ -35,9 +35,9 @@ FROM CERTIFICADOS C INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codi
 UNION ALL SELECT MIN(L.MES_APROBACION) AS FECHA_INICIO FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_INICIO,
 (SELECT MAX(FECHA_FIN) FROM (SELECT MAX(C.MES_APROBACION) AS FECHA_FIN FROM CERTIFICADOS C
 INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID UNION ALL SELECT MAX(L.MES_APROBACION) AS FECHA_FIN FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_FIN,
-CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) FROM CERTIFICADOS AS C 
+CASE WHEN BD.AUTORIZADO2026 IS NOT NULL AND BD.AUTORIZADO2026 > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) FROM CERTIFICADOS AS C 
 INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0) 
-FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO_NUEVO * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O 
+FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO2026 * 100 ELSE NULL END AS PORCENTAJE FROM OBRAS AS O 
 INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID INNER JOIN AREAS AS A ON O.AREA = A.ID 
 INNER JOIN CONTRATA AS C ON O.CONTRATA = C.ID INNER JOIN BARRIOS AS B ON O.BARRIO = B.ID 
 LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG ON BD.LINEA_DE_GESTION = LG.ID  WHERE  O.AREA = @area ";
@@ -80,8 +80,8 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                     aux.Año = datos.Lector["AÑO"] as int?;
                     aux.Etapa = datos.Lector["ETAPA"] as int?;
                     aux.ObraNumero = datos.Lector["OBRA"] as int?;
-                    aux.AutorizadoInicial = datos.Lector["AUTORIZADO_INICIAL"] as decimal?;
-                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] as decimal?;
+                    aux.Autorizado2025 = datos.Lector["AUTORIZADO2025"] as decimal?;
+                    aux.Autorizado2026 = datos.Lector["AUTORIZADO2026"] as decimal?;
                     aux.MontoCertificado = datos.Lector["MONTO_CERTIFICADO"] as decimal?;
                     aux.MontoInicial = datos.Lector["MONTO_DE_OBRA_INICIAL"] as decimal?;
                     aux.MontoActual = datos.Lector["MONTO_ACTUAL"] as decimal?;
@@ -165,8 +165,8 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                                 DESCRIPCION,
                                 LG.NOMBRE AS LINEA_GESTION,
                                 LG.ID AS LINEA_GESTION_ID,
-                                BD.AUTORIZADO_INICIAL,
-                                BD.AUTORIZADO_NUEVO,
+                                BD.AUTORIZADO2025,
+                                BD.AUTORIZADO2026,
                                 (SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
                                 FROM CERTIFICADOS AS C
                                 INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante 
@@ -193,10 +193,10 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                                 FROM CERTIFICADOS C
                                 INNER JOIN AUTORIZANTES A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID 
                                 UNION ALL SELECT MAX(L.MES_APROBACION) AS FECHA_FIN FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID) AS Fechas) AS FECHA_FIN,
-                                CASE WHEN BD.AUTORIZADO_NUEVO IS NOT NULL AND BD.AUTORIZADO_NUEVO > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
+                                CASE WHEN BD.AUTORIZADO2026 IS NOT NULL AND BD.AUTORIZADO2026 > 0 THEN ((SELECT COALESCE(SUM(C.MONTO_TOTAL), 0) 
                                 FROM CERTIFICADOS AS C
                                 INNER JOIN AUTORIZANTES AS A2 ON C.codigo_autorizante = A2.codigo_autorizante WHERE A2.OBRA = O.ID AND YEAR(C.MES_APROBACION) = 2025) + (SELECT COALESCE(SUM(L.CERTIFICADO), 0)
-                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO_NUEVO * 100 ELSE NULL END AS PORCENTAJE
+                                FROM LEGITIMOS_ABONOS L WHERE L.OBRA = O.ID AND YEAR(L.MES_APROBACION) = 2025)) / BD.AUTORIZADO2026 * 100 ELSE NULL END AS PORCENTAJE
                                 FROM OBRAS AS O 
                                 INNER JOIN EMPRESAS AS E ON O.EMPRESA = E.ID 
                                 INNER JOIN AREAS AS A ON O.AREA = A.ID 
@@ -255,8 +255,8 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
                     aux.Año = datos.Lector["AÑO"] as int?;
                     aux.Etapa = datos.Lector["ETAPA"] as int?;
                     aux.ObraNumero = datos.Lector["OBRA"] as int?;
-                    aux.AutorizadoInicial = datos.Lector["AUTORIZADO_INICIAL"] as decimal?;
-                    aux.AutorizadoNuevo = datos.Lector["AUTORIZADO_NUEVO"] as decimal?;
+                    aux.Autorizado2025 = datos.Lector["AUTORIZADO2025"] as decimal?;
+                    aux.Autorizado2026 = datos.Lector["AUTORIZADO2026"] as decimal?;
                     aux.MontoCertificado = datos.Lector["MONTO_CERTIFICADO"] as decimal?;
                     aux.MontoInicial = datos.Lector["MONTO_DE_OBRA_INICIAL"] as decimal?;
                     aux.MontoActual = datos.Lector["MONTO_ACTUAL"] as decimal?;

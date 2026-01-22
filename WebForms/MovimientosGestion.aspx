@@ -176,7 +176,7 @@
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:BoundField HeaderText="Autorizado Nuevo" DataField="AutorizadoNuevo" DataFormatString="{0:C}" />
+                    <asp:BoundField HeaderText="Autorizado Nuevo" DataField="Autorizado2026" DataFormatString="{0:C}" />
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="d-flex justify-content-center gap-2">

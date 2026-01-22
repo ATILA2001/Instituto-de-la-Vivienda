@@ -19,10 +19,10 @@ namespace Dominio
         [Column("SUBPROYECTO")]
         public string NombreSubProyecto { get; set; }
 
-        [Column("AUTORIZADO_INICIAL")]
-        public decimal AutorizadoInicial { get; set; }
-        [Column("AUTORIZADO_NUEVO")]
-        public decimal AutorizadoNuevo { get; set; }
+        [Column("AUTORIZADO2025")]
+        public decimal Autorizado2025 { get; set; }
+        [Column("AUTORIZADO2026")]
+        public decimal Autorizado2026 { get; set; }
 
         [Column("LINEA_DE_GESTION")]
         public int LineaGestionEFId { get; set; }

@@ -21,8 +21,8 @@ namespace Dominio
         public Barrio Barrio { get; set; }
         public string Descripcion { get; set; }
 
-        public decimal? AutorizadoInicial { get; set; }
-        public decimal? AutorizadoNuevo { get; set; }
+        public decimal? Autorizado2025 { get; set; }
+        public decimal? Autorizado2026 { get; set; }
         public decimal? MontoInicial { get; set; }
         public decimal? MontoActual { get; set; }
         public decimal? MontoFaltante { get; set; }

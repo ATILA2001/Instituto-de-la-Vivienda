@@ -193,7 +193,7 @@ namespace WebForms
                 // incluir tanto los DataField como los HeaderText para cubrir todos los casos
                 SetColumnsVisibilityForRedet(UserHelper.IsUserInArea(AreaIdRedet),
                     // DataField names
-                    "AutorizadoNuevo",
+                    "Autorizado2026",
                     "MontoCertificado",
                     "Porcentaje",
                     "MontoInicial",
@@ -291,7 +291,7 @@ namespace WebForms
                         { "Nombre de Obra", "Descripcion" },
                         { "Línea de Gestión", "LineaGestionNombre" },
                         { "Proyecto", "ProyectoNombre" },
-                        { "Disponible Actual", "AutorizadoNuevo" },
+                        { "Disponible Actual", "Autorizado2026" },
                         { "Monto Certificado", "MontoCertificado" },
                         { "Porcentaje", "Porcentaje" },
                         { "Monto Inicial", "MontoInicial" },
