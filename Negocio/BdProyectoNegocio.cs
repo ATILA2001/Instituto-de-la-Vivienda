@@ -65,13 +65,13 @@ namespace Negocio
             SUBPROYECTO = @subProyecto, 
             PROYECTO = @proyecto, 
             LINEA_DE_GESTION = @lineaGestion, 
-            AUTORIZADO2025 = @Autorizado2025
+            AUTORIZADO2026 = @Autorizado2026
         WHERE ID = @id");
 
                 datos.agregarParametro("@subProyecto", proyecto.SubProyecto);
                 datos.agregarParametro("@proyecto", proyecto.Proyecto);
                 datos.agregarParametro("@lineaGestion", proyecto.LineaGestion.Id);
-                datos.agregarParametro("@Autorizado2025", proyecto.Autorizado2025);
+                datos.agregarParametro("@Autorizado2026", proyecto.Autorizado2026);
                 datos.agregarParametro("@id", proyecto.Id);
 
                 datos.ejecutarAccion();
@@ -242,9 +242,9 @@ WHERE 1=1";
             {
                 string query = @"
                     INSERT INTO BD_PROYECTOS 
-                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO2025) 
+                    (ID_BASE, SUBPROYECTO, PROYECTO, LINEA_DE_GESTION, AUTORIZADO2026) 
                     VALUES 
-                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO2025)";
+                    (@ID_BASE, @SUBPROYECTO, @PROYECTO, @LINEA_DE_GESTION, @AUTORIZADO2026)";
 
                 datos.setearConsulta(query);
 
@@ -252,7 +252,7 @@ WHERE 1=1";
                 datos.agregarParametro("@SUBPROYECTO", proyecto.SubProyecto);
                 datos.agregarParametro("@PROYECTO", proyecto.Proyecto);
                 datos.agregarParametro("@LINEA_DE_GESTION", proyecto.LineaGestion.Id);
-                datos.agregarParametro("@AUTORIZADO2025", proyecto.Autorizado2025);
+                datos.agregarParametro("@AUTORIZADO2026", proyecto.Autorizado2026);
 
                 datos.ejecutarAccion();
                 return true;
