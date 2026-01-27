@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Script.Serialization;
 using System.Web.UI;
 
 namespace WebForms
@@ -32,10 +33,11 @@ namespace WebForms
             var publicPaths = new List<string>
             {
                 "/Authentication.aspx",
+                "/Startup.aspx",
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
-                "/WebResource.axd",  
+                "/WebResource.axd",
             };
 
             if (publicPaths.Any(p => requestedPath.EndsWith(p)))
@@ -43,30 +45,89 @@ namespace WebForms
                 return;
             }
 
-            HttpCookie authCookie = Context.Request.Cookies["Jwt"];
-            ControlarQueELUsuarioEsteLogueado(requestedPath, authCookie);
+            ControlarQueELUsuarioEsteLogueado(requestedPath);
         }
 
-        private void ControlarQueELUsuarioEsteLogueado(string requestedPath, HttpCookie authCookie)
+        private void ControlarQueELUsuarioEsteLogueado(string requestedPath)
         {
-            if (NoHayCookie(authCookie) || NoEsUnTokenValido(authCookie.Value))
+            var user = Context.GetOwinContext().Authentication.User;
+            if (user?.Identity?.IsAuthenticated != true)
             {
                 RedirectToLogin();
                 return;
             }
+
+            if (!IsUserAuthorizedForPath(user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value, requestedPath))
+            {
+                RedirectToLogin();
+            }
         }
 
-        private bool NoHayCookie(HttpCookie authCookie)
+        private void RedirectToLogin() => Context.Response.Redirect("~/Startup.aspx", true);
+
+        private static bool IsUserAuthorizedForPath(string permsJson, string requestedPath)
         {
-            return authCookie == null || string.IsNullOrEmpty(authCookie.Value);
+            if (string.IsNullOrWhiteSpace(permsJson) || string.IsNullOrWhiteSpace(requestedPath))
+            {
+                return false;
+            }
+
+            var normalizedRequested = NormalizePath(requestedPath);
+
+            foreach (var url in ParseAllowedUrls(permsJson))
+            {
+                if (string.IsNullOrWhiteSpace(url))
+                {
+                    continue;
+                }
+
+                var normalizedAllowed = NormalizePath(url);
+                if (string.Equals(normalizedAllowed, normalizedRequested, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        private bool NoEsUnTokenValido(string token)
+        private static IEnumerable<string> ParseAllowedUrls(string permsJson)
         {
-            return !TokenNegocio.Instance.EsTokenValido(token);
+            try
+            {
+                var serializer = new JavaScriptSerializer();
+                var payload = serializer.Deserialize<PermissionsPayload>(permsJson);
+                return payload?.pages?.Select(p => p?.url) ?? Enumerable.Empty<string>();
+            }
+            catch
+            {
+                return Enumerable.Empty<string>();
+            }
         }
 
-        private void RedirectToLogin() => Context.Response.Redirect("~/Authentication.aspx", true);
+        private static string NormalizePath(string url)
+        {
+            url = url.Trim();
+            if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
+            {
+                url = string.IsNullOrWhiteSpace(absolute.PathAndQuery) ? "/" : absolute.PathAndQuery;
+            }
+
+            if (url.StartsWith("~/")) url = url.Substring(1);
+            if (!url.StartsWith("/")) url = "/" + url;
+            var queryIndex = url.IndexOf("?", StringComparison.Ordinal);
+            return queryIndex >= 0 ? url.Substring(0, queryIndex) : url;
+        }
+
+        private sealed class PermissionsPayload
+        {
+            public PagePermission[] pages { get; set; }
+        }
+
+        private sealed class PagePermission
+        {
+            public string url { get; set; }
+        }
 
     }
 }

@@ -35,8 +35,8 @@ namespace WebForms
                 }
                 else
                 {
-                    // Redirigir al login si no está autenticado
-                    Response.Redirect("/Authentication.aspx");
+                    // Redirigir al proceso de SSO (Startup) para intentar shared cookie antes del login local
+                    Response.Redirect("/Startup.aspx");
                 }
             }
 

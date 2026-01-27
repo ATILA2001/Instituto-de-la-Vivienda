@@ -14,7 +14,7 @@ namespace WebForms
             // Comprobación básica de usuario logueado
             if (Session["Usuario"] == null)
             {
-                Response.Redirect("Authentication.aspx", false);
+                Response.Redirect("Startup.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();
             }
@@ -28,7 +28,7 @@ namespace WebForms
         {
             Session.Clear();
             Context.Request.Cookies.Clear();
-            Response.Redirect("Authentication.aspx", false);
+            Response.Redirect("Startup.aspx", false);
         }
     }
 }

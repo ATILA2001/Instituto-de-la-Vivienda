@@ -41,6 +41,9 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNetCore.DataProtection">
+      <HintPath>..\packages\Microsoft.AspNetCore.DataProtection.10.0.2\lib\netstandard2.0\Microsoft.AspNetCore.DataProtection.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -107,6 +110,9 @@
     <Compile Include="UnidadesMedidaEF.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="UsuarioEF.cs" />
+    <Compile Include="DataProtectionKeyEF.cs" />
+    <Compile Include="DataProtectionKeysDbContext.cs" />
+    <Compile Include="DataProtectionXmlRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
