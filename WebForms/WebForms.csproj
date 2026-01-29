@@ -336,6 +336,7 @@
     </Compile>
     <Compile Include="Startup.Auth.cs" />
     <Compile Include="Sso\AspNetCoreTicketDataFormat.cs" />
+    <Compile Include="Sso\SharedChunkingCookieManager.cs" />
     <Content Include="Startup.aspx" />
     <Compile Include="Startup.aspx.cs">
       <DependentUpon>Startup.aspx</DependentUpon>

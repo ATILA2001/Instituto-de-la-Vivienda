@@ -1,5 +1,5 @@
 using System;
-using System.Configuration;
+using System.Web.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Interop;
+using Microsoft.Owin.Security;
 using Owin;
 using Microsoft.Owin;
 
@@ -18,8 +19,10 @@ namespace WebForms
     {
         public void Configuration(IAppBuilder app)
         {
-            var sharedCookieName = ConfigurationManager.AppSettings["SharedCookieName"] ?? ".Auth.Shared";
-            var sharedAppName = ConfigurationManager.AppSettings["SharedCookieAppName"] ?? "Auth.SharedCookie";
+            var sharedCookieName = WebConfigurationManager.AppSettings["SharedCookieName"] ?? ".Auth.Shared";
+            var sharedAppName = WebConfigurationManager.AppSettings["SharedCookieAppName"] ?? "Auth.SharedCookie";
+
+            app.SetDefaultSignInAsAuthenticationType("Identity.Application");
 
             // Build a transient DI container to create DataProtection provider with our EF6-backed IXmlRepository
             var services = new ServiceCollection();
@@ -57,9 +60,11 @@ namespace WebForms
             {
                 CookieName = sharedCookieName,
                 AuthenticationType = "Identity.Application",
+                AuthenticationMode = Microsoft.Owin.Security.AuthenticationMode.Active,
                 TicketDataFormat = ticketDataFormat,
+                CookieManager = new WebForms.Sso.SharedChunkingCookieManager(),
                 CookieSecure = CookieSecureOption.Always,
-                CookiePath = ConfigurationManager.AppSettings["SharedCookiePath"] ?? "/",
+                CookiePath = WebConfigurationManager.AppSettings["SharedCookiePath"] ?? "/",
                 // Allow cross-site usage (Required when sharing cookie between different hostnames)
                 CookieSameSite = Microsoft.Owin.SameSiteMode.None,
             });
