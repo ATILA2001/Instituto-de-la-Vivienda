@@ -18,6 +18,11 @@ namespace WebForms
             // Comprobación básica de usuario logueado
             if (Session["Usuario"] == null)
             {
+                UserHelper.EnsureSessionUserFromClaims();
+            }
+
+            if (Session["Usuario"] == null)
+            {
                 Response.Redirect("Startup.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();

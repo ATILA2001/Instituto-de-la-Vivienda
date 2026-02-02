@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 
@@ -34,6 +35,7 @@ namespace WebForms
             {
                 "/Authentication.aspx",
                 "/Startup.aspx",
+                "/AccessDenied.aspx",
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
@@ -59,11 +61,40 @@ namespace WebForms
 
             if (!IsUserAuthorizedForPath(user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value, requestedPath))
             {
-                RedirectToLogin();
+                RedirectToAccessDenied(requestedPath);
             }
         }
 
-        private void RedirectToLogin() => Context.Response.Redirect("~/Startup.aspx", true);
+        private void RedirectToLogin()
+        {
+            var target = BuildAuthLoginUrl();
+            Context.Response.Redirect(target, true);
+        }
+
+        private static string BuildAuthLoginUrl()
+        {
+            var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                return "/Account/Login";
+            }
+
+            baseUrl = baseUrl.Trim().TrimEnd('/');
+            return baseUrl + "/Account/Login";
+        }
+
+        private void RedirectToAccessDenied(string returnUrl)
+        {
+            var target = "~/AccessDenied.aspx";
+            if (!string.IsNullOrWhiteSpace(returnUrl))
+            {
+                target = target + "?returnUrl=" + HttpUtility.UrlEncode(returnUrl);
+            }
+
+            Context.Response.Redirect(target, true);
+        }
 
         private static bool IsUserAuthorizedForPath(string permsJson, string requestedPath)
         {

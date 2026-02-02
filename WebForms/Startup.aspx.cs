@@ -20,6 +20,12 @@ namespace WebForms
             var user = Context.GetOwinContext().Authentication.User;
             if (user?.Identity?.IsAuthenticated != true)
             {
+                if (Context?.IsDebuggingEnabled != true)
+                {
+                    Response.Redirect(BuildAuthLoginUrl(Context), true);
+                    return;
+                }
+
                 var diagHtml = new System.Text.StringBuilder();
                 diagHtml.AppendLine("<h3>No autenticado. Inicie sesión desde el portal de autenticación.</h3>");
                 diagHtml.AppendLine("<h4>Diagnóstico</h4><ul>");
@@ -158,11 +164,14 @@ namespace WebForms
 
             var returnUrl = Request.QueryString["returnUrl"];
 
-            var firstPage = user.Claims.FirstOrDefault(c => c.Type == "first_page")?.Value;
-            if (string.IsNullOrWhiteSpace(firstPage))
+            var permsJsonTmp = user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value;
+            var firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
+
+            if (!string.IsNullOrWhiteSpace(firstPage) && Context?.IsDebuggingEnabled != true)
             {
-                var permsJsonTmp = user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value;
-                firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
+                var targetUrl = NormalizeRedirectUrl(firstPage);
+                Response.Redirect(targetUrl, true);
+                return;
             }
 
             var claimsHtml = new System.Text.StringBuilder();
@@ -186,11 +195,7 @@ namespace WebForms
                 ClaimTypes.Role,
                 "area",
                 "app",
-                "page",
-                "page_action",
-                "perms_version",
-                "perms_json",
-                "first_page"
+                "perms_json"
             };
 
             var groupedClaims = user.Claims
@@ -247,6 +252,42 @@ namespace WebForms
                 return null;
             }
         }
+
+        private static string NormalizeRedirectUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return "/";
+            }
+
+            var trimmed = url.Trim();
+            if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
+            {
+                return absolute.ToString();
+            }
+
+            if (trimmed.StartsWith("~/", StringComparison.Ordinal))
+            {
+                return VirtualPathUtility.ToAbsolute(trimmed);
+            }
+
+            return trimmed.StartsWith("/", StringComparison.Ordinal) ? trimmed : "/" + trimmed;
+        }
+
+        private static string BuildAuthLoginUrl(HttpContext context)
+        {
+            var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                return "/Account/Login";
+            }
+
+            baseUrl = baseUrl.Trim().TrimEnd('/');
+            return baseUrl + "/Account/Login";
+        }
+
 
         private sealed class PermissionsPayload
         {

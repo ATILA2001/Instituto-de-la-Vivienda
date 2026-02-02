@@ -146,6 +146,7 @@
     <Content Include="AbmlBarrio.aspx" />
     <Content Include="AbmlEmpresa.aspx" />
     <Content Include="AbmlUsuarios.aspx" />
+    <Content Include="AccessDenied.aspx" />
     <Content Include="Authentication.aspx" />
     <Content Include="AutorizantesEF.aspx" />
     <Content Include="BdProyectos.aspx" />
@@ -258,6 +259,13 @@
     </Compile>
     <Compile Include="AbmlUsuarios.aspx.designer.cs">
       <DependentUpon>AbmlUsuarios.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AccessDenied.aspx.cs">
+      <DependentUpon>AccessDenied.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AccessDenied.aspx.designer.cs">
+      <DependentUpon>AccessDenied.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin.Master.cs">
       <DependentUpon>Admin.Master</DependentUpon>

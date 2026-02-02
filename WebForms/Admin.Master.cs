@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Negocio;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,6 +13,11 @@ namespace WebForms
         protected void Page_Init(object sender, EventArgs e)
         {
             // Comprobación básica de usuario logueado
+            if (Session["Usuario"] == null)
+            {
+                UserHelper.EnsureSessionUserFromClaims();
+            }
+
             if (Session["Usuario"] == null)
             {
                 Response.Redirect("Startup.aspx", false);

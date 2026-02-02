@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI.WebControls;
 using System.Data.SqlClient;
+using System.Security.Claims;
 
 namespace Negocio
 {
@@ -698,6 +699,12 @@ INNER JOIN (
                 };
             }
 
+            var claimsUser = EnsureSessionUserFromClaims();
+            if (claimsUser != null)
+            {
+                return claimsUser;
+            }
+
             // Si no hay usuario en sesión, devolver un usuario por defecto sin área
             return new UsuarioEF
             {
@@ -707,6 +714,83 @@ INNER JOIN (
                 Tipo = false, // Usuario normal por defecto
                 Estado = false,
                 AreaId = 0, // 0 significa sin filtro de área
+            };
+        }
+
+        /// <summary>
+        /// Si hay claims autenticados, asegura Session["Usuario"] y devuelve el usuario; si no, devuelve null.
+        /// </summary>
+        public static UsuarioEF EnsureSessionUserFromClaims()
+        {
+            var context = HttpContext.Current;
+            if (context?.Session == null)
+            {
+                return null;
+            }
+
+            if (context.Session["Usuario"] is UsuarioEF existing)
+            {
+                return existing;
+            }
+
+            var principal = context.User as ClaimsPrincipal;
+            if (principal?.Identity?.IsAuthenticated != true)
+            {
+                return null;
+            }
+
+            var built = BuildUserFromClaims(principal);
+            if (built == null)
+            {
+                return null;
+            }
+
+            context.Session["Usuario"] = built;
+            return built;
+        }
+
+        private static UsuarioEF BuildUserFromClaims(ClaimsPrincipal principal)
+        {
+            if (principal == null)
+            {
+                return null;
+            }
+
+            var name = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var userIdValue = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            int.TryParse(userIdValue, out var parsedId);
+
+            var areaValue = principal.Claims.FirstOrDefault(c => string.Equals(c.Type, "area", StringComparison.OrdinalIgnoreCase))?.Value;
+            int? areaId = null;
+            if (!string.IsNullOrWhiteSpace(areaValue) && int.TryParse(areaValue, out var parsedArea))
+            {
+                areaId = parsedArea;
+            }
+
+            var roles = principal.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .ToArray();
+
+            var isAdmin = roles.Any(r =>
+                r.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase)
+                || r.Equals("Administradores", StringComparison.OrdinalIgnoreCase));
+
+            var displayName = !string.IsNullOrWhiteSpace(name) ? name : email;
+
+            return new UsuarioEF
+            {
+                Id = parsedId,
+                Nombre = displayName ?? "Usuario",
+                Correo = email,
+                Tipo = isAdmin,
+                Estado = true,
+                AreaId = areaId ?? 0,
+                Area = areaId.HasValue ? new AreaEF { Id = areaId.Value } : null
             };
         }
 
