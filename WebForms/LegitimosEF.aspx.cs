@@ -285,6 +285,7 @@ namespace WebForms
                     (l.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Descripcion?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Area?.Nombre?.ToLower().Contains(filtro) ?? false) ||
+                    (l.ObraEF?.Barrio?.Nombre?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre?.ToLower().Contains(filtro) ?? false)
                 ).ToList();
             }
@@ -353,9 +354,10 @@ namespace WebForms
                 ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
                 foreach (var o in obras)
                 {
-                    ddlObra.Items.Add(new ListItem(o.Descripcion, o.Id.ToString()));
+                    ddlObra.Items.Add(new ListItem($"{o.Descripcion} - {o.Barrio?.Nombre ?? "Sin barrio"}", o.Id.ToString()));
                 }
             }
+
             catch (Exception ex)
             {
                 ToastService.Show(this.Page, "Error al cargar obras: " + ex.Message, ToastService.ToastType.Error);
@@ -412,6 +414,7 @@ namespace WebForms
                     (l.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Descripcion?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Area?.Nombre?.ToLower().Contains(filtro) ?? false) ||
+                    (l.ObraEF?.Barrio?.Nombre?.ToLower().Contains(filtro) ?? false) ||
                     (l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre?.ToLower().Contains(filtro) ?? false)
                 ).ToList();
             }
@@ -854,6 +857,7 @@ namespace WebForms
                 {
                     { "Área", "ObraEF.Area.Nombre" },
                     { "Obra", "ObraEF.Descripcion" },
+                    { "Barrio", "ObraEF.Barrio.Nombre" },
                     { "Empresa", "Empresa" },
                     { "Línea Gestión", "Linea" },
                     { "Código Autorizante", "CodigoAutorizante" },
