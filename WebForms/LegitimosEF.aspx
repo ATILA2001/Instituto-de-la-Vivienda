@@ -232,6 +232,8 @@
 
                     <asp:BoundField HeaderText="Obra" DataField="ObraEF.Descripcion" />
 
+                    <asp:BoundField HeaderText="Barrio" DataField="ObraEF.Barrio.Nombre" />
+
                     <asp:TemplateField>
                         <HeaderTemplate>
                             <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
