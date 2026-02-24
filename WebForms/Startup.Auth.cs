@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.Interop;
 using Microsoft.Owin.Security;
 using Owin;
 using Microsoft.Owin;
