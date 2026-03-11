@@ -68,6 +68,9 @@ namespace WebForms
         private void RedirectToLogin()
         {
             var target = BuildAuthLoginUrl();
+            var returnUrl = Context.Request.Url?.PathAndQuery;
+            if (!string.IsNullOrWhiteSpace(returnUrl))
+                target += "?returnUrl=" + HttpUtility.UrlEncode(returnUrl);
             Context.Response.Redirect(target, true);
         }
 

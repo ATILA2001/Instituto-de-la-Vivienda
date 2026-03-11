@@ -69,7 +69,6 @@ namespace WebForms
                 if (ValidarEstado(usuario))
                 {
                     Session.Add("Usuario", usuario);
-                    GenerarAuthCookieParaUsuario(usuario);
                     RedirigirSegunArea(usuario);
                     return;
                 }
@@ -150,19 +149,6 @@ namespace WebForms
 
             int provided = digits[10] - '0';
             return dv == provided;
-        }
-
-        private void GenerarAuthCookieParaUsuario(UsuarioEF usuario)
-        {
-            string token = TokenNegocio.Instance.GenerarToken(usuario);
-            HttpCookie authCookie = new HttpCookie("Jwt", token)
-            {
-                HttpOnly = true,
-                Secure = Request.IsSecureConnection,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddHours(2)
-            };
-            Response.Cookies.Add(authCookie);
         }
 
         #endregion

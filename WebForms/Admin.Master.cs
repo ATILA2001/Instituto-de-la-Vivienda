@@ -1,4 +1,5 @@
 ﻿using Negocio;
+using Owin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace WebForms
         protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en site.master.cs
         {
             Session.Clear();
-            Context.Request.Cookies.Clear();
+            Context.GetOwinContext().Authentication.SignOut("Identity.Application");
             Response.Redirect("Startup.aspx", false);
         }
     }
