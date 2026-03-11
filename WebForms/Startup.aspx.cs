@@ -163,75 +163,21 @@ namespace WebForms
 
 
             var returnUrl = Request.QueryString["returnUrl"];
-
-            var permsJsonTmp = user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value;
-            var firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
-
-            if (!string.IsNullOrWhiteSpace(firstPage) && Context?.IsDebuggingEnabled != true)
+            if (!string.IsNullOrWhiteSpace(returnUrl))
             {
-                var targetUrl = NormalizeRedirectUrl(firstPage);
-                Response.Redirect(targetUrl, true);
+                Response.Redirect(NormalizeRedirectUrl(returnUrl), true);
                 return;
             }
 
-            var claimsHtml = new System.Text.StringBuilder();
-            claimsHtml.AppendLine("<h3>Detalle de claims del usuario</h3>");
-
-            if (!string.IsNullOrWhiteSpace(returnUrl))
-            {
-                claimsHtml.AppendLine($"<p><strong>returnUrl</strong>: {HttpUtility.HtmlEncode(returnUrl)}</p>");
-            }
-
+            var permsJsonTmp = user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value;
+            var firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
             if (!string.IsNullOrWhiteSpace(firstPage))
             {
-                claimsHtml.AppendLine($"<p><strong>first_page</strong>: {HttpUtility.HtmlEncode(firstPage)}</p>");
+                Response.Redirect(NormalizeRedirectUrl(firstPage), true);
+                return;
             }
 
-            var expectedClaimTypes = new[]
-            {
-                ClaimTypes.NameIdentifier,
-                ClaimTypes.Name,
-                ClaimTypes.Email,
-                ClaimTypes.Role,
-                "area",
-                "app",
-                "perms_json"
-            };
-
-            var groupedClaims = user.Claims
-                .GroupBy(c => c.Type, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.Select(c => c.Value).ToList(), StringComparer.OrdinalIgnoreCase);
-
-            claimsHtml.AppendLine("<h4>Todos los claims (incluye vacíos)</h4><ul>");
-
-            foreach (var claimType in expectedClaimTypes)
-            {
-                if (groupedClaims.TryGetValue(claimType, out var values) && values.Count > 0)
-                {
-                    foreach (var value in values)
-                    {
-                        claimsHtml.AppendLine($"<li><strong>{HttpUtility.HtmlEncode(claimType)}</strong>: {HttpUtility.HtmlEncode(value)}</li>");
-                    }
-                }
-                else
-                {
-                    claimsHtml.AppendLine($"<li><strong>{HttpUtility.HtmlEncode(claimType)}</strong>: <em>(vacío)</em></li>");
-                }
-            }
-
-            foreach (var claim in user.Claims)
-            {
-                if (expectedClaimTypes.Contains(claim.Type, StringComparer.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                claimsHtml.AppendLine($"<li><strong>{HttpUtility.HtmlEncode(claim.Type)}</strong>: {HttpUtility.HtmlEncode(claim.Value)}</li>");
-            }
-
-            claimsHtml.AppendLine("</ul>");
-
-            LitMessage.Text = claimsHtml.ToString();
+            Response.Redirect("~/AccessDenied.aspx", true);
         }
 
         private static string TryGetFirstPageFromPermissions(string permsJson)
