@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Script.Serialization;
@@ -58,6 +59,12 @@ namespace WebForms
                 RedirectToLogin();
                 return;
             }
+
+            var isAdmin = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Any(c => c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+
+            if (isAdmin) return;
 
             if (!IsUserAuthorizedForPath(user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value, requestedPath))
             {
