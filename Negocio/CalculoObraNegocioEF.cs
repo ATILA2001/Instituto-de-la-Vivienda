@@ -20,14 +20,22 @@ namespace Negocio
                 using (var context = new IVCdbContext())
                 {
                     // Resolver obras si no se recibieron: si hay usuario y no es admin filtrar por su área, sino todas.
-                    int userAreaId = UserHelper.GetUserAreaId();
-
                     if (obraIds == null || !obraIds.Any())
                     {
                         if (!UserHelper.IsUserAdmin())
                         {
-                            if (userAreaId != 0)
-                                obraIds = context.Obras.AsNoTracking().Where(o => o.AreaId == userAreaId).Select(o => o.Id).ToList();
+                            var areas = UserHelper.GetFullCurrentUser().AreasNombres;
+                            if (areas != null && areas.Count > 0)
+                            {
+                                var filtroAreaIds = context.Areas.AsNoTracking()
+                                    .Where(ar => areas.Contains(ar.Nombre))
+                                    .Select(ar => ar.Id)
+                                    .ToList();
+                                obraIds = context.Obras.AsNoTracking()
+                                    .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
+                                    .Select(o => o.Id)
+                                    .ToList();
+                            }
                             else
                                 obraIds = new List<int>();
                         }

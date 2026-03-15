@@ -52,7 +52,7 @@ namespace WebForms
                     if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(AreaIdRedet))
                         todasLasObras = _negocio.ListarTodo();
                     else
-                        todasLasObras = _negocio.ListarPorArea(UserHelper.GetUserAreaId());
+                        todasLasObras = _negocio.ListarPorAreaNombres(UserHelper.GetFullCurrentUser().AreasNombres);
 
                     Session["ObrasCompleto"] = todasLasObras;
                 }
@@ -322,7 +322,12 @@ namespace WebForms
             if (!UserHelper.IsUserAdmin())
             {
                 ddlArea.Enabled = false;
-                ddlArea.SelectedValue = UserHelper.GetFullCurrentUser().AreaId.ToString();
+                var areaNombre = UserHelper.GetFullCurrentUser().Area?.Nombre;
+                if (!string.IsNullOrEmpty(areaNombre))
+                {
+                    var item = ddlArea.Items.FindByText(areaNombre);
+                    if (item != null) item.Selected = true;
+                }
             }
             else
             {

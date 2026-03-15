@@ -693,9 +693,11 @@ INNER JOIN (
                     Id = userEntity.Id,
                     Nombre = userEntity.Nombre,
                     Correo = userEntity.Correo,
-                    Tipo = userEntity.Tipo, // true: Administrador, false: Usuario normal
+                    Tipo = userEntity.Tipo,
                     Estado = userEntity.Estado,
-                    AreaId = userEntity.Area?.Id ?? 0,
+                    AreaId = userEntity.AreaId,
+                    Area = userEntity.Area,
+                    AreasNombres = userEntity.AreasNombres,
                 };
             }
 
@@ -762,12 +764,11 @@ INNER JOIN (
 
             int.TryParse(userIdValue, out var parsedId);
 
-            var areaValue = principal.Claims.FirstOrDefault(c => string.Equals(c.Type, "area", StringComparison.OrdinalIgnoreCase))?.Value;
-            int? areaId = null;
-            if (!string.IsNullOrWhiteSpace(areaValue) && int.TryParse(areaValue, out var parsedArea))
-            {
-                areaId = parsedArea;
-            }
+            var areaNombres = principal.Claims
+                .Where(c => string.Equals(c.Type, "area", StringComparison.OrdinalIgnoreCase))
+                .Select(c => c.Value)
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .ToList();
 
             var roles = principal.Claims
                 .Where(c => c.Type == ClaimTypes.Role)
@@ -789,8 +790,8 @@ INNER JOIN (
                 Correo = email,
                 Tipo = isAdmin,
                 Estado = true,
-                AreaId = areaId ?? 0,
-                Area = areaId.HasValue ? new AreaEF { Id = areaId.Value } : null
+                AreasNombres = areaNombres,
+                Area = areaNombres.Count > 0 ? new AreaEF { Nombre = areaNombres[0] } : null
             };
         }
 
@@ -804,16 +805,30 @@ INNER JOIN (
         }
 
         /// <summary>
-        /// Devuelve true si el usuario actual pertenece a un área específica
+        /// Devuelve true si el usuario actual pertenece a un área específica (por ID)
         /// </summary>
         public static bool IsUserInArea(int areaId)
         {
             var user = GetFullCurrentUser();
-            return user.AreaId == areaId;
+            if (user.Tipo) return false;
+            if (user.AreasNombres == null || user.AreasNombres.Count == 0) return false;
+            try
+            {
+                using (var context = new IVCdbContext())
+                {
+                    var nombre = context.Areas.AsNoTracking()
+                        .Where(a => a.Id == areaId)
+                        .Select(a => a.Nombre)
+                        .FirstOrDefault();
+                    return nombre != null && user.AreasNombres
+                        .Any(n => string.Equals(n, nombre, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            catch { return false; }
         }
 
         /// <summary>
-        /// Devuelve el ID del área del usuario actual
+        /// Devuelve el ID del área del usuario actual (deprecado: usar AreasNombres)
         /// </summary>
         public static int GetUserAreaId()
         {
@@ -821,6 +836,74 @@ INNER JOIN (
             return user.AreaId.GetValueOrDefault();
         }
 
+    }
+
+    public static class ClaimsPermissionHelper
+    {
+        public static class Actions
+        {
+            public const string Add    = "add";
+            public const string Edit   = "edit";
+            public const string Delete = "delete";
+        }
+
+        public static bool CanDo(string action)
+        {
+            if (string.IsNullOrWhiteSpace(action)) return false;
+            var user = UserHelper.GetFullCurrentUser();
+            if (user?.Tipo == true) return true;
+
+            var principal = HttpContext.Current?.User as ClaimsPrincipal;
+            if (principal?.Identity?.IsAuthenticated != true) return false;
+
+            var permsJson = principal.Claims
+                .FirstOrDefault(c => string.Equals(c.Type, "perms_json", StringComparison.OrdinalIgnoreCase))?.Value;
+
+            var actions = GetActionsForCurrentPage(permsJson);
+            return actions?.Any(a => string.Equals(a, action, StringComparison.OrdinalIgnoreCase)) == true;
+        }
+
+        private static string[] GetActionsForCurrentPage(string permsJson)
+        {
+            if (string.IsNullOrWhiteSpace(permsJson)) return null;
+            try
+            {
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var payload = System.Text.Json.JsonSerializer.Deserialize<PermissionsPayload>(permsJson, options);
+                var currentPath = NormalizePath(HttpContext.Current?.Request?.Path);
+                if (string.IsNullOrWhiteSpace(currentPath)) return null;
+                var page = payload?.pages?.FirstOrDefault(p =>
+                    string.Equals(NormalizePath(p.url), currentPath, StringComparison.OrdinalIgnoreCase));
+                return page?.actions;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string NormalizePath(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+            url = url.Trim();
+            if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
+                url = absolute.PathAndQuery ?? "/";
+            if (url.StartsWith("~/")) url = url.Substring(1);
+            if (!url.StartsWith("/")) url = "/" + url;
+            var q = url.IndexOf("?", StringComparison.Ordinal);
+            return q >= 0 ? url.Substring(0, q) : url;
+        }
+
+        private sealed class PermissionsPayload
+        {
+            public PagePermission[] pages { get; set; }
+        }
+
+        private sealed class PagePermission
+        {
+            public string url { get; set; }
+            public string[] actions { get; set; }
+        }
     }
 }
 

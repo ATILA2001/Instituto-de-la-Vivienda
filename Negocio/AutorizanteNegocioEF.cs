@@ -31,12 +31,9 @@ namespace Negocio
                     // 3. Usuario tiene un área asignada
                     if (usuario != null && !usuario.Tipo)
                     {
-                        int? areaId = usuario.AreaId ?? (usuario.Area != null ? usuario.Area.Id : (int?)null);
-
-                        if (areaId.HasValue)
-                        {
-                            query = query.Where(a => a.Obra.AreaId == areaId.Value);
-                        }
+                        var areas = usuario.AreasNombres;
+                        if (areas != null && areas.Count > 0)
+                            query = query.Where(a => a.Obra.Area != null && areas.Contains(a.Obra.Area.Nombre));
                     }
 
                     return query

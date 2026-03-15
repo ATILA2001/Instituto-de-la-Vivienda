@@ -22,16 +22,9 @@ namespace Negocio
 
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
-                    }
-                    else if (usuario.AreaId.HasValue)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.AreaId);
-                    else if (usuario.Area != null)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.Area.Id);
+                    var areas = usuario.AreasNombres;
+                    if (areas != null && areas.Count > 0)
+                        query = query.Where(l => l.ObraEF.Area != null && areas.Contains(l.ObraEF.Area.Nombre));
                 }
 
                 var list = query.ToList();
@@ -94,21 +87,15 @@ namespace Negocio
             {
                 var query = context.Legitimos
                     .Include(l => l.ObraEF)
+                    .Include(l => l.ObraEF.Area)
                     .Include(l => l.ObraEF.Empresa)
                     .AsQueryable();
 
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
-                    }
-                    else if (usuario.AreaId.HasValue)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.AreaId);
-                    else if (usuario.Area != null)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.Area.Id);
+                    var areas = usuario.AreasNombres;
+                    if (areas != null && areas.Count > 0)
+                        query = query.Where(l => l.ObraEF.Area != null && areas.Contains(l.ObraEF.Area.Nombre));
                 }
 
                 if (!string.IsNullOrEmpty(filtroGeneral))
@@ -137,16 +124,9 @@ namespace Negocio
 
             if (!usuario.Tipo)
             {
-                // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                if (usuario.AreaId == 19)
-                {
-                    var areasPermitidas = new List<int> { 1, 2, 3 };
-                    query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
-                }
-                else if (usuario.AreaId.HasValue)
-                    query = query.Where(l => l.ObraEF.AreaId == usuario.AreaId);
-                else if (usuario.Area != null)
-                    query = query.Where(l => l.ObraEF.AreaId == usuario.Area.Id);
+                var areas = usuario.AreasNombres;
+                if (areas != null && areas.Count > 0)
+                    query = query.Where(l => l.ObraEF.Area != null && areas.Contains(l.ObraEF.Area.Nombre));
             }
 
             return query;
@@ -339,16 +319,9 @@ namespace Negocio
 
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && areasPermitidas.Contains(l.ObraEF.AreaId.Value));
-                    }
-                    else if (usuario.AreaId.HasValue)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.AreaId);
-                    else if (usuario.Area != null)
-                        query = query.Where(l => l.ObraEF.AreaId == usuario.Area.Id);
+                    var areas = usuario.AreasNombres;
+                    if (areas != null && areas.Count > 0)
+                        query = query.Where(l => l.ObraEF.Area != null && areas.Contains(l.ObraEF.Area.Nombre));
                 }
 
                 if (!string.IsNullOrEmpty(filtroGeneral))

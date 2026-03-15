@@ -151,25 +151,14 @@ namespace WebForms
         {
             bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
             bool isFormulationOpen = ABMPlaniNegocio.GetIsFormulationOpen();
-
-            // Use the common method with the dynamic values
             ConfigureUserControls(isPlanningOpen, isFormulationOpen);
         }
 
-        /// <summary>
-        /// Oculta todos los controles de usuario, independientemente del estado de planificación o formulación
-        /// </summary>
         protected void HideAllUserControls()
         {
-            // Use the common method with all values set to false
             ConfigureUserControls(false, false);
         }
 
-        /// <summary>
-        /// Configura la visibilidad de los controles de usuario según los parámetros especificados
-        /// </summary>
-        /// <param name="showPlanningControls">Si es true, muestra los controles de planificación</param>
-        /// <param name="showFormulationControls">Si es true, muestra los controles de formulación</param>
         private void ConfigureUserControls(bool showPlanningControls, bool showFormulationControls)
         {
             var content = ContentPlaceHolder1;
@@ -183,9 +172,7 @@ namespace WebForms
                     .FirstOrDefault(c => c.HeaderText == "Acciones");
 
                 if (actionsColumn != null)
-                {
                     actionsColumn.Visible = showPlanningControls;
-                }
             }
 
             // Configurar columna de acciones en dgvFormulacion
@@ -196,22 +183,16 @@ namespace WebForms
                     .FirstOrDefault(c => c.HeaderText == "Acciones");
 
                 if (actionsColumn != null)
-                {
                     actionsColumn.Visible = showFormulationControls;
-                }
             }
 
-            // Configurar panel de botón de agregar para planificación
+            // Configurar panel de botón de agregar
             if (content.FindControl("panelShowAddButton") is Panel panelShowAddButton)
-            {
                 panelShowAddButton.Visible = showPlanningControls;
-            }
 
             // Configurar panel de botón de agregar para formulación
             if (content.FindControl("panelFormulationShowAddButton") is Panel panelFormulationShowAddButton)
-            {
                 panelFormulationShowAddButton.Visible = showFormulationControls;
-            }
         }
 
 

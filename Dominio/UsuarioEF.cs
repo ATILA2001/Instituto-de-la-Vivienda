@@ -21,5 +21,8 @@ namespace Dominio
         [ForeignKey("AreaId")]
         public virtual AreaEF Area { get; set; }
 
+        [NotMapped]
+        public List<string> AreasNombres { get; set; }
+
     }
 }
