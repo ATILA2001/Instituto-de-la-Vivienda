@@ -695,6 +695,7 @@ INNER JOIN (
                     Tipo = userEntity.Tipo, // true: Administrador, false: Usuario normal
                     Estado = userEntity.Estado,
                     AreaId = userEntity.Area?.Id ?? 0,
+                    IsPlanningOpenOverride = userEntity.IsPlanningOpenOverride,
                 };
             }
 
