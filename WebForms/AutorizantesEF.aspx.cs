@@ -62,8 +62,6 @@ namespace WebForms
 
 
 
-        private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
-
         #endregion
 
         #region Variables de Paginación Externa
@@ -140,25 +138,21 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
-                panelShowAddButton.Visible = !UserHelper.IsUserInArea(AreaIdRedet);
-
-                // Solo ocultar/mostrar las columnas requeridas para Redeterminaciones:
-                // - Mes base (DataField: "MesBase")
-                // - Buzón SADE (DataField: "BuzonSade")
-                // - Fecha SADE (DataField: "FechaSade")
-                // - Acciones (Header text: "Acciones")
+                bool esRolRedet = System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones");
+                bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
+                bool canModify = !esRolRedet && (UserHelper.IsUserAdmin() || isPlanningOpen);
+                panelShowAddButton.Visible = canModify;
+                // Columnas específicas de Redeterminaciones: ocultar solo para ese rol
                 SetColumnsVisibilityForRedet(
-                    UserHelper.IsUserInArea(AreaIdRedet),
-                    // DataField names
+                    esRolRedet,
                     "MesBase",
                     "BuzonSade",
                     "FechaSade",
-                    // Header text / display names (por si la columna está definida por HeaderText)
                     "Mes Base",
                     "Buzón SADE",
-                    "Fecha SADE",
-                    // acciones (template field header)
-                    "Acciones");
+                    "Fecha SADE");
+                // Columna Acciones: ocultar si no puede modificar (Redet o planning cerrado)
+                SetColumnsVisibilityForRedet(!canModify, "Acciones");
             }
             catch (Exception ex)
             {
@@ -884,6 +878,9 @@ namespace WebForms
                 if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
                     UsuarioEF usuario = UserHelper.GetFullCurrentUser();
+                    // El rol Redeterminaciones ve todos los autorizantes sin filtro de área
+                    if (System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones"))
+                        usuario = new UsuarioEF { Tipo = true };
                     todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;
                     ViewState["NecesitaRecarga"] = null;

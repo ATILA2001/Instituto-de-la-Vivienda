@@ -22,8 +22,6 @@ namespace WebForms
         private int pageSize = 12;
         private int totalRecords = 0;
 
-        private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
-
         protected void Page_Load(object sender, EventArgs e)
         {
             // cargar paginación desde ViewState
@@ -49,7 +47,7 @@ namespace WebForms
                 if (Session["ObrasCompleto"] == null)
                 {
                     // Cargar la lista completa de obras o filtrarla por área.
-                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(AreaIdRedet))
+                    if (UserHelper.IsUserAdmin() || System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones"))
                         todasLasObras = _negocio.ListarTodo();
                     else
                         todasLasObras = _negocio.ListarPorAreaNombres(UserHelper.GetFullCurrentUser().AreasNombres);
@@ -189,25 +187,25 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
-                panelShowAddButton.Visible = !UserHelper.IsUserInArea(AreaIdRedet);
-                // incluir tanto los DataField como los HeaderText para cubrir todos los casos
-                SetColumnsVisibilityForRedet(UserHelper.IsUserInArea(AreaIdRedet),
-                    // DataField names
+                bool esRolRedet = System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones");
+                bool canModify = !esRolRedet && (UserHelper.IsUserAdmin() || IsPlanningOpen);
+                panelShowAddButton.Visible = canModify;
+                // Columnas financieras: ocultar solo para rol Redeterminaciones
+                SetColumnsVisibilityForRedet(esRolRedet,
                     "Autorizado2026",
                     "MontoCertificado",
                     "Porcentaje",
                     "MontoInicial",
                     "MontoActual",
                     "MontoFaltante",
-                    // Header text / display names
                     "Disponible Actual",
                     "Planificacion2025",
                     "Ejecucion presupuesto2025",
                     "Monto de Obra inicial",
                     "Monto de Obra actual",
-                    "Faltante de Obra",
-                    // acciones (template field header)
-                    "Acciones");
+                    "Faltante de Obra");
+                // Columna Acciones: ocultar si no puede modificar (Redet o planning cerrado)
+                SetColumnsVisibilityForRedet(!canModify, "Acciones");
             }
             catch (Exception ex)
             {

@@ -687,13 +687,17 @@ namespace WebForms
                 "Nombre", "Id");
 
                 // Usuario: Id, Nombre
+                var areaRedetId = context.Areas.AsNoTracking()
+                    .Where(a => a.Nombre == "Redeterminaciones")
+                    .Select(a => (int?)a.Id)
+                    .FirstOrDefault();
                 bindFilter("cblsHeaderUsuario",
                 context.Usuarios.AsNoTracking()
-                .Where(u => u.Estado && u.AreaId == 16) // Solo usuarios activos del área16
+                .Where(u => u.Estado && areaRedetId.HasValue && u.AreaId == areaRedetId.Value)
                 .OrderBy(u => u.Nombre)
                 .Select(u => new { u.Id, u.Nombre })
                 .ToList(),
-                "Nombre", "Id");//nuevo bind
+                "Nombre", "Id");
 
                 // Empresa: Id, Nombre
                 bindFilter("cblsHeaderEmpresa",
