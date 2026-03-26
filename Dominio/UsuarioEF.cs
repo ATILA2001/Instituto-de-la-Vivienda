@@ -21,5 +21,8 @@ namespace Dominio
         [ForeignKey("AreaId")]
         public virtual AreaEF Area { get; set; }
 
+        [Column("PLANIFICACION_ABIERTA")]
+        public bool IsPlanningOpenOverride { get; set; } // Override por usuario: planificación abierta aunque esté cerrada globalmente
+
     }
 }

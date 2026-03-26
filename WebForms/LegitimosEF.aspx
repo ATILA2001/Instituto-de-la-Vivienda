@@ -269,7 +269,15 @@
 
                     <asp:BoundField HeaderText="Inicio Ejecución" DataField="InicioEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
                     <asp:BoundField HeaderText="Fin Ejecución" DataField="FinEjecucion" DataFormatString="{0:dd-MM-yyyy}" />
-                    <asp:BoundField HeaderText="Certificado" DataField="Certificado" DataFormatString="{0:C}" />
+                    <asp:TemplateField HeaderText="Monto Certificado">
+                        <ItemTemplate>
+                            <asp:TextBox ID="txtCertificadoInline" runat="server"
+                                Text='<%# ((Dominio.LegitimoEF)Container.DataItem).Certificado.HasValue ? ((Dominio.LegitimoEF)Container.DataItem).Certificado.Value.ToString("C") : string.Empty %>'
+                                AutoPostBack="true"
+                                OnTextChanged="txtCertificadoInline_TextChanged"
+                                CssClass="form-control form-control-sm w-auto text-center" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
                     <asp:TemplateField>
                         <HeaderTemplate>

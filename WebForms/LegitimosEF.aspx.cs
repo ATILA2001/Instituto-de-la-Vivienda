@@ -1,3 +1,4 @@
+
 using Dominio;
 using Negocio;
 using System;
@@ -121,6 +122,34 @@ namespace WebForms
             }
         }
 
+        private void AbrirModalEdicionLegitimo(int legitimoId)
+        {
+            var legitimo = negocio.ObtenerPorId(legitimoId);
+            if (legitimo == null)
+            {
+                ToastService.Show(this.Page, "Error: No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
+                return;
+            }
+
+            Session["EditingLegitimoEFId"] = legitimoId;
+            BindDropDownList();
+            SelectDropDownListByValue(ddlObra, legitimo.ObraId.ToString());
+            txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
+            txtExpediente.Text = legitimo.Expediente ?? string.Empty;
+            txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
+            txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            ddlObra.Enabled = false;
+            btnAgregar.Text = "Actualizar";
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
+                $(document).ready(function() {
+                    $('#modalAgregar .modal-title').text('Modificar Legítimo');
+                    $('#modalAgregar').modal('show');
+                });", true);
+        }
+
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
@@ -211,41 +240,7 @@ namespace WebForms
             try
             {
                 int id = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
-                var lista = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                var legitimo = lista?.FirstOrDefault(l => l.Id == id);
-                if (legitimo == null)
-                {
-                    var usuario = UserHelper.GetFullCurrentUser();
-                    if (usuario != null)
-                    {
-                        lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
-                        Session["legitimosCompletos"] = lista;
-                        legitimo = lista?.FirstOrDefault(l => l.Id == id);
-                    }
-                }
-
-                if (legitimo != null)
-                {
-                    Session["EditingLegitimoEFId"] = legitimo.Id;
-                    // Rebind dropdowns to include current obra
-                    BindDropDownList();
-                    SelectDropDownListByValue(ddlObra, legitimo.ObraId.ToString());
-                    txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
-                    txtExpediente.Text = legitimo.Expediente ?? string.Empty;
-                    txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-                    txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-                    txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
-                    txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
-
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
-                        $(document).ready(function() {
-                            $('#modalAgregar .modal-title').text('Modificar Legítimo');
-                            $('#modalAgregar').modal('show');
-                        });", true);
-
-                    ddlObra.Enabled = false; // No permitir cambiar obra al editar
-                    btnAgregar.Text = "Actualizar";
-                }
+                AbrirModalEdicionLegitimo(id);
             }
             catch (Exception ex)
             {
@@ -660,6 +655,14 @@ namespace WebForms
                     cblsHeaderEstado.AcceptChanges += OnAcceptChanges;
                 }
             }
+            else if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                var legitimo = (Dominio.LegitimoEF)e.Row.DataItem;
+                if (e.Row.FindControl("txtCertificadoInline") is TextBox txtCert)
+                {
+                    txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente);
+                }
+            }
         }
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
@@ -753,6 +756,79 @@ namespace WebForms
             catch (Exception ex)
             {
                 ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
+
+        protected void txtCertificadoInline_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txtBox = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
+
+            try
+            {
+                int rowIndex = row.RowIndex;
+                string nuevoValorStr = txtBox.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(nuevoValorStr)) return;
+
+                if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal nuevoCertificado))
+                {
+                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                if (datosFiltradosActuales == null)
+                {
+                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                {
+                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var legitimo = datosFiltradosActuales[indiceReal];
+                if (legitimo.Id <= 0)
+                {
+                    ToastService.Show(this.Page, "Error: No se puede modificar este registro.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var entidad = negocio.ObtenerPorId(legitimo.Id);
+                if (entidad == null)
+                {
+                    ToastService.Show(this.Page, "Error: No se encontró el legítimo.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                entidad.Certificado = nuevoCertificado;
+                negocio.Modificar(entidad);
+
+                var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
+                if (listaCompleta != null)
+                {
+                    var enLista = listaCompleta.FirstOrDefault(x => x.Id == entidad.Id);
+                    if (enLista != null) enLista.Certificado = nuevoCertificado;
+                }
+
+                var expedientesAfectados = new List<string>();
+                if (!string.IsNullOrWhiteSpace(legitimo.Expediente))
+                    expedientesAfectados.Add(legitimo.Expediente);
+
+                if (expedientesAfectados.Any())
+                    RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
+                else
+                    CargarPaginaActual();
+
+                ToastService.Show(this.Page, "Certificado actualizado correctamente.", ToastService.ToastType.Info);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el certificado: " + ex.Message, ToastService.ToastType.Error);
             }
         }
 

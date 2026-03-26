@@ -15,7 +15,8 @@ namespace WebForms
     {
         private readonly ObraNegocioEF _negocio = new ObraNegocioEF();
 
-        readonly bool IsPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
+        private bool IsPlanningOpen =>
+            ABMPlaniNegocio.GetIsPlanningOpen() || UserHelper.GetFullCurrentUser().IsPlanningOpenOverride;
 
         // Paginación externa (control personalizado)
         private int currentPageIndex = 0;
