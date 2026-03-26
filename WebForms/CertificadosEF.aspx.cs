@@ -583,39 +583,7 @@ namespace WebForms
                     return; // Salir del método después de configurar la reliquidación
                 }
 
-                // Buscar el certificado real en BD para edición
-                CertificadoEF certificadoEF;
-                using (var context = new IVCdbContext())
-                {
-                    certificadoEF = context.Certificados.Find(certificadoSeleccionado.Id);
-                }
-
-                if (certificadoEF != null)
-                {
-                    Session["EditingCertificadoId"] = certificadoSeleccionado.Id;
-                    txtExpediente.Text = certificadoEF.ExpedientePago;
-                    txtMontoCertificado.Text = certificadoEF.MontoTotal.ToString("0.00");
-                    txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
-                    SelectDropDownListByValue(ddlTipo, certificadoEF.TipoPagoId.ToString());
-
-                    // Actualizar el texto del botón
-                    btnAgregar.Text = "Actualizar";
-
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
-                                $(document).ready(function() {
-                                    // Cambiar título y texto del botón
-                                    $('#modalAgregar .modal-title').text('Modificar Certificado');
-                                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
-                                    // Ocultar el dropdown de Autorizante y su etiqueta
-                                    $('#autorizanteContainer').hide();
-                                    // Mostrar el modal
-                                    $('#modalAgregar').modal('show');
-                                });", true);
-                }
-                else
-                {
-                    ToastService.Show(this.Page, "Error: No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
-                }
+                AbrirModalEdicionCertificado(certificadoSeleccionado.Id);
 
             }
             catch (Exception ex)
@@ -635,6 +603,32 @@ namespace WebForms
                 item.Selected = true;
             }
         }
+
+        private void AbrirModalEdicionCertificado(int certificadoId)
+        {
+            CertificadoEF certificadoEF = negocio.ObtenerPorId(certificadoId);
+            if (certificadoEF == null)
+            {
+                ToastService.Show(this.Page, "Error: No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
+                return;
+            }
+
+            Session["EditingCertificadoId"] = certificadoId;
+            txtExpediente.Text = certificadoEF.ExpedientePago;
+            txtMontoCertificado.Text = certificadoEF.MontoTotal.ToString("0.00");
+            txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
+            SelectDropDownListByValue(ddlTipo, certificadoEF.TipoPagoId.ToString());
+            btnAgregar.Text = "Actualizar";
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "UpdateModalAndShow", @"
+                $(document).ready(function() {
+                    $('#modalAgregar .modal-title').text('Modificar Certificado');
+                    document.getElementById('" + btnAgregar.ClientID + @"').value = 'Actualizar';
+                    $('#autorizanteContainer').hide();
+                    $('#modalAgregar').modal('show');
+                });", true);
+        }
+
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             try
@@ -958,6 +952,11 @@ namespace WebForms
 
                     string tipoRegistro = certificado.TipoPagoId == 3 ? "reliquidación" : "certificado";
                     ToastService.Show(this.Page, $"Expediente de {tipoRegistro} actualizado correctamente.", ToastService.ToastType.Info);
+
+                    if (!string.IsNullOrWhiteSpace(nuevoExpediente) && certificado.TipoPagoId != 3 && certificado.Id > 0)
+                    {
+                        AbrirModalEdicionCertificado(certificado.Id);
+                    }
                 }
                 else
                 {

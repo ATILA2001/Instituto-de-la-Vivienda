@@ -1,3 +1,4 @@
+
 using Dominio;
 using Negocio;
 using System;
@@ -121,6 +122,34 @@ namespace WebForms
             }
         }
 
+        private void AbrirModalEdicionLegitimo(int legitimoId)
+        {
+            var legitimo = negocio.ObtenerPorId(legitimoId);
+            if (legitimo == null)
+            {
+                ToastService.Show(this.Page, "Error: No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
+                return;
+            }
+
+            Session["EditingLegitimoEFId"] = legitimoId;
+            BindDropDownList();
+            SelectDropDownListByValue(ddlObra, legitimo.ObraId.ToString());
+            txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
+            txtExpediente.Text = legitimo.Expediente ?? string.Empty;
+            txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
+            txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
+            ddlObra.Enabled = false;
+            btnAgregar.Text = "Actualizar";
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
+                $(document).ready(function() {
+                    $('#modalAgregar .modal-title').text('Modificar Legítimo');
+                    $('#modalAgregar').modal('show');
+                });", true);
+        }
+
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
@@ -211,41 +240,7 @@ namespace WebForms
             try
             {
                 int id = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
-                var lista = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                var legitimo = lista?.FirstOrDefault(l => l.Id == id);
-                if (legitimo == null)
-                {
-                    var usuario = UserHelper.GetFullCurrentUser();
-                    if (usuario != null)
-                    {
-                        lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
-                        Session["legitimosCompletos"] = lista;
-                        legitimo = lista?.FirstOrDefault(l => l.Id == id);
-                    }
-                }
-
-                if (legitimo != null)
-                {
-                    Session["EditingLegitimoEFId"] = legitimo.Id;
-                    // Rebind dropdowns to include current obra
-                    BindDropDownList();
-                    SelectDropDownListByValue(ddlObra, legitimo.ObraId.ToString());
-                    txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
-                    txtExpediente.Text = legitimo.Expediente ?? string.Empty;
-                    txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-                    txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-                    txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
-                    txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
-
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
-                        $(document).ready(function() {
-                            $('#modalAgregar .modal-title').text('Modificar Legítimo');
-                            $('#modalAgregar').modal('show');
-                        });", true);
-
-                    ddlObra.Enabled = false; // No permitir cambiar obra al editar
-                    btnAgregar.Text = "Actualizar";
-                }
+                AbrirModalEdicionLegitimo(id);
             }
             catch (Exception ex)
             {
@@ -744,6 +739,11 @@ namespace WebForms
                     RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
 
                     ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Info);
+
+                    if (!string.IsNullOrWhiteSpace(nuevoExpediente) && legitimo.Id > 0)
+                    {
+                        AbrirModalEdicionLegitimo(legitimo.Id);
+                    }
                 }
                 else
                 {
