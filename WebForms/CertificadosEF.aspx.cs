@@ -681,6 +681,11 @@ namespace WebForms
                 {
                     if (e.Row.FindControl("btnModificar") is LinkButton btnEditar) btnEditar.Visible = false;
                     if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) btnEliminar.Visible = false;
+                    if (e.Row.FindControl("txtMontoInline") is TextBox txtMontoRel) txtMontoRel.Enabled = false;
+                }
+                else if (e.Row.FindControl("txtMontoInline") is TextBox txtMonto)
+                {
+                    txtMonto.Enabled = !string.IsNullOrWhiteSpace(certificado.ExpedientePago);
                 }
             }
         }
@@ -953,10 +958,6 @@ namespace WebForms
                     string tipoRegistro = certificado.TipoPagoId == 3 ? "reliquidación" : "certificado";
                     ToastService.Show(this.Page, $"Expediente de {tipoRegistro} actualizado correctamente.", ToastService.ToastType.Info);
 
-                    if (!string.IsNullOrWhiteSpace(nuevoExpediente) && certificado.TipoPagoId != 3 && certificado.Id > 0)
-                    {
-                        AbrirModalEdicionCertificado(certificado.Id);
-                    }
                 }
                 else
                 {
@@ -966,6 +967,88 @@ namespace WebForms
             catch (Exception ex)
             {
                 ToastService.Show(this.Page, $"Error al actualizar el expediente: {ex.Message}", ToastService.ToastType.Error);
+            }
+        }
+
+        protected void txtMontoInline_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txtBox = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
+
+            try
+            {
+                int rowIndex = row.RowIndex;
+                string nuevoValorStr = txtBox.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(nuevoValorStr)) return;
+
+                if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal nuevoMonto))
+                {
+                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                if (datosFiltradosActuales == null)
+                {
+                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                int indiceReal = (gridviewRegistros.PageIndex * gridviewRegistros.PageSize) + rowIndex;
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                {
+                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                CertificadoDTO certificado = datosFiltradosActuales[indiceReal];
+
+                if (certificado.TipoPagoId == 3 || certificado.Id <= 0)
+                {
+                    ToastService.Show(this.Page, "Error: No se puede modificar el monto de este registro.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var negocioCert = new CertificadoNegocioEF();
+                CertificadoEF entidad = negocioCert.ObtenerPorId(certificado.Id);
+                if (entidad == null)
+                {
+                    ToastService.Show(this.Page, "Error: No se encontró el certificado.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                entidad.MontoTotal = nuevoMonto;
+                bool resultado = negocioCert.Modificar(entidad);
+
+                if (resultado)
+                {
+                    List<CertificadoDTO> listaCompleta = Session["CertificadosCompleto"] as List<CertificadoDTO>;
+                    if (listaCompleta != null)
+                    {
+                        var dto = listaCompleta.FirstOrDefault(c => c.Id == certificado.Id);
+                        if (dto != null) dto.MontoTotal = nuevoMonto;
+                    }
+
+                    var expedientesAfectados = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(certificado.ExpedientePago))
+                        expedientesAfectados.Add(certificado.ExpedientePago);
+
+                    if (expedientesAfectados.Any() && listaCompleta != null)
+                        RecalcularYActualizarCache(expedientesAfectados, listaCompleta, persistirEnBD: false, recargarVista: true);
+                    else
+                        CargarPaginaActual();
+
+                    ToastService.Show(this.Page, "Monto actualizado correctamente.", ToastService.ToastType.Info);
+                }
+                else
+                {
+                    ToastService.Show(this.Page, "Error al actualizar el monto.", ToastService.ToastType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, $"Error al actualizar el monto: {ex.Message}", ToastService.ToastType.Error);
             }
         }
 
