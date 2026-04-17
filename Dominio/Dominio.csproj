@@ -42,7 +42,7 @@
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNetCore.DataProtection">
-      <HintPath>..\packages\Microsoft.AspNetCore.DataProtection.10.0.2\lib\netstandard2.0\Microsoft.AspNetCore.DataProtection.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNetCore.DataProtection.2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.DataProtection.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
