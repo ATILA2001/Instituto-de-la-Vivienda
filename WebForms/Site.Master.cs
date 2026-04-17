@@ -36,9 +36,9 @@ namespace WebForms
 
             // Obtenemos si el usuario es administrador.
             bool isAdmin = currentUser?.Tipo == true;
-            // Rol Redeterminaciones: verificado via claim de rol
-            bool isRedeterminacionesUser = HttpContext.Current.User.IsInRole("Redeterminaciones");
-            // Área Secretaría: verificado via nombre de área (no es un rol JWT)
+            // Rol Redeterminaciones: ahora es un área; IVC área ID 16 = Redeterminaciones
+            bool isRedeterminacionesUser = UserHelper.IsUserInArea(16);
+            // Área Secretaría: IVC área ID 19
             bool isSecretariaUser = UserHelper.IsUserInArea(19);
 
 

@@ -92,7 +92,7 @@ namespace WebForms
         private void RedirigirSegunArea(UsuarioEF usuario)
         {
             {
-                if (usuario != null && usuario.Area != null && usuario.Area.Id == 16)
+                if (UserHelper.IsUserInArea(16))
                 {
                     Response.Redirect("RedeterminacionesEF.aspx", false);
                 }

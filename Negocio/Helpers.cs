@@ -698,6 +698,7 @@ INNER JOIN (
                     AreaId = userEntity.AreaId,
                     Area = userEntity.Area,
                     AreasNombres = userEntity.AreasNombres,
+                    AreaIds = userEntity.AreaIds,
                 };
             }
 
@@ -764,10 +765,12 @@ INNER JOIN (
 
             int.TryParse(userIdValue, out var parsedId);
 
-            var areaNombres = principal.Claims
+            // El claim "area" ahora contiene IDs enteros de Auth.Web (no nombres)
+            var authAreaIds = principal.Claims
                 .Where(c => string.Equals(c.Type, "area", StringComparison.OrdinalIgnoreCase))
                 .Select(c => c.Value)
-                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Where(v => !string.IsNullOrWhiteSpace(v) && int.TryParse(v, out _))
+                .Select(int.Parse)
                 .ToList();
 
             var roles = principal.Claims
@@ -783,6 +786,32 @@ INNER JOIN (
 
             var displayName = !string.IsNullOrWhiteSpace(name) ? name : email;
 
+            // Resolver áreas IVC a partir de los AuthAreaIds del claim
+            AreaEF primaryArea = null;
+            List<string> areaNombres = new List<string>();
+            if (authAreaIds.Count > 0)
+            {
+                try
+                {
+                    using (var context = new IVCdbContext())
+                    {
+                        var ivcAreas = context.Areas.AsNoTracking()
+                            .Where(a => a.AuthAreaId != null && authAreaIds.Contains(a.AuthAreaId.Value))
+                            .ToList();
+
+                        primaryArea = ivcAreas.FirstOrDefault();
+                        areaNombres = ivcAreas
+                            .Select(a => a.Nombre)
+                            .Where(n => n != null)
+                            .ToList();
+                    }
+                }
+                catch
+                {
+                    // Si falla la DB, construimos un usuario parcial sin área resuelta
+                }
+            }
+
             return new UsuarioEF
             {
                 Id = parsedId,
@@ -790,8 +819,9 @@ INNER JOIN (
                 Correo = email,
                 Tipo = isAdmin,
                 Estado = true,
+                AreaIds = authAreaIds,
                 AreasNombres = areaNombres,
-                Area = areaNombres.Count > 0 ? new AreaEF { Nombre = areaNombres[0] } : null
+                Area = primaryArea
             };
         }
 
@@ -805,23 +835,33 @@ INNER JOIN (
         }
 
         /// <summary>
-        /// Devuelve true si el usuario actual pertenece a un área específica (por ID)
+        /// Devuelve true si el usuario actual pertenece a un área específica (por ID de IVC).
+        /// La comparación se hace vía AuthAreaId: busca el AuthAreaId del área IVC y verifica
+        /// que esté en los AreaIds del usuario (leídos del claim "area" de Auth.Web).
         /// </summary>
-        public static bool IsUserInArea(int areaId)
+        public static bool IsUserInArea(int ivcAreaId)
         {
             var user = GetFullCurrentUser();
+            if (user == null) return false;
             if (user.Tipo) return false;
-            if (user.AreasNombres == null || user.AreasNombres.Count == 0) return false;
+            if (user.AreaIds == null || user.AreaIds.Count == 0) return false;
             try
             {
                 using (var context = new IVCdbContext())
                 {
-                    var nombre = context.Areas.AsNoTracking()
-                        .Where(a => a.Id == areaId)
-                        .Select(a => a.Nombre)
+                    var authAreaId = context.Areas.AsNoTracking()
+                        .Where(a => a.Id == ivcAreaId)
+                        .Select(a => a.AuthAreaId)
                         .FirstOrDefault();
-                    return nombre != null && user.AreasNombres
-                        .Any(n => string.Equals(n, nombre, StringComparison.OrdinalIgnoreCase));
+
+                    if (!authAreaId.HasValue)
+                    {
+                        System.Diagnostics.Trace.TraceWarning(
+                            $"IsUserInArea: Área IVC {ivcAreaId} no tiene AuthAreaId configurado.");
+                        return false;
+                    }
+
+                    return user.AreaIds.Contains(authAreaId.Value);
                 }
             }
             catch { return false; }

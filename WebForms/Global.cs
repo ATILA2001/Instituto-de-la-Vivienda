@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Configuration;
@@ -62,9 +64,15 @@ namespace WebForms
 
             var isAdmin = user.Claims
                 .Where(c => c.Type == ClaimTypes.Role)
-                .Any(c => c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+                .Any(c => c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                       || c.Value.Equals("Administrador", StringComparison.OrdinalIgnoreCase)
+                       || c.Value.Equals("Administradores", StringComparison.OrdinalIgnoreCase));
 
+            // Los admins tienen acceso total — skip validación de perms_version y perms_json
             if (isAdmin) return;
+
+            // Para usuarios normales: validar que la versión de permisos sigue vigente
+            ValidarPermsVersion(user);
 
             if (!IsUserAuthorizedForPath(user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value, requestedPath))
             {
@@ -168,6 +176,94 @@ namespace WebForms
         private sealed class PagePermission
         {
             public string url { get; set; }
+        }
+
+        // DTO para deserializar la respuesta de GET /api/permissions/version
+        private sealed class PermissionVersionDto
+        {
+            public int Version { get; set; }
+        }
+
+        /// <summary>
+        /// Verifica que la versión de permisos en la cookie coincida con la actual en Auth.Web.
+        /// Cachea el resultado en Session durante 5 minutos (TTL) para no llamar en cada request.
+        /// Comportamiento fail-open: si Auth.Web no responde en 2 s, deja pasar.
+        /// </summary>
+        private void ValidarPermsVersion(System.Security.Claims.ClaimsPrincipal user)
+        {
+            var cookieVersion = user.Claims
+                .FirstOrDefault(c => string.Equals(c.Type, "perms_version", StringComparison.OrdinalIgnoreCase))
+                ?.Value;
+
+            // Si la cookie no tiene perms_version (usuario antiguo o admin sin claim), fail open
+            if (string.IsNullOrWhiteSpace(cookieVersion))
+                return;
+
+            // Verificar caché de sesión (TTL 5 min)
+            var session = Context.Session;
+            if (session != null)
+            {
+                var cachedVersion = session["PermsVersion_Cached"] as string;
+                var cachedAt = session["PermsVersion_CachedAt"] as DateTime?;
+
+                if (cachedVersion != null && cachedAt.HasValue
+                    && (DateTime.UtcNow - cachedAt.Value).TotalMinutes < 5)
+                {
+                    if (!string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
+                        RedirectToLogin();
+                    return;
+                }
+            }
+
+            // Llamar a Auth.Web: GET /api/permissions/version
+            // Reenviamos la cookie de autenticación compartida
+            string serverVersion = null;
+            try
+            {
+                var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                    ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
+
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    System.Diagnostics.Trace.TraceWarning("perms_version: AuthWebBaseUrl no configurado — fail open.");
+                    return;
+                }
+
+                var url = baseUrl.Trim().TrimEnd('/') + "/api/permissions/version";
+
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Timeout = 2000; // 2 segundos máximo
+                request.Method = "GET";
+                // Reenviar la cookie de sesión compartida para que el endpoint pueda autenticar
+                var cookieHeader = Context.Request.Headers["Cookie"];
+                if (!string.IsNullOrWhiteSpace(cookieHeader))
+                    request.Headers["Cookie"] = cookieHeader;
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    var json = reader.ReadToEnd();
+                    var serializer = new JavaScriptSerializer();
+                    var dto = serializer.Deserialize<PermissionVersionDto>(json);
+                    serverVersion = dto?.Version.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Cualquier error (timeout, conexión rechazada, etc.) → fail open
+                System.Diagnostics.Trace.TraceWarning("perms_version: Auth.Web no disponible, fail open. " + ex.Message);
+                return;
+            }
+
+            // Actualizar caché de sesión con la versión obtenida
+            if (session != null && serverVersion != null)
+            {
+                session["PermsVersion_Cached"] = serverVersion;
+                session["PermsVersion_CachedAt"] = DateTime.UtcNow;
+            }
+
+            if (!string.Equals(cookieVersion, serverVersion, StringComparison.Ordinal))
+                RedirectToLogin();
         }
 
     }

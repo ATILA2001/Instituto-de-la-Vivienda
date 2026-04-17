@@ -138,7 +138,7 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
-                bool esRolRedet = System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones");
+                bool esRolRedet = UserHelper.IsUserInArea(16);
                 bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
                 bool canModify = !esRolRedet && (UserHelper.IsUserAdmin() || isPlanningOpen);
                 panelShowAddButton.Visible = canModify;
@@ -879,7 +879,7 @@ namespace WebForms
                 {
                     UsuarioEF usuario = UserHelper.GetFullCurrentUser();
                     // El rol Redeterminaciones ve todos los autorizantes sin filtro de área
-                    if (System.Web.HttpContext.Current.User.IsInRole("Redeterminaciones"))
+                    if (UserHelper.IsUserInArea(16))
                         usuario = new UsuarioEF { Tipo = true };
                     todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;

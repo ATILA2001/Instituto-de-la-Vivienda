@@ -24,5 +24,12 @@ namespace Dominio
         [NotMapped]
         public List<string> AreasNombres { get; set; }
 
+        /// <summary>
+        /// IDs de área de Auth.Web leídos del claim "area" (enteros). Se usan en IsUserInArea
+        /// para comparar contra AreaEF.AuthAreaId. No es un campo de DB.
+        /// </summary>
+        [NotMapped]
+        public List<int> AreaIds { get; set; }
+
     }
 }
