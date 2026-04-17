@@ -555,14 +555,7 @@ namespace WebForms
             {
                 if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) 
                 {
-                    // Define constant or use existing constant for area ID
-                    const int AreaIdSecretaria = 19;
-                    
-                    // Check if the user is in area 19 (Secretaria)
-                    bool isSecretariaUser = UserHelper.IsUserInArea(AreaIdSecretaria);
-                    
-                    // Show delete button only if: user is admin OR planning is open AND user is NOT from area 19
-                    btnEliminar.Visible = (UserHelper.IsUserAdmin() || IsPlanningOpen) && !isSecretariaUser;
+                    btnEliminar.Visible = UserHelper.IsUserAdmin() || IsPlanningOpen;
                 }
             }
         }
