@@ -20,12 +20,8 @@ namespace WebForms
             var user = Context.GetOwinContext().Authentication.User;
             if (user?.Identity?.IsAuthenticated != true)
             {
-                if (Context?.IsDebuggingEnabled != true)
+                if (Context?.IsDebuggingEnabled == true && Request.QueryString["diag"] == "1")
                 {
-                    Response.Redirect(BuildAuthLoginUrl(Context), true);
-                    return;
-                }
-
                 var diagHtml = new System.Text.StringBuilder();
                 diagHtml.AppendLine("<h3>No autenticado. Inicie sesión desde el portal de autenticación.</h3>");
                 diagHtml.AppendLine("<h4>Diagnóstico</h4><ul>");
@@ -158,6 +154,11 @@ namespace WebForms
 
                 diagHtml.AppendLine("</ul>");
                 LitMessage.Text = diagHtml.ToString();
+                return;
+                }
+
+                var loginUrl = BuildAuthLoginUrl(Context);
+                Response.Redirect(loginUrl, true);
                 return;
             }
 
