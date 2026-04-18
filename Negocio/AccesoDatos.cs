@@ -63,7 +63,7 @@ namespace Negocio
             catch (Exception ex)
             {
 
-                throw ex;
+                throw;
             }
 
         }
@@ -86,7 +86,7 @@ namespace Negocio
             catch (Exception ex)
             {
 
-                throw ex;
+                throw;
             }
 
         }
@@ -101,7 +101,7 @@ namespace Negocio
             catch (Exception ex)
             {
 
-                throw ex;
+                throw;
             }
         }
         public void setearParametros(string nombre, object valor)

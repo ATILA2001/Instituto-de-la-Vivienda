@@ -58,7 +58,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -104,7 +104,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -164,7 +164,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -213,7 +213,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -403,7 +403,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -568,7 +568,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {

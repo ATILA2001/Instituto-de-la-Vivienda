@@ -37,7 +37,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -68,7 +68,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
