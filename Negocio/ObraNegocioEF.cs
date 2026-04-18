@@ -163,6 +163,37 @@ namespace Negocio
                 throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
             }
         }
+
+        public List<ObraDTO> ListarPorAreaIds(List<int> areaIds)
+        {
+            try
+            {
+                using (var context = new IVCdbContext())
+                {
+                    if (areaIds == null || areaIds.Count == 0)
+                        return new List<ObraDTO>();
+
+                    var obras = context.Obras.AsNoTracking()
+                        .Where(o => o.AreaId.HasValue && areaIds.Contains(o.AreaId.Value))
+                        .Include(o => o.Empresa)
+                        .Include(o => o.Area)
+                        .Include(o => o.Barrio)
+                        .Include(o => o.Contrata)
+                        .Include("Proyecto")
+                        .Include("Proyecto.LineaGestionEF")
+                        .OrderBy(o => o.Descripcion)
+                        .ToList();
+
+                    var calc = new CalculoObraNegocioEF();
+                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
+                    return calc.ConstruirObraDTOs(obras, finanzas);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
+            }
+        }
         public ObraEF ObtenerPorId(int id)
         {
             using (var context = new IVCdbContext())

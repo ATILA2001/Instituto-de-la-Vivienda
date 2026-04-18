@@ -31,5 +31,12 @@ namespace Dominio
         [NotMapped]
         public List<int> AreaIds { get; set; }
 
+        /// <summary>
+        /// IDs IVC (tabla Areas.Id) resueltos en BuildUserFromClaims desde los AuthAreaIds.
+        /// Permite filtrar datos y validar acceso por área sin ninguna consulta a DB adicional.
+        /// </summary>
+        [NotMapped]
+        public List<int> IvcAreaIds { get; set; }
+
     }
 }

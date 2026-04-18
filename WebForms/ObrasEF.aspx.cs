@@ -50,7 +50,7 @@ namespace WebForms
                     if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(16))
                         todasLasObras = _negocio.ListarTodo();
                     else
-                        todasLasObras = _negocio.ListarPorAreaNombres(UserHelper.GetFullCurrentUser().AreasNombres);
+                        todasLasObras = _negocio.ListarPorAreaIds(UserHelper.GetFullCurrentUser().IvcAreaIds);
 
                     Session["ObrasCompleto"] = todasLasObras;
                 }

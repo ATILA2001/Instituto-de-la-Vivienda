@@ -699,6 +699,7 @@ INNER JOIN (
                     Area = userEntity.Area,
                     AreasNombres = userEntity.AreasNombres,
                     AreaIds = userEntity.AreaIds,
+                    IvcAreaIds = userEntity.IvcAreaIds,
                 };
             }
 
@@ -789,6 +790,7 @@ INNER JOIN (
             // Resolver áreas IVC a partir de los AuthAreaIds del claim
             AreaEF primaryArea = null;
             List<string> areaNombres = new List<string>();
+            List<int> ivcAreaIdsList = new List<int>();
             if (authAreaIds.Count > 0)
             {
                 try
@@ -804,6 +806,7 @@ INNER JOIN (
                             .Select(a => a.Nombre)
                             .Where(n => n != null)
                             .ToList();
+                        ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
                     }
                 }
                 catch
@@ -821,7 +824,8 @@ INNER JOIN (
                 Estado = true,
                 AreaIds = authAreaIds,
                 AreasNombres = areaNombres,
-                Area = primaryArea
+                Area = primaryArea,
+                IvcAreaIds = ivcAreaIdsList,
             };
         }
 
@@ -844,27 +848,8 @@ INNER JOIN (
             var user = GetFullCurrentUser();
             if (user == null) return false;
             if (user.Tipo) return false;
-            if (user.AreaIds == null || user.AreaIds.Count == 0) return false;
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    var authAreaId = context.Areas.AsNoTracking()
-                        .Where(a => a.Id == ivcAreaId)
-                        .Select(a => a.AuthAreaId)
-                        .FirstOrDefault();
-
-                    if (!authAreaId.HasValue)
-                    {
-                        System.Diagnostics.Trace.TraceWarning(
-                            $"IsUserInArea: Área IVC {ivcAreaId} no tiene AuthAreaId configurado.");
-                        return false;
-                    }
-
-                    return user.AreaIds.Contains(authAreaId.Value);
-                }
-            }
-            catch { return false; }
+            if (user.IvcAreaIds == null || user.IvcAreaIds.Count == 0) return false;
+            return user.IvcAreaIds.Contains(ivcAreaId);
         }
 
         /// <summary>

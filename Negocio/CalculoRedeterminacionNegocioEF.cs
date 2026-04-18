@@ -106,13 +106,9 @@ namespace Negocio
                     context.Configuration.ValidateOnSaveEnabled = false;
 
                     List<AutorizanteEF> autorizantes;
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        var filtroAreaIds = context.Areas.AsNoTracking()
-                            .Where(ar => areas.Contains(ar.Nombre))
-                            .Select(ar => ar.Id)
-                            .ToList();
+                        var filtroAreaIds = usuario.IvcAreaIds;
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                             .Select(o => o.Id)
@@ -447,13 +443,9 @@ namespace Negocio
 
                     List<AutorizanteEF> autorizantesBase;
 
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        var filtroAreaIds = context.Areas.AsNoTracking()
-                            .Where(ar => areas.Contains(ar.Nombre))
-                            .Select(ar => ar.Id)
-                            .ToList();
+                        var filtroAreaIds = usuario.IvcAreaIds;
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                             .Select(o => o.Id)
@@ -1503,10 +1495,10 @@ namespace Negocio
                         .AsQueryable();
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        queryAutorizantes = queryAutorizantes.Where(a => a.Obra.Area != null && areas.Contains(a.Obra.Area.Nombre));
+                        var filtroAreaIds = usuario.IvcAreaIds;
+                        queryAutorizantes = queryAutorizantes.Where(a => a.Obra.AreaId.HasValue && filtroAreaIds.Contains(a.Obra.AreaId.Value));
                     }
 
                     // Contar total de autorizantes
@@ -1527,10 +1519,10 @@ namespace Negocio
                         .AsQueryable();
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.Area != null && areas.Contains(r.Autorizante.Obra.Area.Nombre));
+                        var filtroAreaIds = usuario.IvcAreaIds;
+                        queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.AreaId.HasValue && filtroAreaIds.Contains(r.Autorizante.Obra.AreaId.Value));
                     }
 
                     // Contar total de redeterminaciones
@@ -1758,13 +1750,9 @@ namespace Negocio
                     int totalAutorizantes;
                     int totalRedeterminaciones;
 
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        var filtroAreaIds = context.Areas.AsNoTracking()
-                            .Where(ar => areas.Contains(ar.Nombre))
-                            .Select(ar => ar.Id)
-                            .ToList();
+                        var filtroAreaIds = usuario.IvcAreaIds;
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                             .Select(o => o.Id)
@@ -1827,13 +1815,9 @@ namespace Negocio
                         List<AutorizanteEF> autorizantes;
 
 
-                        if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                        if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                         {
-                            var areas = usuario.AreasNombres;
-                            var filtroAreaIds = context.Areas.AsNoTracking()
-                                .Where(ar => areas.Contains(ar.Nombre))
-                                .Select(ar => ar.Id)
-                                .ToList();
+                            var filtroAreaIds = usuario.IvcAreaIds;
                             var obrasDelArea = context.Obras.AsNoTracking()
                                 .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                                 .Select(o => o.Id)
@@ -1939,10 +1923,10 @@ namespace Negocio
                             .AsQueryable();
 
                         // Aplicar filtro por área si el usuario lo tiene
-                        if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                        if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                         {
-                            var areas = usuario.AreasNombres;
-                            queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.Area != null && areas.Contains(r.Autorizante.Obra.Area.Nombre));
+                            var filtroAreaIds = usuario.IvcAreaIds;
+                            queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.AreaId.HasValue && filtroAreaIds.Contains(r.Autorizante.Obra.AreaId.Value));
                         }
 
                         var redeterminaciones = queryRedeterminaciones.ToList();
@@ -2494,10 +2478,10 @@ namespace Negocio
                                 select new { cert, auth, obra, area, barrio, empresa, tipoPago };
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        query = query.Where(x => areas.Contains(x.area.Nombre));
+                        var filtroAreaIds = usuario.IvcAreaIds;
+                        query = query.Where(x => x.obra.AreaId.HasValue && filtroAreaIds.Contains(x.obra.AreaId.Value));
                     }
 
                     // Aplicar paginación
@@ -2571,13 +2555,9 @@ namespace Negocio
                                 select new { cert, obra };
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.AreasNombres != null && usuario.AreasNombres.Count > 0)
+                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
                     {
-                        var areas = usuario.AreasNombres;
-                        var filtroAreaIds = context.Areas.AsNoTracking()
-                            .Where(ar => areas.Contains(ar.Nombre))
-                            .Select(ar => ar.Id)
-                            .ToList();
+                        var filtroAreaIds = usuario.IvcAreaIds;
                         query = query.Where(x => x.obra.AreaId.HasValue && filtroAreaIds.Contains(x.obra.AreaId.Value));
                     }
 

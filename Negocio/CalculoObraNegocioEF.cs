@@ -24,13 +24,9 @@ namespace Negocio
                     {
                         if (!UserHelper.IsUserAdmin())
                         {
-                            var areas = UserHelper.GetFullCurrentUser().AreasNombres;
-                            if (areas != null && areas.Count > 0)
+                            var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
+                            if (filtroAreaIds != null && filtroAreaIds.Count > 0)
                             {
-                                var filtroAreaIds = context.Areas.AsNoTracking()
-                                    .Where(ar => areas.Contains(ar.Nombre))
-                                    .Select(ar => ar.Id)
-                                    .ToList();
                                 obraIds = context.Obras.AsNoTracking()
                                     .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                                     .Select(o => o.Id)
