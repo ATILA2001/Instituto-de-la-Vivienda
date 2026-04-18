@@ -1,5 +1,6 @@
 using System;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.UI;
 using Owin;
 
@@ -12,6 +13,8 @@ namespace WebForms
             if (!Page.IsPostBack)
             {
                 LogoutUser();
+                var baseUrl = (WebConfigurationManager.AppSettings["AuthWebBaseUrl"] ?? WebConfigurationManager.AppSettings["AuthWebUrl"] ?? "").Trim().TrimEnd('/');
+                Response.Redirect(string.IsNullOrEmpty(baseUrl) ? "/Account/Login" : baseUrl + "/Account/Login", true);
             }
         }
 

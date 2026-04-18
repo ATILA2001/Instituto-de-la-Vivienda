@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -35,7 +36,8 @@ namespace WebForms
         {
             Session.Clear();
             Context.GetOwinContext().Authentication.SignOut("Identity.Application");
-            Response.Redirect("Startup.aspx", false);
+            var baseUrl = (WebConfigurationManager.AppSettings["AuthWebBaseUrl"] ?? WebConfigurationManager.AppSettings["AuthWebUrl"] ?? "").Trim().TrimEnd('/');
+            Response.Redirect(string.IsNullOrEmpty(baseUrl) ? "/Account/Login" : baseUrl + "/Account/Login", true);
         }
     }
 }
