@@ -27,9 +27,9 @@ namespace Negocio
                 // Solo filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    var areas = usuario.AreasNombres;
-                    if (areas != null && areas.Count > 0)
-                        query = query.Where(f => f.ObraEF.Area != null && areas.Contains(f.ObraEF.Area.Nombre));
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 var resultado = query.ToList();
@@ -111,9 +111,9 @@ namespace Negocio
                 // Filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    var areas = usuario.AreasNombres;
-                    if (areas != null && areas.Count > 0)
-                        query = query.Where(f => f.ObraEF.Area != null && areas.Contains(f.ObraEF.Area.Nombre));
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 // Aplicar filtro general de búsqueda
@@ -154,9 +154,9 @@ namespace Negocio
                 // Filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    var areas = usuario.AreasNombres;
-                    if (areas != null && areas.Count > 0)
-                        query = query.Where(f => f.ObraEF.Area != null && areas.Contains(f.ObraEF.Area.Nombre));
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 // Aplicar filtro general de búsqueda
@@ -237,9 +237,9 @@ namespace Negocio
 
             if (!usuario.Tipo)
             {
-                var areas = usuario.AreasNombres;
-                if (areas != null && areas.Count > 0)
-                    query = query.Where(f => f.ObraEF.Area != null && areas.Contains(f.ObraEF.Area.Nombre));
+                var filtroAreaIds = usuario.IvcAreaIds;
+                if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                    query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
             }
 
             return query;

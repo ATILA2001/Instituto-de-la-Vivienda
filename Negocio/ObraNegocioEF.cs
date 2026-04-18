@@ -31,15 +31,9 @@ namespace Negocio
 
                     if (!UserHelper.IsUserAdmin())
                     {
-                        var areas = UserHelper.GetFullCurrentUser().AreasNombres;
-                        if (areas != null && areas.Count > 0)
-                        {
-                            var filtroAreaIds = context.Areas.AsNoTracking()
-                                .Where(ar => areas.Contains(ar.Nombre))
-                                .Select(ar => ar.Id)
-                                .ToList();
+                        var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
+                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
                             query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
-                        }
                     }
 
                     return query.OrderBy(o => o.Descripcion).ToList();
@@ -58,15 +52,9 @@ namespace Negocio
                 var query = context.Obras.AsNoTracking().Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id) || (includeObraId.HasValue && o.Id == includeObraId.Value));
                 if (usuario != null && !usuario.Tipo)
                 {
-                    var areas = usuario.AreasNombres;
-                    if (areas != null && areas.Count > 0)
-                    {
-                        var filtroAreaIds = context.Areas.AsNoTracking()
-                            .Where(ar => areas.Contains(ar.Nombre))
-                            .Select(ar => ar.Id)
-                            .ToList();
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
                         query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
-                    }
                 }
                 return query.OrderBy(o => o.Descripcion).ToList();
             }
@@ -108,42 +96,6 @@ namespace Negocio
                 {
                     var obras = context.Obras.AsNoTracking()
                         .Where(o => o.AreaId == areaId)
-                        .Include(o => o.Empresa)
-                        .Include(o => o.Area)
-                        .Include(o => o.Barrio)
-                        .Include(o => o.Contrata)
-                        .Include("Proyecto")
-                        .Include("Proyecto.LineaGestionEF")
-                        .OrderBy(o => o.Descripcion)
-                        .ToList();
-
-                    var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
-            }
-        }
-
-        public List<ObraDTO> ListarPorAreaNombres(List<string> areaNombres)
-        {
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    if (areaNombres == null || areaNombres.Count == 0)
-                        return new List<ObraDTO>();
-
-                    var filtroAreaIds = context.Areas.AsNoTracking()
-                        .Where(ar => areaNombres.Contains(ar.Nombre))
-                        .Select(ar => ar.Id)
-                        .ToList();
-
-                    var obras = context.Obras.AsNoTracking()
-                        .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                         .Include(o => o.Empresa)
                         .Include(o => o.Area)
                         .Include(o => o.Barrio)

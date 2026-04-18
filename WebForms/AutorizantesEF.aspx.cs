@@ -877,10 +877,8 @@ namespace WebForms
                 List<AutorizanteDTO> todos;
                 if (Session["GridDataAutorizantes"] == null || ViewState["NecesitaRecarga"] != null)
                 {
-                    UsuarioEF usuario = UserHelper.GetFullCurrentUser();
-                    // El rol Redeterminaciones ve todos los autorizantes sin filtro de área
-                    if (UserHelper.IsUserInArea(16))
-                        usuario = new UsuarioEF { Tipo = true };
+                    // Redeterminaciones ve todos los autorizantes sin filtro de área → null omite el filtro
+                    UsuarioEF usuario = UserHelper.IsUserInArea(16) ? null : UserHelper.GetFullCurrentUser();
                     todos = _calculoRedeterminacionNegocioEF.ListarAutorizantesYRedeterminaciones(usuario);
                     Session["GridDataAutorizantes"] = todos;
                     ViewState["NecesitaRecarga"] = null;

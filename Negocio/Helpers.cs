@@ -697,7 +697,6 @@ INNER JOIN (
                     Estado = userEntity.Estado,
                     AreaId = userEntity.AreaId,
                     Area = userEntity.Area,
-                    AreasNombres = userEntity.AreasNombres,
                     AreaIds = userEntity.AreaIds,
                     IvcAreaIds = userEntity.IvcAreaIds,
                 };
@@ -789,7 +788,6 @@ INNER JOIN (
 
             // Resolver áreas IVC a partir de los AuthAreaIds del claim
             AreaEF primaryArea = null;
-            List<string> areaNombres = new List<string>();
             List<int> ivcAreaIdsList = new List<int>();
             if (authAreaIds.Count > 0)
             {
@@ -802,10 +800,6 @@ INNER JOIN (
                             .ToList();
 
                         primaryArea = ivcAreas.FirstOrDefault();
-                        areaNombres = ivcAreas
-                            .Select(a => a.Nombre)
-                            .Where(n => n != null)
-                            .ToList();
                         ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
                     }
                 }
@@ -823,7 +817,6 @@ INNER JOIN (
                 Tipo = isAdmin,
                 Estado = true,
                 AreaIds = authAreaIds,
-                AreasNombres = areaNombres,
                 Area = primaryArea,
                 IvcAreaIds = ivcAreaIdsList,
             };
@@ -850,15 +843,6 @@ INNER JOIN (
             if (user.Tipo) return false;
             if (user.IvcAreaIds == null || user.IvcAreaIds.Count == 0) return false;
             return user.IvcAreaIds.Contains(ivcAreaId);
-        }
-
-        /// <summary>
-        /// Devuelve el ID del área del usuario actual (deprecado: usar AreasNombres)
-        /// </summary>
-        public static int GetUserAreaId()
-        {
-            var user = GetFullCurrentUser();
-            return user.AreaId.GetValueOrDefault();
         }
 
     }
