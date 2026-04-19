@@ -40,6 +40,7 @@ namespace WebForms
                 "/Authentication.aspx",
                 "/Startup.aspx",
                 "/AccessDenied.aspx",
+                "/LogoutConfirmation.aspx",
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
