@@ -8,7 +8,7 @@
 	<h2 class="text-center p-2">Listado Usuarios</h2>
 
 	<div class="container-fluid mt-4 d-flex justify-content-center">
-		<asp:GridView ID="dgvUsuario" DataKeyNames="ID" CssClass="table1  table-bordered table-hover " OnSelectedIndexChanged="dgvUsuario_SelectedIndexChanged" OnRowDeleting="dgvUsuario_RowDeleting" AutoGenerateColumns="false" runat="server">
+		<asp:GridView ID="dgvUsuario" DataKeyNames="ID" CssClass="table1  table-bordered table-hover " OnSelectedIndexChanged="dgvUsuario_SelectedIndexChanged" OnRowDeleting="dgvUsuario_RowDeleting" OnRowDataBound="dgvUsuario_RowDataBound" AutoGenerateColumns="false" runat="server">
 			<Columns>
 
 				<asp:BoundField HeaderText="ID" DataField="ID" HeaderStyle-CssClass="oculto" ItemStyle-CssClass="oculto" />
@@ -27,6 +27,18 @@
 						<%# Convert.ToBoolean(Eval("ESTADO")) ? "Habilitado" : "Bloqueado" %>
 					</ItemTemplate>
 				</asp:TemplateField>
+
+				<asp:TemplateField HeaderText="Plani. abierta">
+					<ItemTemplate>
+						<div class="form-check form-switch d-flex justify-content-center">
+							<input type="checkbox" class="form-check-input" id="chkPlani" runat="server"
+								style="cursor: pointer;"
+								onserverchange="chkPlani_CheckedChanged"
+								onchange="__doPostBack(this.name, '')" />
+						</div>
+					</ItemTemplate>
+				</asp:TemplateField>
+
 				<asp:CommandField ShowSelectButton="true" SelectText="Modificar" ControlStyle-CssClass="btn btn-warning" HeaderText="Modificar"  />
 				<asp:CommandField ShowDeleteButton="true" ControlStyle-CssClass="btn btn-danger" HeaderText="Eliminar" />
 

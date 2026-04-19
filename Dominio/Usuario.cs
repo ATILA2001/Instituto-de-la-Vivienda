@@ -24,6 +24,8 @@ namespace Dominio
 
 		public String Username { get; set; }    // destinado a guardar el nombre de usuario del dominio o el mail
 
+		public bool IsPlanningOpenOverride { get; set; } // Override por usuario: planificación abierta aunque esté cerrada globalmente
+
 
 		public Usuario() { }
 

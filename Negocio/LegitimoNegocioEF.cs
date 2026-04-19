@@ -15,6 +15,7 @@ namespace Negocio
                 var query = context.Legitimos
                     .Include(l => l.ObraEF)
                     .Include(l => l.ObraEF.Area)
+                    .Include(l => l.ObraEF.Barrio)
                     .Include(l => l.ObraEF.Empresa)
                     .Include(l => l.ObraEF.Proyecto)
                     .Include(l => l.ObraEF.Proyecto.LineaGestionEF)
@@ -87,6 +88,7 @@ namespace Negocio
             {
                 var query = context.Legitimos
                     .Include(l => l.ObraEF)
+                    .Include(l => l.ObraEF.Barrio)
                     .Include(l => l.ObraEF.Area)
                     .Include(l => l.ObraEF.Empresa)
                     .AsQueryable();
@@ -117,6 +119,7 @@ namespace Negocio
             var query = context.Legitimos
                 .Include(l => l.ObraEF)
                 .Include(l => l.ObraEF.Area)
+                .Include(l => l.ObraEF.Barrio)
                 .Include(l => l.ObraEF.Empresa)
                 .Include(l => l.ObraEF.Proyecto)
                 .Include(l => l.ObraEF.Proyecto.LineaGestionEF)
@@ -346,6 +349,7 @@ namespace Negocio
                 var entity = context.Legitimos
                     .Include(l => l.ObraEF)
                     .Include(l => l.ObraEF.Area)
+                    .Include(l => l.ObraEF.Barrio)
                     .Include(l => l.ObraEF.Empresa)
                     .Include(l => l.ObraEF.Proyecto)
                     .Include(l => l.ObraEF.Proyecto.LineaGestionEF)

@@ -204,7 +204,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, 
+                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, u.PLANIFICACION_ABIERTA,
                                       a.NOMBRE AS AreaNombre, a.ID AS AreaId 
                                FROM USUARIOS u 
                                INNER JOIN AREAS a ON u.AREA = a.ID");
@@ -219,6 +219,7 @@ namespace Negocio
                         Tipo = Convert.ToBoolean(datos.Lector["TIPO"]),
                         Correo = datos.Lector["CORREO"].ToString(),
                         Estado = Convert.ToBoolean(datos.Lector["ESTADO"]),
+                        IsPlanningOpenOverride = datos.Lector["PLANIFICACION_ABIERTA"] != DBNull.Value && Convert.ToBoolean(datos.Lector["PLANIFICACION_ABIERTA"]),
                         Area = new Area
                         {
                             Id = Convert.ToInt32(datos.Lector["AreaId"]),
@@ -248,7 +249,7 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, 
+datos.setearConsulta(@"SELECT u.ID, u.NOMBRE, u.TIPO, u.CORREO, u.ESTADO, u.PLANIFICACION_ABIERTA,
                                       a.NOMBRE AS AreaNombre, a.ID AS AreaId 
                                FROM USUARIOS u 
                                INNER JOIN AREAS a ON u.AREA = a.ID where u.ESTADO = 0");
@@ -263,6 +264,7 @@ namespace Negocio
                         Tipo = Convert.ToBoolean(datos.Lector["TIPO"]),
                         Correo = datos.Lector["CORREO"].ToString(),
                         Estado = Convert.ToBoolean(datos.Lector["ESTADO"]),
+                        IsPlanningOpenOverride = datos.Lector["PLANIFICACION_ABIERTA"] != DBNull.Value && Convert.ToBoolean(datos.Lector["PLANIFICACION_ABIERTA"]),
                         Area = new Area
                         {
                             Id = Convert.ToInt32(datos.Lector["AreaId"]),
@@ -310,6 +312,27 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+        public bool SetPlanningOpenOverride(int userId, bool value)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta("UPDATE USUARIOS SET PLANIFICACION_ABIERTA = @PLANIFICACION_ABIERTA WHERE ID = @ID");
+                datos.setearParametros("@PLANIFICACION_ABIERTA", value);
+                datos.setearParametros("@ID", userId);
+                datos.ejecutarAccion();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
         public bool ModificarUsuario(Usuario usuario)
         {
             AccesoDatos datos = new AccesoDatos();

@@ -146,7 +146,8 @@ namespace WebForms
 
         protected void ShowOrHideUserControlsByPlanningOrFormulationStatus()
         {
-            bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
+            UsuarioEF currentUser = UserHelper.GetFullCurrentUser();
+            bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen() || currentUser.IsPlanningOpenOverride;
             bool isFormulationOpen = ABMPlaniNegocio.GetIsFormulationOpen();
             ConfigureUserControls(isPlanningOpen, isFormulationOpen);
         }

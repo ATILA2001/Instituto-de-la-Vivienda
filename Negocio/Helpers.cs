@@ -695,10 +695,11 @@ INNER JOIN (
                     Correo = userEntity.Correo,
                     Tipo = userEntity.Tipo,
                     Estado = userEntity.Estado,
-                    AreaId = userEntity.AreaId,
                     Area = userEntity.Area,
                     AreaIds = userEntity.AreaIds,
                     IvcAreaIds = userEntity.IvcAreaIds,
+                    AreaId = userEntity.Area?.Id ?? 0,
+                    IsPlanningOpenOverride = userEntity.IsPlanningOpenOverride,
                 };
             }
 

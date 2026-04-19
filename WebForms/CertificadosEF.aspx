@@ -289,7 +289,15 @@
 					</ItemTemplate>
 				</asp:TemplateField>
 
-				<asp:BoundField HeaderText="Monto Certificado" DataField="MontoTotal" DataFormatString="{0:C}" />
+<asp:TemplateField HeaderText="Monto Certificado">
+						<ItemTemplate>
+							<asp:TextBox ID="txtMontoInline" runat="server"
+							Text='<%# ((decimal)Eval("MontoTotal")).ToString("C") %>'
+								AutoPostBack="true"
+								OnTextChanged="txtMontoInline_TextChanged"
+								CssClass="form-control form-control-sm w-auto text-center" />
+						</ItemTemplate>
+					</asp:TemplateField>
 
 				<asp:TemplateField HeaderText="Mes Certificado">
 					<HeaderTemplate>
