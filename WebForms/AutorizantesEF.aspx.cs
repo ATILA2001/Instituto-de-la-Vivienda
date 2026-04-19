@@ -139,8 +139,8 @@ namespace WebForms
             try
             {
                 bool esRolRedet = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
-                bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen();
                 bool esRolSecretaria = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Secretaria);
+                bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen() || UserHelper.GetFullCurrentUser().IsPlanningOpenOverride;
                 bool canModify = !esRolRedet && !esRolSecretaria && (UserHelper.IsUserAdmin() || isPlanningOpen);
                 panelShowAddButton.Visible = canModify;
                 // Columnas específicas de Redeterminaciones: ocultar solo para ese rol

@@ -790,18 +790,31 @@ INNER JOIN (
             // Resolver áreas IVC a partir de los AuthAreaIds del claim
             AreaEF primaryArea = null;
             List<int> ivcAreaIdsList = new List<int>();
-            if (authAreaIds.Count > 0)
+            bool isPlanningOpenOverride = false;
+            if (authAreaIds.Count > 0 || !string.IsNullOrWhiteSpace(email))
             {
                 try
                 {
                     using (var context = new IVCdbContext())
                     {
-                        var ivcAreas = context.Areas.AsNoTracking()
-                            .Where(a => a.AuthAreaId != null && authAreaIds.Contains(a.AuthAreaId.Value))
-                            .ToList();
+                        if (authAreaIds.Count > 0)
+                        {
+                            var ivcAreas = context.Areas.AsNoTracking()
+                                .Where(a => a.AuthAreaId != null && authAreaIds.Contains(a.AuthAreaId.Value))
+                                .ToList();
 
-                        primaryArea = ivcAreas.FirstOrDefault();
-                        ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
+                            primaryArea = ivcAreas.FirstOrDefault();
+                            ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
+                        }
+
+                        // Cargar el override de planificación del usuario desde la DB
+                        if (!string.IsNullOrWhiteSpace(email))
+                        {
+                            var dbUser = context.Usuarios.AsNoTracking()
+                                .FirstOrDefault(u => u.Correo == email);
+                            if (dbUser != null)
+                                isPlanningOpenOverride = dbUser.IsPlanningOpenOverride;
+                        }
                     }
                 }
                 catch (Exception dbEx)
@@ -823,6 +836,7 @@ INNER JOIN (
                 AreaIds = authAreaIds,
                 Area = primaryArea,
                 IvcAreaIds = ivcAreaIdsList,
+                IsPlanningOpenOverride = isPlanningOpenOverride,
             };
         }
 
