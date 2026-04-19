@@ -45,9 +45,9 @@ namespace WebForms
                 ddlLineaGestion.DataTextField = "NOMBRE";
                 ddlLineaGestion.DataBind();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             finally
             {
