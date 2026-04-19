@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -148,8 +149,11 @@ namespace WebForms
                 var payload = serializer.Deserialize<PermissionsPayload>(permsJson);
                 return payload?.pages?.Select(p => p?.url) ?? Enumerable.Empty<string>();
             }
-            catch
+            catch (Exception ex)
             {
+                // perms_json malformado o con formato inesperado: el usuario verá "Access Denied" en todas las páginas.
+                // Loguear para detectar cambios de formato entre Auth.Web e IVC.
+                Trace.TraceError("[ParseAllowedUrls] No se pudo deserializar perms_json. Ex: {0}", ex);
                 return Enumerable.Empty<string>();
             }
         }

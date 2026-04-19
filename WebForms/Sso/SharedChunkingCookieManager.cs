@@ -37,7 +37,10 @@ namespace WebForms.Sso
                 var part = context.Request.Cookies[key + "C" + i];
                 if (string.IsNullOrWhiteSpace(part))
                 {
-                    return value;
+                    // Chunk faltante: la cookie está incompleta (p.ej. el browser la descartó).
+                    // Devolver null para que el middleware descarte el ticket en lugar de intentar
+                    // desencriptar el string "chunks-N" y fallar silenciosamente.
+                    return null;
                 }
                 builder.Append(part);
             }

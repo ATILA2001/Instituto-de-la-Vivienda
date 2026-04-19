@@ -803,9 +803,12 @@ INNER JOIN (
                         ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
                     }
                 }
-                catch
+                catch (Exception dbEx)
                 {
-                    // Si falla la DB, construimos un usuario parcial sin área resuelta
+                    // Si falla la DB, construimos un usuario parcial sin área resuelta.
+                    // El usuario verá grillas vacías sin mensaje de error — loguear para diagnóstico.
+                    Trace.TraceError("[BuildUserFromClaims] Error resolviendo áreas IVC desde DB. AuthAreaIds=[{0}]. Ex: {1}",
+                        string.Join(",", authAreaIds), dbEx);
                 }
             }
 
