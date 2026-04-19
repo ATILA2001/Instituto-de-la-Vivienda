@@ -1,13 +1,10 @@
 ﻿using Dominio;
 using Negocio;
-using Owin;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Web;
-using System.Web.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -37,10 +34,8 @@ namespace WebForms
 
             // Obtenemos si el usuario es administrador.
             bool isAdmin = currentUser?.Tipo == true;
-            // Rol Redeterminaciones: ahora es un área; IVC área ID 16 = Redeterminaciones
-            bool isRedeterminacionesUser = UserHelper.IsUserInArea(16);
-            // Área Secretaría: IVC área ID 19
-            bool isSecretariaUser = UserHelper.IsUserInArea(19);
+            bool isRedeterminacionesUser = UserHelper.IsUserInArea(IvcAreaIds.Redeterminaciones);
+            bool isSecretariaUser = UserHelper.IsUserInArea(IvcAreaIds.Secretaria);
 
 
             // Aplicar la configuración de navegación según el tipo de usuario
@@ -198,12 +193,9 @@ namespace WebForms
         }
 
 
-        protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en admin.master.cs
+        protected void btnCerrarSesion_Click(object sender, EventArgs e)
         {
-            Session.Clear();
-            Context.GetOwinContext().Authentication.SignOut("Identity.Application");
-            var baseUrl = (WebConfigurationManager.AppSettings["AuthWebBaseUrl"] ?? WebConfigurationManager.AppSettings["AuthWebUrl"] ?? "").Trim().TrimEnd('/');
-            Response.Redirect(string.IsNullOrEmpty(baseUrl) ? "/Account/Login" : baseUrl + "/Account/Login", true);
+            IvcLogoutHelper.SignOutAndRedirect(Context);
         }
 
         protected void chkIsPlanningOpen_ServerChange(object sender, EventArgs e)

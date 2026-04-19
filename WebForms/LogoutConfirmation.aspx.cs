@@ -1,8 +1,5 @@
 using System;
-using System.Web;
-using System.Web.Configuration;
 using System.Web.UI;
-using Owin;
 
 namespace WebForms
 {
@@ -12,29 +9,7 @@ namespace WebForms
         {
             if (!Page.IsPostBack)
             {
-                LogoutUser();
-                var baseUrl = (WebConfigurationManager.AppSettings["AuthWebBaseUrl"] ?? WebConfigurationManager.AppSettings["AuthWebUrl"] ?? "").Trim().TrimEnd('/');
-                Response.Redirect(string.IsNullOrEmpty(baseUrl) ? "/Account/Login" : baseUrl + "/Account/Login", true);
-            }
-        }
-
-        private void LogoutUser()
-        {
-            try
-            {
-                Session.Clear();
-                Session.Abandon();
-                Context.GetOwinContext().Authentication.SignOut("Identity.Application");
-                Response.Cache.SetCacheability(HttpCacheability.NoCache);
-                Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
-                Response.Cache.SetNoStore();
-                Response.AppendHeader("Pragma", "no-cache");
-            }
-            catch
-            {
-                Session.Clear();
-                Session.Abandon();
-                Context.GetOwinContext().Authentication.SignOut("Identity.Application");
+                IvcLogoutHelper.SignOutAndRedirect(Context);
             }
         }
 

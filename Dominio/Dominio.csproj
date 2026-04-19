@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="AcdirEF.cs" />
     <Compile Include="Area.cs" />
+    <Compile Include="IvcAreaIds.cs" />
     <Compile Include="AreaEF.cs" />
     <Compile Include="Autorizante.cs" />
     <Compile Include="AutorizanteEF.cs" />

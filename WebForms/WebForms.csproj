@@ -360,6 +360,7 @@
       <DependentUpon>Startup.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.cs" />
+    <Compile Include="IvcLogoutHelper.cs" />
     <Compile Include="LineasGestion.aspx.cs">
       <DependentUpon>LineasGestion.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

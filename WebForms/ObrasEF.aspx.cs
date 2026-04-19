@@ -47,7 +47,7 @@ namespace WebForms
                 if (Session["ObrasCompleto"] == null)
                 {
                     // Cargar la lista completa de obras o filtrarla por área.
-                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(16))
+                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones))
                         todasLasObras = _negocio.ListarTodo();
                     else
                         todasLasObras = _negocio.ListarPorAreaIds(UserHelper.GetFullCurrentUser().IvcAreaIds);
@@ -187,7 +187,7 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
-                bool esRolRedet = UserHelper.IsUserInArea(16);
+                bool esRolRedet = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
                 bool canModify = !esRolRedet && (UserHelper.IsUserAdmin() || IsPlanningOpen);
                 panelShowAddButton.Visible = canModify;
                 // Columnas financieras: ocultar solo para rol Redeterminaciones
