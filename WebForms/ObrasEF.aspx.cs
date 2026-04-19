@@ -188,7 +188,8 @@ namespace WebForms
             try
             {
                 bool esRolRedet = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
-                bool canModify = !esRolRedet && (UserHelper.IsUserAdmin() || IsPlanningOpen);
+                bool esRolSecretaria = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Secretaria);
+                bool canModify = !esRolRedet && !esRolSecretaria && (UserHelper.IsUserAdmin() || IsPlanningOpen);
                 panelShowAddButton.Visible = canModify;
                 // Columnas financieras: ocultar solo para rol Redeterminaciones
                 SetColumnsVisibilityForRedet(esRolRedet,
