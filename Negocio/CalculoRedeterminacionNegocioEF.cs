@@ -268,6 +268,28 @@ namespace Negocio
                     }
 
                     Debug.WriteLine($"[ListarAutorizantesYRedeterminaciones] Total DTOs devueltos: {autorizantesYRedeterminaciones.Count}");
+
+                    // Poblar ejecución física en bulk para autorizantes (las redeterminaciones no tienen cert/leg propios)
+                    var codigosParaEjec = autorizantesYRedeterminaciones
+                        .Where(d => d.IdRedeterminacion == 0 && d.CodigoAutorizante != null)
+                        .Select(d => d.CodigoAutorizante)
+                        .Distinct()
+                        .ToList();
+
+                    if (codigosParaEjec.Any())
+                    {
+                        var calculoObra = new CalculoObraNegocioEF();
+                        var ejecBulk = calculoObra.ObtenerEjecFisicaBulkPorCodigos(codigosParaEjec);
+                        foreach (var dto in autorizantesYRedeterminaciones.Where(d => d.IdRedeterminacion == 0))
+                        {
+                            if (dto.CodigoAutorizante != null && ejecBulk.TryGetValue(dto.CodigoAutorizante, out var ejec))
+                            {
+                                dto.EjecFisica = ejec;
+                                dto.FaltanteEjecFisica = 100m - ejec;
+                            }
+                        }
+                    }
+
                     swTotal.Stop();
                     Debug.WriteLine($"[ListarAutorizantesYRedeterminaciones] Tiempo total: {swTotal.ElapsedMilliseconds} ms");
                     return autorizantesYRedeterminaciones;
@@ -664,6 +686,7 @@ namespace Negocio
                                              TipoPagoNombre = tipoPago?.Nombre,
                                              EstadoRedetId = auth.Redeterminaciones?.OrderByDescending(r => r.Id).Select(r => (int?)r.EstadoRedetEFId).FirstOrDefault(),
                                              Porcentaje = (auth.MontoAutorizado > 0) ? (cert.MontoTotal / auth.MontoAutorizado) * 100 : 0,
+                                             PorcEjecFisica = cert.PorcEjecFisica,
                                          }).ToList();
 
                     Debug.WriteLine($"Tiempo proyección inicial OPTIMIZADA: {sw.ElapsedMilliseconds} ms");

@@ -275,6 +275,18 @@
                                 Text='<%# ((Dominio.LegitimoEF)Container.DataItem).Certificado.HasValue ? ((Dominio.LegitimoEF)Container.DataItem).Certificado.Value.ToString("C") : string.Empty %>'
                                 AutoPostBack="true"
                                 OnTextChanged="txtCertificadoInline_TextChanged"
+                                Enabled='<%# !string.IsNullOrWhiteSpace(((Dominio.LegitimoEF)Container.DataItem).Expediente) %>'
+                                CssClass="form-control form-control-sm w-auto text-center" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Ejec. Física (%)">
+                        <ItemTemplate>
+                            <asp:TextBox ID="txtPorcEjecFisicaInline" runat="server"
+                                Text='<%# ((Dominio.LegitimoEF)Container.DataItem).PorcEjecFisica.HasValue ? ((Dominio.LegitimoEF)Container.DataItem).PorcEjecFisica.Value.ToString("F2") : string.Empty %>'
+                                AutoPostBack="true"
+                                OnTextChanged="txtPorcEjecFisicaInline_TextChanged"
+                                Enabled='<%# !string.IsNullOrWhiteSpace(((Dominio.LegitimoEF)Container.DataItem).Expediente) %>'
                                 CssClass="form-control form-control-sm w-auto text-center" />
                         </ItemTemplate>
                     </asp:TemplateField>

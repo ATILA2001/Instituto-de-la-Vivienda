@@ -143,9 +143,145 @@ namespace Negocio
         }
 
         /// <summary>
+        /// Calcula la ejecución física acumulada (suma de PorcEjecFisica) de un autorizante,
+        /// considerando tanto certificados como legítimos que tengan el dato cargado.
+        /// También devuelve el faltante físico (100 - acumulado).
+        /// </summary>
+        public (decimal EjecFisica, decimal FaltanteEjecFisica) EjecFisicaPorAutorizante(string codigoAutorizante)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var sumCert = context.Certificados.AsNoTracking()
+                    .Where(c => c.CodigoAutorizante == codigoAutorizante && c.PorcEjecFisica.HasValue)
+                    .Sum(c => (decimal?)c.PorcEjecFisica) ?? 0m;
+
+                var sumLeg = context.Legitimos.AsNoTracking()
+                    .Where(l => l.CodigoAutorizante == codigoAutorizante && l.PorcEjecFisica.HasValue)
+                    .Sum(l => (decimal?)l.PorcEjecFisica) ?? 0m;
+
+                var total = sumCert + sumLeg;
+                return (total, 100m - total);
+            }
+        }
+
+        /// <summary>
+        /// Calcula la ejecución física acumulada de una obra.
+        /// Certificados: via CodigoAutorizante (no tienen ObraId).
+        /// Legítimos: directamente por ObraId.
+        /// </summary>
+        public (decimal EjecFisica, decimal FaltanteEjecFisica) EjecFisicaPorObra(int obraId)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var codigos = context.Autorizantes.AsNoTracking()
+                    .Where(a => a.ObraId == obraId)
+                    .Select(a => a.CodigoAutorizante)
+                    .ToList();
+
+                var sumCert = codigos.Any()
+                    ? context.Certificados.AsNoTracking()
+                        .Where(c => codigos.Contains(c.CodigoAutorizante) && c.PorcEjecFisica.HasValue)
+                        .Sum(c => (decimal?)c.PorcEjecFisica) ?? 0m
+                    : 0m;
+
+                var sumLeg = context.Legitimos.AsNoTracking()
+                    .Where(l => l.ObraId == obraId && l.PorcEjecFisica.HasValue)
+                    .Sum(l => (decimal?)l.PorcEjecFisica) ?? 0m;
+
+                var total = sumCert + sumLeg;
+                return (total, 100m - total);
+            }
+        }
+
+        /// <summary>
+        /// Calcula en bulk la ejecución física acumulada por CodigoAutorizante (suma cert + leg con dato cargado).
+        /// </summary>
+        public Dictionary<string, decimal> ObtenerEjecFisicaBulkPorCodigos(List<string> codigos)
+        {
+            if (codigos == null || !codigos.Any()) return new Dictionary<string, decimal>();
+            using (var context = new IVCdbContext())
+            {
+                var sumCert = context.Certificados.AsNoTracking()
+                    .Where(c => codigos.Contains(c.CodigoAutorizante) && c.PorcEjecFisica.HasValue)
+                    .GroupBy(c => c.CodigoAutorizante)
+                    .Select(g => new { Codigo = g.Key, Suma = g.Sum(c => (decimal?)c.PorcEjecFisica) ?? 0m })
+                    .ToList();
+
+                var sumLeg = context.Legitimos.AsNoTracking()
+                    .Where(l => codigos.Contains(l.CodigoAutorizante) && l.PorcEjecFisica.HasValue)
+                    .GroupBy(l => l.CodigoAutorizante)
+                    .Select(g => new { Codigo = g.Key, Suma = g.Sum(l => (decimal?)l.PorcEjecFisica) ?? 0m })
+                    .ToList();
+
+                var result = new Dictionary<string, decimal>();
+                foreach (var c in sumCert)
+                    result[c.Codigo] = c.Suma;
+                foreach (var l in sumLeg)
+                {
+                    if (result.ContainsKey(l.Codigo)) result[l.Codigo] += l.Suma;
+                    else result[l.Codigo] = l.Suma;
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Calcula en bulk la ejecución física acumulada por ObraId.
+        /// Certificados: se suman via CodigoAutorizante (no tienen ObraId directo).
+        /// Legítimos: se suman directamente por ObraId (tienen FK directo a la obra).
+        /// </summary>
+        public Dictionary<int, decimal> ObtenerEjecFisicaBulkPorObras(List<int> obraIds)
+        {
+            if (obraIds == null || !obraIds.Any()) return new Dictionary<int, decimal>();
+            using (var context = new IVCdbContext())
+            {
+                var result = new Dictionary<int, decimal>();
+
+                // --- Certificados: vínculo obra -> autorizante -> código ---
+                var autorizantes = context.Autorizantes.AsNoTracking()
+                    .Where(a => obraIds.Contains(a.ObraId))
+                    .Select(a => new { a.ObraId, a.CodigoAutorizante })
+                    .ToList();
+
+                if (autorizantes.Any())
+                {
+                    var codigos = autorizantes.Select(a => a.CodigoAutorizante).Distinct().ToList();
+                    var sumCert = context.Certificados.AsNoTracking()
+                        .Where(c => codigos.Contains(c.CodigoAutorizante) && c.PorcEjecFisica.HasValue)
+                        .GroupBy(c => c.CodigoAutorizante)
+                        .Select(g => new { Codigo = g.Key, Suma = g.Sum(c => (decimal?)c.PorcEjecFisica) ?? 0m })
+                        .ToList();
+
+                    foreach (var auth in autorizantes)
+                    {
+                        var certSum = sumCert.FirstOrDefault(x => x.Codigo == auth.CodigoAutorizante)?.Suma ?? 0m;
+                        if (certSum == 0m) continue;
+                        if (result.ContainsKey(auth.ObraId)) result[auth.ObraId] += certSum;
+                        else result[auth.ObraId] = certSum;
+                    }
+                }
+
+                // --- Legítimos: tienen ObraId directo ---
+                var sumLeg = context.Legitimos.AsNoTracking()
+                    .Where(l => obraIds.Contains(l.ObraId) && l.PorcEjecFisica.HasValue)
+                    .GroupBy(l => l.ObraId)
+                    .Select(g => new { ObraId = g.Key, Suma = g.Sum(l => (decimal?)l.PorcEjecFisica) ?? 0m })
+                    .ToList();
+
+                foreach (var leg in sumLeg)
+                {
+                    if (result.ContainsKey(leg.ObraId)) result[leg.ObraId] += leg.Suma;
+                    else result[leg.ObraId] = leg.Suma;
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Construye una lista de ObraDTO a partir de entidades ObraEF y el diccionario financiero.
         /// </summary>
-        public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? Autorizado2026, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas)
+        public List<ObraDTO> ConstruirObraDTOs(IEnumerable<ObraEF> obras, Dictionary<int, (decimal? Autorizado2026, decimal? MontoCertificado, decimal? Porcentaje, decimal? MontoInicial, decimal? MontoActual, decimal? MontoFaltante, DateTime? FechaInicio, DateTime? FechaFin)> finanzas, Dictionary<int, decimal> ejecFisicaDict = null)
         {
             var listaDto = obras.Select(o => new ObraDTO
             {
@@ -173,7 +309,9 @@ namespace Negocio
                 MontoActual = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoActual : (decimal?)null,
                 MontoFaltante = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].MontoFaltante : (decimal?)null,
                 FechaInicio = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaInicio : (DateTime?)null,
-                FechaFin = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaFin : (DateTime?)null
+                FechaFin = finanzas != null && finanzas.ContainsKey(o.Id) ? finanzas[o.Id].FechaFin : (DateTime?)null,
+                EjecFisica = ejecFisicaDict != null && ejecFisicaDict.ContainsKey(o.Id) ? (decimal?)ejecFisicaDict[o.Id] : (decimal?)null,
+                FaltanteEjecFisica = ejecFisicaDict != null && ejecFisicaDict.ContainsKey(o.Id) ? (decimal?)(100m - ejecFisicaDict[o.Id]) : (decimal?)null
             }).ToList();
 
             return listaDto;

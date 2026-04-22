@@ -35,6 +35,9 @@ namespace Dominio
         [Column("MES_APROBACION")]
         public DateTime? MesAprobacion { get; set; }
 
+        [Column("PORC_EJEC_FISICA")]
+        public decimal? PorcEjecFisica { get; set; }
+
         // Propiedades auxiliares para uso en vista/export. Se rellenan en la capa de negocio.
         [NotMapped]
         public string Empresa { get; set; }

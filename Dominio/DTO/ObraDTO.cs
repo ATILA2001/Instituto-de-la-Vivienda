@@ -33,5 +33,9 @@ namespace Dominio.DTO
         public decimal? MontoFaltante { get; set; }
         public DateTime? FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
+
+        // Ejecución física (suma de acumulados de todos los autorizantes de la obra)
+        public decimal? EjecFisica { get; set; }
+        public decimal? FaltanteEjecFisica { get; set; }
     }
 }

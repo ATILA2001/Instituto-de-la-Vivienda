@@ -82,6 +82,20 @@ namespace Negocio
             return true;
         }
 
+        /// <summary>
+        /// Actualiza únicamente el porcentaje de ejecución física de un legítimo.
+        /// </summary>
+        public bool ActualizarEjecFisica(int id, decimal? porcentaje)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var entity = context.Legitimos.Find(id);
+                if (entity == null) return false;
+                entity.PorcEjecFisica = porcentaje;
+                return context.SaveChanges() > 0;
+            }
+        }
+
         public int ContarPorUsuario(UsuarioEF usuario, string filtroGeneral = null)
         {
             using (var context = new IVCdbContext())

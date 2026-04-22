@@ -1286,6 +1286,73 @@ namespace WebForms
             return data;
         }
 
+        protected void txtPorcEjecFisicaInline_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txtBox = (TextBox)sender;
+            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
+
+            try
+            {
+                int rowIndex = row.RowIndex;
+                string nuevoValorStr = txtBox.Text.Trim();
+
+                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
+                if (datosFiltradosActuales == null)
+                {
+                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                int indiceReal = (gridviewRegistros.PageIndex * gridviewRegistros.PageSize) + rowIndex;
+                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                {
+                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    return;
+                }
+
+                var dto = datosFiltradosActuales[indiceReal];
+                if (dto.IdReliquidacion != 0 || dto.Id <= 0)
+                {
+                    ToastService.Show(this.Page, "La ejecución física solo se puede cargar en certificados reales.", ToastService.ToastType.Warning);
+                    return;
+                }
+
+                decimal? nuevoPorcentaje = null;
+                if (!string.IsNullOrWhiteSpace(nuevoValorStr))
+                {
+                    nuevoValorStr = nuevoValorStr.Replace(",", ".");
+                    if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out decimal parsed))
+                    {
+                        ToastService.Show(this.Page, "Error: El porcentaje ingresado no es válido.", ToastService.ToastType.Error);
+                        return;
+                    }
+                    nuevoPorcentaje = parsed;
+                }
+
+                negocio.ActualizarEjecFisica(dto.Id, nuevoPorcentaje);
+
+                // Actualizar cache en Session
+                var listaCompleta = Session["CertificadosCompleto"] as List<CertificadoDTO>;
+                if (listaCompleta != null)
+                {
+                    var enLista = listaCompleta.FirstOrDefault(x => x.Id == dto.Id && x.IdReliquidacion == 0);
+                    if (enLista != null) enLista.PorcEjecFisica = nuevoPorcentaje;
+                }
+                Session["FilteredCertificadosCompleto"] = null;
+                // Invalidar caches de páginas que agreguen ejecución por autorizante/obra
+                Session["ObrasCompleto"] = null;
+                Session["GridDataAutorizantes"] = null;
+                CargarPaginaActual();
+
+                ToastService.Show(this.Page, "Ejecución física actualizada.", ToastService.ToastType.Info);
+            }
+            catch (Exception ex)
+            {
+                ToastService.Show(this.Page, "Error al actualizar ejecución física: " + ex.Message, ToastService.ToastType.Error);
+            }
+        }
+
 
     }
 }

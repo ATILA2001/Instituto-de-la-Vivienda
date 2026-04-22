@@ -78,8 +78,10 @@ namespace Negocio
 
                     // Calcular finanzas y construir DTOs
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
+                    var obraIds = obras.Select(o => o.Id).ToList();
+                    var finanzas = calc.ObtenerFinanzasPorObras(obraIds);
+                    var ejecFisica = calc.ObtenerEjecFisicaBulkPorObras(obraIds);
+                    return calc.ConstruirObraDTOs(obras, finanzas, ejecFisica);
                 }
             }
             catch (Exception ex)
@@ -106,8 +108,10 @@ namespace Negocio
                         .ToList();
 
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
+                    var obraIds2 = obras.Select(o => o.Id).ToList();
+                    var finanzas2 = calc.ObtenerFinanzasPorObras(obraIds2);
+                    var ejecFisica2 = calc.ObtenerEjecFisicaBulkPorObras(obraIds2);
+                    return calc.ConstruirObraDTOs(obras, finanzas2, ejecFisica2);
                 }
             }
             catch (Exception ex)
@@ -137,8 +141,10 @@ namespace Negocio
                         .ToList();
 
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
+                    var obraIds3 = obras.Select(o => o.Id).ToList();
+                    var finanzas3 = calc.ObtenerFinanzasPorObras(obraIds3);
+                    var ejecFisica3 = calc.ObtenerEjecFisicaBulkPorObras(obraIds3);
+                    return calc.ConstruirObraDTOs(obras, finanzas3, ejecFisica3);
                 }
             }
             catch (Exception ex)
