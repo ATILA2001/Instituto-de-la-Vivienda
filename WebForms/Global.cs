@@ -37,7 +37,6 @@ namespace WebForms
             // Lista de rutas públicas que no requieren autenticación.
             var publicPaths = new List<string>
             {
-                "/Authentication.aspx",
                 "/Startup.aspx",
                 "/AccessDenied.aspx",
                 "/LogoutConfirmation.aspx",

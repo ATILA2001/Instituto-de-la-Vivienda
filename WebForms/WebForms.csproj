@@ -151,9 +151,8 @@
   <ItemGroup>
     <Content Include="AbmlBarrio.aspx" />
     <Content Include="AbmlEmpresa.aspx" />
-    <Content Include="AbmlUsuarios.aspx" />
     <Content Include="AccessDenied.aspx" />
-    <Content Include="Authentication.aspx" />
+    <Content Include="PanelConfiguracion.aspx" />
     <Content Include="AutorizantesEF.aspx" />
     <Content Include="BdProyectos.aspx" />
     <Content Include="CertificadosEF.aspx" />
@@ -219,7 +218,6 @@
     <Content Include="LineasGestionFF.aspx" />
     <Content Include="ModificarBarrio.aspx" />
     <Content Include="ModificarEmpresa.aspx" />
-    <Content Include="ModificarUsuario.aspx" />
     <Content Include="MovimientosGestion.aspx" />
     <Content Include="RedeterminacionesEF.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -259,13 +257,6 @@
     <Compile Include="AbmlEmpresa.aspx.designer.cs">
       <DependentUpon>AbmlEmpresa.aspx</DependentUpon>
     </Compile>
-    <Compile Include="AbmlUsuarios.aspx.cs">
-      <DependentUpon>AbmlUsuarios.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AbmlUsuarios.aspx.designer.cs">
-      <DependentUpon>AbmlUsuarios.aspx</DependentUpon>
-    </Compile>
     <Compile Include="AccessDenied.aspx.cs">
       <DependentUpon>AccessDenied.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -280,12 +271,12 @@
     <Compile Include="Admin.Master.designer.cs">
       <DependentUpon>Admin.Master</DependentUpon>
     </Compile>
-    <Compile Include="Authentication.aspx.cs">
-      <DependentUpon>Authentication.aspx</DependentUpon>
+    <Compile Include="PanelConfiguracion.aspx.cs">
+      <DependentUpon>PanelConfiguracion.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Authentication.aspx.designer.cs">
-      <DependentUpon>Authentication.aspx</DependentUpon>
+    <Compile Include="PanelConfiguracion.aspx.designer.cs">
+      <DependentUpon>PanelConfiguracion.aspx</DependentUpon>
     </Compile>
     <Compile Include="AutorizantesEF.aspx.cs">
       <DependentUpon>AutorizantesEF.aspx</DependentUpon>
@@ -395,13 +386,6 @@
     </Compile>
     <Compile Include="ModificarEmpresa.aspx.designer.cs">
       <DependentUpon>ModificarEmpresa.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ModificarUsuario.aspx.cs">
-      <DependentUpon>ModificarUsuario.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ModificarUsuario.aspx.designer.cs">
-      <DependentUpon>ModificarUsuario.aspx</DependentUpon>
     </Compile>
     <Compile Include="MovimientosGestion.aspx.cs">
       <DependentUpon>MovimientosGestion.aspx</DependentUpon>

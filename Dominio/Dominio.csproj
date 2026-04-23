@@ -111,6 +111,7 @@
     <Compile Include="UnidadesMedidaEF.cs" />
     <Compile Include="Usuario.cs" />
     <Compile Include="UsuarioEF.cs" />
+    <Compile Include="UsuarioVinculadoEF.cs" />
     <Compile Include="DataProtectionKeyEF.cs" />
     <Compile Include="DataProtectionKeysDbContext.cs" />
     <Compile Include="DataProtectionXmlRepository.cs" />
