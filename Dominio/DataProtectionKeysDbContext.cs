@@ -4,7 +4,7 @@ namespace Dominio
 {
     public class DataProtectionKeysDbContext : DbContext
     {
-        public DataProtectionKeysDbContext() : base("name=SharedCookieConnection")
+        public DataProtectionKeysDbContext() : base("name=AuthWebConnection")
         {
             Database.SetInitializer<DataProtectionKeysDbContext>(null);
         }

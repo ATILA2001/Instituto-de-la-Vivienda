@@ -60,7 +60,8 @@ namespace WebForms
 
                 try
                 {
-                    var sharedCookieName = WebConfigurationManager.AppSettings["SharedCookieName"] ?? ".Auth.Shared";
+                    var sharedCookieName = Environment.GetEnvironmentVariable("SharedCookie__Name")
+                        ?? WebConfigurationManager.AppSettings["SharedCookieName"];
                     var owinCtx = Context.GetOwinContext();
                     var cookieManager = new ChunkingCookieManager { ThrowForPartialCookies = false };
                     var cookieValue = cookieManager.GetRequestCookie(owinCtx, sharedCookieName);
@@ -107,7 +108,8 @@ namespace WebForms
                             }
                         }
 
-                        var sharedAppName = WebConfigurationManager.AppSettings["SharedCookieAppName"] ?? "Auth.SharedCookie";
+                        var sharedAppName = Environment.GetEnvironmentVariable("SharedCookie__ApplicationName")
+                            ?? WebConfigurationManager.AppSettings["SharedCookieAppName"];
                         var services = new ServiceCollection();
                         var xmlRepo = new Dominio.DataProtectionXmlRepository(() => new Dominio.DataProtectionKeysDbContext());
                         services.AddSingleton<IXmlRepository>(sp => xmlRepo);

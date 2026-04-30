@@ -18,8 +18,10 @@ namespace WebForms
     {
         public void Configuration(IAppBuilder app)
         {
-            var sharedCookieName = WebConfigurationManager.AppSettings["SharedCookieName"] ?? ".Auth.Shared";
-            var sharedAppName = WebConfigurationManager.AppSettings["SharedCookieAppName"] ?? "Auth.SharedCookie";
+            var sharedCookieName = Environment.GetEnvironmentVariable("SharedCookie__Name")
+                ?? WebConfigurationManager.AppSettings["SharedCookieName"];
+            var sharedAppName = Environment.GetEnvironmentVariable("SharedCookie__ApplicationName")
+                ?? WebConfigurationManager.AppSettings["SharedCookieAppName"];
 
             app.SetDefaultSignInAsAuthenticationType("Identity.Application");
 
@@ -63,7 +65,8 @@ namespace WebForms
                 TicketDataFormat = ticketDataFormat,
                 CookieManager = new WebForms.Sso.SharedChunkingCookieManager(),
                 CookieSecure = CookieSecureOption.Always,
-                CookiePath = WebConfigurationManager.AppSettings["SharedCookiePath"] ?? "/",
+                CookiePath = Environment.GetEnvironmentVariable("SharedCookie__Path")
+                    ?? WebConfigurationManager.AppSettings["SharedCookiePath"] ?? "/",
                 // Allow cross-site usage (Required when sharing cookie between different hostnames)
                 CookieSameSite = Microsoft.Owin.SameSiteMode.None,
             });

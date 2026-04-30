@@ -45,7 +45,9 @@ namespace WebForms
             var principal = HttpContext.Current?.User as ClaimsPrincipal;
             if (principal != null)
             {
-                var authWebBase = System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]?.TrimEnd('/') ?? string.Empty;
+                var authWebBase = (Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                    ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                    ?? string.Empty).TrimEnd('/');
                 const string currentClientId = "PlaniLocal";
                 OtherApps = principal.Claims
                     .Where(c => c.Type == "available_app"

@@ -92,8 +92,8 @@ namespace WebForms
 
         private static string BuildAuthLoginUrl()
         {
-            var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
-                ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
+            var baseUrl = Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                ?? WebConfigurationManager.AppSettings["AuthWebBaseUrl"];
 
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
@@ -224,7 +224,8 @@ namespace WebForms
             string serverVersion = null;
             try
             {
-                var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                var baseUrl = Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                    ?? WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
                     ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
 
                 if (string.IsNullOrWhiteSpace(baseUrl))
