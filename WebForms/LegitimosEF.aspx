@@ -280,17 +280,6 @@
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:TemplateField HeaderText="Ejec. Física (%)">
-                        <ItemTemplate>
-                            <asp:TextBox ID="txtPorcEjecFisicaInline" runat="server"
-                                Text='<%# ((Dominio.LegitimoEF)Container.DataItem).PorcEjecFisica.HasValue ? ((Dominio.LegitimoEF)Container.DataItem).PorcEjecFisica.Value.ToString("F2") : string.Empty %>'
-                                AutoPostBack="true"
-                                OnTextChanged="txtPorcEjecFisicaInline_TextChanged"
-                                Enabled='<%# !string.IsNullOrWhiteSpace(((Dominio.LegitimoEF)Container.DataItem).Expediente) %>'
-                                CssClass="form-control form-control-sm w-auto text-center" />
-                        </ItemTemplate>
-                    </asp:TemplateField>
-
                     <asp:TemplateField>
                         <HeaderTemplate>
                             <CustomControls:TreeViewSearch ID="cblsHeaderMesAprobacion" runat="server" 
