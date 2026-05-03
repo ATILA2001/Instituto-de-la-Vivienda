@@ -19,7 +19,8 @@ namespace WebForms
         public static void SignOutAndRedirect(HttpContext context)
         {
             PerformSignOut(context);
-            var baseUrl = (WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+            var baseUrl = (Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                           ?? WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
                            ?? WebConfigurationManager.AppSettings["AuthWebUrl"]
                            ?? string.Empty).Trim().TrimEnd('/');
 

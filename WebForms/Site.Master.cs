@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -12,6 +13,14 @@ namespace WebForms
 {
     public partial class Site : System.Web.UI.MasterPage
     {
+        public class AppLinkItem
+        {
+            public string Label { get; set; }
+            public string Url { get; set; }
+        }
+
+        protected List<AppLinkItem> OtherApps { get; private set; } = new List<AppLinkItem>();
+
         protected void Page_Init(object sender, EventArgs e)
         {
             // Comprobación básica de usuario logueado
@@ -31,6 +40,36 @@ namespace WebForms
         protected void Page_PreRender(object sender, EventArgs e)
         {
             UsuarioEF currentUser = UserHelper.GetFullCurrentUser();
+
+            // Build app switcher list from available_app claims
+            var principal = HttpContext.Current?.User as ClaimsPrincipal;
+            if (principal != null)
+            {
+                var authWebBase = (Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                    ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                    ?? string.Empty).TrimEnd('/');
+                const string currentClientId = "PlaniLocal";
+                OtherApps = principal.Claims
+                    .Where(c => c.Type == "available_app"
+                                && !string.Equals(c.Value, currentClientId, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => new AppLinkItem
+                    {
+                        Label = c.Value,
+                        Url = authWebBase + "/connect/switch-app?clientId=" + Uri.EscapeDataString(c.Value)
+                    })
+                    .ToList();
+            }
+
+            if (rptOtherApps != null)
+            {
+                rptOtherApps.DataSource = OtherApps;
+                rptOtherApps.DataBind();
+            }
+
+            if (phAppSwitcher != null)
+            {
+                phAppSwitcher.Visible = OtherApps.Count > 0;
+            }
 
             // Obtenemos si el usuario es administrador.
             bool isAdmin = currentUser?.Tipo == true;
@@ -77,11 +116,6 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                chkIsPlanningOpen.Checked = ABMPlaniNegocio.GetIsPlanningOpen();
-                chkIsFormulationOpen.Checked = ABMPlaniNegocio.GetIsFormulationOpen();
-            }
         }
 
         protected void ShowOrHideRedeterminacionesNavItems(bool visible)
@@ -199,15 +233,6 @@ namespace WebForms
             IvcLogoutHelper.SignOutAndRedirect(Context);
         }
 
-        protected void chkIsPlanningOpen_ServerChange(object sender, EventArgs e)
-        {
-            Negocio.ABMPlaniNegocio.SetIsPlanningOpen(chkIsPlanningOpen.Checked);
-        }
-
-        protected void chkIsFormulationOpen_ServerChange(object sender, EventArgs e)
-        {
-            ABMPlaniNegocio.SetIsFormulationOpen(chkIsFormulationOpen.Checked);
-        }
         /// <summary>
         /// Obtiene el nombre de la página actual sin la extensión .aspx
         /// </summary>

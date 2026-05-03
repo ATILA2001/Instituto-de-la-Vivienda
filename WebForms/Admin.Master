@@ -87,12 +87,15 @@
                                 </a>
 
                                 <ul class="dropdown-menu">
-
+                                    <li>
+                                        <a class="dropdown-item" href="PanelConfiguracion.aspx">Panel de Configuración</a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
                                     <li>
                                         <a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
                                     </li>
-
-                                    <li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
 
                                     <li>
                                         <hr class="dropdown-divider">

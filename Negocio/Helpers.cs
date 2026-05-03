@@ -791,7 +791,7 @@ INNER JOIN (
             AreaEF primaryArea = null;
             List<int> ivcAreaIdsList = new List<int>();
             bool isPlanningOpenOverride = false;
-            if (authAreaIds.Count > 0 || !string.IsNullOrWhiteSpace(email))
+            if (authAreaIds.Count > 0 || !string.IsNullOrWhiteSpace(userIdValue))
             {
                 try
                 {
@@ -807,13 +807,31 @@ INNER JOIN (
                             ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
                         }
 
-                        // Cargar el override de planificación del usuario desde la DB
-                        if (!string.IsNullOrWhiteSpace(email))
+                        // Upsert en UsuariosVinculados: cargar override y registrar al usuario si es su primer login
+                        if (!string.IsNullOrWhiteSpace(userIdValue))
                         {
-                            var dbUser = context.Usuarios.AsNoTracking()
-                                .FirstOrDefault(u => u.Correo == email);
-                            if (dbUser != null)
-                                isPlanningOpenOverride = dbUser.IsPlanningOpenOverride;
+                            var ivcUser = context.UsuariosVinculados.FirstOrDefault(u => u.AuthUserId == userIdValue);
+                            if (ivcUser == null)
+                            {
+                                ivcUser = new UsuarioVinculadoEF
+                                {
+                                    AuthUserId = userIdValue,
+                                    Nombre = displayName ?? "Usuario",
+                                    IsPlanningOpenOverride = false
+                                };
+                                context.UsuariosVinculados.Add(ivcUser);
+                                context.SaveChanges();
+                            }
+                            else
+                            {
+                                // Refrescar nombre si cambió en Auth.Web
+                                if (!string.IsNullOrWhiteSpace(displayName) && ivcUser.Nombre != displayName)
+                                {
+                                    ivcUser.Nombre = displayName;
+                                    context.SaveChanges();
+                                }
+                                isPlanningOpenOverride = ivcUser.IsPlanningOpenOverride;
+                            }
                         }
                     }
                 }

@@ -46,6 +46,7 @@ namespace Dominio
         public DbSet<EstadoRedetEF> EstadosRedet { get; set; }
         public DbSet<TipoPagoEF> TiposPago { get; set; }
         public DbSet<ABMPlaniEF> ABMPlani { get; set; } // Estado de planificación
+        public DbSet<UsuarioVinculadoEF> UsuariosVinculados { get; set; } // Atributos IVC por usuario
 
         // Nuevas tablas para consultas EF
         public DbSet<PaseSadeEF> PasesSade { get; set; }
