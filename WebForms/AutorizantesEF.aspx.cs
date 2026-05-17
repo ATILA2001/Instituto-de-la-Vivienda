@@ -253,11 +253,11 @@ namespace WebForms
                 };
 
                 Negocio.ExcelHelper.ExportarDatosGenericos(datosParaExportar, mapeoColumnas, "Autorizantes");
-                ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
+                // El download es la confirmación de éxito (Response.End() impide mostrar toast)
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al exportar: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -508,19 +508,32 @@ namespace WebForms
             autorizanteExistente.ConceptoId = int.Parse(ddlConceptoEditar.SelectedValue);
             autorizanteExistente.EstadoId = int.Parse(ddlEstadoEditar.SelectedValue);
 
-            if (_autorizanteNegocioEF.Modificar(autorizanteExistente))
+            try
             {
-                ToastService.Show(this.Page, "Autorizante modificado exitosamente!", ToastService.ToastType.Success);
+                if (_autorizanteNegocioEF.Modificar(autorizanteExistente))
+                {
+                    ToastService.Show(this.Page, "Autorizante modificado exitosamente!", ToastService.ToastType.Success);
 
-                // Limpiar cache SADE ya que se modificó un autorizante
-                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+                    // Limpiar cache SADE ya que se modificó un autorizante
+                    CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
 
-                // Limpiar el estado de edición
-                Session["EditingAutorizanteId"] = null;
+                    // Limpiar el estado de edición
+                    Session["EditingAutorizanteId"] = null;
+                }
+                else
+                {
+                    ToastService.Show(this.Page, "No se pudo guardar el cambio. Intente nuevamente.", ToastService.ToastType.Error);
+                }
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Hubo un problema al modificar el autorizante.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                return;
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                return;
             }
 
             // Limpiar campos
@@ -737,9 +750,9 @@ namespace WebForms
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar obras: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
             }
 
         }
@@ -782,9 +795,9 @@ namespace WebForms
                 ddlConceptoEditar.DataValueField = "Id";
                 ddlConceptoEditar.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar conceptos: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los conceptos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -825,9 +838,9 @@ namespace WebForms
                 ddlEstadoEditar.DataValueField = "Id";
                 ddlEstadoEditar.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar estados: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los estados. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -892,9 +905,9 @@ namespace WebForms
                 _totalRecords = todos?.Count ?? 0;
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar autorizantes: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los autorizantes. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1126,9 +1139,9 @@ namespace WebForms
        });", true);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos del autorizante: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del autorizante. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1180,9 +1193,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "No se pudo eliminar (puede tener dependencias).", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo eliminar el autorizante. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1257,9 +1270,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1393,9 +1406,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "Error al actualizar el estado.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al actualizar el estado: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el estado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)

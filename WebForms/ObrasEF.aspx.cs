@@ -63,9 +63,9 @@ namespace WebForms
 
                 totalRecords = todasLasObras?.Count ?? 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar obras: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -106,9 +106,9 @@ namespace WebForms
                 totalRecords = totalFiltrados;
                 ConfigurarPaginationControl(listaFiltrada);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error en BindGrid: {ex.Message}" + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""), ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -309,9 +309,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -512,9 +512,9 @@ namespace WebForms
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos del certificado: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos de la obra. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -545,9 +545,13 @@ namespace WebForms
                 CargarListaObrasCompleta();
                 CargarPaginaActual();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la obra. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -637,9 +641,9 @@ namespace WebForms
                     ddlBarrio.DataBind();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -745,9 +749,9 @@ namespace WebForms
                 ViewState["CurrentPageIndex"] = currentPageIndex;
                 CargarPaginaActual();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

@@ -99,10 +99,9 @@ namespace WebForms
                 // Guardar total de registros en campo
                 totalRecords = todoLosCertificados?.Count ?? 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar certificados: {ex.Message}", ToastService.ToastType.Error);
-                System.Diagnostics.Trace.TraceError("Error al cargar certificados: " + ex);
+                ToastService.Show(this.Page, "Error al cargar los certificados. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -324,9 +323,9 @@ namespace WebForms
                 ExcelHelper.ExportarDatosGenericos(todosLosCertificados, mapeoColumnas, "Certificados");
                 ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -475,9 +474,13 @@ namespace WebForms
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -586,9 +589,9 @@ namespace WebForms
                 AbrirModalEdicionCertificado(certificadoSeleccionado.Id);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos del certificado: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos del certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
 
         }
@@ -666,9 +669,9 @@ namespace WebForms
                     CargarPaginaActual();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al eliminar el certificado: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo eliminar el certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -964,9 +967,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error al actualizar el expediente: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1046,9 +1053,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "Error al actualizar el monto.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error al actualizar el monto: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el monto. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1347,9 +1358,9 @@ namespace WebForms
 
                 ToastService.Show(this.Page, "Ejecución física actualizada.", ToastService.ToastType.Info);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al actualizar ejecución física: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar la ejecución física. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

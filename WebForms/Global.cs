@@ -271,5 +271,27 @@ namespace WebForms
                 RedirectToLogin();
         }
 
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            var ex = Server.GetLastError();
+            Server.ClearError();
+
+            string mensaje = "Ocurrió un error inesperado. Por favor, reintentá la operación o contactá al administrador.";
+            if (ex is HttpException httpEx && httpEx.GetHttpCode() == 404)
+                mensaje = "La página solicitada no existe.";
+
+            try
+            {
+                if (Session != null)
+                    Session["error"] = mensaje;
+            }
+            catch (HttpException)
+            {
+                // El estado de sesión no está disponible en este contexto (ej: 404 de recursos)
+            }
+
+            Response.Redirect("~/Error.aspx", false);
+        }
+
     }
 }

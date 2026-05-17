@@ -3,6 +3,8 @@ using Dominio.DTO;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -232,8 +234,27 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
+                var totalCertificados = context.Certificados
+                    .Where(c => c.CodigoAutorizante == autorizanteModificado.CodigoAutorizante)
+                    .Sum(c => (decimal?)c.MontoTotal) ?? 0;
+
+                if (autorizanteModificado.MontoAutorizado < totalCertificados)
+                    throw new InvalidOperationException(
+                        $"El monto autorizado (${autorizanteModificado.MontoAutorizado:N2}) no puede ser menor al total ya certificado (${totalCertificados:N2}).");
+
                 context.Entry(autorizanteModificado).State = EntityState.Modified;
-                return context.SaveChanges() > 0;
+                try
+                {
+                    return context.SaveChanges() > 0;
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    var sqlEx = dbEx.InnerException?.InnerException as SqlException
+                                ?? dbEx.InnerException as SqlException;
+                    if (sqlEx != null)
+                        throw new InvalidOperationException(sqlEx.Message.Split('\n')[0].Trim(), dbEx);
+                    throw;
+                }
             }
         }
 

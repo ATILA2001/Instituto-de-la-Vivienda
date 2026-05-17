@@ -35,10 +35,6 @@ namespace Negocio
 
                 return dt;
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
             finally
             {
                 datos.cerrarConexion();
@@ -65,10 +61,6 @@ namespace Negocio
                 }
 
                 return lista;
-            }
-            catch (Exception ex)
-            {
-                throw;
             }
             finally
             {

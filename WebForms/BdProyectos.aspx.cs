@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -96,13 +97,11 @@ namespace WebForms
                 dgvBdProyecto.DataBind();
                 CalcularSubtotal();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar los Proyectos: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
-                dgvBdProyecto.DataSource = null; // Asegurar que la grilla esté vacía en caso de error
+                ToastService.Show(this.Page, "Error al cargar los proyectos. Intente nuevamente.", ToastService.ToastType.Error);
+                dgvBdProyecto.DataSource = null;
                 dgvBdProyecto.DataBind();
-                //txtSubtotal.Text = 0.ToString("C");
             }
         }
 
@@ -198,10 +197,9 @@ namespace WebForms
                         });", true);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar los datos del proyecto: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar los datos del proyecto. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -225,16 +223,18 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvBdProyecto.DataKeys[e.RowIndex].Value);
                 if (bdProyectoNegocio.eliminar(id))
                 {
-                    lblMensaje.Text = "Proyecto eliminado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Proyecto eliminado correctamente.", ToastService.ToastType.Success);
                     CargarListaProyectos(null, true); // Force complete reload
                     CalcularSubtotal();
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al eliminar el proyecto: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar el proyecto. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -314,10 +314,9 @@ namespace WebForms
                 CargarListaProyectos();
                 CalcularSubtotal();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -348,8 +347,7 @@ namespace WebForms
 
                     if (bdProyectoNegocio.modificar(proyecto))
                     {
-                        lblMensaje.Text = "Proyecto modificado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Proyecto modificado exitosamente!", ToastService.ToastType.Success);
 
                         // Clear the editing state
                         ViewState["EditingProyectoId"] = null;
@@ -357,8 +355,7 @@ namespace WebForms
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al modificar el proyecto.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "No se pudo modificar el proyecto.", ToastService.ToastType.Error);
                     }
                 }
                 else
@@ -369,13 +366,11 @@ namespace WebForms
 
                     if (bdProyectoNegocio.agregar(proyecto))
                     {
-                        lblMensaje.Text = "Proyecto agregado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Proyecto agregado exitosamente!", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar el proyecto.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "No se pudo agregar el proyecto.", ToastService.ToastType.Error);
                     }
                 }
 
@@ -395,10 +390,15 @@ namespace WebForms
                 CargarListaProyectos(null, true);
                 CalcularSubtotal();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = "Error: " + ex.Message;
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalOnError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalOnError", "$('#modalAgregar').modal('show');", true);
             }
         }
 

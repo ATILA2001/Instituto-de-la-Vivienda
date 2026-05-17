@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -28,10 +29,9 @@ namespace WebForms
                 dgvLineaGestion.DataSource = Session["listaLineas"];
                 dgvLineaGestion.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar las Lineas de gestion: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "No se pudieron cargar las líneas de gestión. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -51,19 +51,20 @@ namespace WebForms
                 negocio.agregar(linea);
 
                 // Mostrar mensaje de éxito
-                lblMensaje.Text = "¡Línea de Gestión agregada exitosamente!";
-                lblMensaje.ForeColor = System.Drawing.Color.Green;
+                ToastService.Show(this.Page, "¡Línea de Gestión agregada exitosamente!", ToastService.ToastType.Success);
 
 
                 List<LineaGestion> listaLineaGestion = negocio.listar();
                 dgvLineaGestion.DataSource = listaLineaGestion;
                 dgvLineaGestion.DataBind();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                // Mostrar error si ocurre un problema
-                lblMensaje.Text = "Error al agregar la Línea de Gestión: " + ex.Message;
-                lblMensaje.ForeColor = System.Drawing.Color.Red;
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo agregar la línea de gestión. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void dgvLineaGestion_SelectedIndexChanged(object sender, EventArgs e)
@@ -100,10 +101,9 @@ namespace WebForms
                 // Refrescar el listado de empresas
                 CargarListaLineaGestion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

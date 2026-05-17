@@ -35,10 +35,6 @@ namespace Negocio
 
                 return dt;
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
             finally
             {
                 datos.cerrarConexion();
@@ -73,10 +69,6 @@ namespace Negocio
 
                 return lista;
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
             finally
             {
                 datos.cerrarConexion();
@@ -86,40 +78,24 @@ namespace Negocio
         public void agregar(Barrio barrio)
         {
             AccesoDatos datos = new AccesoDatos();
-            try
+            if (barrio != null)
             {
-                if (barrio != null)
-                {
-                    datos.setearConsulta("INSERT INTO BARRIOS (NOMBRE) VALUES (@Nombre)");
-                    datos.setearParametros("@Nombre", barrio.Nombre);
-                    datos.ejecutarAccion();
-                    datos.cerrarConexion();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
+                datos.setearConsulta("INSERT INTO BARRIOS (NOMBRE) VALUES (@Nombre)");
+                datos.setearParametros("@Nombre", barrio.Nombre);
+                datos.ejecutarAccion();
+                datos.cerrarConexion();
             }
         }
         public void modificar(Barrio barrio)
         {
             AccesoDatos datos = new AccesoDatos();
-            try
+            if (barrio != null)
             {
-                if (barrio != null)
-                {
-                    datos.setearConsulta("UPDATE BARRIOS SET NOMBRE = @NOMBRE WHERE ID = @ID;");
-                    datos.setearParametros("@NOMBRE", barrio.Nombre);
-                    datos.setearParametros("@ID", barrio.Id);
-                    datos.ejecutarAccion();
-                    datos.cerrarConexion();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
+                datos.setearConsulta("UPDATE BARRIOS SET NOMBRE = @NOMBRE WHERE ID = @ID;");
+                datos.setearParametros("@NOMBRE", barrio.Nombre);
+                datos.setearParametros("@ID", barrio.Id);
+                datos.ejecutarAccion();
+                datos.cerrarConexion();
             }
         }
 

@@ -63,9 +63,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -244,9 +244,14 @@ namespace WebForms
 
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -312,9 +317,9 @@ namespace WebForms
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -346,9 +351,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "No se pudo eliminar la formulación.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error al eliminar: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la formulación. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -484,9 +493,9 @@ namespace WebForms
                 CalcularSubtotal(pagina);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar la grilla: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -538,9 +547,9 @@ namespace WebForms
                 ddlPrioridades.DataValueField = "Id";
                 ddlPrioridades.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -574,9 +583,9 @@ namespace WebForms
                     BindGrid();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al filtrar: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -594,9 +603,9 @@ namespace WebForms
                 dgvFormulacion.PageIndex = e.NewPageIndex;
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
