@@ -20,8 +20,17 @@ namespace WebForms
         {
             var sharedCookieName = Environment.GetEnvironmentVariable("SharedCookie__Name")
                 ?? WebConfigurationManager.AppSettings["SharedCookieName"];
+            if (string.IsNullOrEmpty(sharedCookieName))
+                throw new InvalidOperationException(
+                    "La cookie compartida no está configurada. " +
+                    "Defina la variable de entorno 'SharedCookie__Name' o el appSetting 'SharedCookieName'.");
+
             var sharedAppName = Environment.GetEnvironmentVariable("SharedCookie__ApplicationName")
                 ?? WebConfigurationManager.AppSettings["SharedCookieAppName"];
+            if (string.IsNullOrEmpty(sharedAppName))
+                throw new InvalidOperationException(
+                    "El nombre de aplicación compartido no está configurado. " +
+                    "Defina la variable de entorno 'SharedCookie__ApplicationName' o el appSetting 'SharedCookieAppName'.");
 
             app.SetDefaultSignInAsAuthenticationType("Identity.Application");
 
