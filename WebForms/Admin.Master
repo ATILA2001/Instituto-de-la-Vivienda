@@ -110,6 +110,24 @@
 
                         </ul>
 
+                        <!-- App Switcher -->
+                        <asp:PlaceHolder ID="phAppSwitcher" runat="server" Visible="false">
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-grid-3x3-gap-fill"></i> Aplicaciones
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <asp:Repeater ID="rptOtherApps" runat="server">
+                                            <ItemTemplate>
+                                                <li><a class="dropdown-item" href="<%# Eval("Url") %>"><%# Eval("Label") %></a></li>
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </asp:PlaceHolder>
+
                         <!-- Botón Cerrar Sesión -->
                         <ul class="navbar-nav">
                             <li class="nav-item">

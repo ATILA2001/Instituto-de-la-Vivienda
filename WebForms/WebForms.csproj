@@ -208,6 +208,7 @@
     <Content Include="CustomControls\TreeViewSearch\TreeViewSearch.js" />
     <Content Include="Error.aspx" />
     <Content Include="FormulacionEF.aspx" />
+    <Content Include="Inicio.aspx" />
     <Content Include="LegitimosEF.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Images\IVC--Logo-Blanco-fondo-azul.png" />
@@ -328,6 +329,13 @@
     <Compile Include="FormulacionEF.aspx.cs">
       <DependentUpon>FormulacionEF.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Inicio.aspx.cs">
+      <DependentUpon>Inicio.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Inicio.aspx.designer.cs">
+      <DependentUpon>Inicio.aspx</DependentUpon>
     </Compile>
     <Compile Include="LegitimosEF.aspx.cs">
       <DependentUpon>LegitimosEF.aspx</DependentUpon>

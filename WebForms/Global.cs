@@ -38,6 +38,7 @@ namespace WebForms
             var publicPaths = new List<string>
             {
                 "/Startup.aspx",
+                "/Inicio.aspx",
                 "/AccessDenied.aspx",
                 "/LogoutConfirmation.aspx",
                 "/Error.aspx",

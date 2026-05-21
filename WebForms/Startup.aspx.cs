@@ -172,18 +172,6 @@ namespace WebForms
                 return;
             }
 
-            // Admins tienen acceso total: redirigir a la página principal sin verificar perms_json
-            var isAdmin = user.Claims
-                .Any(c => c.Type == System.Security.Claims.ClaimTypes.Role
-                       && (c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-                           || c.Value.Equals("Administrador", StringComparison.OrdinalIgnoreCase)
-                           || c.Value.Equals("Administradores", StringComparison.OrdinalIgnoreCase)));
-            if (isAdmin)
-            {
-                Response.Redirect("~/CertificadosEF.aspx", true);
-                return;
-            }
-
             var permsJsonTmp = user.Claims.FirstOrDefault(c => c.Type == "perms_json")?.Value;
             var firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
             if (!string.IsNullOrWhiteSpace(firstPage))

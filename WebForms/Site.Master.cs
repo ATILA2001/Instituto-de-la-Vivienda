@@ -54,7 +54,7 @@ namespace WebForms
                                 && !string.Equals(c.Value, currentClientId, StringComparison.OrdinalIgnoreCase))
                     .Select(c => new AppLinkItem
                     {
-                        Label = c.Value,
+                        Label = GetAppDisplayName(c.Value),
                         Url = authWebBase + "/connect/switch-app?clientId=" + Uri.EscapeDataString(c.Value)
                     })
                     .ToList();
@@ -231,6 +231,19 @@ namespace WebForms
         protected void btnCerrarSesion_Click(object sender, EventArgs e)
         {
             IvcLogoutHelper.SignOutAndRedirect(Context);
+        }
+
+        private static string GetAppDisplayName(string clientId)
+        {
+            switch (clientId)
+            {
+                case "sai":
+                    return "Sistema de Administracion de Inventario";
+                case "PlaniLocal":
+                    return "Administracion Financiera";
+                default:
+                    return clientId;
+            }
         }
 
         /// <summary>
