@@ -123,6 +123,12 @@
                                                 <li><a class="dropdown-item" href="<%# Eval("Url") %>"><%# Eval("Label") %></a></li>
                                             </ItemTemplate>
                                         </asp:Repeater>
+                                        <asp:PlaceHolder ID="phAdminPanelDivider" runat="server" Visible="false">
+                                            <li><hr class="dropdown-divider"></li>
+                                        </asp:PlaceHolder>
+                                        <asp:PlaceHolder ID="phAdminPanelLink" runat="server" Visible="false">
+                                            <li><asp:HyperLink ID="lnkAdminPanel" runat="server" CssClass="dropdown-item" Text="Panel de Administración" /></li>
+                                        </asp:PlaceHolder>
                                     </ul>
                                 </li>
                             </ul>

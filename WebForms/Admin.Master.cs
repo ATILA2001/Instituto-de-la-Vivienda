@@ -18,6 +18,7 @@ namespace WebForms
         }
 
         protected List<AppLinkItem> OtherApps { get; private set; } = new List<AppLinkItem>();
+        protected string AdminPanelUrl { get; private set; } = "/admin";
 
         protected void Page_Init(object sender, EventArgs e)
         {
@@ -48,21 +49,35 @@ namespace WebForms
         private void BindAppSwitcher()
         {
             var principal = HttpContext.Current?.User as ClaimsPrincipal;
+            var currentUser = UserHelper.GetFullCurrentUser();
+            bool isAdmin = currentUser?.Tipo == true;
             if (principal != null)
             {
                 var authWebBase = (Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
                     ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]
                     ?? string.Empty).TrimEnd('/');
+                AdminPanelUrl = string.IsNullOrWhiteSpace(authWebBase) ? "/admin" : authWebBase + "/admin";
                 const string currentClientId = "PlaniLocal";
-                OtherApps = principal.Claims
+                var availableAppIds = principal.Claims
                     .Where(c => c.Type == "available_app"
-                                && !string.Equals(c.Value, currentClientId, StringComparison.OrdinalIgnoreCase))
-                    .Select(c => new AppLinkItem
+                                && !string.IsNullOrWhiteSpace(c.Value))
+                    .Select(c => c.Value)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                OtherApps = availableAppIds
+                    .Where(clientId => isAdmin || !string.Equals(clientId, currentClientId, StringComparison.OrdinalIgnoreCase))
+                    .Select(clientId => new AppLinkItem
                     {
-                        Label = GetAppDisplayName(c.Value),
-                        Url = authWebBase + "/connect/switch-app?clientId=" + Uri.EscapeDataString(c.Value)
+                        Label = GetAppDisplayName(clientId),
+                        Url = authWebBase + "/connect/switch-app?clientId=" + Uri.EscapeDataString(clientId)
                     })
                     .ToList();
+
+                if (phAppSwitcher != null)
+                {
+                    phAppSwitcher.Visible = isAdmin || availableAppIds.Count > 1;
+                }
             }
 
             if (rptOtherApps != null)
@@ -73,7 +88,19 @@ namespace WebForms
 
             if (phAppSwitcher != null)
             {
-                phAppSwitcher.Visible = OtherApps.Count > 0;
+                phAppSwitcher.Visible = isAdmin || phAppSwitcher.Visible;
+            }
+            if (phAdminPanelDivider != null)
+            {
+                phAdminPanelDivider.Visible = isAdmin && OtherApps.Count > 0;
+            }
+            if (phAdminPanelLink != null)
+            {
+                phAdminPanelLink.Visible = isAdmin;
+            }
+            if (lnkAdminPanel != null)
+            {
+                lnkAdminPanel.NavigateUrl = AdminPanelUrl;
             }
         }
 
