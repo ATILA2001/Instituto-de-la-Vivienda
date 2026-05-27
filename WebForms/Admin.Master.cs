@@ -57,7 +57,7 @@ namespace WebForms
                     ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]
                     ?? string.Empty).TrimEnd('/');
                 AdminPanelUrl = string.IsNullOrWhiteSpace(authWebBase) ? "/admin" : authWebBase + "/admin";
-                const string currentClientId = "PlaniLocal";
+                var currentClientId = GetCurrentClientId(principal);
                 var availableAppIds = principal.Claims
                     .Where(c => c.Type == "available_app"
                                 && !string.IsNullOrWhiteSpace(c.Value))
@@ -66,7 +66,7 @@ namespace WebForms
                     .ToList();
 
                 OtherApps = availableAppIds
-                    .Where(clientId => isAdmin || !string.Equals(clientId, currentClientId, StringComparison.OrdinalIgnoreCase))
+                    .Where(clientId => isAdmin || string.IsNullOrWhiteSpace(currentClientId) || !string.Equals(clientId, currentClientId, StringComparison.OrdinalIgnoreCase))
                     .Select(clientId => new AppLinkItem
                     {
                         Label = GetAppDisplayName(clientId),
@@ -104,18 +104,23 @@ namespace WebForms
             }
         }
 
-        private static string GetAppDisplayName(string clientId)
+        private static string GetCurrentClientId(ClaimsPrincipal principal)
         {
-            switch (clientId)
+            var activeApp = principal.Claims
+                .FirstOrDefault(c => string.Equals(c.Type, "app", StringComparison.OrdinalIgnoreCase)
+                                  && !string.IsNullOrWhiteSpace(c.Value))
+                ?.Value;
+
+            if (!string.IsNullOrWhiteSpace(activeApp))
             {
-                case "sai":
-                    return "Sistema de Administracion de Inventario";
-                case "PlaniLocal":
-                    return "Administracion Financiera";
-                default:
-                    return clientId;
+                return activeApp;
             }
+
+            return Environment.GetEnvironmentVariable("AuthWeb__ClientId")
+                ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebClientId"];
         }
+
+        private static string GetAppDisplayName(string clientId) => clientId;
 
         protected void btnCerrarSesion_Click(object sender, EventArgs e)
         {
