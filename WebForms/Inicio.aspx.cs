@@ -9,6 +9,8 @@ namespace WebForms
 {
     public partial class Inicio : System.Web.UI.Page
     {
+        protected string CurrentUserDisplayName { get; private set; } = "";
+
         private static readonly HomePageLink[] Pages =
         {
             new HomePageLink("ObrasEF.aspx", "Obras", "Consulta y gestion de obras."),
@@ -28,12 +30,14 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            var user = Context.GetOwinContext().Authentication.User;
+            CurrentUserDisplayName = GetCurrentUserDisplayName(user);
+
             if (IsPostBack)
             {
                 return;
             }
 
-            var user = Context.GetOwinContext().Authentication.User;
             var visiblePages = IsAdmin(user)
                 ? Pages
                 : Pages.Where(page => CanAccess(user, page.Url)).ToArray();
@@ -55,6 +59,11 @@ namespace WebForms
                 && (c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase)
                     || c.Value.Equals("Administrador", StringComparison.OrdinalIgnoreCase)
                     || c.Value.Equals("Administradores", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        private static string GetCurrentUserDisplayName(ClaimsPrincipal user)
+        {
+            return user?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         }
 
         private static bool CanAccess(ClaimsPrincipal user, string pageUrl)

@@ -84,8 +84,8 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <section class="container plafi-home">
         <div class="plafi-home__header">
-            <span class="plafi-home__eyebrow">PLAFI</span>
-            <h1>Planificacion y Formulacion</h1>
+            <span class="plafi-home__eyebrow">Hola <%: CurrentUserDisplayName %></span>
+            <h1>Planificacion Financiera</h1>
             <p class="text-muted mb-0">Selecciona una seccion disponible para comenzar.</p>
         </div>
 
