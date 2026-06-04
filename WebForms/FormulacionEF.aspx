@@ -52,7 +52,7 @@
 
                                         <div class="col-6">
                                             <div class="mb-3">
-                                                <label for="txtTechos" class="form-label">Techos 2026</label>
+                                                <label for="txtTechos" class="form-label">Techos</label>
                                                 <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" />
                                             </div>
                                         </div>
@@ -68,64 +68,29 @@
 
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMonto26" class="form-label">Monto 26</label>
-                                        <asp:TextBox ID="txtMonto26" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvMonto26"
-                                            ControlToValidate="txtMonto26"
+                                        <label for="ddlAnio" class="form-label">Año</label>
+                                        <asp:DropDownList ID="ddlAnio" CssClass="form-select" runat="server">
+                                            <asp:ListItem Value="2027" Text="2027"></asp:ListItem>
+                                            <asp:ListItem Value="2028" Text="2028"></asp:ListItem>
+                                            <asp:ListItem Value="2029" Text="2029"></asp:ListItem>
+                                        </asp:DropDownList>
+                                        <asp:RequiredFieldValidator ID="rfvAnio"
+                                            ControlToValidate="ddlAnio"
                                             ValidationGroup="AgregarFormulacion"
                                             runat="server"
-                                            ErrorMessage="Ingrese el monto 26"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMonto26"
-                                            ControlToValidate="txtMonto26"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese un valor numérico válido"
+                                            ErrorMessage="Seleccione un año"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true"
-                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                            InitialValue="" />
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
-                                        <label for="txtMonto27" class="form-label">Monto 27</label>
-                                        <asp:TextBox ID="txtMonto27" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvMonto27"
-                                            ControlToValidate="txtMonto27"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese el monto 27"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMonto27"
-                                            ControlToValidate="txtMonto27"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese un valor numérico válido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="txtMonto28" class="form-label">Monto 28</label>
-                                        <asp:TextBox ID="txtMonto28" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RequiredFieldValidator ID="rfvMonto28"
-                                            ControlToValidate="txtMonto28"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese el monto 28"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true" />
-                                        <asp:RegularExpressionValidator ID="revMonto28"
-                                            ControlToValidate="txtMonto28"
+                                        <label for="txtMonto" class="form-label">Monto</label>
+                                        <asp:TextBox ID="txtMonto" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                        <asp:RegularExpressionValidator ID="revMonto"
+                                            ControlToValidate="txtMonto"
                                             ValidationGroup="AgregarFormulacion"
                                             runat="server"
                                             ErrorMessage="Ingrese un valor numérico válido"
@@ -182,6 +147,27 @@
                                             CssClass="text-danger"
                                             EnableClientScript="true"
                                             InitialValue="" />
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="txtBreveDescripcion" class="form-label">Breve Descripción</label>
+                                        <asp:TextBox ID="txtBreveDescripcion" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="2" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtFechaInicio" class="form-label">Fecha Inicio</label>
+                                        <asp:TextBox ID="txtFechaInicio" CssClass="form-control" runat="server" TextMode="Date" />
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="txtFechaFin" class="form-label">Fecha Fin</label>
+                                        <asp:TextBox ID="txtFechaFin" CssClass="form-control" runat="server" TextMode="Date" />
                                     </div>
                                 </div>
 
@@ -275,15 +261,32 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Empresa" DataField="ObraEF.Empresa.Nombre" />
+                <asp:TemplateField HeaderText="Empresa">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderEmpresa" runat="server"
+                            HeaderText="Empresa"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate><%# Eval("ObraEF.Empresa.Nombre") %></ItemTemplate>
+                </asp:TemplateField>
                 <asp:TemplateField HeaderText="Contrata">
                     <ItemTemplate>
                         <%# string.Format("{0} {1}/{2}", Eval("ObraEF.Contrata.Nombre"), Eval("ObraEF.Numero"), Eval("ObraEF.Anio")) %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Barrio" DataField="ObraEF.Barrio.Nombre" />
-                <asp:BoundField HeaderText="Nombre de Obra" DataField="ObraEF.Descripcion" />
+                <asp:TemplateField HeaderText="Barrio">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderBarrio" runat="server"
+                            HeaderText="Barrio"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate><%# Eval("ObraEF.Barrio.Nombre") %></ItemTemplate>
+                </asp:TemplateField>
 
                 <asp:TemplateField HeaderText="Linea de Gestión">
                     <HeaderTemplate>
@@ -311,31 +314,49 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
+                <asp:TemplateField HeaderText="Nombre de Obra">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderObra" runat="server"
+                            HeaderText="Nombre de Obra"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate><%# Eval("ObraEF.Descripcion") %></ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField HeaderText="Breve Descripción" DataField="BreveDescripcion" />
+                <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
+                <asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
+
                 <asp:BoundField HeaderText="PPI" DataField="Ppi" />
 
-                <asp:BoundField HeaderText="Techos 2026" DataField="Techos" DataFormatString="{0:C}" />
+                <asp:BoundField HeaderText="Techos" DataField="Techos" DataFormatString="{0:C}" />
 
-                <asp:TemplateField HeaderText="Plurianual (2026,2027,2028)">
-                    <ItemTemplate>
-                        <%# CalcularPlurianual(Eval("ObraId")) %>
-                    </ItemTemplate>
-                </asp:TemplateField>
-
-                <asp:TemplateField HeaderText="Monto 2026">
+                <asp:TemplateField HeaderText="Año">
                     <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderMonto2026" runat="server"
-                            HeaderText="Monto 2026"
+                        <CustomControls:TreeViewSearch ID="cblsHeaderAnio" runat="server"
+                            HeaderText="Año"
                             DataTextField="Nombre"
                             DataValueField="Id"
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("Monto_26", "{0:C}") %>
+                        <%# ((DateTime)Eval("FechaPeriodo")).Year %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:BoundField HeaderText="Monto 2027" DataField="Monto_27" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Monto 2028" DataField="Monto_28" DataFormatString="{0:C}" />
+                <asp:TemplateField HeaderText="Monto">
+                    <HeaderTemplate>
+                        <CustomControls:TreeViewSearch ID="cblsHeaderMonto" runat="server"
+                            HeaderText="Monto"
+                            DataTextField="Nombre"
+                            DataValueField="Id"
+                            OnAcceptChanges="OnAcceptChanges" />
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%# Eval("Monto", "{0:C}") %>
+                    </ItemTemplate>
+                </asp:TemplateField>
                 <asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
                 <asp:BoundField HeaderText="Unidad de Medida" DataField="UnidadMedidaEF.Nombre" />
                 <asp:BoundField HeaderText="Valor de Medida" DataField="ValorMedida" />
@@ -400,16 +421,18 @@
         }
 
         function limpiarFormulario() {
-            document.getElementById('<%= txtMonto26.ClientID %>').value = '';
-            document.getElementById('<%= txtMonto27.ClientID %>').value = '';
-            document.getElementById('<%= txtMonto28.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto.ClientID %>').value = '';
             document.getElementById('<%= txtPpi.ClientID %>').value = '';
             document.getElementById('<%= txtTechos.ClientID %>').value = '';
             document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
             document.getElementById('<%= txtMesBase.ClientID %>').value = '';
             document.getElementById('<%= txtObservaciones.ClientID %>').value = '';
+            document.getElementById('<%= txtBreveDescripcion.ClientID %>').value = '';
+            document.getElementById('<%= txtFechaInicio.ClientID %>').value = '';
+            document.getElementById('<%= txtFechaFin.ClientID %>').value = '';
             document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlObraEditar.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= ddlAnio.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
         }

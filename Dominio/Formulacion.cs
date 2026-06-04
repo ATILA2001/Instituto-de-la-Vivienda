@@ -17,10 +17,13 @@ namespace Dominio
         public UnidadMedida UnidadMedida { get; set; }
         public decimal ValorMedida { get; set; }
         public decimal Plurianual { get; set; }
-        public decimal? Techos2026 { get; set; }
+        public decimal? Techos { get; set; }
         public string Observacion { get; set; }
         public Prioridad Prioridad { get; set; }
         public Formulacion() { }
         public DateTime? MesBase { get; set; }
+        public string BreveDescripcion { get; set; }
+        public DateTime? FechaInicio { get; set; }
+        public DateTime? FechaFin { get; set; }
     }
 }

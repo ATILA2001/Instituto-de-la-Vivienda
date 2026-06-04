@@ -192,7 +192,7 @@ namespace WebForms
             if (content.FindControl("dgvFormulacion") is GridView gv)
             {
                 var ppiColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "PPI", StringComparison.OrdinalIgnoreCase));
-                var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techos 2026", StringComparison.OrdinalIgnoreCase));
+                var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techos", StringComparison.OrdinalIgnoreCase));
 
                 if (ppiColumn != null)
                     ppiColumn.Visible = isVisible; // Admin ve PPI, User no
