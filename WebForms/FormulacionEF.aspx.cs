@@ -51,7 +51,7 @@ namespace WebForms
                         { "Fecha Fin", "FechaFin" },
                         { "Año", "FechaPeriodo" },
                         { "PPI", "Ppi" },
-                        { "Techos", "Techos" },
+                        { "Techo", "Techos" },
                         { "Monto", "Monto" },
                         { "Mes Base", "MesBase" },
                         { "Unidad de Medida", "UnidadMedidaEF.Nombre" },

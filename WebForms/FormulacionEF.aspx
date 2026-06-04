@@ -52,7 +52,7 @@
 
                                         <div class="col-6">
                                             <div class="mb-3">
-                                                <label for="txtTechos" class="form-label">Techos</label>
+                                                <label for="txtTechos" class="form-label">Techo</label>
                                                 <asp:TextBox ID="txtTechos" CssClass="form-control" runat="server" />
                                             </div>
                                         </div>
@@ -330,7 +330,7 @@
 
                 <asp:BoundField HeaderText="PPI" DataField="Ppi" />
 
-                <asp:BoundField HeaderText="Techos" DataField="Techos" DataFormatString="{0:C}" />
+                <asp:BoundField HeaderText="Techo" DataField="Techos" DataFormatString="{0:C}" />
 
                 <asp:TemplateField HeaderText="Año">
                     <HeaderTemplate>
