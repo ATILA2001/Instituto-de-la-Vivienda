@@ -1,4 +1,4 @@
-ï»¿using Dominio;
+using Dominio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +28,8 @@ namespace Negocio
                 else
                     datos.setearParametros("@Ppi", DBNull.Value);
 
-                if (formulacion.Techos2026 != null)
-                    datos.setearParametros("@Techos", formulacion.Techos2026);
+                if (formulacion.Techos != null)
+                    datos.setearParametros("@Techos", formulacion.Techos);
                 else
                     datos.setearParametros("@Techos", DBNull.Value);
 
@@ -138,8 +138,8 @@ namespace Negocio
                 else
                     datos.setearParametros("@IdUnidadMedida", DBNull.Value);
 
-                if (formulacion.Techos2026 != null)
-                    datos.setearParametros("@Techos", formulacion.Techos2026);
+                if (formulacion.Techos != null)
+                    datos.setearParametros("@Techos", formulacion.Techos);
                 else
                     datos.setearParametros("@Techos", DBNull.Value);
 
@@ -257,9 +257,9 @@ namespace Negocio
                                 E.NOMBRE AS EMPRESA,
                                 E.ID AS EMPRESA_ID,
                                 O.NUMERO, 
-CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
+CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
                                 C.ID AS CONTRATA_ID, 
-                                O.AÃ‘O,
+                                O.AÑO,
                                 O.ETAPA,
                                 O.OBRA AS OBRA_NUMERO,
                                 B.NOMBRE AS BARRIO,
@@ -336,7 +336,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
                             Id = datos.Lector["CONTRATA_ID"] != DBNull.Value ? (int)datos.Lector["CONTRATA_ID"] : 0,
                             Nombre = datos.Lector["CONTRATA"] != DBNull.Value ? (string)datos.Lector["CONTRATA"] : string.Empty
                         },
-                        AÃ±o = datos.Lector["AÃ‘O"] != DBNull.Value ? (int?)datos.Lector["AÃ‘O"] : null,
+                        Año = datos.Lector["AÑO"] != DBNull.Value ? (int?)datos.Lector["AÑO"] : null,
                         Etapa = datos.Lector["ETAPA"] != DBNull.Value ? (int?)datos.Lector["ETAPA"] : null,
                         ObraNumero = datos.Lector["OBRA_NUMERO"] != DBNull.Value ? (int?)datos.Lector["OBRA_NUMERO"] : null,
                         Barrio = new Barrio
@@ -371,7 +371,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
                         Convert.ToInt32(datos.Lector["PPI"]) : 0;
                     aux.Plurianual = datos.Lector["PLURIANUAL"] != DBNull.Value ?
                         Convert.ToInt32(datos.Lector["PLURIANUAL"]) : 0;
-                    aux.Techos2026 = datos.Lector["TECHOS"] != DBNull.Value ?
+                    aux.Techos = datos.Lector["TECHOS"] != DBNull.Value ?
                         Convert.ToDecimal(datos.Lector["TECHOS"]) : 0;
                     aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ?
                         Convert.ToDateTime(datos.Lector["MES_BASE"]) : (DateTime?)null;
@@ -428,9 +428,9 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
                                 E.NOMBRE AS EMPRESA,
                                 E.ID AS EMPRESA_ID,
                                 O.NUMERO,
-                                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
+                                CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÑO) AS CONTRATA,
                                 C.ID AS CONTRATA_ID, 
-                                O.AÃ‘O,
+                                O.AÑO,
                                 O.ETAPA,
                                 O.OBRA AS OBRA_NUMERO,
                                 B.NOMBRE AS BARRIO,
@@ -501,7 +501,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
                             Id = datos.Lector["CONTRATA_ID"] != DBNull.Value ? (int)datos.Lector["CONTRATA_ID"] : 0,
                             Nombre = datos.Lector["CONTRATA"] != DBNull.Value ? (string)datos.Lector["CONTRATA"] : string.Empty
                         },
-                        AÃ±o = datos.Lector["AÃ‘O"] != DBNull.Value ? (int?)datos.Lector["AÃ‘O"] : null,
+                        Año = datos.Lector["AÑO"] != DBNull.Value ? (int?)datos.Lector["AÑO"] : null,
                         Etapa = datos.Lector["ETAPA"] != DBNull.Value ? (int?)datos.Lector["ETAPA"] : null,
                         ObraNumero = datos.Lector["OBRA_NUMERO"] != DBNull.Value ? (int?)datos.Lector["OBRA_NUMERO"] : null,
                         Barrio = new Barrio
@@ -536,7 +536,7 @@ CONCAT(C.NOMBRE, ' ', O.NUMERO, '/', O.AÃ‘O) AS CONTRATA,
                         Convert.ToInt32(datos.Lector["PPI"]) : 0;
                     aux.Plurianual = datos.Lector["PLURIANUAL"] != DBNull.Value ?
                         Convert.ToDecimal(datos.Lector["PLURIANUAL"]) : 0;
-                    aux.Techos2026 = datos.Lector["TECHOS"] != DBNull.Value ?
+                    aux.Techos = datos.Lector["TECHOS"] != DBNull.Value ?
                         Convert.ToDecimal(datos.Lector["TECHOS"]) : 0;
                     aux.MesBase = datos.Lector["MES_BASE"] != DBNull.Value ?
                         Convert.ToDateTime(datos.Lector["MES_BASE"]) : (DateTime?)null;
