@@ -327,9 +327,9 @@ namespace WebForms
  $('#modalAgregar').modal('show');
  });", true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar datos: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos de la redeterminación. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void dgvRedeterminacion_RowDeleting(object sender, GridViewDeleteEventArgs e)
@@ -343,9 +343,13 @@ namespace WebForms
                     BindGrid();
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error al eliminar la redeterminación: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la redeterminación. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -446,9 +450,15 @@ namespace WebForms
 
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalOnError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalOnError", "$('#modalAgregar').modal('show');", true);
             }
         }
 
@@ -528,9 +538,9 @@ namespace WebForms
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos iniciales: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos iniciales. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -687,13 +697,17 @@ namespace WebForms
                 "Nombre", "Id");
 
                 // Usuario: Id, Nombre
+                var areaRedetId = context.Areas.AsNoTracking()
+                    .Where(a => a.Nombre == "Redeterminaciones")
+                    .Select(a => (int?)a.Id)
+                    .FirstOrDefault();
                 bindFilter("cblsHeaderUsuario",
                 context.Usuarios.AsNoTracking()
-                .Where(u => u.Estado && u.AreaId == 16) // Solo usuarios activos del área16
+                .Where(u => u.Estado && areaRedetId.HasValue && u.AreaId == areaRedetId.Value)
                 .OrderBy(u => u.Nombre)
                 .Select(u => new { u.Id, u.Nombre })
                 .ToList(),
-                "Nombre", "Id");//nuevo bind
+                "Nombre", "Id");
 
                 // Empresa: Id, Nombre
                 bindFilter("cblsHeaderEmpresa",
@@ -836,9 +850,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void btnExportarExcel_Click(object sender, EventArgs e)
@@ -878,9 +896,9 @@ namespace WebForms
                 ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
                 ToastService.Show(this.Page, "Exportación completada con éxito.", ToastService.ToastType.Success);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -897,9 +915,13 @@ namespace WebForms
                 BindGrid();
                 ToastService.Show(this.Page, "Etapa actualizada correctamente.", ToastService.ToastType.Success);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al actualizar la etapa: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar la etapa. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -916,9 +938,13 @@ namespace WebForms
                 BindGrid();
                 ToastService.Show(this.Page, "Usuario actualizado correctamente.", ToastService.ToastType.Success);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al actualizar el usuario: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el usuario. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
+using System.Security.Claims;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -13,12 +13,26 @@ namespace WebForms
 {
     public partial class Site : System.Web.UI.MasterPage
     {
+        public class AppLinkItem
+        {
+            public string Label { get; set; }
+            public string Url { get; set; }
+        }
+
+        protected List<AppLinkItem> OtherApps { get; private set; } = new List<AppLinkItem>();
+        protected string AdminPanelUrl { get; private set; } = "/admin";
+
         protected void Page_Init(object sender, EventArgs e)
         {
             // Comprobación básica de usuario logueado
             if (Session["Usuario"] == null)
             {
-                Response.Redirect("Authentication.aspx", false);
+                UserHelper.EnsureSessionUserFromClaims();
+            }
+
+            if (Session["Usuario"] == null)
+            {
+                Response.Redirect("Startup.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();
             }
@@ -28,11 +42,64 @@ namespace WebForms
         {
             UsuarioEF currentUser = UserHelper.GetFullCurrentUser();
 
-            // Obtenemos si el usuario es administrador.
+            // Build app switcher list from available_app claims
+            var principal = HttpContext.Current?.User as ClaimsPrincipal;
             bool isAdmin = currentUser?.Tipo == true;
-            // Determinar si el usuario pertenece al área de Redeterminaciones
-            bool isRedeterminacionesUser = currentUser?.AreaId == 16;
-            bool isSecretariaUser = currentUser?.AreaId == 19;
+            if (principal != null)
+            {
+                var authWebBase = (Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                    ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebBaseUrl"]
+                    ?? string.Empty).TrimEnd('/');
+                AdminPanelUrl = string.IsNullOrWhiteSpace(authWebBase) ? "/admin" : authWebBase + "/admin";
+                var currentClientId = GetCurrentClientId(principal);
+                var availableAppIds = principal.Claims
+                    .Where(c => c.Type == "available_app"
+                                && !string.IsNullOrWhiteSpace(c.Value))
+                    .Select(c => c.Value)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                OtherApps = availableAppIds
+                    .Where(clientId => isAdmin || string.IsNullOrWhiteSpace(currentClientId) || !string.Equals(clientId, currentClientId, StringComparison.OrdinalIgnoreCase))
+                    .Select(clientId => new AppLinkItem
+                    {
+                        Label = GetAppDisplayName(clientId),
+                        Url = authWebBase + "/connect/switch-app?clientId=" + Uri.EscapeDataString(clientId)
+                    })
+                    .ToList();
+
+                if (phAppSwitcher != null)
+                {
+                    phAppSwitcher.Visible = isAdmin || availableAppIds.Count > 1;
+                }
+            }
+
+            if (rptOtherApps != null)
+            {
+                rptOtherApps.DataSource = OtherApps;
+                rptOtherApps.DataBind();
+            }
+
+            if (phAppSwitcher != null)
+            {
+                phAppSwitcher.Visible = isAdmin || phAppSwitcher.Visible;
+            }
+            if (phAdminPanelDivider != null)
+            {
+                phAdminPanelDivider.Visible = isAdmin && OtherApps.Count > 0;
+            }
+            if (phAdminPanelLink != null)
+            {
+                phAdminPanelLink.Visible = isAdmin;
+            }
+            if (lnkAdminPanel != null)
+            {
+                lnkAdminPanel.NavigateUrl = AdminPanelUrl;
+            }
+
+            // Obtenemos si el usuario es administrador.
+            bool isRedeterminacionesUser = UserHelper.IsUserInArea(IvcAreaIds.Redeterminaciones);
+            bool isSecretariaUser = UserHelper.IsUserInArea(IvcAreaIds.Secretaria);
 
 
             // Aplicar la configuración de navegación según el tipo de usuario
@@ -74,11 +141,6 @@ namespace WebForms
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                chkIsPlanningOpen.Checked = ABMPlaniNegocio.GetIsPlanningOpen();
-                chkIsFormulationOpen.Checked = ABMPlaniNegocio.GetIsFormulationOpen();
-            }
         }
 
         protected void ShowOrHideRedeterminacionesNavItems(bool visible)
@@ -130,7 +192,7 @@ namespace WebForms
             if (content.FindControl("dgvFormulacion") is GridView gv)
             {
                 var ppiColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "PPI", StringComparison.OrdinalIgnoreCase));
-                var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techos 2026", StringComparison.OrdinalIgnoreCase));
+                var techosColumn = gv.Columns.OfType<DataControlField>().FirstOrDefault(c => string.Equals(c.HeaderText, "Techo", StringComparison.OrdinalIgnoreCase));
 
                 if (ppiColumn != null)
                     ppiColumn.Visible = isVisible; // Admin ve PPI, User no
@@ -146,25 +208,14 @@ namespace WebForms
             UsuarioEF currentUser = UserHelper.GetFullCurrentUser();
             bool isPlanningOpen = ABMPlaniNegocio.GetIsPlanningOpen() || currentUser.IsPlanningOpenOverride;
             bool isFormulationOpen = ABMPlaniNegocio.GetIsFormulationOpen();
-
-            // Use the common method with the dynamic values
             ConfigureUserControls(isPlanningOpen, isFormulationOpen);
         }
 
-        /// <summary>
-        /// Oculta todos los controles de usuario, independientemente del estado de planificación o formulación
-        /// </summary>
         protected void HideAllUserControls()
         {
-            // Use the common method with all values set to false
             ConfigureUserControls(false, false);
         }
 
-        /// <summary>
-        /// Configura la visibilidad de los controles de usuario según los parámetros especificados
-        /// </summary>
-        /// <param name="showPlanningControls">Si es true, muestra los controles de planificación</param>
-        /// <param name="showFormulationControls">Si es true, muestra los controles de formulación</param>
         private void ConfigureUserControls(bool showPlanningControls, bool showFormulationControls)
         {
             var content = ContentPlaceHolder1;
@@ -178,9 +229,7 @@ namespace WebForms
                     .FirstOrDefault(c => c.HeaderText == "Acciones");
 
                 if (actionsColumn != null)
-                {
                     actionsColumn.Visible = showPlanningControls;
-                }
             }
 
             // Configurar columna de acciones en dgvFormulacion
@@ -191,41 +240,42 @@ namespace WebForms
                     .FirstOrDefault(c => c.HeaderText == "Acciones");
 
                 if (actionsColumn != null)
-                {
                     actionsColumn.Visible = showFormulationControls;
-                }
             }
 
-            // Configurar panel de botón de agregar para planificación
+            // Configurar panel de botón de agregar
             if (content.FindControl("panelShowAddButton") is Panel panelShowAddButton)
-            {
                 panelShowAddButton.Visible = showPlanningControls;
-            }
 
             // Configurar panel de botón de agregar para formulación
             if (content.FindControl("panelFormulationShowAddButton") is Panel panelFormulationShowAddButton)
-            {
                 panelFormulationShowAddButton.Visible = showFormulationControls;
+        }
+
+
+        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        {
+            IvcLogoutHelper.SignOutAndRedirect(Context);
+        }
+
+        private static string GetCurrentClientId(ClaimsPrincipal principal)
+        {
+            var activeApp = principal.Claims
+                .FirstOrDefault(c => string.Equals(c.Type, "app", StringComparison.OrdinalIgnoreCase)
+                                  && !string.IsNullOrWhiteSpace(c.Value))
+                ?.Value;
+
+            if (!string.IsNullOrWhiteSpace(activeApp))
+            {
+                return activeApp;
             }
+
+            return Environment.GetEnvironmentVariable("AuthWeb__ClientId")
+                ?? System.Configuration.ConfigurationManager.AppSettings["AuthWebClientId"];
         }
 
+        private static string GetAppDisplayName(string clientId) => clientId;
 
-        protected void btnCerrarSesion_Click(object sender, EventArgs e) // codigo duplicado en admin.master.cs
-        {
-            Session.Clear();
-            Context.Request.Cookies.Clear();
-            Response.Redirect("Authentication.aspx", false);
-        }
-
-        protected void chkIsPlanningOpen_ServerChange(object sender, EventArgs e)
-        {
-            Negocio.ABMPlaniNegocio.SetIsPlanningOpen(chkIsPlanningOpen.Checked);
-        }
-
-        protected void chkIsFormulationOpen_ServerChange(object sender, EventArgs e)
-        {
-            ABMPlaniNegocio.SetIsFormulationOpen(chkIsFormulationOpen.Checked);
-        }
         /// <summary>
         /// Obtiene el nombre de la página actual sin la extensión .aspx
         /// </summary>

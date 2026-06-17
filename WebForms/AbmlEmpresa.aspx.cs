@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -38,10 +39,9 @@ namespace WebForms
                 dgvEmpresa.DataSource = Session["listaEmpresa"];
                 dgvEmpresa.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar las empresas: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar las empresas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -55,22 +55,23 @@ namespace WebForms
                     empresa.Nombre = txtNombre.Text.Trim();
                     negocio.agregar(empresa);
 
-                    lblMensaje.Text = "¡Empresa agregada exitosamente!";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "¡Empresa agregada exitosamente!", ToastService.ToastType.Success);
                     txtNombre.Text = string.Empty;
 
                     CargarListaEmpresas();
                 }
                 else
                 {
-                    lblMensaje.Text = "Debe llenar todos los campos.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Debe llenar todos los campos.", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al agregar la empresa: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo agregar la empresa. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -87,15 +88,17 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvEmpresa.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
-                    lblMensaje.Text = "Empresa eliminada correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Empresa eliminada correctamente.", ToastService.ToastType.Success);
                     CargarListaEmpresas();
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al eliminar la empresa: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la empresa. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

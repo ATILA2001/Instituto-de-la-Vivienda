@@ -334,6 +334,16 @@
 				</asp:TemplateField>
 
 				<asp:BoundField HeaderText="Porcentaje" DataField="Porcentaje" DataFormatString="{0:F2}%" />
+				<asp:TemplateField HeaderText="Ejec. Física (%)">
+					<ItemTemplate>
+						<asp:TextBox ID="txtPorcEjecFisicaInline" runat="server"
+							Text='<%# ((Dominio.DTO.CertificadoDTO)Container.DataItem).IdReliquidacion == 0 && ((Dominio.DTO.CertificadoDTO)Container.DataItem).PorcEjecFisica.HasValue ? ((Dominio.DTO.CertificadoDTO)Container.DataItem).PorcEjecFisica.Value.ToString("F2") : string.Empty %>'
+							AutoPostBack="true"
+							OnTextChanged="txtPorcEjecFisicaInline_TextChanged"
+							Enabled='<%# ((Dominio.DTO.CertificadoDTO)Container.DataItem).IdReliquidacion == 0 && !string.IsNullOrWhiteSpace(((Dominio.DTO.CertificadoDTO)Container.DataItem).ExpedientePago) %>'
+							CssClass="form-control form-control-sm w-auto text-center" />
+					</ItemTemplate>
+				</asp:TemplateField>
 				<asp:BoundField HeaderText="Sigaf" DataField="Sigaf" DataFormatString="{0:C}" />
 				<asp:BoundField HeaderText="Buzon SADE" DataField="BuzonSade" />
 				<asp:BoundField HeaderText="Fecha SADE" DataField="FechaSade" DataFormatString="{0:dd/MM/yyyy}" />

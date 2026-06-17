@@ -359,6 +359,8 @@
                     </asp:TemplateField>
                     <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
                     <asp:BoundField HeaderText="Fecha Fin" DataField="FechaFin" DataFormatString="{0:dd-MM-yyyy}" />
+                    <asp:BoundField HeaderText="Ejec. Física (%)" DataField="EjecFisica" DataFormatString="{0:N2}%" />
+                    <asp:BoundField HeaderText="Faltante Fís. (%)" DataField="FaltanteEjecFisica" DataFormatString="{0:N2}%" />
 
                     <asp:TemplateField HeaderText="Acciones">
                         <HeaderTemplate>

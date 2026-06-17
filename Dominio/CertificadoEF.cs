@@ -34,5 +34,8 @@ namespace Dominio
 
         [ForeignKey("TipoPagoId")]
         public virtual TipoPagoEF TipoPago { get; set; }
+
+        [Column("PORC_EJEC_FISICA")]
+        public decimal? PorcEjecFisica { get; set; }
     }
 }

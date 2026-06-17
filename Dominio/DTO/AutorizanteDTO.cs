@@ -64,6 +64,10 @@ namespace Dominio.DTO
         // Propiedades ACDIR (calculadas externamente)
         public string Acdir { get; set; }
 
+        // Ejecución física (suma de PorcEjecFisica de certificados y legítimos del autorizante)
+        public decimal? EjecFisica { get; set; }
+        public decimal? FaltanteEjecFisica { get; set; }
+
         // Constructor vacío
         public AutorizanteDTO() { }
 

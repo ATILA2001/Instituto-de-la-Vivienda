@@ -37,6 +37,7 @@ namespace Dominio
         public DbSet<BarrioEF> Barrios { get; set; }
         // Usuarios (mappea la tabla Usuarios)
         public DbSet<UsuarioEF> Usuarios { get; set; }
+        public DbSet<DataProtectionKeyEF> DataProtectionKeys { get; set; }
         public DbSet<AreaEF> Areas { get; set; }
         public DbSet<LineaGestionEF> LineasGestion { get; set; }
         public DbSet<LineaGestionFFEF> LineasGestionFF { get; set; }
@@ -45,6 +46,7 @@ namespace Dominio
         public DbSet<EstadoRedetEF> EstadosRedet { get; set; }
         public DbSet<TipoPagoEF> TiposPago { get; set; }
         public DbSet<ABMPlaniEF> ABMPlani { get; set; } // Estado de planificación
+        public DbSet<UsuarioVinculadoEF> UsuariosVinculados { get; set; } // Atributos IVC por usuario
 
         // Nuevas tablas para consultas EF
         public DbSet<PaseSadeEF> PasesSade { get; set; }

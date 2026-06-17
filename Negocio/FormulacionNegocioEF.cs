@@ -27,28 +27,9 @@ namespace Negocio
                 // Solo filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(f => f.ObraEF.AreaId.HasValue && areasPermitidas.Contains(f.ObraEF.AreaId.Value));
-                        System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Usuario especial área 18 - Filtrando por áreas 1, 2 y 3");
-                    }
-                    // Usuario no administrador: filtrar por su área
-                    else if (usuario.AreaId.HasValue)
-                    {
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.AreaId);
-                        System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Usuario no admin - Filtrando por AreaId: {usuario.AreaId}");
-                    }
-                    else if (usuario.Area != null)
-                    {
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
-                        System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Usuario no admin - Filtrando por Area.Id: {usuario.Area.Id}");
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF] Usuario administrador - Mostrando todas las formulaciones");
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 var resultado = query.ToList();
@@ -130,17 +111,9 @@ namespace Negocio
                 // Filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(f => f.ObraEF.AreaId.HasValue && areasPermitidas.Contains(f.ObraEF.AreaId.Value));
-                        System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF.ContarPorUsuario] Usuario especial área 18 - Contando formulaciones de áreas 1, 2 y 3");
-                    }
-                    else if (usuario.AreaId.HasValue)
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.AreaId);
-                    else if (usuario.Area != null)
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 // Aplicar filtro general de búsqueda
@@ -181,17 +154,9 @@ namespace Negocio
                 // Filtrar por área si NO es administrador
                 if (!usuario.Tipo)
                 {
-                    // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (usuario.AreaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = query.Where(f => f.ObraEF.AreaId.HasValue && areasPermitidas.Contains(f.ObraEF.AreaId.Value));
-                        System.Diagnostics.Debug.WriteLine($"[FormulacionNegocioEF.ListarPorUsuarioPaginado] Usuario especial área 18 - Listando formulaciones de áreas 1, 2 y 3");
-                    }
-                    else if (usuario.AreaId.HasValue)
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.AreaId);
-                    else if (usuario.Area != null)
-                        query = query.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                 }
 
                 // Aplicar filtro general de búsqueda
@@ -222,13 +187,14 @@ namespace Negocio
         /// Mantiene la firma original separada para no romper código existente.
         /// </summary>
         public int ContarPorUsuarioConFiltros(UsuarioEF usuario, string filtroGeneral,
-            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos, List<int> prioridades,
+            List<int> obras = null, List<int> anios = null, List<int> empresas = null, List<int> contratas = null, List<int> barrios = null)
         {
             using (var context = new IVCdbContext())
             {
                 var query = BuildBaseQuery(context, usuario);
 
-                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos26, prioridades);
+                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos, prioridades, obras, anios, empresas, contratas, barrios);
 
                 return query.Count();
             }
@@ -238,12 +204,13 @@ namespace Negocio
         /// Versión extendida paginada con filtros discretos.
         /// </summary>
         public List<FormulacionEF> ListarPorUsuarioPaginadoConFiltros(UsuarioEF usuario, int pageIndex, int pageSize, string filtroGeneral,
-            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos, List<int> prioridades,
+            List<int> obras = null, List<int> anios = null, List<int> empresas = null, List<int> contratas = null, List<int> barrios = null)
         {
             using (var context = new IVCdbContext())
             {
                 var query = BuildBaseQuery(context, usuario);
-                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos26, prioridades);
+                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, montos, prioridades, obras, anios, empresas, contratas, barrios);
 
                 return query
                     .OrderBy(f => f.ObraEF.Descripcion)
@@ -272,16 +239,9 @@ namespace Negocio
 
             if (!usuario.Tipo)
             {
-                // NUEVO: Caso especial para usuario con AreaId 18 - acceso a áreas 1, 2 y 3
-                if (usuario.AreaId == 19)
-                {
-                    var areasPermitidas = new List<int> { 1, 2, 3 };
-                    query = query.Where(f => f.ObraEF.AreaId.HasValue && areasPermitidas.Contains(f.ObraEF.AreaId.Value));
-                }
-                else if (usuario.AreaId.HasValue)
-                    query = query.Where(f => f.ObraEF.AreaId == usuario.AreaId);
-                else if (usuario.Area != null)
-                    query = query.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+                var filtroAreaIds = usuario.IvcAreaIds;
+                if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                    query = query.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
             }
 
             return query;
@@ -291,7 +251,8 @@ namespace Negocio
         /// Aplica filtros opcionales sobre el query.
         /// </summary>
         private IQueryable<FormulacionEF> ApplyOptionalFilters(IQueryable<FormulacionEF> query, string filtroGeneral,
-            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos26, List<int> prioridades)
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<decimal> montos, List<int> prioridades,
+            List<int> obras = null, List<int> anios = null, List<int> empresas = null, List<int> contratas = null, List<int> barrios = null)
         {
             if (!string.IsNullOrWhiteSpace(filtroGeneral))
             {
@@ -313,10 +274,20 @@ namespace Negocio
                 query = query.Where(f => f.ObraEF.Proyecto.LineaGestionEF != null && lineasGestion.Contains(f.ObraEF.Proyecto.LineaGestionEF.Id));
             if (proyectos != null && proyectos.Any())
                 query = query.Where(f => f.ObraEF.Proyecto != null && proyectos.Contains(f.ObraEF.Proyecto.Id));
-            if (montos26 != null && montos26.Any())
-                query = query.Where(f => f.Monto_26.HasValue && montos26.Contains(f.Monto_26.Value));
+            if (montos != null && montos.Any())
+                query = query.Where(f => f.Monto.HasValue && montos.Contains(f.Monto.Value));
             if (prioridades != null && prioridades.Any())
                 query = query.Where(f => f.PrioridadEF != null && prioridades.Contains(f.PrioridadEF.Id));
+            if (obras != null && obras.Any())
+                query = query.Where(f => obras.Contains(f.ObraId));
+            if (anios != null && anios.Any())
+                query = query.Where(f => anios.Contains(f.FechaPeriodo.Year));
+            if (empresas != null && empresas.Any())
+                query = query.Where(f => f.ObraEF.EmpresaId.HasValue && empresas.Contains(f.ObraEF.EmpresaId.Value));
+            if (contratas != null && contratas.Any())
+                query = query.Where(f => f.ObraEF.ContrataId.HasValue && contratas.Contains(f.ObraEF.ContrataId.Value));
+            if (barrios != null && barrios.Any())
+                query = query.Where(f => f.ObraEF.BarrioId.HasValue && barrios.Contains(f.ObraEF.BarrioId.Value));
 
             return query;
         }

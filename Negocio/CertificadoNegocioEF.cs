@@ -39,8 +39,8 @@ namespace Negocio
         }
 
         /// <summary>
-        /// Obtiene un certificado específico por su ID.
-        /// Esencial para el patrón de "recuperar y modificar".
+        /// Obtiene un certificado especï¿½fico por su ID.
+        /// Esencial para el patrï¿½n de "recuperar y modificar".
         /// </summary>
         /// <param name="id">El ID del certificado a buscar.</param>
         /// <returns>La entidad CertificadoEF o null si no se encuentra.</returns>
@@ -48,7 +48,7 @@ namespace Negocio
         {
             using (var context = new IVCdbContext())
             {
-                // Find es la forma más eficiente de obtener una entidad por su clave primaria.
+                // Find es la forma mï¿½s eficiente de obtener una entidad por su clave primaria.
                 return context.Certificados.Find(id);
             }
         }
@@ -80,6 +80,20 @@ namespace Negocio
                     return context.SaveChanges() > 0;
                 }
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Actualiza Ãºnicamente el porcentaje de ejecuciÃ³n fÃ­sica de un certificado.
+        /// </summary>
+        public bool ActualizarEjecFisica(int id, decimal? porcentaje)
+        {
+            using (var context = new IVCdbContext())
+            {
+                var certificado = context.Certificados.Find(id);
+                if (certificado == null) return false;
+                certificado.PorcEjecFisica = porcentaje;
+                return context.SaveChanges() > 0;
             }
         }
     }

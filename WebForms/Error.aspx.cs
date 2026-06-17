@@ -17,6 +17,10 @@ namespace WebForms
                 lblMensaje.Text = Server.HtmlEncode(Session["error"].ToString());
                 Session.Remove("error"); // Evita redirecciones repetidas
             }
+            else
+            {
+                lblMensaje.Text = "Ocurrió un error inesperado. Por favor, reintentá la operación o contactá al administrador.";
+            }
         }
     }
 }

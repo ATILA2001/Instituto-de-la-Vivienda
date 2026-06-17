@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -210,10 +211,9 @@ namespace WebForms
                 dgvMovimiento.DataSource = resultadoFinal;
                 dgvMovimiento.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar los Movimientos: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "No se pudieron cargar los movimientos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -261,10 +261,9 @@ namespace WebForms
                         });", true);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar los datos del movimiento: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del movimiento. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -275,15 +274,17 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvMovimiento.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
-                    lblMensaje.Text = "Movimiento eliminado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Movimiento eliminado correctamente.", ToastService.ToastType.Success);
                     CargarListaMovimientos(null, true);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al eliminar el movimiento: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar el movimiento. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -294,10 +295,9 @@ namespace WebForms
                 dgvMovimiento.PageIndex = e.NewPageIndex;
                 CargarListaMovimientos();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -327,8 +327,7 @@ namespace WebForms
 
                     if (negocio.modificar(movimiento))
                     {
-                        lblMensaje.Text = "Movimiento modificado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Movimiento modificado exitosamente!", ToastService.ToastType.Success);
 
                         // Clear the editing state
                         ViewState["EditingMovimientoId"] = null;
@@ -336,8 +335,7 @@ namespace WebForms
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al modificar el movimiento.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al modificar el movimiento.", ToastService.ToastType.Warning);
                     }
                 }
                 else
@@ -347,13 +345,11 @@ namespace WebForms
 
                     if (negocio.agregar(movimiento))
                     {
-                        lblMensaje.Text = "Movimiento agregado exitosamente!";
-                        lblMensaje.CssClass = "alert alert-success";
+                        ToastService.Show(this.Page, "Movimiento agregado exitosamente!", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        lblMensaje.Text = "Hubo un problema al agregar el movimiento.";
-                        lblMensaje.CssClass = "alert alert-danger";
+                        ToastService.Show(this.Page, "Hubo un problema al agregar el movimiento.", ToastService.ToastType.Warning);
                     }
                 }
 
@@ -372,10 +368,13 @@ namespace WebForms
                 // MODIFIED: Force reload after database change
                 CargarListaMovimientos(null, true);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo guardar el movimiento. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

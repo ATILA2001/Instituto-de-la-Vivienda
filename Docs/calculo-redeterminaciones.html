@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cálculo de Redeterminaciones - Instituto de la Vivienda</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #222; }
+
+  /* ── CABECERA ── */
+  header {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2e6da4 100%);
+    color: #fff; padding: 32px 40px;
+    border-bottom: 4px solid #f5a623;
+  }
+  header h1 { font-size: 2rem; margin-bottom: 6px; }
+  header p  { opacity: .8; font-size: .95rem; }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+  .section { margin-bottom: 40px; }
+  .section h2 {
+    font-size: 1.25rem; color: #1a3a5c;
+    border-left: 5px solid #2e6da4; padding-left: 12px;
+    margin-bottom: 18px;
+  }
+  .section h3 { font-size: 1rem; color: #444; margin: 16px 0 8px; }
+
+  /* ── CAJAS CONCEPTO ── */
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .concept-box {
+    background: #fff; border-radius: 10px; padding: 18px 16px;
+    border-top: 4px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .concept-box .icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .concept-box .label { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+  .concept-box .title { font-weight: 700; font-size: 1rem; margin: 4px 0; color: #1a3a5c; }
+  .concept-box .desc  { font-size: .82rem; color: #555; line-height: 1.45; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+    width: 3px; background: #cde; border-radius: 3px;
+  }
+  .tl-step {
+    position: relative; margin-bottom: 24px;
+    background: #fff; border-radius: 10px; padding: 16px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+  .tl-step::before {
+    content: attr(data-n);
+    position: absolute; left: -24px; top: 14px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #2e6da4; color: #fff;
+    font-weight: 700; font-size: .8rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 3px #fff;
+  }
+  .tl-step h4 { color: #1a3a5c; font-size: .95rem; margin-bottom: 6px; }
+  .tl-step p  { font-size: .85rem; color: #555; line-height: 1.5; }
+
+  /* ── FÓRMULAS ── */
+  .formula-card {
+    background: #fff; border-radius: 10px; padding: 20px 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 16px;
+    border-left: 5px solid var(--accent, #2e6da4);
+  }
+  .formula-card .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 10px;
+    background: var(--accent, #2e6da4); color: #fff;
+  }
+  .formula {
+    background: #f7f9fc; border: 1px solid #d4e0ef;
+    border-radius: 8px; padding: 12px 16px;
+    font-family: 'Courier New', monospace; font-size: .9rem;
+    color: #1a3a5c; line-height: 1.7; margin: 10px 0;
+  }
+  .formula .comment { color: #888; font-style: italic; }
+  .formula .highlight { color: #d64f00; font-weight: 700; }
+  .note {
+    font-size: .8rem; color: #666;
+    background: #fffbea; border: 1px solid #f5e08a;
+    border-radius: 6px; padding: 8px 12px; margin-top: 10px;
+  }
+
+  /* ── TABLA EJEMPLO ── */
+  .example-box {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08); overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+  th {
+    background: #1a3a5c; color: #fff; padding: 9px 12px;
+    text-align: left; font-weight: 600;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #e8eef5; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f7f9fc; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 12px;
+    font-size: .72rem; font-weight: 700;
+  }
+  .tag-cert  { background: #d4edda; color: #155724; }
+  .tag-redet { background: #cce5ff; color: #004085; }
+  .tag-reliq { background: #fff3cd; color: #856404; }
+  .tag-base  { background: #e2d9f3; color: #4a235a; }
+  .num { font-family: 'Courier New', monospace; color: #1a3a5c; }
+  .calc-detail { font-size: .75rem; color: #888; }
+
+  /* ── DIAGRAMA DE FLUJO ── */
+  .flow { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+  .flow-box {
+    flex: 1; min-width: 150px; max-width: 200px;
+    background: #fff; border-radius: 10px; padding: 14px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    text-align: center; position: relative;
+    border-top: 4px solid var(--accent, #2e6da4);
+  }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 6px; font-size: 1.4rem; color: #aab;
+    flex-shrink: 0;
+  }
+  .flow-box .f-icon { font-size: 1.6rem; margin-bottom: 6px; }
+  .flow-box .f-title { font-weight: 700; font-size: .85rem; color: #1a3a5c; margin-bottom: 4px; }
+  .flow-box .f-sub   { font-size: .75rem; color: #666; line-height: 1.3; }
+
+  /* ── COLORES ACENTO ── */
+  .a-blue   { --accent: #2e6da4; }
+  .a-green  { --accent: #28a745; }
+  .a-orange { --accent: #f5a623; }
+  .a-red    { --accent: #dc3545; }
+  .a-purple { --accent: #6f42c1; }
+  .a-teal   { --accent: #20c997; }
+
+  /* ── FOOTER ── */
+  footer { text-align: center; font-size: .78rem; color: #aaa; padding: 20px; }
+
+  /* ── AXIS VISUAL ── */
+  .axis-wrap { overflow-x: auto; padding: 8px 0 12px; }
+  .axis {
+    display: flex; align-items: stretch;
+    min-width: 920px; position: relative; height: 210px;
+  }
+  .axis-line {
+    position: absolute;  top: 132px; left: 0; right: 0;
+    height: 4px; background: linear-gradient(90deg,#cde 0%,#2e6da4 100%);
+    border-radius: 2px; z-index: 0;
+  }
+  .axis-event {
+    flex: 1; position: relative;
+  }
+  /* Línea conectora etiqueta → punto */
+  .axis-event::before {
+    content: ''; position: absolute;
+    left: 50%; top: 90px; height: 38px; width: 2px;
+    background: var(--accent,#cde);
+    transform: translateX(-50%); z-index: 1; opacity: .45;
+  }
+  /* Punto sobre la línea */
+  .axis-event::after {
+    content: ''; position: absolute;
+    top: 124px; left: 50%; transform: translateX(-50%);
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent,#2e6da4);
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px var(--accent,#2e6da4);
+    z-index: 2;
+  }
+  .axis-label {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    background: #fff; border-radius: 8px; padding: 8px 9px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+    font-size: .73rem; text-align: center; line-height: 1.35;
+    border-top: 3px solid var(--accent,#2e6da4);
+    width: 88px; height: 84px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+  }
+  .axis-label strong { display: block; color: #1a3a5c; font-size: .78rem; margin-bottom: 3px; }
+  .axis-month {
+    position: absolute; top: 154px; left: 50%; transform: translateX(-50%);
+    font-size: .68rem; color: #666; white-space: nowrap; font-weight: 600;
+  }
+
+  /* alertas */
+  .alert {
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
+    font-size: .85rem; line-height: 1.5;
+  }
+  .alert-info { background: #e8f4fd; border-left: 4px solid #2e6da4; color: #1a3a5c; }
+  .alert-warn { background: #fff8e1; border-left: 4px solid #f5a623; color: #5a3e00; }
+  .alert-ok   { background: #eafaf1; border-left: 4px solid #28a745; color: #145a2a; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 Cálculo de Redeterminaciones</h1>
+  <p>Instituto de la Vivienda — Documentación técnica de lógica de negocio</p>
+</header>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════
+       1. CONCEPTOS CLAVE
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>1. Conceptos clave</h2>
+    <div class="concept-grid">
+
+      <div class="concept-box a-purple">
+        <div class="icon">📋</div>
+        <div class="label">Entidad base</div>
+        <div class="title">Autorizante</div>
+        <div class="desc">
+          Autorización de pago base.<br>
+          Tiene un <strong>MontoAutorizado</strong> (techo máximo) y un <strong>MesBase</strong> de referencia.
+        </div>
+      </div>
+
+      <div class="concept-box a-green">
+        <div class="icon">🧾</div>
+        <div class="label">Pago real</div>
+        <div class="title">Certificado</div>
+        <div class="desc">
+          Pago efectivo vinculado a un autorizante.<br>
+          Tiene <strong>MontoTotal</strong> y <strong>MesAprobacion</strong>.
+          Se pueden emitir varios a lo largo del tiempo.
+        </div>
+      </div>
+
+      <div class="concept-box a-blue">
+        <div class="icon">📈</div>
+        <div class="label">Ajuste de precios</div>
+        <div class="title">Redeterminación</div>
+        <div class="desc">
+          Ajuste por variación de costos.<br>
+          Tiene <strong>Porcentaje</strong>, <strong>Salto</strong> (mes de inicio) y <strong>Nro</strong> (orden secuencial).
+          Su monto se calcula, no se ingresa manualmente.
+        </div>
+      </div>
+
+      <div class="concept-box a-orange">
+        <div class="icon">🔄</div>
+        <div class="label">Pago derivado</div>
+        <div class="title">Reliquidación</div>
+        <div class="desc">
+          Pago generado automáticamente para cada certificado
+          emitido  después del Salto de una redeterminación.
+          El <strong>primer</strong> certificado post-Salto absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Sección 4, Paso 3b).
+          Representa la parte proporcional del ajuste.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       2. EJE TEMPORAL
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>2. Eje temporal — Cómo se relacionan los eventos</h2>
+
+    <div class="axis-wrap">
+      <div class="axis">
+        <div class="axis-line"></div>
+
+        <div class="axis-event" style="--accent:#6f42c1">
+          <div class="axis-label a-purple">
+            <strong>Autorizante</strong>
+            Monto: $1.000.000<br>MesBase: Ene-24
+          </div>
+          <div class="axis-month">Ene 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#28a745">
+          <div class="axis-label a-green">
+            <strong>Cert. 1</strong>
+            $300.000<br>(30%)
+          </div>
+          <div class="axis-month">Mar 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#28a745">
+          <div class="axis-label a-green">
+            <strong>Cert. 2</strong>
+            $200.000<br>(20%)
+          </div>
+          <div class="axis-month">May 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#2e6da4">
+          <div class="axis-label a-blue">
+            <strong>Redet R1</strong>
+            Salto: Jun-24<br>Porcentaje: 10%
+          </div>
+          <div class="axis-month">Jun 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#28a745">
+          <div class="axis-label a-green">
+            <strong>Cert. 3</strong>
+            $250.000<br>(25%)
+          </div>
+          <div class="axis-month">Ago 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#f5a623">
+          <div class="axis-label a-orange">
+            <strong>Reliq. 3</strong>
+            para Cert. 3<br>(auto-generada)
+          </div>
+          <div class="axis-month">Ago 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#28a745">
+          <div class="axis-label a-green">
+            <strong>Cert. 4</strong>
+            $250.000<br>(25%)
+          </div>
+          <div class="axis-month">Oct 2024</div>
+        </div>
+
+        <div class="axis-event" style="--accent:#f5a623">
+          <div class="axis-label a-orange">
+            <strong>Reliq. 4</strong>
+            para Cert. 4<br>(auto-generada)
+          </div>
+          <div class="axis-month">Oct 2024</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-top:16px">
+      💡 <strong>Regla clave del Salto:</strong>
+      Los certificados emitidos <em>antes</em> del Salto determinan cuánto ya se pagó (reducen el faltante).
+      Los certificados emitidos <em>después del Salto</em> generan una reliquidación.
+      El <em>primero</em> de ellos absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Paso 3b).
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       3. FÓRMULAS DE MONTO REDETERMINACION
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>3. Fórmula del MontoRedet (CalcularMontoRedeterminaciones)</h2>
+
+    <div class="alert alert-info">
+      Las redeterminaciones se procesan en orden por <strong>Nro</strong> (1, 2, 3…).
+      Solo se consideran certificados emitidos <strong>antes del Salto</strong> para determinar el porcentaje ya utilizado.
+    </div>
+
+    <!-- Paso A -->
+    <div class="formula-card a-green">
+      <div class="badge">Paso A — Porcentaje de ejecución</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Sumamos los certificados del autorizante cuya <code>MesAprobacion</code> es <strong>menor</strong> al <code>Salto</code> de la redeterminación.
+      </p>
+      <div class="formula">
+SumaCerts =  cert.MontoTotal
+            donde 
+            <span class="highlight"> cert.MesAprobacion &lt; redet.Salto</span>
+
+PorcentajeUtilizado = (SumaCerts / auth.MontoAutorizado) × 100
+      </div>
+    </div>
+
+    <!-- Paso B -->
+    <div class="formula-card a-teal">
+      <div class="badge">Paso B — Faltante</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        El faltante representa qué porcentaje del autorizante aún no fue pagado al momento del Salto.
+      </p>
+      <div class="formula">
+Faltante = Max(0,  100 - PorcentajeUtilizado)
+<span class="comment">// Nunca negativo: si ya se pagó el 110%, el faltante es 0</span>
+      </div>
+    </div>
+
+    <!-- Paso C — Nro 1 -->
+    <div class="formula-card a-blue">
+      <div class="badge">Paso C — MontoRedet para Nro = 1 (primera redeterminación)</div>
+      <div class="formula">
+MontoRedet<span class="highlight">[Nro=1]</span> =
+  ( auth.MontoAutorizado × redet.Porcentaje / 100 )
+  × ( Faltante / 100 )
+      </div>
+      <div class="note">
+        📌 redet.Porcentaje -> Porcentaje de ponderacion
+      </div>
+    </div>
+
+    <!-- Paso C — Nro > 1 -->
+    <div class="formula-card a-orange">
+      <div class="badge">Paso C — MontoRedet para Nro &gt; 1 (redeterminaciones posteriores)</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Las redeterminaciones anteriores del mismo autorizante se suman al monto base, acumulando el ajuste sobre la base ampliada.
+      </p>
+      <div class="formula">
+MontoRedet<span class="highlight">[Nro>1]</span> =
+  ( (auth.MontoAutorizado + SumaRedetsAnteriores) × redet.Porcentaje / 100 )
+  × ( Faltante / 100 )
+      </div>
+      <div class="note">
+        📌 Ejemplo con R2: MontoAutorizado=$1.000.000, R1.MontoRedet=$50.000,
+        Porcentaje R2=8%, Faltante=30%<br>
+        → Base = 1.000.000 + 50.000 = $1.050.000<br>
+        → MontoRedet R2 = (1.050.000 × 8/100) × (30/100) = 84.000 × 0,3 = <strong>$25.200</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       4. FÓRMULAS RELIQUIDACIÓN
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>4. Fórmula de cada Reliquidación (ListarCertificadosYReliquidaciones)</h2>
+
+    
+    <!-- 5.1 Diagrama de distribución -->
+    <h3>4.1 ¿Cómo se distribuye el MontoRedet entre las reliquidaciones?</h3>
+    <div class="example-box" style="margin-bottom:18px">
+      <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;padding:4px 0">
+
+        <!-- Pool -->
+        <div style="flex:0 0 auto;text-align:center;padding-top:6px">
+          <div style="background:#e8f0fb;border:2px solid #2e6da4;border-radius:10px;padding:16px 18px;min-width:130px">
+            <div style="font-size:.7rem;color:#004085;text-transform:uppercase;font-weight:700;letter-spacing:.5px;margin-bottom:4px">Monto redeterminacion</div>
+            <div style="font-size:1.7rem;font-weight:700;color:#1a3a5c;line-height:1">$50.000</div>
+            <div style="font-size:.73rem;color:#555;margin-top:4px">redet.MontoRedet</div>
+          </div>
+          <div style="font-size:.72rem;color:#888;margin-top:8px;max-width:130px;line-height:1.4">
+            Calculado para el 50% faltante del autorizante
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;font-size:1.8rem;color:#bbc;padding-top:16px">→</div>
+
+        <!-- Distribución -->
+        <div style="flex:1;min-width:320px">
+          <div style="font-size:.8rem;color:#444;margin-bottom:10px;font-weight:600">Distribuido proporcionalmente según el peso de cada cert. sobre el MontoAutorizado:</div>
+
+          <!-- Cert 1 — pre-salto -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;opacity:.38">
+            <div style="background:#f1f3f5;border:1px dashed #bbb;border-radius:7px;padding:7px 12px;flex:4;font-size:.77rem;color:#777">
+              <strong>Cert 1</strong> — Mar-2024 — $300.000 (30%) <em>← Pre-Salto</em>
+            </div>
+            <div style="flex:1;background:#f1f3f5;border-radius:7px;padding:7px 8px;font-size:.77rem;text-align:center;color:#999">❌</div>
+          </div>
+          <!-- Cert 2 — pre-salto -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;opacity:.38">
+            <div style="background:#f1f3f5;border:1px dashed #bbb;border-radius:7px;padding:7px 12px;flex:4;font-size:.77rem;color:#777">
+              <strong>Cert 2</strong> — May-2024 — $200.000 (20%) <em>← Pre-Salto</em>
+            </div>
+            <div style="flex:1;background:#f1f3f5;border-radius:7px;padding:7px 8px;font-size:.77rem;text-align:center;color:#999">❌</div>
+          </div>
+
+          <div style="border-top:2px dashed #2e6da4;margin:10px 0 10px;position:relative">
+            <span style="position:absolute;top:-10px;left:8px;background:#fff;padding:0 6px;font-size:.7rem;color:#2e6da4;font-weight:700">SALTO R1 — Jun-2024</span>
+          </div>
+
+          <!-- Cert 3 — primer cert post-Salto (Paso 3b) -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+            <div style="background:#f3eaff;border:2px solid #6f42c1;border-radius:7px;padding:7px 12px;flex:4;font-size:.77rem;color:#4a235a">
+              <strong>Cert 3</strong> — Ago-2024 — $250.000 (<strong>25%</strong>) ← 1.° Post-Salto → <strong>Paso 3b</strong>
+              <br><span style="font-size:.7rem;color:#6f42c1">$50.000 × (25% + 50%) / 100 = $50.000 × 0,75</span>
+            </div>
+            <div style="flex:1;background:#f3eaff;border:2px solid #6f42c1;border-radius:7px;padding:7px 8px;font-size:.82rem;font-weight:700;text-align:center;color:#4a235a">
+              <div style="font-size:.68rem;font-weight:600;margin-bottom:2px">Reliq. 3</div>
+              $37.500
+            </div>
+          </div>
+          <!-- Cert 4 — post-salto (Paso 3a) -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+            <div style="background:#d4edda;border:1px solid #28a745;border-radius:7px;padding:7px 12px;flex:4;font-size:.77rem;color:#155724">
+              <strong>Cert 4</strong> — Oct-2024 — $250.000 (<strong>25%</strong>) ← Post-Salto → <strong>Paso 3a</strong>
+            </div>
+            <div style="flex:1;background:#fff3cd;border:2px solid #f5a623;border-radius:7px;padding:7px 8px;font-size:.82rem;font-weight:700;text-align:center;color:#856404">
+              <div style="font-size:.68rem;font-weight:600;margin-bottom:2px">Reliq. 4</div>
+              $12.500
+            </div>
+          </div>
+          <div style="font-size:.75rem;color:#888;margin-top:10px;text-align:right">
+            Total reliquidado: <strong style="color:#1a3a5c">$50.000 = MontoRedet</strong> ✓
+            = $37.500 + $12.500
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5.2 Fórmulas -->
+    <h3>4.2 Fórmulas paso a paso</h3>
+
+    <div class="formula-card a-green">
+      <div class="badge">Paso 1 — Porcentaje del certificado respecto al autorizante</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Indica qué fracción del <code>MontoAutorizado</code> total representa ese certificado.
+        </p>
+      <div class="formula">
+cert.Porcentaje = (cert.MontoTotal / auth.MontoAutorizado) × 100
+<span class="comment">// Ej: $250.000 / $1.000.000 × 100 = 25%</span>
+      </div>
+    </div>
+
+    <div class="formula-card a-orange">
+      <div class="badge">Paso 2 — Condición para generar la reliquidación</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Se evalúa para cada combinación de redeterminación y certificado del mismo autorizante.
+      </p>
+      <div class="formula">
+<span class="highlight">SI</span>  cert.CodigoAutorizante == redet.CodigoAutorizante
+<span class="highlight">Y</span>   cert.MesAprobacion <span class="highlight">&gt; redet.Salto</span>
+<span class="comment">// Solo certificados POSTERIORES al Salto reciben reliquidación</span>
+<span class="comment">// El PRIMERO de ellos absorbe retroactivamente el porcentaje acumulado pre-Salto (ver Paso 3b)</span>
+      </div>
+    </div>
+
+    <div class="formula-card a-blue">
+      <div class="badge">Paso 3a — Cálculo del monto (certificados posteriores al Salto)</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Para todos los certificados con <code>MesAprobacion &gt; redet.Salto</code>.
+      </p>
+      <div class="formula">
+MontoReliq = redet.MontoRedet × ( cert.Porcentaje / 100 )
+<br>
+<span class="comment">// Expandido (sustituyendo cert.Porcentaje):</span>
+MontoReliq = redet.MontoRedet × ( cert.MontoTotal / auth.MontoAutorizado )
+<br>
+<span class="comment">// Expandido total para Nro=1 (sustituyendo MontoRedet):</span>
+MontoReliq = cert.MontoTotal × (redet.Porcentaje/100) × (Faltante/100)
+      </div>
+      <div class="note">
+        📌 Ejemplo: MontoRedet=$50.000 · cert.MontoTotal=$250.000 · MontoAutorizado=$1.000.000<br>
+        → cert.Porcentaje = 250.000/1.000.000 = <strong>25%</strong><br>
+        → MontoReliq = $50.000 × 25% = <strong>$12.500</strong><br><br>
+        Expandido total: $250.000 × 10% × 50% = $250.000 × 0,05 = <strong>$12.500</strong> ✓
+      </div>
+    </div>
+
+    <div class="formula-card a-purple">
+      <div class="badge">Paso 3b — Cálculo del monto (primer certificado post-Salto)</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Para el <strong>primer</strong> certificado cuyo <code>MesAprobacion &gt; redet.Salto</code>, el porcentaje acumulado
+        pre-Salto se suma al porcentaje propio: este primer pago absorbe retroactivamente
+        el trabajo ya ejecutado antes del Salto.
+      </p>
+      <div class="formula">
+<span class="comment">// Variables previas</span>
+porcentajeAcumulado = (SumaCerts_preSalto / auth.MontoAutorizado) × 100
+certPorcentaje      = (cert.MontoTotal / auth.MontoAutorizado) × 100
+<br>
+<span class="comment">// Fórmula para el primer cert post-Salto</span>
+MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + porcentajeAcumulado) / 100 )</span>
+      </div>
+      <div class="note">
+        📌 Ejemplo: Salto = Jun-2024, primer cert post-Salto = Cert 3 (Ago-2024) por $250.000.<br>
+        → certPorcentaje = 250.000 / 1.000.000 = <strong>25%</strong><br>
+        → porcentajeAcumulado (Cert1 + Cert2 pre-Salto) = 500.000 / 1.000.000 = <strong>50%</strong><br>
+        → MontoReliq = $50.000 × (25% + 50%) = $50.000 × 75% = <strong>$37.500</strong><br><br>
+        Con la fórmula estándar (Paso 3a) habría dado: $50.000 × 25% = $12.500
+      </div>
+    </div>
+
+    <div class="alert alert-ok" style="margin-bottom:18px">
+      ✅ <strong>Regla de consistencia:</strong> El total de todas las reliquidaciones de una redeterminación
+      es igual a <code>MontoRedet × ( cert.Porcentaje post-Salto / 100)</code>.
+      Si los certificados futuros cubren exactamente el porcentaje faltante,
+      el total reliquidado iguala al MontoRedet.
+    </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         5. EJEMPLO NUMÉRICO COMPLETO
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>5. Ejemplo numérico completo</h2>
+
+    <h3>5.1 Datos base</h3>
+    <div class="example-box" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>Entidad</th><th>Campo</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-base">Autorizante</span></td><td>CodigoAutorizante</td><td class="num">AUT-001</td></tr>
+          <tr><td><span class="tag tag-base">Autorizante</span></td><td>MontoAutorizado</td><td class="num">$1.000.000</td></tr>
+          <tr><td><span class="tag tag-cert">Certificado 1</span></td><td>MontoTotal / MesAprobacion</td><td class="num">$300.000 / Mar-2024</td></tr>
+          <tr><td><span class="tag tag-cert">Certificado 2</span></td><td>MontoTotal / MesAprobacion</td><td class="num">$200.000 / May-2024</td></tr>
+          <tr><td><span class="tag tag-redet">Redeterminación R1</span></td><td>Salto / Porcentaje / Nro</td><td class="num">Jun-2024 / 10% / 1</td></tr>
+          <tr><td><span class="tag tag-cert">Certificado 3</span></td><td>MontoTotal / MesAprobacion</td><td class="num">$250.000 / Ago-2024</td></tr>
+          <tr><td><span class="tag tag-cert">Certificado 4</span></td><td>MontoTotal / MesAprobacion</td><td class="num">$250.000 / Oct-2024</td></tr>
+          <tr><td><span class="tag tag-redet">Redeterminación R2</span></td><td>Salto / Porcentaje / Nro</td><td class="num">Nov-2024 / 8% / 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5.2 Cálculo MontoRedet R1</h3>
+    <div class="example-box" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>Variable</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Certs antes del Salto (Jun-2024)</td>
+            <td>Cert1 (Mar) + Cert2 (May)</td>
+            <td class="num">$300.000 + $200.000 = $500.000</td>
+          </tr>
+          <tr>
+            <td>PorcentajeUtilizado</td>
+            <td>500.000 / 1.000.000 × 100</td>
+            <td class="num">50%</td>
+          </tr>
+          <tr>
+            <td>Faltante</td>
+            <td>100 - 50</td>
+            <td class="num">50%</td>
+          </tr>
+          <tr>
+            <td><strong>MontoRedet R1</strong></td>
+            <td>(1.000.000 × 10/100) × (50/100)</td>
+            <td class="num"><strong>$50.000</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5.3 Cálculo MontoRedet R2 (acumula R1)</h3>
+    <div class="example-box" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>Variable</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Certs antes del Salto (Nov-2024)</td>
+            <td>Cert1+Cert2+Cert3+Cert4</td>
+            <td class="num">$1.000.000 (100%)</td>
+          </tr>
+          <tr>
+            <td>PorcentajeUtilizado</td>
+            <td>1.000.000 / 1.000.000 × 100</td>
+            <td class="num">100%</td>
+          </tr>
+          <tr>
+            <td>Faltante</td>
+            <td>Max(0, 100 - 100)</td>
+            <td class="num">0%</td>
+          </tr>
+          <tr>
+            <td>SumaRedetsAnteriores</td>
+            <td>R1.MontoRedet</td>
+            <td class="num">$50.000</td>
+          </tr>
+          <tr>
+            <td><strong>MontoRedet R2</strong></td>
+            <td>((1.000.000 + 50.000) × 8/100) × (0/100)</td>
+            <td class="num"><strong>$0</strong> <span class="calc-detail">(ya todo pagado)</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px">
+        💡 R2 resulta $0 porque al momento de su Salto (Nov-2024) ya se habían pagado el 100% de los certificados.
+        Si en cambio hubiera quedado un 30% faltante: ((1.050.000 × 8%) × 30%) = <strong>$25.200</strong>.
+      </div>
+    </div>
+
+    <h3>5.4 Reliquidaciones generadas por R1 ($50.000)</h3>
+    <div class="example-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Certificado</th>
+            <th>MesAprobacion</th>
+            <th>¿Post-Salto R1? (&gt;)</th>
+            <th>Porcentaje cert.</th>
+            <th>MontoReliq</th>
+            <th>Cálculo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-cert">Cert 1</span></td>
+            <td>Mar-2024</td>
+            <td>❌ No (antes)</td>
+            <td class="num">30%</td>
+            <td class="num">—</td>
+            <td class="calc-detail">No genera reliquidación</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cert">Cert 2</span></td>
+            <td>May-2024</td>
+            <td>❌ No (antes)</td>
+            <td class="num">20%</td>
+            <td class="num">—</td>
+            <td class="calc-detail">No genera reliquidación</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cert">Cert 3</span></td>
+            <td>Ago-2024</td>
+            <td>✅ Sí — <strong>1.°</strong></td>
+            <td class="num">25%</td>
+            <td class="num"><strong>$37.500</strong></td>
+            <td class="calc-detail">50.000 × (25%+50%)/100 <span style="color:#6f42c1">(Paso 3b)</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cert">Cert 4</span></td>
+            <td>Oct-2024</td>
+            <td>✅ Sí</td>
+            <td class="num">25%</td>
+            <td class="num"><strong>$12.500</strong></td>
+            <td class="calc-detail">50.000 × (250.000/1.000.000)</td>
+          </tr>
+          <tr style="background:#fffbea;font-weight:bold">
+            <td colspan="4" style="text-align:right">Total reliquidado por R1:</td>
+            <td class="num">$50.000</td>
+            <td class="calc-detail">100% del MontoRedet ✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-ok" style="margin-top:14px">
+      ✅ <strong>El total reliquidado iguala al MontoRedet:</strong> Cert 3 (primer post-Salto) absorbió el 50% acumulado pre-Salto
+      más su propio 25%, totalizando 75% → $37.500. Cert 4 aportó el 25% restante → $12.500.
+      Suma: $37.500 + $12.500 = <strong>$50.000 = MontoRedet</strong>.
+    </div>
+  </div>
+
+
+
+  </div><!-- /page -->
+
+<footer>
+  Generado automáticamente desde CalculoRedeterminacionNegocioEF.cs · Instituto de la Vivienda
+</footer>
+
+</body>
+</html>

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI.WebControls;
 using System.Data.SqlClient;
+using System.Security.Claims;
 
 namespace Negocio
 {
@@ -692,11 +693,20 @@ INNER JOIN (
                     Id = userEntity.Id,
                     Nombre = userEntity.Nombre,
                     Correo = userEntity.Correo,
-                    Tipo = userEntity.Tipo, // true: Administrador, false: Usuario normal
+                    Tipo = userEntity.Tipo,
                     Estado = userEntity.Estado,
+                    Area = userEntity.Area,
+                    AreaIds = userEntity.AreaIds,
+                    IvcAreaIds = userEntity.IvcAreaIds,
                     AreaId = userEntity.Area?.Id ?? 0,
                     IsPlanningOpenOverride = userEntity.IsPlanningOpenOverride,
                 };
+            }
+
+            var claimsUser = EnsureSessionUserFromClaims();
+            if (claimsUser != null)
+            {
+                return claimsUser;
             }
 
             // Si no hay usuario en sesión, devolver un usuario por defecto sin área
@@ -712,6 +722,143 @@ INNER JOIN (
         }
 
         /// <summary>
+        /// Si hay claims autenticados, asegura Session["Usuario"] y devuelve el usuario; si no, devuelve null.
+        /// </summary>
+        public static UsuarioEF EnsureSessionUserFromClaims()
+        {
+            var context = HttpContext.Current;
+            if (context?.Session == null)
+            {
+                return null;
+            }
+
+            if (context.Session["Usuario"] is UsuarioEF existing)
+            {
+                return existing;
+            }
+
+            var principal = context.User as ClaimsPrincipal;
+            if (principal?.Identity?.IsAuthenticated != true)
+            {
+                return null;
+            }
+
+            var built = BuildUserFromClaims(principal);
+            if (built == null)
+            {
+                return null;
+            }
+
+            context.Session["Usuario"] = built;
+            return built;
+        }
+
+        private static UsuarioEF BuildUserFromClaims(ClaimsPrincipal principal)
+        {
+            if (principal == null)
+            {
+                return null;
+            }
+
+            var name = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var userIdValue = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            int.TryParse(userIdValue, out var parsedId);
+
+            // El claim "area" ahora contiene IDs enteros de Auth.Web (no nombres)
+            var authAreaIds = principal.Claims
+                .Where(c => string.Equals(c.Type, "area", StringComparison.OrdinalIgnoreCase))
+                .Select(c => c.Value)
+                .Where(v => !string.IsNullOrWhiteSpace(v) && int.TryParse(v, out _))
+                .Select(int.Parse)
+                .ToList();
+
+            var roles = principal.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .ToArray();
+
+            var isAdmin = roles.Any(r =>
+                r.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                || r.Equals("Administrador", StringComparison.OrdinalIgnoreCase)
+                || r.Equals("Administradores", StringComparison.OrdinalIgnoreCase));
+
+            var displayName = !string.IsNullOrWhiteSpace(name) ? name : email;
+
+            // Resolver áreas IVC a partir de los AuthAreaIds del claim
+            AreaEF primaryArea = null;
+            List<int> ivcAreaIdsList = new List<int>();
+            bool isPlanningOpenOverride = false;
+            if (authAreaIds.Count > 0 || !string.IsNullOrWhiteSpace(userIdValue))
+            {
+                try
+                {
+                    using (var context = new IVCdbContext())
+                    {
+                        if (authAreaIds.Count > 0)
+                        {
+                            var ivcAreas = context.Areas.AsNoTracking()
+                                .Where(a => a.AuthAreaId != null && authAreaIds.Contains(a.AuthAreaId.Value))
+                                .ToList();
+
+                            primaryArea = ivcAreas.FirstOrDefault();
+                            ivcAreaIdsList = ivcAreas.Select(a => a.Id).ToList();
+                        }
+
+                        // Upsert en UsuariosVinculados: cargar override y registrar al usuario si es su primer login
+                        if (!string.IsNullOrWhiteSpace(userIdValue))
+                        {
+                            var ivcUser = context.UsuariosVinculados.FirstOrDefault(u => u.AuthUserId == userIdValue);
+                            if (ivcUser == null)
+                            {
+                                ivcUser = new UsuarioVinculadoEF
+                                {
+                                    AuthUserId = userIdValue,
+                                    Nombre = displayName ?? "Usuario",
+                                    IsPlanningOpenOverride = false
+                                };
+                                context.UsuariosVinculados.Add(ivcUser);
+                                context.SaveChanges();
+                            }
+                            else
+                            {
+                                // Refrescar nombre si cambió en Auth.Web
+                                if (!string.IsNullOrWhiteSpace(displayName) && ivcUser.Nombre != displayName)
+                                {
+                                    ivcUser.Nombre = displayName;
+                                    context.SaveChanges();
+                                }
+                                isPlanningOpenOverride = ivcUser.IsPlanningOpenOverride;
+                            }
+                        }
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    // Si falla la DB, construimos un usuario parcial sin área resuelta.
+                    // El usuario verá grillas vacías sin mensaje de error — loguear para diagnóstico.
+                    Trace.TraceError("[BuildUserFromClaims] Error resolviendo áreas IVC desde DB. AuthAreaIds=[{0}]. Ex: {1}",
+                        string.Join(",", authAreaIds), dbEx);
+                }
+            }
+
+            return new UsuarioEF
+            {
+                Id = parsedId,
+                Nombre = displayName ?? "Usuario",
+                Correo = email,
+                Tipo = isAdmin,
+                Estado = true,
+                AreaIds = authAreaIds,
+                Area = primaryArea,
+                IvcAreaIds = ivcAreaIdsList,
+                IsPlanningOpenOverride = isPlanningOpenOverride,
+            };
+        }
+
+        /// <summary>
         /// Devuelve true si el usuario actual es administrador
         /// </summary>
         public static bool IsUserAdmin()
@@ -721,23 +868,87 @@ INNER JOIN (
         }
 
         /// <summary>
-        /// Devuelve true si el usuario actual pertenece a un área específica
+        /// Devuelve true si el usuario actual pertenece a un área específica (por ID de IVC).
+        /// La comparación se hace vía AuthAreaId: busca el AuthAreaId del área IVC y verifica
+        /// que esté en los AreaIds del usuario (leídos del claim "area" de Auth.Web).
         /// </summary>
-        public static bool IsUserInArea(int areaId)
+        public static bool IsUserInArea(int ivcAreaId)
         {
             var user = GetFullCurrentUser();
-            return user.AreaId == areaId;
+            if (user == null) return false;
+            if (user.Tipo) return false;
+            if (user.IvcAreaIds == null || user.IvcAreaIds.Count == 0) return false;
+            return user.IvcAreaIds.Contains(ivcAreaId);
         }
 
-        /// <summary>
-        /// Devuelve el ID del área del usuario actual
-        /// </summary>
-        public static int GetUserAreaId()
+    }
+
+    public static class ClaimsPermissionHelper
+    {
+        public static class Actions
         {
-            var user = GetFullCurrentUser();
-            return user.AreaId.GetValueOrDefault();
+            public const string Add    = "add";
+            public const string Edit   = "edit";
+            public const string Delete = "delete";
         }
 
+        public static bool CanDo(string action)
+        {
+            if (string.IsNullOrWhiteSpace(action)) return false;
+            var user = UserHelper.GetFullCurrentUser();
+            if (user?.Tipo == true) return true;
+
+            var principal = HttpContext.Current?.User as ClaimsPrincipal;
+            if (principal?.Identity?.IsAuthenticated != true) return false;
+
+            var permsJson = principal.Claims
+                .FirstOrDefault(c => string.Equals(c.Type, "perms_json", StringComparison.OrdinalIgnoreCase))?.Value;
+
+            var actions = GetActionsForCurrentPage(permsJson);
+            return actions?.Any(a => string.Equals(a, action, StringComparison.OrdinalIgnoreCase)) == true;
+        }
+
+        private static string[] GetActionsForCurrentPage(string permsJson)
+        {
+            if (string.IsNullOrWhiteSpace(permsJson)) return null;
+            try
+            {
+                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var payload = System.Text.Json.JsonSerializer.Deserialize<PermissionsPayload>(permsJson, options);
+                var currentPath = NormalizePath(HttpContext.Current?.Request?.Path);
+                if (string.IsNullOrWhiteSpace(currentPath)) return null;
+                var page = payload?.pages?.FirstOrDefault(p =>
+                    string.Equals(NormalizePath(p.url), currentPath, StringComparison.OrdinalIgnoreCase));
+                return page?.actions;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string NormalizePath(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+            url = url.Trim();
+            if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
+                url = absolute.PathAndQuery ?? "/";
+            if (url.StartsWith("~/")) url = url.Substring(1);
+            if (!url.StartsWith("/")) url = "/" + url;
+            var q = url.IndexOf("?", StringComparison.Ordinal);
+            return q >= 0 ? url.Substring(0, q) : url;
+        }
+
+        private sealed class PermissionsPayload
+        {
+            public PagePermission[] pages { get; set; }
+        }
+
+        private sealed class PagePermission
+        {
+            public string url { get; set; }
+            public string[] actions { get; set; }
+        }
     }
 }
 

@@ -275,6 +275,7 @@
                                 Text='<%# ((Dominio.LegitimoEF)Container.DataItem).Certificado.HasValue ? ((Dominio.LegitimoEF)Container.DataItem).Certificado.Value.ToString("C") : string.Empty %>'
                                 AutoPostBack="true"
                                 OnTextChanged="txtCertificadoInline_TextChanged"
+                                Enabled='<%# !string.IsNullOrWhiteSpace(((Dominio.LegitimoEF)Container.DataItem).Expediente) %>'
                                 CssClass="form-control form-control-sm w-auto text-center" />
                         </ItemTemplate>
                     </asp:TemplateField>

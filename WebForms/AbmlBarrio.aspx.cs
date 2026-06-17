@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -33,10 +34,9 @@ namespace WebForms
                 dgvBarrio.DataSource = Session["listaBarrio"];
                 dgvBarrio.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cargar los barrios: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cargar los barrios. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -50,21 +50,22 @@ namespace WebForms
                     barrio.Nombre = txtNombre.Text.Trim();
                     negocio.agregar(barrio);
 
-                    lblMensaje.Text = "Barrio agregado exitosamente!";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Barrio agregado exitosamente!", ToastService.ToastType.Success);
                     txtNombre.Text = string.Empty;
                     CargarListaBarrios();
                 }
                 else
                 {
-                    lblMensaje.Text = "Debe llenar todos los campos.";
-                    lblMensaje.CssClass = "alert alert-danger";
+                    ToastService.Show(this.Page, "Debe llenar todos los campos.", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al agregar el barrio: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo agregar el barrio. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -82,15 +83,17 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvBarrio.DataKeys[e.RowIndex].Value);
                 if (negocio.eliminar(id))
                 {
-                    lblMensaje.Text = "Barrio eliminado correctamente.";
-                    lblMensaje.CssClass = "alert alert-success";
+                    ToastService.Show(this.Page, "Barrio eliminado correctamente.", ToastService.ToastType.Success);
                     CargarListaBarrios();
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                lblMensaje.Text = $"Error al eliminar el barrio: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar el barrio. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
         protected void dgvBarrio_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -102,10 +105,9 @@ namespace WebForms
 
                 CargarListaBarrios();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lblMensaje.Text = $"Error al cambiar de página: {ex.Message}";
-                lblMensaje.CssClass = "alert alert-danger";
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

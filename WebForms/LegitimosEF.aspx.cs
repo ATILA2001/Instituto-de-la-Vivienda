@@ -103,9 +103,14 @@ namespace WebForms
                 BindDropDownList();
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -228,9 +233,14 @@ namespace WebForms
                     BindGrid();
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al eliminar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                BindGrid();
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar el registro. Intente nuevamente.", ToastService.ToastType.Error);
                 BindGrid();
             }
         }
@@ -242,9 +252,9 @@ namespace WebForms
                 int id = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
                 AbrirModalEdicionLegitimo(id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos del legítimo. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -353,9 +363,9 @@ namespace WebForms
                 }
             }
 
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar obras: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -462,9 +472,9 @@ namespace WebForms
                     if (selected.Any()) data = data.Where(d => d.ObraEF?.Proyecto?.LineaGestionEF != null && selected.Contains(d.ObraEF.Proyecto.LineaGestionEF.Id)).ToList();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al aplicar filtros: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
             }
 
             return data;
@@ -472,21 +482,14 @@ namespace WebForms
 
         private void LimpiarFormulario()
         {
-            try
-            {
-                txtAutorizante.Text = string.Empty;
-                txtExpediente.Text = string.Empty;
-                txtInicioEjecucion.Text = string.Empty;
-                txtFinEjecucion.Text = string.Empty;
-                txtCertificado.Text = string.Empty;
-                txtMesAprobacion.Text = string.Empty;
-                ddlObra.ClearSelection();
-                Session["EditingLegitimoEFId"] = null;
-            }
-            catch (Exception ex)
-            {
-                ToastService.Show(this.Page, "Error al limpiar formulario: " + ex.Message, ToastService.ToastType.Error);
-            }
+            txtAutorizante.Text = string.Empty;
+            txtExpediente.Text = string.Empty;
+            txtInicioEjecucion.Text = string.Empty;
+            txtFinEjecucion.Text = string.Empty;
+            txtCertificado.Text = string.Empty;
+            txtMesAprobacion.Text = string.Empty;
+            ddlObra.ClearSelection();
+            Session["EditingLegitimoEFId"] = null;
         }
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -753,9 +756,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "No se detectaron cambios para guardar.", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al actualizar el expediente: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -826,9 +833,13 @@ namespace WebForms
 
                 ToastService.Show(this.Page, "Certificado actualizado correctamente.", ToastService.ToastType.Info);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error al actualizar el certificado: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Error al actualizar el certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -1017,6 +1028,7 @@ namespace WebForms
 
             return null;
         }
+
 
     }
 }

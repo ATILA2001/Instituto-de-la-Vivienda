@@ -111,32 +111,17 @@
 									<span>Admin</span>
 								</a>
 								<ul class="dropdown-menu dropdown-menu-end">
-
+							<li>
+								<a class="dropdown-item" href="PanelConfiguracion.aspx">Panel de Configuración</a>
+							</li>
+							<li>
+								<hr class="dropdown-divider">
+							</li>
 									<li>
-										<div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-											<input type="checkbox" class="form-check-input me-2" id="chkIsPlanningOpen" name="chkIsPlanningOpen" runat="server" style="cursor: pointer;"
-												onserverchange="chkIsPlanningOpen_ServerChange"
-												onchange="__doPostBack('<%= chkIsPlanningOpen.UniqueID %>', '')" />
-											<label class="form-check-label ms-1" for="chkIsPlanningOpen">Plani</label>
-										</div>
-									</li>
-									<li>
-										<div class="form-check form-switch d-flex align-items-center ms-3 mb-2">
-											<input type="checkbox" class="form-check-input me-2" id="chkIsFormulationOpen" name="chkIsFormulationOpen" runat="server" style="cursor: pointer;"
-												onserverchange="chkIsFormulationOpen_ServerChange"
-												onchange="__doPostBack('<%= chkIsFormulationOpen.UniqueID %>', '')" />
-											<label class="form-check-label ms-1" for="chkIsFormulationOpen">Formu</label>
-										</div>
-									</li>
-
-									<li>
-										<a class="dropdown-item" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
-									</li>
-
-									<li><a class="dropdown-item" href="AbmlUsuarios.aspx">Usuarios</a></li>
-
-									<li>
-										<hr class="dropdown-divider">
+									<a class="dropdown-item" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
+								</li>
+								<li>
+									<hr class="dropdown-divider">
 									</li>
 									<li>
 										<h6 class="dropdown-header">Base de Datos</h6>
@@ -147,6 +132,30 @@
 							</li>
 
 						</ul>
+
+						<!-- App Switcher -->
+						<asp:PlaceHolder ID="phAppSwitcher" runat="server" Visible="false">
+						<ul class="navbar-nav">
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									<i class="bi bi-grid-3x3-gap-fill"></i> Aplicaciones
+								</a>
+								<ul class="dropdown-menu dropdown-menu-end">
+									<asp:Repeater ID="rptOtherApps" runat="server">
+										<ItemTemplate>
+											<li><a class="dropdown-item" href="<%# Eval("Url") %>"><%# Eval("Label") %></a></li>
+										</ItemTemplate>
+									</asp:Repeater>
+									<asp:PlaceHolder ID="phAdminPanelDivider" runat="server" Visible="false">
+										<li><hr class="dropdown-divider"></li>
+									</asp:PlaceHolder>
+									<asp:PlaceHolder ID="phAdminPanelLink" runat="server" Visible="false">
+										<li><asp:HyperLink ID="lnkAdminPanel" runat="server" CssClass="dropdown-item" Text="Panel de Administración" /></li>
+									</asp:PlaceHolder>
+								</ul>
+							</li>
+						</ul>
+						</asp:PlaceHolder>
 
 						<!-- Dark Mode Toggle -->
 						<ul class="navbar-nav">

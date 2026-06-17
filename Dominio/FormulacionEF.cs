@@ -17,12 +17,10 @@ namespace Dominio
         public int ObraId { get; set; }
         public virtual ObraEF ObraEF { get; set; }
 
-        [Column("MONTO_26")]
-        public decimal? Monto_26 { get; set; }
-        [Column("MONTO_27")]
-        public decimal? Monto_27 { get; set; }
-        [Column("MONTO_28")]
-        public decimal? Monto_28 { get; set; }
+        [Column("FECHA_PERIODO")]
+        public DateTime FechaPeriodo { get; set; }
+        [Column("MONTO")]
+        public decimal? Monto { get; set; }
         [Column("MES_BASE")]
         public DateTime? MesBase { get; set; }
         [Column("OBSERVACIONES")]
@@ -43,5 +41,12 @@ namespace Dominio
         [Column("PRIORIDAD")]
         public int? PrioridadId { get; set; }
         public virtual PrioridadesEF PrioridadEF { get; set; }
+
+        [Column("BREVE_DESCRIPCION")]
+        public string BreveDescripcion { get; set; }
+        [Column("FECHA_INICIO")]
+        public DateTime? FechaInicio { get; set; }
+        [Column("FECHA_FIN")]
+        public DateTime? FechaFin { get; set; }
     }
 }

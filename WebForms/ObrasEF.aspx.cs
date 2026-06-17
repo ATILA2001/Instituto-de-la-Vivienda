@@ -23,8 +23,6 @@ namespace WebForms
         private int pageSize = 12;
         private int totalRecords = 0;
 
-        private readonly int AreaIdRedet = 16; // Id del Área Redeterminaciones en la BD.
-
         protected void Page_Load(object sender, EventArgs e)
         {
             // cargar paginación desde ViewState
@@ -50,10 +48,10 @@ namespace WebForms
                 if (Session["ObrasCompleto"] == null)
                 {
                     // Cargar la lista completa de obras o filtrarla por área.
-                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(AreaIdRedet))
+                    if (UserHelper.IsUserAdmin() || UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones))
                         todasLasObras = _negocio.ListarTodo();
                     else
-                        todasLasObras = _negocio.ListarPorArea(UserHelper.GetUserAreaId());
+                        todasLasObras = _negocio.ListarPorAreaIds(UserHelper.GetFullCurrentUser().IvcAreaIds);
 
                     Session["ObrasCompleto"] = todasLasObras;
                 }
@@ -65,9 +63,9 @@ namespace WebForms
 
                 totalRecords = todasLasObras?.Count ?? 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar obras: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -108,9 +106,9 @@ namespace WebForms
                 totalRecords = totalFiltrados;
                 ConfigurarPaginationControl(listaFiltrada);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error en BindGrid: {ex.Message}" + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""), ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -190,25 +188,26 @@ namespace WebForms
             // Aplicar la visibilidad de columnas justo antes del render
             try
             {
-                panelShowAddButton.Visible = !UserHelper.IsUserInArea(AreaIdRedet);
-                // incluir tanto los DataField como los HeaderText para cubrir todos los casos
-                SetColumnsVisibilityForRedet(UserHelper.IsUserInArea(AreaIdRedet),
-                    // DataField names
+                bool esRolRedet = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
+                bool esRolSecretaria = UserHelper.IsUserInArea(Dominio.IvcAreaIds.Secretaria);
+                bool canModify = !esRolRedet && !esRolSecretaria && (UserHelper.IsUserAdmin() || IsPlanningOpen);
+                panelShowAddButton.Visible = canModify;
+                // Columnas financieras: ocultar solo para rol Redeterminaciones
+                SetColumnsVisibilityForRedet(esRolRedet,
                     "Autorizado2026",
                     "MontoCertificado",
                     "Porcentaje",
                     "MontoInicial",
                     "MontoActual",
                     "MontoFaltante",
-                    // Header text / display names
                     "Disponible Actual",
                     "Planificacion2025",
                     "Ejecucion presupuesto2025",
                     "Monto de Obra inicial",
                     "Monto de Obra actual",
-                    "Faltante de Obra",
-                    // acciones (template field header)
-                    "Acciones");
+                    "Faltante de Obra");
+                // Columna Acciones: ocultar si no puede modificar (Redet o planning cerrado)
+                SetColumnsVisibilityForRedet(!canModify, "Acciones");
             }
             catch (Exception ex)
             {
@@ -310,9 +309,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -323,7 +322,12 @@ namespace WebForms
             if (!UserHelper.IsUserAdmin())
             {
                 ddlArea.Enabled = false;
-                ddlArea.SelectedValue = UserHelper.GetFullCurrentUser().AreaId.ToString();
+                var areaNombre = UserHelper.GetFullCurrentUser().Area?.Nombre;
+                if (!string.IsNullOrEmpty(areaNombre))
+                {
+                    var item = ddlArea.Items.FindByText(areaNombre);
+                    if (item != null) item.Selected = true;
+                }
             }
             else
             {
@@ -508,9 +512,9 @@ namespace WebForms
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos del certificado: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos de la obra. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -541,9 +545,13 @@ namespace WebForms
                 CargarListaObrasCompleta();
                 CargarPaginaActual();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, "Error: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la obra. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -553,14 +561,7 @@ namespace WebForms
             {
                 if (e.Row.FindControl("btnEliminar") is LinkButton btnEliminar) 
                 {
-                    // Define constant or use existing constant for area ID
-                    const int AreaIdSecretaria = 19;
-                    
-                    // Check if the user is in area 19 (Secretaria)
-                    bool isSecretariaUser = UserHelper.IsUserInArea(AreaIdSecretaria);
-                    
-                    // Show delete button only if: user is admin OR planning is open AND user is NOT from area 19
-                    btnEliminar.Visible = (UserHelper.IsUserAdmin() || IsPlanningOpen) && !isSecretariaUser;
+                    btnEliminar.Visible = UserHelper.IsUserAdmin() || IsPlanningOpen;
                 }
             }
         }
@@ -640,9 +641,9 @@ namespace WebForms
                     ddlBarrio.DataBind();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -748,9 +749,9 @@ namespace WebForms
                 ViewState["CurrentPageIndex"] = currentPageIndex;
                 CargarPaginaActual();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

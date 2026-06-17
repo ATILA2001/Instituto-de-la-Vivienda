@@ -2,6 +2,7 @@
 using Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Globalization;
 using System.Linq;
 using System.Web.UI;
@@ -42,13 +43,16 @@ namespace WebForms
                         { "Empresa", "ObraEF.Empresa.Nombre" },
                         { "Contrata", "ObraEF.Contrata.Nombre" },
                         { "Barrio", "ObraEF.Barrio.Nombre" },
-                        { "Nombre de Obra", "ObraEF.Descripcion" },
+                        { "Línea de Gestión", "ObraEF.Proyecto.LineaGestionEF.Nombre" },
                         { "Proyecto", "ObraEF.Proyecto.Nombre" },
+                        { "Nombre de Obra", "ObraEF.Descripcion" },
+                        { "Breve Descripción", "BreveDescripcion" },
+                        { "Fecha Inicio", "FechaInicio" },
+                        { "Fecha Fin", "FechaFin" },
+                        { "Año", "FechaPeriodo" },
                         { "PPI", "Ppi" },
-                        { "Techos2026", "Techos" },
-                        { "Monto2026", "Monto_26" },
-                        { "Monto2027", "Monto_27" },
-                        { "Monto2028", "Monto_28" },
+                        { "Techo", "Techos" },
+                        { "Monto", "Monto" },
                         { "Mes Base", "MesBase" },
                         { "Unidad de Medida", "UnidadMedidaEF.Nombre" },
                         { "Valor de Medida", "ValorMedida" },
@@ -63,9 +67,9 @@ namespace WebForms
                     ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -132,18 +136,18 @@ namespace WebForms
                     cblsHeaderProyecto.AcceptChanges += OnAcceptChanges;
                 }
 
-                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto2026") is TreeViewSearch cblsHeaderMonto2026)
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderMonto") is TreeViewSearch cblsHeaderMonto)
                 {
                     var montosUnicos = formulacionesCompletas
-                        .Where(f => f.Monto_26.HasValue)
-                        .Select(f => f.Monto_26.Value)
+                        .Where(f => f.Monto.HasValue)
+                        .Select(f => f.Monto.Value)
                         .Distinct()
                         .OrderBy(m => m)
                         .Select(m => new { Id = m.ToString(CultureInfo.InvariantCulture), Nombre = m })
                         .ToList();
-                    cblsHeaderMonto2026.DataSource = montosUnicos;
-                    cblsHeaderMonto2026.DataBind();
-                    cblsHeaderMonto2026.AcceptChanges += OnAcceptChanges;
+                    cblsHeaderMonto.DataSource = montosUnicos;
+                    cblsHeaderMonto.DataBind();
+                    cblsHeaderMonto.AcceptChanges += OnAcceptChanges;
                 }
 
                 if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderPrioridad") is TreeViewSearch cblsHeaderPrioridad)
@@ -158,6 +162,61 @@ namespace WebForms
                     cblsHeaderPrioridad.DataSource = prioridadesUnicas;
                     cblsHeaderPrioridad.DataBind();
                     cblsHeaderPrioridad.AcceptChanges += OnAcceptChanges;
+                }
+
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa)
+                {
+                    var empresasUnicas = formulacionesCompletas
+                        .Where(f => f.ObraEF?.Empresa != null)
+                        .Select(f => f.ObraEF.Empresa)
+                        .Distinct()
+                        .OrderBy(emp => emp.Nombre)
+                        .Select(emp => new { Id = emp.Id.ToString(), emp.Nombre })
+                        .ToList();
+                    cblsHeaderEmpresa.DataSource = empresasUnicas;
+                    cblsHeaderEmpresa.DataBind();
+                    cblsHeaderEmpresa.AcceptChanges += OnAcceptChanges;
+                }
+
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderBarrio") is TreeViewSearch cblsHeaderBarrio)
+                {
+                    var barriosUnicos = formulacionesCompletas
+                        .Where(f => f.ObraEF?.Barrio != null)
+                        .Select(f => f.ObraEF.Barrio)
+                        .Distinct()
+                        .OrderBy(b => b.Nombre)
+                        .Select(b => new { Id = b.Id.ToString(), b.Nombre })
+                        .ToList();
+                    cblsHeaderBarrio.DataSource = barriosUnicos;
+                    cblsHeaderBarrio.DataBind();
+                    cblsHeaderBarrio.AcceptChanges += OnAcceptChanges;
+                }
+
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderAnio") is TreeViewSearch cblsHeaderAnio)
+                {
+                    var aniosUnicos = formulacionesCompletas
+                        .Select(f => f.FechaPeriodo.Year)
+                        .Distinct()
+                        .OrderBy(a => a)
+                        .Select(a => new { Id = a.ToString(), Nombre = a.ToString() })
+                        .ToList();
+                    cblsHeaderAnio.DataSource = aniosUnicos;
+                    cblsHeaderAnio.DataBind();
+                    cblsHeaderAnio.AcceptChanges += OnAcceptChanges;
+                }
+
+                if (dgvFormulacion.HeaderRow.FindControl("cblsHeaderObra") is TreeViewSearch cblsHeaderObra)
+                {
+                    var obrasUnicas = formulacionesCompletas
+                        .Where(f => f.ObraEF != null)
+                        .Select(f => f.ObraEF)
+                        .Distinct()
+                        .OrderBy(o => o.Descripcion)
+                        .Select(o => new { Id = o.Id.ToString(), Nombre = o.Descripcion })
+                        .ToList();
+                    cblsHeaderObra.DataSource = obrasUnicas;
+                    cblsHeaderObra.DataBind();
+                    cblsHeaderObra.AcceptChanges += OnAcceptChanges;
                 }
             }
         }
@@ -199,10 +258,12 @@ namespace WebForms
                 Dominio.FormulacionEF formu = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new Dominio.FormulacionEF();
 
 
-                formu.ObraId = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
-                formu.Monto_26 = string.IsNullOrWhiteSpace(txtMonto26.Text) ? (decimal?)null : decimal.Parse(txtMonto26.Text.Replace('.', ','));
-                formu.Monto_27 = string.IsNullOrWhiteSpace(txtMonto27.Text) ? (decimal?)null : decimal.Parse(txtMonto27.Text.Replace('.', ','));
-                formu.Monto_28 = string.IsNullOrWhiteSpace(txtMonto28.Text) ? (decimal?)null : decimal.Parse(txtMonto28.Text.Replace('.', ','));
+                int obraIdSeleccionada = editingId != null ? int.Parse(ddlObraEditar.SelectedValue) : int.Parse(ddlObraAgregar.SelectedValue);
+                int anioSeleccionado = int.Parse(ddlAnio.SelectedValue);
+
+                formu.ObraId = obraIdSeleccionada;
+                formu.FechaPeriodo = new DateTime(anioSeleccionado, 1, 1);
+                formu.Monto = string.IsNullOrWhiteSpace(txtMonto.Text) ? (decimal?)null : decimal.Parse(txtMonto.Text.Replace('.', ','));
                 formu.MesBase = string.IsNullOrWhiteSpace(txtMesBase.Text) ? (DateTime?)null : DateTime.Parse(txtMesBase.Text);
                 formu.Observaciones = txtObservaciones.Text;
                 formu.Ppi = string.IsNullOrWhiteSpace(txtPpi.Text) ? (int?)null : int.Parse(txtPpi.Text);
@@ -210,6 +271,9 @@ namespace WebForms
                 formu.UnidadMedidaId = string.IsNullOrEmpty(ddlUnidadMedida.SelectedValue) ? (int?)null : int.Parse(ddlUnidadMedida.SelectedValue);
                 formu.ValorMedida = string.IsNullOrWhiteSpace(txtValorMedida.Text) ? (decimal?)null : decimal.Parse(txtValorMedida.Text.Replace('.', ','));
                 formu.PrioridadId = string.IsNullOrEmpty(ddlPrioridades.SelectedValue) ? (int?)null : int.Parse(ddlPrioridades.SelectedValue);
+                formu.BreveDescripcion = txtBreveDescripcion.Text;
+                formu.FechaInicio = string.IsNullOrWhiteSpace(txtFechaInicio.Text) ? (DateTime?)null : DateTime.Parse(txtFechaInicio.Text);
+                formu.FechaFin = string.IsNullOrWhiteSpace(txtFechaFin.Text) ? (DateTime?)null : DateTime.Parse(txtFechaFin.Text);
 
 
 
@@ -244,9 +308,21 @@ namespace WebForms
 
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex) when (ex.InnerException?.InnerException?.Message.Contains("UQ_FORMULACION_BASE_PERIODO") == true ||
+                                                ex.InnerException?.Message.Contains("UQ_FORMULACION_BASE_PERIODO") == true)
             {
-                ToastService.Show(this.Page, $"Error: {ex.Message}", ToastService.ToastType.Error);
+                int anio = int.Parse(ddlAnio.SelectedValue);
+                ToastService.Show(this.Page, $"Ya existe una formulación para esa obra en el año {anio}.", ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -285,9 +361,8 @@ namespace WebForms
                     rfvObra.Enabled = false;
 
                     SelectDropDownListByValue(ddlObraEditar, formulacion.ObraId.ToString());
-                    txtMonto26.Text = formulacion.Monto_26?.ToString(CultureInfo.CurrentCulture) ?? "";
-                    txtMonto27.Text = formulacion.Monto_27?.ToString(CultureInfo.CurrentCulture) ?? "";
-                    txtMonto28.Text = formulacion.Monto_28?.ToString(CultureInfo.CurrentCulture) ?? "";
+                    SelectDropDownListByValue(ddlAnio, formulacion.FechaPeriodo.Year.ToString());
+                    txtMonto.Text = formulacion.Monto?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtPpi.Text = formulacion.Ppi?.ToString() ?? "";
                     txtTechos.Text = formulacion.Techos?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtMesBase.Text = formulacion.MesBase?.ToString("yyyy-MM-dd") ?? "";
@@ -295,6 +370,9 @@ namespace WebForms
                     txtValorMedida.Text = formulacion.ValorMedida?.ToString(CultureInfo.CurrentCulture) ?? "";
                     txtObservaciones.Text = formulacion.Observaciones ?? "";
                     SelectDropDownListByValue(ddlPrioridades, formulacion.PrioridadId?.ToString());
+                    txtBreveDescripcion.Text = formulacion.BreveDescripcion ?? "";
+                    txtFechaInicio.Text = formulacion.FechaInicio?.ToString("yyyy-MM-dd") ?? "";
+                    txtFechaFin.Text = formulacion.FechaFin?.ToString("yyyy-MM-dd") ?? "";
 
                     btnAgregar.Text = "Actualizar";
 
@@ -312,9 +390,9 @@ namespace WebForms
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar los datos: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -346,9 +424,13 @@ namespace WebForms
                     ToastService.Show(this.Page, "No se pudo eliminar la formulación.", ToastService.ToastType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                ToastService.Show(this.Page, $"Error al eliminar: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+            }
+            catch (Exception)
+            {
+                ToastService.Show(this.Page, "No se pudo eliminar la formulación. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -369,14 +451,18 @@ namespace WebForms
                 var selAreas = GetSelectedValues("cblsHeaderArea").Select(int.Parse).ToList();
                 var selLineas = GetSelectedValues("cblsHeaderLineaGestion").Select(int.Parse).ToList();
                 var selProyectos = GetSelectedValues("cblsHeaderProyecto").Select(int.Parse).ToList();
-                var selMontos26 = GetSelectedValues("cblsHeaderMonto2026").Select(s => decimal.Parse(s, CultureInfo.InvariantCulture)).ToList();
+                var selMontos = GetSelectedValues("cblsHeaderMonto").Select(s => decimal.Parse(s, CultureInfo.InvariantCulture)).ToList();
                 var selPrioridades = GetSelectedValues("cblsHeaderPrioridad").Select(int.Parse).ToList();
+                var selObras = GetSelectedValues("cblsHeaderObra").Select(int.Parse).ToList();
+                var selAnios = GetSelectedValues("cblsHeaderAnio").Select(int.Parse).ToList();
+                var selEmpresas = GetSelectedValues("cblsHeaderEmpresa").Select(int.Parse).ToList();
+                var selBarrios = GetSelectedValues("cblsHeaderBarrio").Select(int.Parse).ToList();
 
                 int pageIndex = paginationControl.CurrentPageIndex;
                 int pageSize = paginationControl.PageSize;
 
                 // Total filtrado en BD
-                int total = _negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                int total = _negocio.ContarPorUsuarioConFiltros(usuario, filtroGeneral, selAreas, selLineas, selProyectos, selMontos, selPrioridades, selObras, selAnios, selEmpresas, null, selBarrios);
 
 
                 if (pageIndex * pageSize >= Math.Max(1, total))
@@ -388,7 +474,7 @@ namespace WebForms
                 paginationControl.UpdatePaginationControls();
 
                 // Página actual desde BD
-                var pagina = _negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos26, selPrioridades);
+                var pagina = _negocio.ListarPorUsuarioPaginadoConFiltros(usuario, pageIndex, pageSize, filtroGeneral, selAreas, selLineas, selProyectos, selMontos, selPrioridades, selObras, selAnios, selEmpresas, null, selBarrios);
 
                 dgvFormulacion.DataSource = pagina;
                 dgvFormulacion.DataBind();
@@ -443,7 +529,7 @@ namespace WebForms
                 }
 
 
-                decimal totalMonto26Global =0;
+                decimal totalMontoGlobal = 0;
                 if (total >0)
                 {
 
@@ -453,10 +539,9 @@ namespace WebForms
 
                         if (!usuario.Tipo)
                         {
-                            if (usuario.AreaId.HasValue)
-                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId == usuario.AreaId);
-                            else if (usuario.Area != null)
-                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId == usuario.Area.Id);
+                            var filtroAreaIds = usuario.IvcAreaIds;
+                            if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                         }
                         if (!string.IsNullOrWhiteSpace(filtroGeneral))
                         {
@@ -474,20 +559,24 @@ namespace WebForms
                         if (selAreas.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Area != null && selAreas.Contains(f.ObraEF.Area.Id));
                         if (selLineas.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Proyecto.LineaGestionEF != null && selLineas.Contains(f.ObraEF.Proyecto.LineaGestionEF.Id));
                         if (selProyectos.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.Proyecto != null && selProyectos.Contains(f.ObraEF.Proyecto.Id));
-                        if (selMontos26.Any()) querySubtotal = querySubtotal.Where(f => f.Monto_26.HasValue && selMontos26.Contains(f.Monto_26.Value));
+                        if (selMontos.Any()) querySubtotal = querySubtotal.Where(f => f.Monto.HasValue && selMontos.Contains(f.Monto.Value));
                         if (selPrioridades.Any()) querySubtotal = querySubtotal.Where(f => f.PrioridadEF != null && selPrioridades.Contains(f.PrioridadEF.Id));
+                        if (selObras.Any()) querySubtotal = querySubtotal.Where(f => selObras.Contains(f.ObraId));
+                        if (selAnios.Any()) querySubtotal = querySubtotal.Where(f => selAnios.Contains(f.FechaPeriodo.Year));
+                        if (selEmpresas.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.EmpresaId.HasValue && selEmpresas.Contains(f.ObraEF.EmpresaId.Value));
+                        if (selBarrios.Any()) querySubtotal = querySubtotal.Where(f => f.ObraEF.BarrioId.HasValue && selBarrios.Contains(f.ObraEF.BarrioId.Value));
 
-                        totalMonto26Global = querySubtotal.Sum(f => (decimal?)f.Monto_26) ??0m;
+                        totalMontoGlobal = querySubtotal.Sum(f => (decimal?)f.Monto) ?? 0m;
                     }
                 }
 
-                paginationControl.SubtotalText = $"Total Monto2026: {totalMonto26Global:C} ({total} registros)";
+                paginationControl.SubtotalText = $"Total Monto: {totalMontoGlobal:C} ({total} registros)";
                 CalcularSubtotal(pagina);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar la grilla: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -518,7 +607,7 @@ namespace WebForms
                         obraEnEdicion = form?.ObraId;
                     }
                 }
-                ddlObraAgregar.DataSource = new ObraNegocioEF().ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario);
+                ddlObraAgregar.DataSource = new ObraNegocioEF().ListarParaDDL();
                 ddlObraAgregar.DataTextField = "Descripcion";
                 ddlObraAgregar.DataValueField = "Id";
                 ddlObraAgregar.DataBind();
@@ -539,9 +628,9 @@ namespace WebForms
                 ddlPrioridades.DataValueField = "Id";
                 ddlPrioridades.DataBind();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cargar listas: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -549,15 +638,17 @@ namespace WebForms
         {
             ddlObraAgregar.SelectedIndex =0;
             ddlObraEditar.SelectedIndex =0;
-            txtMonto26.Text = "";
+            ddlAnio.SelectedIndex = 0;
+            txtMonto.Text = "";
             txtPpi.Text = "";
             txtTechos.Text = "";
-            txtMonto27.Text = "";
-            txtMonto28.Text = "";
             txtMesBase.Text = "";
             ddlUnidadMedida.SelectedIndex =0;
             txtValorMedida.Text = "";
             txtObservaciones.Text = "";
+            txtBreveDescripcion.Text = "";
+            txtFechaInicio.Text = "";
+            txtFechaFin.Text = "";
             ddlPrioridades.SelectedIndex =0;
         }
 
@@ -575,9 +666,9 @@ namespace WebForms
                     BindGrid();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al filtrar: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -595,9 +686,9 @@ namespace WebForms
                 dgvFormulacion.PageIndex = e.NewPageIndex;
                 BindGrid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ToastService.Show(this.Page, $"Error al cambiar de página: {ex.Message}", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -671,17 +762,17 @@ namespace WebForms
         private void CalcularSubtotal(List<Dominio.FormulacionEF> formulacionesPagina)
         {
 
-            decimal totalMonto26 =0;
-            int count = formulacionesPagina?.Count ??0;
+            decimal totalMonto = 0;
+            int count = formulacionesPagina?.Count ?? 0;
 
             if (formulacionesPagina != null)
             {
-                totalMonto26 = formulacionesPagina
-                    .Sum(f => f.Monto_26 ??0);
+                totalMonto = formulacionesPagina
+                    .Sum(f => f.Monto ?? 0);
             }
 
             var paginationInfo = paginationControl.GetPaginationInfo();
-            paginationControl.SubtotalText = $"Total Monto2026: {totalMonto26:C} ({paginationInfo.TotalRecords} registros)";
+            paginationControl.SubtotalText = $"Total Monto: {totalMonto:C} ({paginationInfo.TotalRecords} registros)";
 
         }
 

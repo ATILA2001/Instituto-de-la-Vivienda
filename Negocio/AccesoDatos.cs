@@ -54,18 +54,9 @@ namespace Negocio
 
         public void ejecutarLectura()
         {
-            try
-            {
-                comando.Connection = conexion;
-                conexion.Open();
-                lector = comando.ExecuteReader();
-            }
-            catch (Exception ex)
-            {
-
-                throw ex;
-            }
-
+            comando.Connection = conexion;
+            conexion.Open();
+            lector = comando.ExecuteReader();
         }
         public void cerrarConexion()
         {
@@ -78,31 +69,14 @@ namespace Negocio
         public void ejecutarAccion()
         {
             comando.Connection = conexion;
-            try
-            {
-                conexion.Open();
-                comando.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-
-                throw ex;
-            }
-
+            conexion.Open();
+            comando.ExecuteNonQuery();
         }
         public string ejecutarAccionScalar()
         {
             comando.Connection = conexion;
-            try
-            {
-                conexion.Open();
-                return comando.ExecuteScalar().ToString();
-            }
-            catch (Exception ex)
-            {
-
-                throw ex;
-            }
+            conexion.Open();
+            return comando.ExecuteScalar().ToString();
         }
         public void setearParametros(string nombre, object valor)
         {

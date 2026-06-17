@@ -133,7 +133,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -316,7 +316,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -352,7 +352,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
             catch (Exception ex)
             {
                 // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-                throw ex;
+                throw;
             }
             finally
             {
@@ -377,7 +377,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
             catch (Exception ex)
             {
 
-                throw ex;
+                throw;
             }
             finally
             {
@@ -421,7 +421,7 @@ LEFT JOIN BD_PROYECTOS AS BD ON O.ID = BD.ID_BASE LEFT JOIN LINEA_DE_GESTION LG 
             catch (Exception ex)
             {
                 // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-                throw ex;
+                throw;
             }
             finally
             {

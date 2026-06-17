@@ -24,5 +24,15 @@ namespace Dominio
         [Column("PLANIFICACION_ABIERTA")]
         public bool IsPlanningOpenOverride { get; set; } // Override por usuario: planificación abierta aunque esté cerrada globalmente
 
+        [NotMapped]
+        public List<int> AreaIds { get; set; }
+
+        /// <summary>
+        /// IDs IVC (tabla Areas.Id) resueltos en BuildUserFromClaims desde los AuthAreaIds.
+        /// Permite filtrar datos y validar acceso por área sin ninguna consulta a DB adicional.
+        /// </summary>
+        [NotMapped]
+        public List<int> IvcAreaIds { get; set; }
+
     }
 }

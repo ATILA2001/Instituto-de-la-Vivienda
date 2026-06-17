@@ -24,24 +24,19 @@ namespace Negocio
             {
                 using (var context = new IVCdbContext())
                 {
+                    var query = context.Obras.AsNoTracking()
+                        .Include(e => e.Empresa)
+                        .Include(b => b.Barrio)
+                        .AsQueryable();
 
-                    List<ObraEF> query;
-                    int userAreaId = UserHelper.GetUserAreaId();
+                    if (!UserHelper.IsUserAdmin())
+                    {
+                        var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
+                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                            query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
+                    }
 
-                    if (UserHelper.IsUserAdmin())
-                        query = context.Obras.AsNoTracking()
-                            .Include(e => e.Empresa)
-                            .Include(b => b.Barrio)
-                            .ToList();
-                    else
-                        query = context.Obras.AsNoTracking()
-                            .Include(e => e.Empresa)
-                            .Include(b => b.Barrio)
-                            .Where(o => o.AreaId == userAreaId).ToList();
-
-                    return query
-                            .OrderBy(o => o.Descripcion)
-                            .ToList();
+                    return query.OrderBy(o => o.Descripcion).ToList();
                 }
             }
             catch (Exception ex)
@@ -57,8 +52,9 @@ namespace Negocio
                 var query = context.Obras.AsNoTracking().Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id) || (includeObraId.HasValue && o.Id == includeObraId.Value));
                 if (usuario != null && !usuario.Tipo)
                 {
-                    if (usuario.AreaId.HasValue) query = query.Where(o => o.AreaId == usuario.AreaId.Value);
-                    else if (usuario.Area != null) query = query.Where(o => o.AreaId == usuario.Area.Id);
+                    var filtroAreaIds = usuario.IvcAreaIds;
+                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                        query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
                 }
                 return query.OrderBy(o => o.Descripcion).ToList();
             }
@@ -82,8 +78,10 @@ namespace Negocio
 
                     // Calcular finanzas y construir DTOs
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
+                    var obraIds = obras.Select(o => o.Id).ToList();
+                    var finanzas = calc.ObtenerFinanzasPorObras(obraIds);
+                    var ejecFisica = calc.ObtenerEjecFisicaBulkPorObras(obraIds);
+                    return calc.ConstruirObraDTOs(obras, finanzas, ejecFisica);
                 }
             }
             catch (Exception ex)
@@ -98,23 +96,8 @@ namespace Negocio
             {
                 using (var context = new IVCdbContext())
                 {
-                    IQueryable<ObraEF> query;
-
-                    // NUEVO: Caso especial para AreaId 18 - acceso a áreas 1, 2 y 3
-                    if (areaId == 19)
-                    {
-                        var areasPermitidas = new List<int> { 1, 2, 3 };
-                        query = context.Obras.AsNoTracking()
-                            .Where(o => o.AreaId.HasValue && areasPermitidas.Contains(o.AreaId.Value));
-                    }
-                    else
-                    {
-                        query = context.Obras.AsNoTracking()
-                            .Where(o => o.AreaId == areaId);
-                    }
-
-                    // Continuar con las inclusiones necesarias
-                    var obras = query
+                    var obras = context.Obras.AsNoTracking()
+                        .Where(o => o.AreaId == areaId)
                         .Include(o => o.Empresa)
                         .Include(o => o.Area)
                         .Include(o => o.Barrio)
@@ -125,8 +108,43 @@ namespace Negocio
                         .ToList();
 
                     var calc = new CalculoObraNegocioEF();
-                    var finanzas = calc.ObtenerFinanzasPorObras(obras.Select(o => o.Id).ToList());
-                    return calc.ConstruirObraDTOs(obras, finanzas);
+                    var obraIds2 = obras.Select(o => o.Id).ToList();
+                    var finanzas2 = calc.ObtenerFinanzasPorObras(obraIds2);
+                    var ejecFisica2 = calc.ObtenerEjecFisicaBulkPorObras(obraIds2);
+                    return calc.ConstruirObraDTOs(obras, finanzas2, ejecFisica2);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error al obtener las obras por área (DTO)", ex);
+            }
+        }
+
+        public List<ObraDTO> ListarPorAreaIds(List<int> areaIds)
+        {
+            try
+            {
+                using (var context = new IVCdbContext())
+                {
+                    if (areaIds == null || areaIds.Count == 0)
+                        return new List<ObraDTO>();
+
+                    var obras = context.Obras.AsNoTracking()
+                        .Where(o => o.AreaId.HasValue && areaIds.Contains(o.AreaId.Value))
+                        .Include(o => o.Empresa)
+                        .Include(o => o.Area)
+                        .Include(o => o.Barrio)
+                        .Include(o => o.Contrata)
+                        .Include("Proyecto")
+                        .Include("Proyecto.LineaGestionEF")
+                        .OrderBy(o => o.Descripcion)
+                        .ToList();
+
+                    var calc = new CalculoObraNegocioEF();
+                    var obraIds3 = obras.Select(o => o.Id).ToList();
+                    var finanzas3 = calc.ObtenerFinanzasPorObras(obraIds3);
+                    var ejecFisica3 = calc.ObtenerEjecFisicaBulkPorObras(obraIds3);
+                    return calc.ConstruirObraDTOs(obras, finanzas3, ejecFisica3);
                 }
             }
             catch (Exception ex)

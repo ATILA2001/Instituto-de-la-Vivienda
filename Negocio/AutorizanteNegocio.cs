@@ -73,7 +73,7 @@ namespace Negocio
             INNER JOIN EMPRESAS AS EM ON O.EMPRESA = EM.ID 
             INNER JOIN BARRIOS AS BA ON O.BARRIO = BA.ID 
             INNER JOIN CONCEPTOS AS CO ON A.CONCEPTO = CO.ID 
-            WHERE O.AREA = @area";
+            WHERE O.AREA IN (SELECT ID FROM AREAS WHERE NOMBRE = @area)";
 
                 if (empresa != null && empresa.Count > 0)
                 {
@@ -123,7 +123,7 @@ namespace Negocio
 
                 query += " ORDER BY O.DESCRIPCION,A.CODIGO_AUTORIZANTE";
                 datos.setearConsulta(query);
-                datos.agregarParametro("@area", usuario.Area.Id);
+                datos.agregarParametro("@area", usuario.Area.Nombre);
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
@@ -187,7 +187,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -364,7 +364,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -480,7 +480,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -513,7 +513,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {

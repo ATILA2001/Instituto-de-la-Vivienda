@@ -5,6 +5,7 @@
 
 .github/
 connectionStrings.config
+SharedCookie.config
 *.csproj.user
 
 

@@ -1,6 +1,7 @@
 ﻿using Dominio;
 using Negocio;
 using System;
+using WebForms.CustomControls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -36,19 +37,28 @@ namespace WebForms
 
             if (txtNombre.Text.Trim() != string.Empty)
             {
-                barrio.Id = int.Parse(Request.QueryString["codM"].ToString());
-                barrio.Nombre = txtNombre.Text.Trim();
-                negocio.modificar(barrio);
-                lblMensaje.Text = "Se modificó el barrio exitosamente.";
-                lblMensaje.CssClass = "alert alert-success";
+                try
+                {
+                    barrio.Id = int.Parse(Request.QueryString["codM"].ToString());
+                    barrio.Nombre = txtNombre.Text.Trim();
+                    negocio.modificar(barrio);
+                    ToastService.Show(this.Page, "Se modificó el barrio exitosamente.", ToastService.ToastType.Success);
 
-                ScriptManager.RegisterClientScriptBlock(this, typeof(Page), "redirectJS",
-                "setTimeout(function() { window.location.replace('Abmlbarrio.aspx') }, 3000);", true);
+                    ScriptManager.RegisterClientScriptBlock(this, typeof(Page), "redirectJS",
+                    "setTimeout(function() { window.location.replace('Abmlbarrio.aspx') }, 3000);", true);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
+                }
+                catch (Exception)
+                {
+                    ToastService.Show(this.Page, "No se pudo modificar el barrio. Intente nuevamente.", ToastService.ToastType.Error);
+                }
             }
             else
             {
-                lblMensaje.Text = "Tiene que llenar todos los campos.";
-                lblMensaje.CssClass = "alert alert-success";
+                ToastService.Show(this.Page, "Tiene que llenar todos los campos.", ToastService.ToastType.Warning);
             }
         }
         protected void btnVolver_Click(object sender, EventArgs e)

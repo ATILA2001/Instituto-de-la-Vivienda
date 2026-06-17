@@ -79,7 +79,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -110,7 +110,7 @@ namespace Negocio
             catch (Exception ex)
             {
                 // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-                throw ex;
+                throw;
             }
             finally
             {
@@ -135,7 +135,7 @@ namespace Negocio
             catch (Exception ex)
             {
 
-                throw ex;
+                throw;
             }
             finally
             {
@@ -169,7 +169,7 @@ namespace Negocio
             catch (Exception ex)
             {
                 // En caso de error, lanzamos la excepción para que se maneje donde se llame el método
-                throw ex;
+                throw;
             }
             finally
             {

@@ -44,5 +44,8 @@ namespace Dominio.DTO
         public int? TipoPagoId { get; set; }
         public string TipoPagoNombre { get; set; }
         public int? EstadoRedetId { get; set; }
+
+        // Ejecución física
+        public decimal? PorcEjecFisica { get; set; }
     }
 }
