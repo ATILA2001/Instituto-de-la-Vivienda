@@ -109,7 +109,7 @@ namespace WebForms
                         }
 
                         var sharedAppName = Environment.GetEnvironmentVariable("SharedCookie__ApplicationName")
-                            ?? WebConfigurationManager.AppSettings["SharedCookieAppName"];
+                            ?? WebConfigurationManager.AppSettings["SharedCookieApplicationName"];
                         var services = new ServiceCollection();
                         var xmlRepo = new Dominio.DataProtectionXmlRepository(() => new Dominio.DataProtectionKeysDbContext());
                         services.AddSingleton<IXmlRepository>(sp => xmlRepo);
