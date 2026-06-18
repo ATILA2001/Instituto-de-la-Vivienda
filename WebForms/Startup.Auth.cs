@@ -26,11 +26,11 @@ namespace WebForms
                     "Defina la variable de entorno 'SharedCookie__Name' o el appSetting 'SharedCookieName'.");
 
             var sharedAppName = Environment.GetEnvironmentVariable("SharedCookie__ApplicationName")
-                ?? WebConfigurationManager.AppSettings["SharedCookieAppName"];
+                ?? WebConfigurationManager.AppSettings["SharedCookieApplicationName"];
             if (string.IsNullOrEmpty(sharedAppName))
                 throw new InvalidOperationException(
                     "El nombre de aplicación compartido no está configurado. " +
-                    "Defina la variable de entorno 'SharedCookie__ApplicationName' o el appSetting 'SharedCookieAppName'.");
+                    "Defina la variable de entorno 'SharedCookie__ApplicationName' o el appSetting 'SharedCookieApplicationName'.");
 
             app.SetDefaultSignInAsAuthenticationType("Identity.Application");
 
