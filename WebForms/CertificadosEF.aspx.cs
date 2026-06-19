@@ -790,7 +790,7 @@ namespace WebForms
                 var autorizante = autorizantes.FirstOrDefault(a => a.Id.ToString() == item.Value);
                 if (autorizante != null && autorizante.Obra != null)
                 {
-                    item.Text = $"{autorizante.CodigoAutorizante} - {autorizante.Obra.Descripcion} - {autorizante.Obra.Empresa.Nombre} - {autorizante.Detalle}";
+                    item.Text = $"{autorizante.CodigoAutorizante} - {autorizante.Obra.Descripcion} - {autorizante.Obra.Empresa?.Nombre ?? "Sin empresa"} - {autorizante.Obra.Barrio?.Nombre ?? "Sin barrio"}";
                 }
             }
         }
