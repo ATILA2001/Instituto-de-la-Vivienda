@@ -25,7 +25,8 @@ namespace Negocio
                 {
                     var query = context.Autorizantes.AsNoTracking()
                         .Include(a => a.Obra)
-                        .Include(e => e.Obra.Empresa);
+                        .Include(a => a.Obra.Empresa)
+                        .Include(a => a.Obra.Barrio);
 
                     // Aplica filtro de seguridad por área solo si:
                     // 1. Usuario no es null

@@ -607,13 +607,21 @@ namespace WebForms
                         obraEnEdicion = form?.ObraId;
                     }
                 }
-                ddlObraAgregar.DataSource = new ObraNegocioEF().ListarParaDDL();
-                ddlObraAgregar.DataTextField = "Descripcion";
+                var obras = new ObraNegocioEF().ListarParaDDL()
+                    .Select(o => new
+                    {
+                        o.Id,
+                        DescripcionCompleta = $"{o.Descripcion} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
+                    })
+                    .ToList();
+
+                ddlObraAgregar.DataSource = obras;
+                ddlObraAgregar.DataTextField = "DescripcionCompleta";
                 ddlObraAgregar.DataValueField = "Id";
                 ddlObraAgregar.DataBind();
 
-                ddlObraEditar.DataSource = new ObraNegocioEF().ListarParaDDL();
-                ddlObraEditar.DataTextField = "Descripcion";
+                ddlObraEditar.DataSource = obras;
+                ddlObraEditar.DataTextField = "DescripcionCompleta";
                 ddlObraEditar.DataValueField = "Id";
                 ddlObraEditar.DataBind();
 
