@@ -321,12 +321,21 @@ namespace WebForms
 
             if (!UserHelper.IsUserAdmin())
             {
-                ddlArea.Enabled = false;
-                var areaNombre = UserHelper.GetFullCurrentUser().Area?.Nombre;
-                if (!string.IsNullOrEmpty(areaNombre))
+                // El ddlArea ya viene filtrado a las áreas del usuario desde BindDropDownList (IvcAreaIds)
+                var userAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds ?? new List<int>();
+                ddlArea.ClearSelection();
+
+                if (userAreaIds.Count == 1)
                 {
-                    var item = ddlArea.Items.FindByText(areaNombre);
+                    // Una sola área: fijarla y bloquear
+                    var item = ddlArea.Items.FindByValue(userAreaIds[0].ToString());
                     if (item != null) item.Selected = true;
+                    ddlArea.Enabled = false;
+                }
+                else
+                {
+                    // Varias áreas: permitir elegir entre las disponibles
+                    ddlArea.Enabled = true;
                 }
             }
             else
@@ -616,7 +625,17 @@ namespace WebForms
 
                 using (var ctx = new IVCdbContext())
                 {
-                    var areas = ctx.Areas.AsNoTracking().OrderBy(a => a.Nombre).Select(a => new { a.Id, a.Nombre }).ToList();
+                    var areasQuery = ctx.Areas.AsNoTracking().AsQueryable();
+
+                    // Para usuarios no admin, restringir a sus áreas (IvcAreaIds), igual que ObraNegocioEF.ListarParaDDL
+                    if (!UserHelper.IsUserAdmin())
+                    {
+                        var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
+                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
+                            areasQuery = areasQuery.Where(a => filtroAreaIds.Contains(a.Id));
+                    }
+
+                    var areas = areasQuery.OrderBy(a => a.Nombre).Select(a => new { a.Id, a.Nombre }).ToList();
                     ddlArea.DataSource = areas;
                     ddlArea.DataTextField = "Nombre";
                     ddlArea.DataValueField = "Id";
