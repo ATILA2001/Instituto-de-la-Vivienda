@@ -288,7 +288,7 @@ namespace WebForms
             switch (pageName.ToLower())
             {
                 case "formulacionef":
-                    return "Formulación 2026";
+                    return "Formulación 2027";
                 case "proyectosef":
                     return "Proyectos";
                 case "movimientosgestionef":

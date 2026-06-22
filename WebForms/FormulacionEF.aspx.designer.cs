@@ -86,13 +86,17 @@ namespace WebForms
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtMesBase;
 
-        protected global::System.Web.UI.WebControls.DropDownList ddlAnio;
+        protected global::System.Web.UI.WebControls.TextBox txtMonto1;
 
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAnio;
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto1;
 
-        protected global::System.Web.UI.WebControls.TextBox txtMonto;
+        protected global::System.Web.UI.WebControls.TextBox txtMonto2;
 
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto;
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto2;
+
+        protected global::System.Web.UI.WebControls.TextBox txtMonto3;
+
+        protected global::System.Web.UI.WebControls.RegularExpressionValidator revMonto3;
 
         protected global::System.Web.UI.WebControls.DropDownList ddlUnidadMedida;
 

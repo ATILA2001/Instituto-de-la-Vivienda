@@ -150,6 +150,7 @@
     <Compile Include="EstadoRedetNegocioEF.cs" />
     <Compile Include="ExpedienteReliqNegocio.cs" />
     <Compile Include="ExpedienteReliqNegocioEF.cs" />
+    <Compile Include="FormulacionCiclo.cs" />
     <Compile Include="FormulacionNegocioEF.cs" />
     <Compile Include="FormulacionNegocio.cs" />
     <Compile Include="Helpers.cs" />

@@ -87,6 +87,7 @@
     <Compile Include="ExpedienteReliqEF.cs" />
     <Compile Include="Formulacion.cs" />
     <Compile Include="FormulacionEF.cs" />
+    <Compile Include="FormulacionPivotEF.cs" />
     <Compile Include="IVCdbContext.cs" />
     <Compile Include="Legitimo.cs" />
     <Compile Include="LegitimoEF.cs" />
