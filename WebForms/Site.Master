@@ -69,7 +69,7 @@
 							</li>
 
 							<li class="nav-item">
-								<a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2026</span></a>
+								<a class="nav-link text-white" href="FormulacionEF.aspx" id="lnkFormulacion" runat="server"><span>Formulacion 2027</span></a>
 							</li>
 							<!-- Gestión -->
 							<li class="nav-item dropdown" id="dropdownGestion" runat="server">
@@ -80,7 +80,7 @@
 								<ul class="dropdown-menu">
 									<li><a class="dropdown-item" href="BdProyectos.aspx">Proyectos</a></li>
 									<li><a class="dropdown-item" href="MovimientosGestion.aspx">Movimientos</a></li>
-									<li><a class="dropdown-item" href="FormulacionEF.aspx">Formulación 2026</a></li>
+									<li><a class="dropdown-item" href="FormulacionEF.aspx">Formulación 2027</a></li>
 									<li>
 										<hr class="dropdown-divider">
 									</li>

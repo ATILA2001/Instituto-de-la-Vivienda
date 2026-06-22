@@ -47,9 +47,13 @@ namespace Negocio
 
         public List<ObraEF> ListarParaDDLNoEnFormulacion(int? includeObraId = null, UsuarioEF usuario = null)
         {
+            var anios = FormulacionCiclo.Anios;
             using (var context = new IVCdbContext())
             {
-                var query = context.Obras.AsNoTracking().Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id) || (includeObraId.HasValue && o.Id == includeObraId.Value));
+                var query = context.Obras.AsNoTracking()
+                    .Include(o => o.Empresa)
+                    .Include(o => o.Barrio)
+                    .Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id && anios.Contains(f.FechaPeriodo.Year)) || (includeObraId.HasValue && o.Id == includeObraId.Value));
                 if (usuario != null && !usuario.Tipo)
                 {
                     var filtroAreaIds = usuario.IvcAreaIds;

@@ -66,38 +66,53 @@
                                     </div>
                                 </div>
 
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="ddlAnio" class="form-label">Año</label>
-                                        <asp:DropDownList ID="ddlAnio" CssClass="form-select" runat="server">
-                                            <asp:ListItem Value="2027" Text="2027"></asp:ListItem>
-                                            <asp:ListItem Value="2028" Text="2028"></asp:ListItem>
-                                            <asp:ListItem Value="2029" Text="2029"></asp:ListItem>
-                                        </asp:DropDownList>
-                                        <asp:RequiredFieldValidator ID="rfvAnio"
-                                            ControlToValidate="ddlAnio"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Seleccione un año"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            InitialValue="" />
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="txtMonto" class="form-label">Monto</label>
-                                        <asp:TextBox ID="txtMonto" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
-                                        <asp:RegularExpressionValidator ID="revMonto"
-                                            ControlToValidate="txtMonto"
-                                            ValidationGroup="AgregarFormulacion"
-                                            runat="server"
-                                            ErrorMessage="Ingrese un valor numérico válido"
-                                            Display="Dynamic"
-                                            CssClass="text-danger"
-                                            EnableClientScript="true"
-                                            ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                <div class="col-12">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="mb-3">
+                                                <label for="txtMonto1" class="form-label">Monto <%= AnioCiclo1 %></label>
+                                                <asp:TextBox ID="txtMonto1" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                                <asp:RegularExpressionValidator ID="revMonto1"
+                                                    ControlToValidate="txtMonto1"
+                                                    ValidationGroup="AgregarFormulacion"
+                                                    runat="server"
+                                                    ErrorMessage="Ingrese un valor numérico válido"
+                                                    Display="Dynamic"
+                                                    CssClass="text-danger"
+                                                    EnableClientScript="true"
+                                                    ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="mb-3">
+                                                <label for="txtMonto2" class="form-label">Monto <%= AnioCiclo2 %></label>
+                                                <asp:TextBox ID="txtMonto2" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                                <asp:RegularExpressionValidator ID="revMonto2"
+                                                    ControlToValidate="txtMonto2"
+                                                    ValidationGroup="AgregarFormulacion"
+                                                    runat="server"
+                                                    ErrorMessage="Ingrese un valor numérico válido"
+                                                    Display="Dynamic"
+                                                    CssClass="text-danger"
+                                                    EnableClientScript="true"
+                                                    ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="mb-3">
+                                                <label for="txtMonto3" class="form-label">Monto <%= AnioCiclo3 %></label>
+                                                <asp:TextBox ID="txtMonto3" CssClass="form-control" runat="server" onkeypress="return soloNumerosDecimales(event)" />
+                                                <asp:RegularExpressionValidator ID="revMonto3"
+                                                    ControlToValidate="txtMonto3"
+                                                    ValidationGroup="AgregarFormulacion"
+                                                    runat="server"
+                                                    ErrorMessage="Ingrese un valor numérico válido"
+                                                    Display="Dynamic"
+                                                    CssClass="text-danger"
+                                                    EnableClientScript="true"
+                                                    ValidationExpression="^\d+(?:[\.,]\d{1,2})?$" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -239,14 +254,14 @@
     <hr class="mb-3" />
     <div class="gridview-scroll-container">
 
-        <asp:GridView ID="dgvFormulacion" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+        <asp:GridView ID="dgvFormulacion" DataKeyNames="ObraId" CssClass="table1 table-bordered table-hover mb-4"
             OnSelectedIndexChanged="dgvFormulacion_SelectedIndexChanged"
             OnRowDeleting="dgvFormulacion_RowDeleting"
             OnDataBound="dgvFormulacion_DataBound"
             ShowHeaderWhenEmpty="true"
             AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
             <Columns>
-                <asp:BoundField HeaderText="ID" DataField="Id" Visible="false" />
+                <asp:BoundField HeaderText="ID" DataField="ObraId" Visible="false" />
 
                 <asp:TemplateField HeaderText="Área">
                     <HeaderTemplate>
@@ -332,30 +347,19 @@
 
                 <asp:BoundField HeaderText="Techo" DataField="Techos" DataFormatString="{0:C}" />
 
-                <asp:TemplateField HeaderText="Año">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderAnio" runat="server"
-                            HeaderText="Año"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# ((DateTime)Eval("FechaPeriodo")).Year %>
-                    </ItemTemplate>
+                <asp:TemplateField>
+                    <HeaderTemplate>Monto <%# AnioCiclo1 %></HeaderTemplate>
+                    <ItemTemplate><%# Eval("MontoAnio1", "{0:C}") %></ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="Monto">
-                    <HeaderTemplate>
-                        <CustomControls:TreeViewSearch ID="cblsHeaderMonto" runat="server"
-                            HeaderText="Monto"
-                            DataTextField="Nombre"
-                            DataValueField="Id"
-                            OnAcceptChanges="OnAcceptChanges" />
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("Monto", "{0:C}") %>
-                    </ItemTemplate>
+                <asp:TemplateField>
+                    <HeaderTemplate>Monto <%# AnioCiclo2 %></HeaderTemplate>
+                    <ItemTemplate><%# Eval("MontoAnio2", "{0:C}") %></ItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField>
+                    <HeaderTemplate>Monto <%# AnioCiclo3 %></HeaderTemplate>
+                    <ItemTemplate><%# Eval("MontoAnio3", "{0:C}") %></ItemTemplate>
                 </asp:TemplateField>
                 <asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
                 <asp:BoundField HeaderText="Unidad de Medida" DataField="UnidadMedidaEF.Nombre" />
@@ -421,7 +425,9 @@
         }
 
         function limpiarFormulario() {
-            document.getElementById('<%= txtMonto.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto1.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto2.ClientID %>').value = '';
+            document.getElementById('<%= txtMonto3.ClientID %>').value = '';
             document.getElementById('<%= txtPpi.ClientID %>').value = '';
             document.getElementById('<%= txtTechos.ClientID %>').value = '';
             document.getElementById('<%= txtValorMedida.ClientID %>').value = '';
@@ -432,7 +438,6 @@
             document.getElementById('<%= txtFechaFin.ClientID %>').value = '';
             document.getElementById('<%= ddlObraAgregar.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlObraEditar.ClientID %>').selectedIndex = 0;
-            document.getElementById('<%= ddlAnio.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
         }

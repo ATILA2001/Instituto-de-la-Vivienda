@@ -93,6 +93,217 @@ namespace Negocio
             }
         }
 
+        #region Pivot por obra (ciclo de 3 años)
+
+        /// <summary>
+        /// Arma el viewmodel pivoteado de una obra a partir de sus filas FORMULACION del ciclo.
+        /// Los campos compartidos se toman de cualquier fila (son idénticos); los montos se
+        /// ubican por año en las posiciones del ciclo.
+        /// </summary>
+        private FormulacionPivotEF BuildPivot(int obraId, List<FormulacionEF> filas, int[] anios)
+        {
+            var first = filas.OrderBy(f => f.FechaPeriodo).FirstOrDefault();
+            var pivot = new FormulacionPivotEF
+            {
+                ObraId = obraId,
+                ObraEF = first?.ObraEF,
+                Ppi = first?.Ppi,
+                Techos = first?.Techos,
+                MesBase = first?.MesBase,
+                UnidadMedidaId = first?.UnidadMedidaId,
+                UnidadMedidaEF = first?.UnidadMedidaEF,
+                ValorMedida = first?.ValorMedida,
+                PrioridadId = first?.PrioridadId,
+                PrioridadEF = first?.PrioridadEF,
+                BreveDescripcion = first?.BreveDescripcion,
+                FechaInicio = first?.FechaInicio,
+                FechaFin = first?.FechaFin,
+                Observaciones = first?.Observaciones
+            };
+            pivot.MontoAnio1 = filas.FirstOrDefault(f => f.FechaPeriodo.Year == anios[0])?.Monto;
+            pivot.MontoAnio2 = filas.FirstOrDefault(f => f.FechaPeriodo.Year == anios[1])?.Monto;
+            pivot.MontoAnio3 = filas.FirstOrDefault(f => f.FechaPeriodo.Year == anios[2])?.Monto;
+            return pivot;
+        }
+
+        /// <summary>
+        /// Cuenta las OBRAS distintas (no filas) con formulación en el ciclo vigente, aplicando filtros.
+        /// </summary>
+        public int ContarObrasConFiltros(UsuarioEF usuario, string filtroGeneral,
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<int> prioridades,
+            List<int> obras = null, List<int> empresas = null, List<int> barrios = null)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                var query = BuildBaseQuery(context, usuario);
+                query = ApplyOptionalFilters(query, filtroGeneral, areas, lineasGestion, proyectos, null, prioridades, obras, null, empresas, null, barrios);
+                query = query.Where(f => anios.Contains(f.FechaPeriodo.Year));
+                return query.Select(f => f.ObraId).Distinct().Count();
+            }
+        }
+
+        /// <summary>
+        /// Devuelve una página de OBRAS (1 fila lógica por obra) con sus montos del ciclo pivoteados.
+        /// </summary>
+        public List<FormulacionPivotEF> ListarPivotPaginadoConFiltros(UsuarioEF usuario, int pageIndex, int pageSize, string filtroGeneral,
+            List<int> areas, List<int> lineasGestion, List<int> proyectos, List<int> prioridades,
+            List<int> obras = null, List<int> empresas = null, List<int> barrios = null)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                // 1) Página de obras ordenadas por descripción (aplica filtros + ventana del ciclo)
+                var filtrado = BuildBaseQuery(context, usuario);
+                filtrado = ApplyOptionalFilters(filtrado, filtroGeneral, areas, lineasGestion, proyectos, null, prioridades, obras, null, empresas, null, barrios);
+                filtrado = filtrado.Where(f => anios.Contains(f.FechaPeriodo.Year));
+
+                var obrasPage = filtrado
+                    .Select(f => new { f.ObraId, f.ObraEF.Descripcion })
+                    .Distinct()
+                    .OrderBy(x => x.Descripcion)
+                    .ThenBy(x => x.ObraId)
+                    .Skip(pageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var obraIdsPage = obrasPage.Select(x => x.ObraId).ToList();
+
+                if (!obraIdsPage.Any())
+                    return new List<FormulacionPivotEF>();
+
+                // 2) Traer las filas (con includes) de las obras de esta página
+                var filas = BuildBaseQuery(context, usuario)
+                    .Where(f => anios.Contains(f.FechaPeriodo.Year) && obraIdsPage.Contains(f.ObraId))
+                    .ToList();
+
+                // 3) Pivotear preservando el orden de la página
+                var aniosArr = anios;
+                var porObra = filas.GroupBy(f => f.ObraId).ToDictionary(g => g.Key, g => g.ToList());
+                return obraIdsPage
+                    .Where(id => porObra.ContainsKey(id))
+                    .Select(id => BuildPivot(id, porObra[id], aniosArr))
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Lista TODAS las obras del usuario pivoteadas (sin paginar), ordenadas por descripción.
+        /// Pensado para exportar a Excel con las mismas columnas que la grilla.
+        /// </summary>
+        public List<FormulacionPivotEF> ListarPivotPorUsuario(UsuarioEF usuario)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                var filas = BuildBaseQuery(context, usuario)
+                    .Where(f => anios.Contains(f.FechaPeriodo.Year))
+                    .ToList();
+
+                return filas
+                    .GroupBy(f => f.ObraId)
+                    .Select(g => BuildPivot(g.Key, g.ToList(), anios))
+                    .OrderBy(p => p.ObraEF?.Descripcion)
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Carga el pivot de una obra puntual para edición. Devuelve null si la obra no tiene
+        /// ninguna formulación en el ciclo vigente.
+        /// </summary>
+        public FormulacionPivotEF ObtenerPivotPorObra(int obraId)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                var filas = context.Formulaciones
+                    .Include(f => f.ObraEF)
+                    .Include(f => f.UnidadMedidaEF)
+                    .Include(f => f.PrioridadEF)
+                    .Where(f => f.ObraId == obraId && anios.Contains(f.FechaPeriodo.Year))
+                    .ToList();
+
+                return filas.Any() ? BuildPivot(obraId, filas, anios) : null;
+            }
+        }
+
+        /// <summary>
+        /// Guarda la formulación de una obra para el ciclo (alta y edición unificadas).
+        /// Por cada año: si viene monto, hace upsert de la fila con los campos compartidos;
+        /// si el monto viene vacío, elimina la fila de ese año si existía.
+        /// </summary>
+        public bool GuardarPivot(int obraId, FormulacionEF compartido, decimal?[] montos)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                var existentes = context.Formulaciones
+                    .Where(f => f.ObraId == obraId && anios.Contains(f.FechaPeriodo.Year))
+                    .ToList();
+
+                for (int i = 0; i < anios.Length; i++)
+                {
+                    int anio = anios[i];
+                    decimal? monto = montos[i];
+                    var fila = existentes.FirstOrDefault(f => f.FechaPeriodo.Year == anio);
+
+                    if (!monto.HasValue)
+                    {
+                        if (fila != null) context.Formulaciones.Remove(fila);
+                        continue;
+                    }
+
+                    if (fila == null)
+                    {
+                        fila = new FormulacionEF
+                        {
+                            ObraId = obraId,
+                            FechaPeriodo = FormulacionCiclo.FechaPeriodo(anio)
+                        };
+                        context.Formulaciones.Add(fila);
+                    }
+
+                    fila.Monto = monto;
+                    fila.MesBase = compartido.MesBase;
+                    fila.Observaciones = compartido.Observaciones;
+                    fila.Ppi = compartido.Ppi;
+                    fila.Techos = compartido.Techos;
+                    fila.UnidadMedidaId = compartido.UnidadMedidaId;
+                    fila.ValorMedida = compartido.ValorMedida;
+                    fila.PrioridadId = compartido.PrioridadId;
+                    fila.BreveDescripcion = compartido.BreveDescripcion;
+                    fila.FechaInicio = compartido.FechaInicio;
+                    fila.FechaFin = compartido.FechaFin;
+                }
+
+                context.SaveChanges();
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Elimina todas las filas de formulación de una obra dentro del ciclo vigente.
+        /// </summary>
+        public bool EliminarPorObra(int obraId)
+        {
+            var anios = FormulacionCiclo.Anios;
+            using (var context = new IVCdbContext())
+            {
+                var filas = context.Formulaciones
+                    .Where(f => f.ObraId == obraId && anios.Contains(f.FechaPeriodo.Year))
+                    .ToList();
+
+                if (!filas.Any()) return false;
+
+                context.Formulaciones.RemoveRange(filas);
+                context.SaveChanges();
+                return true;
+            }
+        }
+
+        #endregion
+
         #region Métodos para Paginación
 
         /// <summary>
