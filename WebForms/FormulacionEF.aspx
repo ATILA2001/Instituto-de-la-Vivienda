@@ -68,10 +68,6 @@
 
                                 <div class="col-12">
                                     <div class="row">
-                                        <div class="col-12">
-                                            <label class="form-label fw-bold">Montos estimados por año</label>
-                                            <p class="text-muted small mb-2">Cargá el monto estimado para cada año del ciclo. Dejá vacío el año que no corresponda.</p>
-                                        </div>
                                         <div class="col-4">
                                             <div class="mb-3">
                                                 <label for="txtMonto1" class="form-label">Monto <%= AnioCiclo1 %></label>
