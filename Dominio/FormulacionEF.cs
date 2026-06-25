@@ -8,6 +8,8 @@ namespace Dominio
     public class FormulacionEF
     {
 
+        public const int ObservacionesMaxLength = 255;
+        public const int BreveDescripcionMaxLength = 500;
         [Key]
         [DatabaseGenerated(databaseGeneratedOption: DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -24,6 +26,7 @@ namespace Dominio
         [Column("MES_BASE")]
         public DateTime? MesBase { get; set; }
         [Column("OBSERVACIONES")]
+        [StringLength(ObservacionesMaxLength)]
         public string Observaciones { get; set; }
         [Column("VALOR_MEDIDA")]
         public decimal? ValorMedida { get; set; }
@@ -43,6 +46,7 @@ namespace Dominio
         public virtual PrioridadesEF PrioridadEF { get; set; }
 
         [Column("BREVE_DESCRIPCION")]
+        [StringLength(BreveDescripcionMaxLength)]
         public string BreveDescripcion { get; set; }
         [Column("FECHA_INICIO")]
         public DateTime? FechaInicio { get; set; }
