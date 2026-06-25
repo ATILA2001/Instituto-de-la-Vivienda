@@ -167,8 +167,12 @@
 
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label for="txtBreveDescripcion" class="form-label">Breve Descripción</label>
-                                        <asp:TextBox ID="txtBreveDescripcion" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="2" />
+                                        <label for="txtBreveDescripcion" class="form-label">Breve Descripción (máximo <%= BreveDescripcionMaxLength %> caracteres)</label>
+                                        <asp:TextBox ID="txtBreveDescripcion" CssClass="form-control" runat="server"
+                                            TextMode="MultiLine" Rows="2" />
+                                        <div class="form-text text-end" aria-live="polite">
+                                            <span id="contadorBreveDescripcion">0</span> / <%= BreveDescripcionMaxLength %> caracteres
+                                        </div>
                                     </div>
                                 </div>
 
@@ -188,8 +192,12 @@
 
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label for="txtObservaciones" class="form-label">Observaciones</label>
-                                        <asp:TextBox ID="txtObservaciones" CssClass="form-control" runat="server" TextMode="MultiLine" Rows="3" />
+                                        <label for="txtObservaciones" class="form-label">Observaciones (máximo <%= ObservacionesMaxLength %> caracteres)</label>
+                                        <asp:TextBox ID="txtObservaciones" CssClass="form-control" runat="server"
+                                            TextMode="MultiLine" Rows="3" />
+                                        <div class="form-text text-end" aria-live="polite">
+                                            <span id="contadorObservaciones">0</span> / <%= ObservacionesMaxLength %> caracteres
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -424,6 +432,39 @@
             return false;
         }
 
+        function actualizarContadorCaracteres(campo, contadorId, maximo) {
+            if (campo.value.length > maximo) {
+                campo.value = campo.value.substring(0, maximo);
+            }
+
+            var contador = document.getElementById(contadorId);
+            if (contador) {
+                contador.textContent = campo.value.length;
+            }
+        }
+
+        function configurarContadorCaracteres(campoId, contadorId, maximo) {
+            var campo = document.getElementById(campoId);
+            if (!campo) return;
+
+            // TextBox.MaxLength no se aplica a TextMode="MultiLine" en Web Forms.
+            campo.setAttribute('maxlength', maximo);
+            actualizarContadorCaracteres(campo, contadorId, maximo);
+        }
+
+        function inicializarContadoresCaracteres() {
+            configurarContadorCaracteres('<%= txtBreveDescripcion.ClientID %>', 'contadorBreveDescripcion', <%= BreveDescripcionMaxLength %>);
+            configurarContadorCaracteres('<%= txtObservaciones.ClientID %>', 'contadorObservaciones', <%= ObservacionesMaxLength %>);
+        }
+
+        if (window.Sys && Sys.Application) {
+            Sys.Application.add_load(inicializarContadoresCaracteres);
+        } else if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarContadoresCaracteres);
+        } else {
+            inicializarContadoresCaracteres();
+        }
+
         function limpiarFormulario() {
             document.getElementById('<%= txtMonto1.ClientID %>').value = '';
             document.getElementById('<%= txtMonto2.ClientID %>').value = '';
@@ -440,6 +481,7 @@
             document.getElementById('<%= ddlObraEditar.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlUnidadMedida.ClientID %>').selectedIndex = 0;
             document.getElementById('<%= ddlPrioridades.ClientID %>').selectedIndex = 0;
+            inicializarContadoresCaracteres();
         }
     </script>
 </asp:Content>

@@ -235,6 +235,19 @@ namespace Negocio
         /// </summary>
         public bool GuardarPivot(int obraId, FormulacionEF compartido, decimal?[] montos)
         {
+            if (compartido == null)
+                throw new ArgumentNullException(nameof(compartido));
+
+            if (compartido.BreveDescripcion != null &&
+                compartido.BreveDescripcion.Length > FormulacionEF.BreveDescripcionMaxLength)
+                throw new InvalidOperationException(
+                    $"La breve descripción no puede superar los {FormulacionEF.BreveDescripcionMaxLength} caracteres.");
+
+            if (compartido.Observaciones != null &&
+                compartido.Observaciones.Length > FormulacionEF.ObservacionesMaxLength)
+                throw new InvalidOperationException(
+                    $"Las observaciones no pueden superar los {FormulacionEF.ObservacionesMaxLength} caracteres.");
+
             var anios = FormulacionCiclo.Anios;
             using (var context = new IVCdbContext())
             {
