@@ -98,7 +98,8 @@ body.dark-mode {
     color: #ffffff !important;
 }
 
-.dark-mode .text-muted {
+.dark-mode .text-muted,
+.dark-mode .form-text {
     color: #9CA3AF !important;
 }
 
