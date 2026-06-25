@@ -20,14 +20,28 @@ namespace WebForms
         protected int AnioCiclo1 => FormulacionCiclo.Anios[0];
         protected int AnioCiclo2 => FormulacionCiclo.Anios[1];
         protected int AnioCiclo3 => FormulacionCiclo.Anios[2];
+        protected int BreveDescripcionMaxLength => Dominio.FormulacionEF.BreveDescripcionMaxLength;
+        protected int ObservacionesMaxLength => Dominio.FormulacionEF.ObservacionesMaxLength;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            ConfigurarLimitesTexto();
+
             if (!IsPostBack)
             {
                 BindDropDownList();
                 BindGrid();
             }
+        }
+
+        private void ConfigurarLimitesTexto()
+        {
+            txtBreveDescripcion.Attributes["maxlength"] = BreveDescripcionMaxLength.ToString(CultureInfo.InvariantCulture);
+            txtBreveDescripcion.Attributes["oninput"] =
+                $"actualizarContadorCaracteres(this, 'contadorBreveDescripcion', {BreveDescripcionMaxLength})";
+            txtObservaciones.Attributes["maxlength"] = ObservacionesMaxLength.ToString(CultureInfo.InvariantCulture);
+            txtObservaciones.Attributes["oninput"] =
+                $"actualizarContadorCaracteres(this, 'contadorObservaciones', {ObservacionesMaxLength})";
         }
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
