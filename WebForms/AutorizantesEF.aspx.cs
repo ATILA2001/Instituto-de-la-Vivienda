@@ -601,29 +601,9 @@ namespace WebForms
         #region Filtros y Búsqueda
 
         /// <summary>
-        /// Pobla los filtros TreeViewSearch del header del GridView con datos de BD.
-        /// 
-        /// FILTROS CONFIGURADOS:
-        /// - Área, Obra, Barrio, Proyecto, Empresa, Contrata: Consultas directas a BD
-        /// - Concepto: Incluye conceptos normales + "REDETERMINACION" especial
-        /// - Estado: Usa CalculoRedeterminacionNegocioEF.ObtenerEstadosParaFiltro()
-        /// - Mes Autorizante: Valores únicos de MesBase de autorizantes existentes
-        /// 
-        /// PATRÓN DE IMPLEMENTACIÓN:
-        /// - Función lambda bindFilter para reutilizar lógica
-        /// - Consultas AsNoTracking() para optimizar performance
-        /// - Ordenamiento alfabético en la mayoría de filtros
-        /// - Manejo especial para conceptos (incluye REDETERMINACION)
-        /// 
-        /// OPTIMIZACIÓN:
-        /// - Single using context para todas las consultas
-        /// - AsNoTracking() evita tracking innecesario de entities
-        /// - Select anónimo para obtener solo campos necesarios
-        /// 
-        /// DEPENDENCIAS:
-        /// - RequierE GridView.HeaderRow != null (llamar después de DataBind)
-        /// - TreeViewSearch controls en template del header
-        /// - CalculoRedeterminacionNegocioEF para estados especiales
+        /// Puebla los TreeViewSearch después del DataBind del GridView.
+        /// Actualmente combina catálogos de BD con valores derivados del snapshot
+        /// completo almacenado en Session["GridDataAutorizantes"].
         /// </summary>
         private void PoblarFiltrosHeader()
         {
@@ -849,43 +829,12 @@ namespace WebForms
         #region Carga de Datos Principal
 
         /// <summary>
-        /// Método central que carga datos paginados de autorizantes y redeterminaciones.
-        /// 
-        /// ARQUITECTURA DE PAGINACIÓN REAL:
-        /// 1. Consulta totalRecords con ContarTotalAutorizantes() (count optimizado)
-        /// 2. Carga solo pageSize registros usando ListarAutorizantesPaginados() 
-        /// 3. Guarda total en ViewState["TotalRecords"] para cálculos de paginación
-        /// 4. Guarda datos de página actual en Session["GridDataAutorizantes"]
-        /// 
-        /// DATOS COMBINADOS:
-        /// - Autorizantes reales de tabla Autorizantes
-        /// - Redeterminaciones calculadas dinámicamente (virtuales)
-        /// - Integración de datos SADE y SIGAF
-        /// - Estados mapeados según lógica de negocio
-        /// 
-        /// OPTIMIZACIONES IMPLEMENTADAS:
-        /// - Paginación en BD (no carga todos los registros)
-        /// - Variables externas currentPageIndex y pageSize
-        /// - Consulta de conteo separada (más eficiente)
-        /// - Session para evitar recálculos en filtros locales
-        /// 
-        /// FLUJO POST-CARGA:
-        /// 1. DataBind() al GridView con datos paginados
-        /// 2. PoblarFiltrosHeader() para filtros TreeViewSearch
-        /// 3. CalcularSubtotal() para totales de montos
-        /// 
-        /// DEPENDENCIAS:
-        /// - CalculoRedeterminacionNegocioEF para datos combinados
-        /// - Variables currentPageIndex, pageSize (paginación externa)
-        /// 
-        /// DIFERENCIAS CON OTROS MÓDULOS:
-        /// - Otros módulos cargan todo en memoria y paginan en cliente
-        /// - Este módulo pagina en servidor para manejar grandes volúmenes
-        /// - Session contiene solo datos de página actual (no todo el dataset)
+        /// Carga o reutiliza el snapshot completo de autorizantes y redeterminaciones.
+        /// La consolidación costosa se ejecuta solo cuando la caché no existe o fue
+        /// invalidada. BindGrid aplica filtros en memoria y pagina el resultado.
         /// </summary>
         private void CargarListaAutorizantesRedet()
         {
-            //ólo asegura cache completo y delega paginación/filtrado a BindGrid()
             try
             {
                 List<AutorizanteDTO> todos;
@@ -919,7 +868,10 @@ namespace WebForms
             ConfigurarPaginationControl();
         }
 
-        // Refresca grid desde cache aplicando filtros y paginación basada en currentPageIndex/pageSize
+        /// <summary>
+        /// Filtra el snapshot completo en memoria, obtiene la página visible y
+        /// actualiza el GridView, sus filtros y el control de paginación.
+        /// </summary>
         private void BindGrid()
         {
             if (Session["GridDataAutorizantes"] == null) return;
@@ -962,8 +914,7 @@ namespace WebForms
         }
 
         /// <summary>
-        /// Método para vincular datos paginados directamente al GridView
-        /// No aplica filtros en memoria ya que los datos vienen paginados de la base
+        /// Aplica los filtros TreeViewSearch sobre el snapshot recibido.
         /// </summary>
         private List<AutorizanteDTO> AplicarFiltrosTreeViewEnMemoria(List<AutorizanteDTO> autorizantes)
         {

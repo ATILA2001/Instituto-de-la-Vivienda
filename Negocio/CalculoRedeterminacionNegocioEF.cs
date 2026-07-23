@@ -25,9 +25,9 @@ namespace Negocio
     ///    - SIGAF: Cálculo de importes devengados por expediente
     ///    - SADE: Información de buzones y fechas de últimos pases
     ///    - Mapeo de estados entre sistemas heterogéneos
-    /// 
+    ///
     /// 3. OPTIMIZACIÓN DE CONSULTAS MASIVAS:
-    ///    - Paginación real en base de datos (no en memoria)
+    ///    - Métodos de carga completa y métodos paginados según el caso de uso
     ///    - Carga separada de entidades relacionadas
     ///    - Consultas bulk para datos SIGAF y SADE
     ///    - Disable de features EF innecesarias para performance

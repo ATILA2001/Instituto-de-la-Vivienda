@@ -326,9 +326,9 @@ namespace Negocio
         }
 
         /// <summary>
-        /// Lista las redeterminaciones paginadas aplicando filtros simples.
+        /// Lista las redeterminaciones paginadas aplicando texto, obra,
+        /// autorizante, estado y usuario.
         /// pageIndex es 0-based.
-        /// La implementación actual aplica filtro de texto y paginación; otros filtros se dejan como punto de extensión.
         /// </summary>
         public List<RedeterminacionEF> ListarPaginadoConFiltros(int pageIndex,
             int pageSize,
