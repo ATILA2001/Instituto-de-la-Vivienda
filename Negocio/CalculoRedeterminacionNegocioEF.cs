@@ -710,11 +710,28 @@ namespace Negocio
                     {
                         if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
 
-                        var certificadosAfectados = listaFinalDTO.Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante && c.MesAprobacion > redet.Salto);
+                        if (!redet.Salto.HasValue) continue;
 
+                        // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
+                        // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
+                        var certificadosAfectados = listaFinalDTO
+                            .Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante
+                                     && c.MesAprobacion.HasValue
+                                     && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
+                                     && c.TipoPagoId != TipoPagoAnticipoId)
+                            .OrderBy(c => c.MesAprobacion)
+                            .ThenBy(c => c.Id)
+                            .ToList();
+
+                        bool esPrimerCertificadoPostSalto = true;
                         foreach (var certAfectado in certificadosAfectados)
                         {
-                            decimal montoReliq = (redet.MontoRedet ?? 0) * ((certAfectado.Porcentaje ?? 0) / 100);
+                            // Paso 3a / 3b (R3): el primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
+                            decimal porcentajeAplicado = (certAfectado.Porcentaje ?? 0)
+                                + (esPrimerCertificadoPostSalto ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
+                            esPrimerCertificadoPostSalto = false;
+
+                            decimal montoReliq = (redet.MontoRedet ?? 0) * (porcentajeAplicado / 100);
 
                             var claveReliq = new Tuple<string, int, int>(redet.CodigoRedet, certAfectado.MesAprobacion.Value.Month, certAfectado.MesAprobacion.Value.Year);
 
@@ -757,7 +774,7 @@ namespace Negocio
                                 LineaGestionNombre = lineaGestionRedet?.Nombre,
                                 TipoPagoId = 3,
                                 TipoPagoNombre = "RELIQUIDACION",
-                                Porcentaje = certAfectado.Porcentaje, // El porcentaje sí viene del certificado afectado
+                                Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
                             });
                         }
                     }
@@ -1046,35 +1063,71 @@ namespace Negocio
             }
         }
 
+        /// <summary>
+        /// Id del tipo de pago "anticipo financiero". Regla R2: cuenta como ejecutado (ya está pagado)
+        /// y no se redetermina, por lo tanto nunca genera reliquidación.
+        /// </summary>
+        private const int TipoPagoAnticipoId = 1;
+
+        private static DateTime PrimerDiaDelMes(DateTime fecha) => new DateTime(fecha.Year, fecha.Month, 1);
+
+        /// <summary>Regla R1: la comparación contra el salto es mes a mes y el mes del salto cuenta como ANTERIOR (ejecutado).</summary>
+        private static bool EsMesAnteriorOIgual(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) <= PrimerDiaDelMes(salto);
+
+        /// <summary>Regla R1: solo los meses estrictamente posteriores al del salto generan reliquidación.</summary>
+        private static bool EsMesPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) > PrimerDiaDelMes(salto);
+
+        /// <summary>
+        /// Calcula MontoRedet de cada redeterminación (Pasos A, B y C de Docs/calculo-redeterminaciones.html)
+        /// y deja en PorcentajeEjecutadoPreSalto el porcentaje ya ejecutado, que usa el Paso 3b de las reliquidaciones.
+        /// Reglas vigentes: ver Docs/calculo-redeterminaciones.html, Sección 6. Debe dar lo mismo que la vista SQL
+        /// dbo.vw_PBI_Redeterminaciones (Database/vw_PowerBI_Redeterminaciones.sql).
+        /// </summary>
         private void CalcularMontoRedeterminaciones(List<RedeterminacionEF> redeterminaciones, List<AutorizanteEF> autorizantes, List<CertificadoEF> certificados = null)
         {
             var redeterminacionesCalculadas = new List<RedeterminacionEF>();
+
+            // Si no se recibieron certificados, se cargan UNA sola vez para todos los autorizantes involucrados.
+            if (certificados == null)
+            {
+                var codigosAutorizante = redeterminaciones
+                    .Select(r => r.CodigoAutorizante)
+                    .Where(c => !string.IsNullOrEmpty(c))
+                    .Distinct()
+                    .ToList();
+
+                using (IVCdbContext context = new IVCdbContext())
+                {
+                    certificados = codigosAutorizante.Any()
+                        ? context.Certificados.AsNoTracking()
+                            .Where(c => codigosAutorizante.Contains(c.CodigoAutorizante))
+                            .ToList()
+                        : new List<CertificadoEF>();
+                }
+            }
+
+            // Agrupar por autorizante. IMPORTANTE: no reasignar ni filtrar la lista recibida dentro del bucle;
+            // hacerlo dejaba solo los certificados del primer autorizante y el resto se calculaba con faltante = 100%.
+            var certificadosPorAutorizante = certificados
+                .Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante))
+                .GroupBy(c => c.CodigoAutorizante)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             foreach (var redet in redeterminaciones.OrderBy(r => r.Nro))
             {
                 var autorizante = autorizantes.FirstOrDefault(a => a.CodigoAutorizante == redet.CodigoAutorizante);
                 if (autorizante == null || !redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
 
+                certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosDelAutorizante);
 
-
-                if (certificados != null)
-                {
-                    certificados = certificados
-                        .Where(c => c.CodigoAutorizante == autorizante.CodigoAutorizante && c.MesAprobacion < redet.Salto)
-                        .ToList();
-                }
-                else
-                {
-                    using (IVCdbContext context = new IVCdbContext())
-                    {
-                        certificados = context.Certificados
-                        .Where(c => c.CodigoAutorizante == autorizante.CodigoAutorizante && c.MesAprobacion < redet.Salto)
-                        .ToList();
-                    }
-                }
-                decimal sumaMontosTotal = certificados.Sum(c => c.MontoTotal);
+                // Paso A. R1: hasta el mes del salto inclusive. R2: todos los tipos de pago, incluido el anticipo.
+                decimal sumaMontosTotal = (certificadosDelAutorizante ?? new List<CertificadoEF>())
+                    .Where(c => c.MesAprobacion.HasValue && EsMesAnteriorOIgual(c.MesAprobacion.Value, redet.Salto.Value))
+                    .Sum(c => c.MontoTotal);
                 decimal porcentajeUtilizado = (autorizante.MontoAutorizado > 0) ? (sumaMontosTotal / autorizante.MontoAutorizado) * 100 : 0;
+                // Paso B
                 decimal faltante = Math.Max(0, 100 - porcentajeUtilizado);
+                redet.PorcentajeEjecutadoPreSalto = porcentajeUtilizado;
                 decimal montoCalculado = 0;
 
                 if (redet.Nro == 1)

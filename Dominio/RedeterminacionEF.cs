@@ -63,6 +63,13 @@ namespace Dominio
         [NotMapped]
         public decimal? MontoRedet { get; set; }
 
+        /// <summary>
+        /// Porcentaje del autorizante ya ejecutado hasta el mes del salto inclusive (Paso A).
+        /// Calculado en memoria junto con MontoRedet; lo usa el Paso 3b de las reliquidaciones.
+        /// </summary>
+        [NotMapped]
+        public decimal? PorcentajeEjecutadoPreSalto { get; set; }
+
         // Nuevo: nombre de la Contrata de la Obra del Autorizante (para UI)
         [NotMapped]
         public string Contrata { get; set; }
