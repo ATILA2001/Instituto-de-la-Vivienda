@@ -711,6 +711,7 @@ namespace Negocio
                         if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
 
                         if (!redet.Salto.HasValue) continue;
+                        if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
 
                         // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
                         // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
@@ -1078,6 +1079,13 @@ namespace Negocio
         private static bool EsMesPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) > PrimerDiaDelMes(salto);
 
         /// <summary>
+        /// Regla R6: una redeterminación Rechazada (etapa 35) o Fuera de Plazo (etapa 36) tiene monto cero,
+        /// no acumula en las siguientes y no genera reliquidaciones. Las que están en trámite se calculan normalmente.
+        /// </summary>
+        private bool EsDesestimada(RedeterminacionEF redet) =>
+            redet.EstadoRedetEFId.HasValue && idsDesestimado.Contains(redet.EstadoRedetEFId.Value);
+
+        /// <summary>
         /// Calcula MontoRedet de cada redeterminación (Pasos A, B y C de Docs/calculo-redeterminaciones.html)
         /// y deja en PorcentajeEjecutadoPreSalto el porcentaje ya ejecutado, que usa el Paso 3b de las reliquidaciones.
         /// Reglas vigentes: ver Docs/calculo-redeterminaciones.html, Sección 6. Debe dar lo mismo que la vista SQL
@@ -1143,6 +1151,9 @@ namespace Negocio
                     decimal sumaMontosRedetAnteriores = redeterminacionesAnteriores.Sum(r => r.MontoRedet.Value);
                     montoCalculado = (((autorizante.MontoAutorizado + sumaMontosRedetAnteriores) * redet.Porcentaje.Value) / 100) * (faltante / 100);
                 }
+
+                // R6: rechazada o fuera de plazo => monto cero (y por lo tanto no suma en la base de las siguientes).
+                if (EsDesestimada(redet)) montoCalculado = 0;
 
                 redet.MontoRedet = montoCalculado;
                 redeterminacionesCalculadas.Add(redet);

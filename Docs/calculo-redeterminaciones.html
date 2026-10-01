@@ -362,6 +362,7 @@
     <div class="alert alert-info">
       Las redeterminaciones se procesan en orden por <strong>Nro</strong> (1, 2, 3…), por separado para cada autorizante.
       Solo se consideran certificados aprobados <strong>hasta el mes del Salto inclusive</strong> para determinar el porcentaje ya utilizado.
+      Una redeterminación <strong>Rechazada</strong> o <strong>Fuera de Plazo</strong> tiene monto cero y no entra en la acumulación (regla R6, Sección 6).
     </div>
 
     <!-- Paso A -->
@@ -791,6 +792,12 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
             <td>Cada autorizante se calcula con <strong>sus propios certificados</strong>.</td>
             <td>Bug corregido el 22/09/2026: <code>CalcularMontoRedeterminaciones</code> reasignaba la lista de certificados dentro del bucle, de modo que solo el primer autorizante procesado se calculaba bien y el resto salía con faltante 100 % (monto inflado).</td>
             <td>Aplicación · vistas</td>
+          </tr>
+          <tr>
+            <td><strong>R6</strong></td>
+            <td>Una redeterminación <strong>Rechazada</strong> (etapa 35) o <strong>Fuera de Plazo</strong> (etapa 36) tiene <strong>monto cero</strong>: no acumula en la base de las siguientes y no genera reliquidaciones. Sigue apareciendo en las grillas con estado DESESTIMADO. Las que están <strong>en trámite</strong> se calculan normalmente. Definido el 01/10/2026.</td>
+            <td>Se calculaba completa, acumulaba y reliquidaba. En producción eran seis rechazadas (unos 390 millones y 64 reliquidaciones), cinco de ellas provisorias ya reemplazadas por su definitiva, es decir, contadas dos veces.</td>
+            <td>Paso C · Paso 2 · vistas</td>
           </tr>
         </tbody>
       </table>

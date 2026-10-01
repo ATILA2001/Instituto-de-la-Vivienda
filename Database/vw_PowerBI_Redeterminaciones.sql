@@ -19,6 +19,9 @@
          (Pendiente futuro: si algún día comparten expediente, agregar LEGITIMOS_ABONOS a vw_PBI_Pagos.)
      R5. Cada autorizante se calcula con SUS PROPIOS certificados (corrige el bug de la app, que
          reutilizaba la lista filtrada del primer autorizante para todos los demás).
+     R6. (01/10/2026) Una redeterminación RECHAZADA (etapa 35) o FUERA DE PLAZO (etapa 36) tiene MontoRedet = 0,
+         no acumula en la base de las siguientes y no genera reliquidaciones. Las que están EN TRÁMITE se
+         calculan normalmente. Los Ids 35 y 36 son los mismos que usa la app (idsDesestimado).
 
    FÓRMULAS:
      Ejecutado        = SUM(MONTO_TOTAL) de certificados del autorizante con mes <= mes del salto (todos los tipos de pago, incluido el anticipo)
@@ -72,6 +75,7 @@ WITH Base AS
         r.Nro                                           AS Nro,
         r.Salto                                         AS Salto,
         EOMONTH(r.Salto)                                AS SaltoMes,
+        r.ETAPA                                         AS EtapaId,
         CAST(r.PORCENTAJE_PONDERACION AS decimal(19,6)) AS PorcentajePonderacion,
         CAST(a.MONTO_AUTORIZADO AS decimal(19,6))       AS MontoAutorizado,
         ROW_NUMBER() OVER (PARTITION BY r.CODIGO_AUTORIZANTE
@@ -110,11 +114,14 @@ Falt AS
 ),
 Rec AS
 (
-    -- Ancla: primera redeterminación de cada autorizante
+    -- Ancla: primera redeterminación de cada autorizante.
+    -- R6: etapa 35/36 (rechazada / fuera de plazo) => monto 0, y por lo tanto no suma en el acumulado.
     SELECT
         f.RedeterminacionId, f.CodigoAutorizante, f.Orden,
-        CAST(f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 AS decimal(19,4)) AS MontoRedet,
-        CAST(f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 AS decimal(19,4)) AS AcumuladoRedet
+        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
+                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)) AS MontoRedet,
+        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
+                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)) AS AcumuladoRedet
     FROM Falt f
     WHERE f.Orden = 1
 
@@ -123,8 +130,10 @@ Rec AS
     -- Recursión: base = MontoAutorizado + suma de las redeterminaciones anteriores del mismo autorizante
     SELECT
         f.RedeterminacionId, f.CodigoAutorizante, f.Orden,
-        CAST((f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 AS decimal(19,4)),
-        CAST(p.AcumuladoRedet + (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 AS decimal(19,4))
+        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
+                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)),
+        CAST(p.AcumuladoRedet + CASE WHEN f.EtapaId IN (35, 36) THEN 0
+                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4))
     FROM Falt f
     INNER JOIN Rec p ON p.CodigoAutorizante = f.CodigoAutorizante
                     AND f.Orden = p.Orden + 1
@@ -208,6 +217,7 @@ WITH Post AS
     FROM dbo.vw_PBI_Redeterminaciones rd
     INNER JOIN dbo.Certificados c ON c.CODIGO_AUTORIZANTE = rd.CodigoAutorizante
     WHERE rd.MontoRedet IS NOT NULL
+      AND (rd.EtapaId IS NULL OR rd.EtapaId NOT IN (35, 36)) -- R6: rechazada / fuera de plazo no reliquida (sin etapa = se calcula)
       AND c.MES_APROBACION IS NOT NULL
       AND EOMONTH(c.MES_APROBACION) > rd.SaltoMes          -- R1: solo meses posteriores al salto
       AND c.TIPO_PAGO <> 1                                  -- R2: el anticipo financiero no se redetermina
