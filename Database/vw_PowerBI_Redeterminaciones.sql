@@ -34,6 +34,12 @@
      Sigaf            = SUM(IMPORTE_PP del expediente) * Monto / SUM(Monto de todos los pagos del mismo expediente)
 
    NOTAS:
+     - LÍMITE DE RECURSIÓN: la acumulación de redeterminaciones usa un CTE recursivo. SQL Server lo corta a
+       100 niveles por autorizante y una vista no puede cambiar ese límite. Hoy el máximo es ~28. Si algún
+       autorizante llegara a 100, la consulta que lee la vista debe agregar el hint al final:
+           SELECT * FROM dbo.vw_PBI_Pagos OPTION (MAXRECURSION 0);
+       En Power BI eso se logra importando con una "consulta SQL nativa" en lugar de elegir la vista.
+     - Las etapas que anulan el monto (R6) se definen UNA sola vez, en el CTE RedetFlags de la primera vista.
      - Los joins entre tablas por número de expediente usan COLLATE DATABASE_DEFAULT porque
        PASES_SADE y GEDO tienen collations distintas al resto de la base.
      - Las redeterminaciones sin Salto o sin PORCENTAJE_PONDERACION se listan con MontoRedet NULL
@@ -64,7 +70,16 @@ GO
    ===================================================================================== */
 CREATE OR ALTER VIEW dbo.vw_PBI_Redeterminaciones
 AS
-WITH Base AS
+WITH RedetFlags AS
+(
+    -- R6: ÚNICO lugar donde se enumeran las etapas que anulan el monto (35 Rechazada, 36 Fuera de Plazo).
+    -- Mismos Ids que idsDesestimado en Negocio/CalculoRedeterminacionNegocioEF.cs. Sin etapa => 0 (se calcula).
+    SELECT
+        r.Id,
+        CAST(CASE WHEN r.ETAPA IN (35, 36) THEN 1 ELSE 0 END AS bit) AS EsDesestimada
+    FROM dbo.Redeterminaciones r
+),
+Base AS
 (
     SELECT
         r.Id                                            AS RedeterminacionId,
@@ -76,6 +91,7 @@ WITH Base AS
         r.Salto                                         AS Salto,
         EOMONTH(r.Salto)                                AS SaltoMes,
         r.ETAPA                                         AS EtapaId,
+        fl.EsDesestimada                                AS EsDesestimada,
         CAST(r.PORCENTAJE_PONDERACION AS decimal(19,6)) AS PorcentajePonderacion,
         CAST(a.MONTO_AUTORIZADO AS decimal(19,6))       AS MontoAutorizado,
         ROW_NUMBER() OVER (PARTITION BY r.CODIGO_AUTORIZANTE
@@ -90,6 +106,7 @@ WITH Base AS
         ), 0) AS decimal(19,6))                         AS EjecutadoPreSalto
     FROM dbo.Redeterminaciones r
     INNER JOIN dbo.Autorizantes a ON a.CODIGO_AUTORIZANTE = r.CODIGO_AUTORIZANTE
+    INNER JOIN RedetFlags fl       ON fl.Id = r.Id
     WHERE r.Salto IS NOT NULL
       AND r.PORCENTAJE_PONDERACION IS NOT NULL
 ),
@@ -115,13 +132,14 @@ Falt AS
 Rec AS
 (
     -- Ancla: primera redeterminación de cada autorizante.
-    -- R6: etapa 35/36 (rechazada / fuera de plazo) => monto 0, y por lo tanto no suma en el acumulado.
+    -- R6: EsDesestimada = 1 => monto 0, y por lo tanto no suma en el acumulado.
+    -- Se acumula con decimal(28,8) para no arrastrar redondeos nivel a nivel; se redondea a 4 decimales recién al exponer.
     SELECT
         f.RedeterminacionId, f.CodigoAutorizante, f.Orden,
-        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
-                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)) AS MontoRedet,
-        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
-                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)) AS AcumuladoRedet
+        CAST(CASE WHEN f.EsDesestimada = 1 THEN 0
+                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(28,8)) AS MontoRedet,
+        CAST(CASE WHEN f.EsDesestimada = 1 THEN 0
+                  ELSE f.MontoAutorizado * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(28,8)) AS AcumuladoRedet
     FROM Falt f
     WHERE f.Orden = 1
 
@@ -130,10 +148,10 @@ Rec AS
     -- Recursión: base = MontoAutorizado + suma de las redeterminaciones anteriores del mismo autorizante
     SELECT
         f.RedeterminacionId, f.CodigoAutorizante, f.Orden,
-        CAST(CASE WHEN f.EtapaId IN (35, 36) THEN 0
-                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4)),
-        CAST(p.AcumuladoRedet + CASE WHEN f.EtapaId IN (35, 36) THEN 0
-                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(19,4))
+        CAST(CASE WHEN f.EsDesestimada = 1 THEN 0
+                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(28,8)),
+        CAST(p.AcumuladoRedet + CASE WHEN f.EsDesestimada = 1 THEN 0
+                  ELSE (f.MontoAutorizado + p.AcumuladoRedet) * f.PorcentajePonderacion / 100 * f.Faltante / 100 END AS decimal(28,8))
     FROM Falt f
     INNER JOIN Rec p ON p.CodigoAutorizante = f.CodigoAutorizante
                     AND f.Orden = p.Orden + 1
@@ -161,11 +179,12 @@ SELECT
     r.Expediente,
     r.ETAPA                                 AS EtapaId,
     er.Nombre                               AS EtapaNombre,
-    CASE WHEN r.ETAPA IN (35, 36)          THEN 3
+    fl.EsDesestimada,
+    CASE WHEN fl.EsDesestimada = 1         THEN 3
          WHEN r.ETAPA IN (37, 38)          THEN 4
          WHEN r.ETAPA IN (12, 22, 33, 39)  THEN 1
          ELSE 2 END                         AS EstadoGeneralId,
-    CASE WHEN r.ETAPA IN (35, 36)          THEN 'DESESTIMADO'
+    CASE WHEN fl.EsDesestimada = 1         THEN 'DESESTIMADO'
          WHEN r.ETAPA IN (37, 38)          THEN 'NO INICIADO'
          WHEN r.ETAPA IN (12, 22, 33, 39)  THEN 'APROBADO'
          ELSE 'EN TRAMITE' END              AS EstadoGeneral,
@@ -175,10 +194,11 @@ SELECT
     f.EjecutadoPreSalto,
     f.PorcentajeUtilizado,
     f.Faltante,
-    rec.MontoRedet,
+    CAST(rec.MontoRedet AS decimal(19,4))   AS MontoRedet,
     up.BuzonSade,
     up.FechaSade
 FROM dbo.Redeterminaciones r
+INNER JOIN RedetFlags       fl  ON fl.Id = r.Id
 LEFT JOIN dbo.Autorizantes  a   ON a.CODIGO_AUTORIZANTE = r.CODIGO_AUTORIZANTE
 LEFT JOIN dbo.Estados_Redet er  ON er.Id = r.ETAPA
 LEFT JOIN Falt              f   ON f.RedeterminacionId = r.Id
@@ -217,7 +237,7 @@ WITH Post AS
     FROM dbo.vw_PBI_Redeterminaciones rd
     INNER JOIN dbo.Certificados c ON c.CODIGO_AUTORIZANTE = rd.CodigoAutorizante
     WHERE rd.MontoRedet IS NOT NULL
-      AND (rd.EtapaId IS NULL OR rd.EtapaId NOT IN (35, 36)) -- R6: rechazada / fuera de plazo no reliquida (sin etapa = se calcula)
+      AND rd.EsDesestimada = 0                              -- R6: rechazada / fuera de plazo no reliquida
       AND c.MES_APROBACION IS NOT NULL
       AND EOMONTH(c.MES_APROBACION) > rd.SaltoMes          -- R1: solo meses posteriores al salto
       AND c.TIPO_PAGO <> 1                                  -- R2: el anticipo financiero no se redetermina

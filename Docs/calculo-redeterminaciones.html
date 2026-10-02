@@ -901,6 +901,11 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
         porque ya trae las reliquidaciones como filas con <code>TipoPagoId = 3</code> y <code>Origen = 'RELIQUIDACION'</code>.
         Lo único que conviene resolver en DAX son los semáforos por días en buzón, con <code>TODAY()</code> sobre <code>FechaSade</code>.
       </p>
+      <div class="note">
+        ⚠️ <strong>Límite de recursión.</strong> La acumulación de redeterminaciones usa un CTE recursivo, que SQL Server corta a 100 niveles por autorizante
+        y que una vista no puede ampliar. Hoy el máximo es de 28. Si algún autorizante llegara a 100, importar en Power BI con una
+        consulta SQL nativa que termine en <code>OPTION (MAXRECURSION 0)</code> en lugar de elegir la vista directamente.
+      </div>
     </div>
 
     <div class="formula-card a-green">
