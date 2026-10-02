@@ -710,7 +710,7 @@ namespace Negocio
                     {
                         if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
 
-                        if (!redet.Salto.HasValue) continue;
+                        if (!redet.Salto.HasValue || !redet.MontoRedet.HasValue) continue; // sin salto o sin porcentaje: no hay monto, no hay reliquidación
                         if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
 
                         // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
@@ -1121,10 +1121,21 @@ namespace Negocio
                 .GroupBy(c => c.CodigoAutorizante)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            foreach (var redet in redeterminaciones.OrderBy(r => r.Nro))
+            var autorizantesPorCodigo = autorizantes
+                .Where(a => !string.IsNullOrEmpty(a.CodigoAutorizante))
+                .GroupBy(a => a.CodigoAutorizante)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            // Mismo orden que la vista SQL (ROW_NUMBER por autorizante): Nro ascendente, nulos al final, desempate por Id.
+            var redeterminacionesOrdenadas = redeterminaciones
+                .OrderBy(r => r.Nro.HasValue ? 0 : 1)
+                .ThenBy(r => r.Nro)
+                .ThenBy(r => r.Id);
+
+            foreach (var redet in redeterminacionesOrdenadas)
             {
-                var autorizante = autorizantes.FirstOrDefault(a => a.CodigoAutorizante == redet.CodigoAutorizante);
-                if (autorizante == null || !redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
+                if (string.IsNullOrEmpty(redet.CodigoAutorizante) || !autorizantesPorCodigo.TryGetValue(redet.CodigoAutorizante, out var autorizante)) continue;
+                if (!redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
 
                 certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosDelAutorizante);
 
@@ -1136,24 +1147,16 @@ namespace Negocio
                 // Paso B
                 decimal faltante = Math.Max(0, 100 - porcentajeUtilizado);
                 redet.PorcentajeEjecutadoPreSalto = porcentajeUtilizado;
-                decimal montoCalculado = 0;
-
-                if (redet.Nro == 1)
-                {
-                    montoCalculado = ((autorizante.MontoAutorizado * redet.Porcentaje.Value) / 100) * (faltante / 100);
-                }
-                else
-                {
-                    var redeterminacionesAnteriores = redeterminacionesCalculadas
-                        .Where(r => r.CodigoAutorizante == redet.CodigoAutorizante && r.Nro < redet.Nro && r.MontoRedet.HasValue)
-                        .ToList();
-
-                    decimal sumaMontosRedetAnteriores = redeterminacionesAnteriores.Sum(r => r.MontoRedet.Value);
-                    montoCalculado = (((autorizante.MontoAutorizado + sumaMontosRedetAnteriores) * redet.Porcentaje.Value) / 100) * (faltante / 100);
-                }
+                // Paso C. Base = MontoAutorizado + todas las redeterminaciones ya calculadas del mismo autorizante
+                // (en el orden de arriba). Para la primera la suma es 0, así que la misma fórmula sirve para Nro = 1.
+                decimal sumaMontosRedetAnteriores = redeterminacionesCalculadas
+                    .Where(r => r.CodigoAutorizante == redet.CodigoAutorizante && r.MontoRedet.HasValue)
+                    .Sum(r => r.MontoRedet.Value);
 
                 // R6: rechazada o fuera de plazo => monto cero (y por lo tanto no suma en la base de las siguientes).
-                if (EsDesestimada(redet)) montoCalculado = 0;
+                decimal montoCalculado = EsDesestimada(redet)
+                    ? 0
+                    : (((autorizante.MontoAutorizado + sumaMontosRedetAnteriores) * redet.Porcentaje.Value) / 100) * (faltante / 100);
 
                 redet.MontoRedet = montoCalculado;
                 redeterminacionesCalculadas.Add(redet);
