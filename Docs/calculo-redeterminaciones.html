@@ -202,7 +202,7 @@
 
 <header>
   <h1>📊 Cálculo de Redeterminaciones</h1>
-  <p>Instituto de la Vivienda — Documentación técnica de lógica de negocio</p>
+  <p>Instituto de la Vivienda — Documentación técnica de lógica de negocio · Reglas vigentes desde el 23/09/2026 (aplicación y vistas SQL para Power BI)</p>
 </header>
 
 <div class="page">
@@ -252,7 +252,8 @@
         <div class="title">Reliquidación</div>
         <div class="desc">
           Pago generado automáticamente para cada certificado
-          emitido  después del Salto de una redeterminación.
+          aprobado en un <strong>mes posterior</strong> al del Salto de una redeterminación
+          (los anticipos financieros no generan reliquidación).
           El <strong>primer</strong> certificado post-Salto absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Sección 4, Paso 3b).
           Representa la parte proporcional del ajuste.
         </div>
@@ -339,10 +340,16 @@
     </div>
 
     <div class="alert alert-info" style="margin-top:16px">
-      💡 <strong>Regla clave del Salto:</strong>
-      Los certificados emitidos <em>antes</em> del Salto determinan cuánto ya se pagó (reducen el faltante).
-      Los certificados emitidos <em>después del Salto</em> generan una reliquidación.
+      💡 <strong>Regla clave del Salto (la comparación es siempre mes a mes, nunca por día):</strong>
+      Los certificados aprobados <em>hasta el mes del Salto inclusive</em> determinan cuánto ya se pagó (reducen el faltante);
+      el anticipo financiero también cuenta, porque ya está pagado y no se redetermina.
+      Los certificados aprobados en <em>meses posteriores al Salto</em> generan una reliquidación, salvo los anticipos.
       El <em>primero</em> de ellos absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Paso 3b).
+    </div>
+    <div class="alert alert-warn">
+      ⚠️ <strong>Cambio de regla (23/09/2026):</strong> hasta esa fecha la aplicación comparaba fecha contra fecha con "menor estricto",
+      de modo que un certificado del mismo mes del Salto no contaba como ejecutado <em>ni</em> generaba reliquidación.
+      Ahora el mes del Salto pertenece al período "anterior". Ver Sección 6.
     </div>
   </div>
 
@@ -353,22 +360,29 @@
     <h2>3. Fórmula del MontoRedet (CalcularMontoRedeterminaciones)</h2>
 
     <div class="alert alert-info">
-      Las redeterminaciones se procesan en orden por <strong>Nro</strong> (1, 2, 3…).
-      Solo se consideran certificados emitidos <strong>antes del Salto</strong> para determinar el porcentaje ya utilizado.
+      Las redeterminaciones se procesan en orden por <strong>Nro</strong> (1, 2, 3…), por separado para cada autorizante.
+      Solo se consideran certificados aprobados <strong>hasta el mes del Salto inclusive</strong> para determinar el porcentaje ya utilizado.
+      Una redeterminación <strong>Rechazada</strong> o <strong>Fuera de Plazo</strong> tiene monto cero y no entra en la acumulación (regla R6, Sección 6).
     </div>
 
     <!-- Paso A -->
     <div class="formula-card a-green">
       <div class="badge">Paso A — Porcentaje de ejecución</div>
       <p style="font-size:.85rem;color:#444;margin-bottom:8px">
-        Sumamos los certificados del autorizante cuya <code>MesAprobacion</code> es <strong>menor</strong> al <code>Salto</code> de la redeterminación.
+        Sumamos los certificados del autorizante cuyo <strong>mes</strong> de <code>MesAprobacion</code> es <strong>menor o igual</strong> al mes del <code>Salto</code> de la redeterminación.
+        Se incluyen <strong>todos los tipos de pago</strong>, también el anticipo financiero.
       </p>
       <div class="formula">
-SumaCerts =  cert.MontoTotal
-            donde 
-            <span class="highlight"> cert.MesAprobacion &lt; redet.Salto</span>
+SumaCerts = Σ cert.MontoTotal
+            donde
+            <span class="highlight"> mes(cert.MesAprobacion) &lt;= mes(redet.Salto)</span>
+<span class="comment">// mes(x) = primer día del mes de x. En SQL: EOMONTH(x)</span>
 
 PorcentajeUtilizado = (SumaCerts / auth.MontoAutorizado) × 100
+<span class="comment">// Si MontoAutorizado = 0 → PorcentajeUtilizado = 0</span>
+      </div>
+      <div class="note">
+        📌 El anticipo financiero (TipoPago = 1) <strong>sí</strong> cuenta como ejecutado: ya fue pagado y no está sujeto a redeterminación.
       </div>
     </div>
 
@@ -516,16 +530,18 @@ cert.Porcentaje = (cert.MontoTotal / auth.MontoAutorizado) × 100
       </p>
       <div class="formula">
 <span class="highlight">SI</span>  cert.CodigoAutorizante == redet.CodigoAutorizante
-<span class="highlight">Y</span>   cert.MesAprobacion <span class="highlight">&gt; redet.Salto</span>
-<span class="comment">// Solo certificados POSTERIORES al Salto reciben reliquidación</span>
-<span class="comment">// El PRIMERO de ellos absorbe retroactivamente el porcentaje acumulado pre-Salto (ver Paso 3b)</span>
+<span class="highlight">Y</span>   mes(cert.MesAprobacion) <span class="highlight">&gt; mes(redet.Salto)</span>
+<span class="highlight">Y</span>   cert.TipoPago <span class="highlight">≠ 1 (anticipo financiero)</span>
+<span class="comment">// Solo certificados de meses POSTERIORES al Salto reciben reliquidación</span>
+<span class="comment">// El anticipo financiero no se redetermina, por lo tanto nunca reliquida</span>
+<span class="comment">// El PRIMERO de ellos (ordenados por MesAprobacion y luego Id) absorbe el porcentaje acumulado pre-Salto (ver Paso 3b)</span>
       </div>
     </div>
 
     <div class="formula-card a-blue">
       <div class="badge">Paso 3a — Cálculo del monto (certificados posteriores al Salto)</div>
       <p style="font-size:.85rem;color:#444;margin-bottom:8px">
-        Para todos los certificados con <code>MesAprobacion &gt; redet.Salto</code>.
+        Para todos los certificados (excepto anticipos) con <code>mes(MesAprobacion) &gt; mes(redet.Salto)</code>, salvo el primero de ellos (ver Paso 3b).
       </p>
       <div class="formula">
 MontoReliq = redet.MontoRedet × ( cert.Porcentaje / 100 )
@@ -547,9 +563,11 @@ MontoReliq = cert.MontoTotal × (redet.Porcentaje/100) × (Faltante/100)
     <div class="formula-card a-purple">
       <div class="badge">Paso 3b — Cálculo del monto (primer certificado post-Salto)</div>
       <p style="font-size:.85rem;color:#444;margin-bottom:8px">
-        Para el <strong>primer</strong> certificado cuyo <code>MesAprobacion &gt; redet.Salto</code>, el porcentaje acumulado
+        Para el <strong>primer</strong> certificado (ordenando por <code>MesAprobacion</code> y luego por <code>Id</code>) cuyo
+        <code>mes(MesAprobacion) &gt; mes(redet.Salto)</code>, el porcentaje acumulado
         pre-Salto se suma al porcentaje propio: este primer pago absorbe retroactivamente
-        el trabajo ya ejecutado antes del Salto.
+        el trabajo ya ejecutado hasta el mes del Salto. Así, cuando los certificados posteriores cubren el faltante,
+        la suma de las reliquidaciones iguala al MontoRedet.
       </p>
       <div class="formula">
 <span class="comment">// Variables previas</span>
@@ -674,7 +692,7 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
           <tr>
             <th>Certificado</th>
             <th>MesAprobacion</th>
-            <th>¿Post-Salto R1? (&gt;)</th>
+            <th>¿Mes posterior al Salto R1?</th>
             <th>Porcentaje cert.</th>
             <th>MontoReliq</th>
             <th>Cálculo</th>
@@ -729,12 +747,235 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════
+       6. REGLAS DE NEGOCIO VIGENTES
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>6. Reglas de negocio vigentes (decisiones del 22 y 23/09/2026)</h2>
 
+    <div class="alert alert-info">
+      Hasta septiembre de 2026 convivían en el código <strong>tres variantes</strong> de la fórmula (la del camino Entity Framework
+      que usan las pantallas y dos versiones ADO heredadas en <code>CalculoRedeterminacionNegocio.cs</code>), que diferían en los puntos
+      de abajo. Se fijó una única regla, que aplican <strong>tanto la aplicación como las vistas SQL</strong> del tablero Power BI.
+    </div>
+
+    <div class="example-box">
+      <table>
+        <thead><tr><th>#</th><th>Regla vigente</th><th>Qué hacía antes la aplicación</th><th>Dónde se aplica</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>R1</strong></td>
+            <td>El certificado del <strong>mes del Salto</strong> cuenta como <strong>anterior</strong> (ejecutado). La comparación es mes a mes: <code>mes(MesAprobacion) &lt;= mes(Salto)</code>. Reliquidan solo los meses posteriores.</td>
+            <td>Comparaba fecha contra fecha con "menor estricto" para lo ejecutado y "mayor estricto" para reliquidar. Un certificado del mismo mes del Salto quedaba en un hueco: no reducía el faltante ni reliquidaba.</td>
+            <td>Paso A · Paso 2 · vistas</td>
+          </tr>
+          <tr>
+            <td><strong>R2</strong></td>
+            <td>El <strong>anticipo financiero</strong> (TipoPago = 1) <strong>sí</strong> cuenta como ejecutado, porque ya está pagado y no se redetermina. Por lo mismo, un anticipo posterior al Salto <strong>no</strong> genera reliquidación.</td>
+            <td>Lo contaba como ejecutado (igual que ahora), pero si caía después del Salto sí le generaba una reliquidación. Una de las versiones ADO heredadas lo excluía de lo ejecutado.</td>
+            <td>Paso A · Paso 2 · vistas</td>
+          </tr>
+          <tr>
+            <td><strong>R3</strong></td>
+            <td>El <strong>Paso 3b</strong> aplica: el primer certificado posterior al Salto absorbe el porcentaje acumulado pre-Salto.</td>
+            <td>Solo existía en las versiones ADO heredadas; el camino Entity Framework que usan las pantallas no lo aplicaba, aunque esta documentación ya lo describía.</td>
+            <td>Paso 3b · vistas</td>
+          </tr>
+          <tr>
+            <td><strong>R4</strong></td>
+            <td>Los <strong>legítimos abonos no participan</strong> del reparto del SIGAF por expediente (no deberían compartir expediente con certificados). Queda anotado como posible mejora futura.</td>
+            <td>El camino Entity Framework ya los excluía; las versiones ADO heredadas los sumaban al pool del expediente.</td>
+            <td>Sección 7 (vista de pagos)</td>
+          </tr>
+          <tr>
+            <td><strong>R5</strong></td>
+            <td>Cada autorizante se calcula con <strong>sus propios certificados</strong>.</td>
+            <td>Bug corregido el 22/09/2026: <code>CalcularMontoRedeterminaciones</code> reasignaba la lista de certificados dentro del bucle, de modo que solo el primer autorizante procesado se calculaba bien y el resto salía con faltante 100 % (monto inflado).</td>
+            <td>Aplicación · vistas</td>
+          </tr>
+          <tr>
+            <td><strong>R6</strong></td>
+            <td>Una redeterminación <strong>Rechazada</strong> (etapa 35) o <strong>Fuera de Plazo</strong> (etapa 36) tiene <strong>monto cero</strong>: no acumula en la base de las siguientes y no genera reliquidaciones. Sigue apareciendo en las grillas con estado DESESTIMADO. Las que están <strong>en trámite</strong> se calculan normalmente. Definido el 01/10/2026.</td>
+            <td>Se calculaba completa, acumulaba y reliquidaba. En producción eran seis rechazadas (unos 390 millones y 64 reliquidaciones), cinco de ellas provisorias ya reemplazadas por su definitiva, es decir, contadas dos veces.</td>
+            <td>Paso C · Paso 2 · vistas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-warn" style="margin-top:14px">
+      ⚠️ <strong>Caso límite a tener en cuenta:</strong> un anticipo aprobado <em>después</em> del Salto de una redeterminación no reliquida en esa redeterminación
+      pero sí cuenta como ejecutado para las redeterminaciones cuyo Salto sea igual o posterior a su mes.
+      En ese caso la suma de reliquidaciones queda por debajo del MontoRedet en la parte proporcional del anticipo.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       7. VISTAS SQL PARA POWER BI
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>7. Vistas SQL para Power BI</h2>
+
+    <div class="alert alert-info">
+      El monto de la redeterminación <strong>no está guardado en la base</strong> (<code>MontoRedet</code> es una propiedad
+      <code>[NotMapped]</code> que la aplicación recalcula en cada request) y las reliquidaciones son filas <strong>virtuales</strong>
+      que no existen en ninguna tabla. Para que el tablero Power BI las vea, el cálculo se replicó en <strong>vistas SQL</strong> dentro de la
+      misma base <code>IVC</code>, en el script <code>Database/vw_PowerBI_Redeterminaciones.sql</code> del repositorio.
+      Se descartó exportar desde la aplicación (dependería de que alguien abra la pantalla) y recalcular con DAX
+      (la acumulación de redeterminaciones anteriores y el prorrateo del SIGAF no se expresan bien sin recursión).
+    </div>
+
+    <h3>7.1 Estructura en capas</h3>
+    <div class="flow" style="margin-bottom:16px">
+      <div class="flow-box a-blue">
+        <div class="f-icon">📈</div>
+        <div class="f-title">vw_PBI_Redeterminaciones</div>
+        <div class="f-sub">Una fila por redeterminación. Ejecutado pre-Salto, faltante, <strong>MontoRedet</strong>, estado general, último pase SADE.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box a-orange">
+        <div class="f-icon">🔄</div>
+        <div class="f-title">vw_PBI_Reliquidaciones</div>
+        <div class="f-sub">Una fila por redeterminación × certificado posterior al Salto. Porcentaje aplicado, marca de "primer post-Salto", <strong>MontoReliquidacion</strong>, expediente de EXPEDIENTES_RELIQ.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box a-green">
+        <div class="f-icon">🧾</div>
+        <div class="f-title">vw_PBI_Pagos</div>
+        <div class="f-sub">Certificados reales + reliquidaciones en una sola tabla, con <strong>SIGAF prorrateado</strong> por expediente, estado (NO INICIADO / EN TRAMITE / DEVENGADO) y buzón SADE.</div>
+      </div>
+    </div>
+
+    <h3>7.2 Cómo funciona cada vista</h3>
+    <div class="timeline">
+      <div class="tl-step" data-n="1">
+        <h4>vw_PBI_Redeterminaciones — el cálculo del MontoRedet</h4>
+        <p>
+          Une <code>Redeterminaciones</code> con <code>Autorizantes</code> por <code>CODIGO_AUTORIZANTE</code>. Para cada redeterminación suma los certificados
+          con <code>EOMONTH(MES_APROBACION) &lt;= EOMONTH(Salto)</code> (R1, R2), calcula <code>PorcentajeUtilizado</code> y <code>Faltante</code>, y resuelve
+          la acumulación de redeterminaciones anteriores del mismo autorizante (Paso C, Nro &gt; 1) con un <strong>CTE recursivo</strong> ordenado por Nro.
+          Las redeterminaciones sin Salto o sin porcentaje se listan con <code>MontoRedet</code> NULL, igual que en la aplicación.
+          Los porcentajes intermedios se guardan con 12 decimales para que el resultado coincida al centavo con la aplicación.
+        </p>
+      </div>
+      <div class="tl-step" data-n="2">
+        <h4>vw_PBI_Reliquidaciones — Pasos 1, 2, 3a y 3b</h4>
+        <p>
+          Cruza cada redeterminación calculada con los certificados del mismo autorizante de meses posteriores al Salto, excluyendo anticipos (R2).
+          <code>ROW_NUMBER()</code> por redeterminación identifica al primer certificado post-Salto, que recibe el porcentaje acumulado pre-Salto (R3).
+          El expediente sale de <code>EXPEDIENTES_RELIQ</code> por (código de redeterminación, año, mes). La clave estable de cada fila es
+          <code>ReliquidacionKey = RedeterminacionId-CertificadoId</code>.
+        </p>
+      </div>
+      <div class="tl-step" data-n="3">
+        <h4>vw_PBI_Pagos — SIGAF, estado y SADE</h4>
+        <p>
+          Apila certificados reales y reliquidaciones (tipo de pago 3). El devengado de <code>DEVENGADOS</code> se reparte entre todos los pagos que comparten
+          <code>EXPEDIENTE_PAGO</code> en proporción a su monto; si hay un solo pago en el expediente recibe el total. Los legítimos no participan (R4).
+          El estado se deriva igual que en la aplicación: sin expediente → NO INICIADO; SIGAF &gt; 0 → DEVENGADO; si no → EN TRAMITE.
+          El último pase SADE sale de <code>PASES_SADE</code> ordenando por fecha descendente.
+        </p>
+      </div>
+    </div>
+
+    <h3>7.3 Instalación y uso</h3>
+    <div class="formula-card a-teal">
+      <div class="badge">Instalación</div>
+      <div class="formula">
+<span class="comment">-- 1. Abrir Database/vw_PowerBI_Redeterminaciones.sql en SSMS conectado a SQL2019-IVC</span>
+<span class="comment">-- 2. El script empieza con USE IVC; y usa CREATE OR ALTER VIEW: se puede re-ejecutar las veces que haga falta</span>
+<span class="comment">-- 3. Requiere SQL Server 2016 SP1 o superior (el servidor es 2019)</span>
+<span class="comment">-- 4. Los índices sugeridos al inicio del script son opcionales; ejecutarlos solo si el refresco resulta lento</span>
+      </div>
+      <div class="note">
+        📌 Los joins por número de expediente contra <code>PASES_SADE</code> y <code>GEDO</code> usan <code>COLLATE DATABASE_DEFAULT</code> porque esas tablas
+        tienen una collation distinta al resto de la base. No quitar esos COLLATE.
+      </div>
+    </div>
+
+    <div class="formula-card a-blue">
+      <div class="badge">Power BI</div>
+      <p style="font-size:.85rem;color:#444;margin-bottom:8px">
+        Conectar las tres vistas en modo <strong>Import</strong> y relacionarlas con las tablas ya existentes del modelo por
+        <code>AutorizanteId</code> u <code>ObraId</code>. <code>vw_PBI_Pagos</code> puede reemplazar a la tabla de certificados del modelo,
+        porque ya trae las reliquidaciones como filas con <code>TipoPagoId = 3</code> y <code>Origen = 'RELIQUIDACION'</code>.
+        Lo único que conviene resolver en DAX son los semáforos por días en buzón, con <code>TODAY()</code> sobre <code>FechaSade</code>.
+      </p>
+      <div class="note">
+        ⚠️ <strong>Límite de recursión.</strong> La acumulación de redeterminaciones usa un CTE recursivo, que SQL Server corta a 100 niveles por autorizante
+        y que una vista no puede ampliar. Hoy el máximo es de 28. Si algún autorizante llegara a 100, importar en Power BI con una
+        consulta SQL nativa que termine en <code>OPTION (MAXRECURSION 0)</code> en lugar de elegir la vista directamente.
+      </div>
+    </div>
+
+    <div class="formula-card a-green">
+      <div class="badge">Verificación</div>
+      <div class="formula">
+<span class="comment">-- Un autorizante paso a paso</span>
+SELECT * FROM dbo.vw_PBI_Redeterminaciones WHERE CodigoAutorizante = 'XXX' ORDER BY Nro;
+SELECT * FROM dbo.vw_PBI_Reliquidaciones    WHERE CodigoAutorizante = 'XXX' ORDER BY NroRedet, MesAprobacion;
+
+<span class="comment">-- Control: total reliquidado vs. MontoRedet (deben coincidir cuando los certificados cubren el faltante)</span>
+SELECT rd.CodigoRedet, rd.MontoRedet, SUM(rq.MontoReliquidacion) AS TotalReliquidado
+FROM dbo.vw_PBI_Redeterminaciones rd
+LEFT JOIN dbo.vw_PBI_Reliquidaciones rq ON rq.RedeterminacionId = rd.RedeterminacionId
+GROUP BY rd.CodigoRedet, rd.MontoRedet;
+      </div>
+      <div class="note">
+        📌 Validado el 23/09/2026 contra <code>IVC_TEST</code>: las tres vistas se construyen sin errores, la base completa
+        (unos 5.000 pagos) se resuelve en ~110 ms y los montos coinciden con los que calcula la aplicación.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       8. IMPLEMENTACIÓN EN LA APLICACIÓN
+  ══════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>8. Dónde vive el cálculo en la aplicación</h2>
+    <div class="example-box">
+      <table>
+        <thead><tr><th>Pieza</th><th>Ubicación</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Pasos A, B y C</td>
+            <td><code>Negocio/CalculoRedeterminacionNegocioEF.cs</code> → <code>CalcularMontoRedeterminaciones</code></td>
+            <td>Agrupa los certificados por autorizante una sola vez (R5), aplica R1 y R2 con los helpers <code>EsMesAnteriorOIgual</code> / <code>EsMesPosterior</code>, calcula <code>MontoRedet</code> y deja el porcentaje ejecutado pre-Salto en <code>RedeterminacionEF.PorcentajeEjecutadoPreSalto</code> para el Paso 3b.</td>
+          </tr>
+          <tr>
+            <td>Pasos 1, 2, 3a y 3b</td>
+            <td><code>Negocio/CalculoRedeterminacionNegocioEF.cs</code> → <code>ListarCertificadosYReliquidaciones</code></td>
+            <td>Genera las reliquidaciones virtuales (tipo de pago 3) para la pantalla de Certificados. El campo <code>Porcentaje</code> de la reliquidación es el porcentaje <em>aplicado</em> (propio + acumulado pre-Salto si es la primera).</td>
+          </tr>
+          <tr>
+            <td>Propiedades calculadas</td>
+            <td><code>Dominio/RedeterminacionEF.cs</code></td>
+            <td><code>MontoRedet</code> y <code>PorcentajeEjecutadoPreSalto</code> son <code>[NotMapped]</code>: existen solo en memoria. <code>Codigo_Redet</code> (sufijo -R1, -R2…) es una columna calculada de la base.</td>
+          </tr>
+          <tr>
+            <td>Pantallas</td>
+            <td><code>AutorizantesEF.aspx</code> · <code>CertificadosEF.aspx</code></td>
+            <td>Usan <code>ListarAutorizantesYRedeterminaciones</code> y <code>ListarCertificadosYReliquidaciones</code>. Las redeterminaciones aparecen en la grilla de autorizantes como filas con concepto REDETERMINACION y <code>MontoAutorizado = MontoRedet</code>.</td>
+          </tr>
+          <tr>
+            <td>Código heredado</td>
+            <td><code>Negocio/CalculoRedeterminacionNegocio.cs</code> (ADO)</td>
+            <td>Versiones anteriores de la fórmula. Ninguna pantalla las usa para redeterminaciones; no se actualizaron a las reglas vigentes. No tomarlas como referencia.</td>
+          </tr>
+          <tr>
+            <td>Métodos con falla conocida</td>
+            <td><code>ListarAutorizantesCompleto</code> · <code>ListarAutorizantesPaginados</code></td>
+            <td>Hacen <code>Include(r =&gt; r.Autorizante)</code> sobre una propiedad no mapeada; Entity Framework lanza una excepción, el catch la absorbe y devuelven lista vacía. Solo el primero se usa, como respaldo del subtotal del paginador.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   </div><!-- /page -->
 
 <footer>
-  Generado automáticamente desde CalculoRedeterminacionNegocioEF.cs · Instituto de la Vivienda
+  Documentación de CalculoRedeterminacionNegocioEF.cs y Database/vw_PowerBI_Redeterminaciones.sql · Instituto de la Vivienda · Actualizado 23/09/2026
 </footer>
 
 </body>
