@@ -307,7 +307,10 @@ namespace WebForms
         /// </summary>
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            // Reiniciar a la primera página al aplicar filtros
+            // Reiniciar a la primera página al aplicar filtros. BindGrid pagina con _currentPageIndex
+            // (restaurado desde ViewState), así que no alcanza con resetear el control de paginación.
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
@@ -333,7 +336,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
             TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-            // Reiniciar a la primera página
+            // Reiniciar a la primera página (ver btnFiltrar_Click)
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;

@@ -66,18 +66,14 @@ namespace Negocio
         // En tramite todos los demas
 
 
+        /// <summary>
+        /// Estado general de una redeterminación a partir de su etapa. Delega en MapearEstadoDesdeId
+        /// para usar un único mapeo y tolerar ETAPA null (antes redet.Etapa.Id lanzaba NRE y la grilla
+        /// de autorizantes quedaba vacía).
+        /// </summary>
         private EstadoAutorizanteEF MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
         {
-            if (IdsDesestimado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizanteEF { Id = 3, Nombre = "DESESTIMADO" };
-
-            if (IdsNoIniciado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizanteEF { Id = 4, Nombre = "NO INICIADO" };
-
-            if (IdsAprobado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizanteEF { Id = 1, Nombre = "APROBADO" };
-
-            return new EstadoAutorizanteEF { Id = 2, Nombre = "EN TRAMITE" };
+            return MapearEstadoDesdeId(redet.EstadoRedetEFId);
         }
 
 
@@ -213,8 +209,9 @@ namespace Negocio
                             MontoAutorizado = auth.MontoAutorizado,
                             MesAprobacion = auth.MesAprobacion,
                             MesBase = auth.MesBase,
-                            BuzonSade = datosSade.TryGetValue(auth.Expediente, out var sadeInfo) ? sadeInfo.Buzon : null,
-                            FechaSade = datosSade.TryGetValue(auth.Expediente, out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
+                            // Dictionary no admite clave null: un autorizante sin expediente vaciaba toda la grilla
+                            BuzonSade = datosSade.TryGetValue(auth.Expediente ?? "", out var sadeInfo) ? sadeInfo.Buzon : null,
+                            FechaSade = datosSade.TryGetValue(auth.Expediente ?? "", out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
                             Acdir = datosAcdir.TryGetValue(auth.Expediente ?? "", out var acdirInfo) ? acdirInfo : null
                         };
                         autorizantesYRedeterminaciones.Add(dto);
@@ -241,7 +238,7 @@ namespace Negocio
                             BarrioNombre = obra?.Barrio?.Nombre,
                             EmpresaId = obra?.EmpresaId,
                             EmpresaNombre = obra?.Empresa?.Nombre,
-                            Contrata = $"{obra?.Contrata?.Nombre} {obra.Numero}/{obra.Anio}",
+                            Contrata = $"{obra?.Contrata?.Nombre} {obra?.Numero}/{obra?.Anio}",
                             EstadoId = estado.Id,
                             EstadoNombre = estado.Nombre,
                             Detalle = $"{redet.Tipo} - {redet.Etapa?.Nombre}",
@@ -251,8 +248,8 @@ namespace Negocio
                             MontoAutorizado = redet.MontoRedet ?? 0,
                             MesAprobacion = redet.Salto,
                             MesBase = null,
-                            BuzonSade = datosSade.TryGetValue(redet.Expediente, out var sadeInfo) ? sadeInfo.Buzon : null,
-                            FechaSade = datosSade.TryGetValue(redet.Expediente, out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
+                            BuzonSade = datosSade.TryGetValue(redet.Expediente ?? "", out var sadeInfo) ? sadeInfo.Buzon : null,
+                            FechaSade = datosSade.TryGetValue(redet.Expediente ?? "", out sadeInfo) ? sadeInfo.Fecha : (DateTime?)null,
                             Acdir = datosAcdir.TryGetValue(redet.Expediente ?? "", out var acdirInfo) ? acdirInfo : null
                         };
                         autorizantesYRedeterminaciones.Add(dto);
