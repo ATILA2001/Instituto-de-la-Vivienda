@@ -34,6 +34,10 @@ namespace WebForms
         {
             string requestedPath = Context.Request.Path;
 
+            // Ruta del recurso realmente ejecutado, relativa a la aplicación y sin path-info
+            // ("~/Inicio.aspx" -> "/Inicio.aspx"). Se usa para decidir si la ruta es pública.
+            string executedPath = Context.Request.AppRelativeCurrentExecutionFilePath?.TrimStart('~') ?? requestedPath;
+
             // Lista de rutas públicas que no requieren autenticación.
             var publicPaths = new List<string>
             {
@@ -47,7 +51,10 @@ namespace WebForms
                 "/WebResource.axd",
             };
 
-            if (publicPaths.Any(p => requestedPath.EndsWith(p)))
+            // Comparación exacta (como hacen SAI/SAF). Con EndsWith, "/" o "/Inicio.aspx" matcheaban
+            // cualquier ruta con path-info ("/BdProyectos.aspx/" o "/AbmlBarrio.aspx/Inicio.aspx")
+            // y permitían saltear la validación de permisos.
+            if (publicPaths.Any(p => string.Equals(p, executedPath, StringComparison.OrdinalIgnoreCase)))
             {
                 return;
             }

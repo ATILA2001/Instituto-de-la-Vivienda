@@ -54,7 +54,6 @@ namespace Negocio
     /// - Métodos Listar*() para diferentes necesidades de paginación
     /// 
     /// CONSIDERACIONES ESPECIALES:
-    /// - _cargandoDatos: Flag para prevenir recursión infinita
     /// - Manejo de grandes volúmenes de datos (miles de autorizantes)
     /// - Compatibilidad con filtros TreeViewSearch y paginación externa
     /// </summary>
@@ -106,9 +105,9 @@ namespace Negocio
                     context.Configuration.ValidateOnSaveEnabled = false;
 
                     List<AutorizanteEF> autorizantes;
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                             .Select(o => o.Id)
@@ -329,21 +328,6 @@ namespace Negocio
         private readonly int[] IdsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
         /// <summary>
-        /// Flag de protección contra recursión infinita en carga de datos.
-        /// 
-        /// PROBLEMÁTICA:
-        /// - Algunos métodos de cálculo pueden disparar otros métodos de carga
-        /// - Sin protección, se pueden generar bucles infinitos
-        /// - Especialmente crítico en ListarCertificadosYReliquidaciones()
-        /// 
-        /// USO:
-        /// - Se establece en true al iniciar operaciones críticas
-        /// - Se verifica al inicio de métodos susceptibles a recursión
-        /// - Se resetea en finally para garantizar limpieza
-        /// </summary>
-        private static bool _cargandoDatos = false;
-
-        /// <summary>
         /// Obtiene el cache de SADE desde la sesión HTTP
         /// </summary>
         private Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerCacheSade()
@@ -440,381 +424,364 @@ namespace Negocio
         /// <returns>Una lista de DTOs que incluye Certificados originales y Reliquidaciones generadas.</returns>
         public List<CertificadoDTO> ListarCertificadosYReliquidaciones(UsuarioEF usuario = null)
         {
-            if (_cargandoDatos)
-            {
-                Debug.WriteLine("Bucle detectado en ListarCertificadosYReliquidaciones");
-                return new List<CertificadoDTO>();
-            }
-
             var swTotal = Stopwatch.StartNew();
             var sw = Stopwatch.StartNew();
 
-            try
+            using (var context = new IVCdbContext())
             {
-                _cargandoDatos = true;
+                context.Configuration.LazyLoadingEnabled = false;
+                context.Configuration.ProxyCreationEnabled = false;
+                context.Configuration.AutoDetectChangesEnabled = false;
+                context.Configuration.ValidateOnSaveEnabled = false;
 
-                using (var context = new IVCdbContext())
+                // OPTIMIZACIÓN CRÍTICA AUTORIZANTES: Eliminar JOIN costoso y usar consultas separadas
+                sw.Restart();
+
+                List<AutorizanteEF> autorizantesBase;
+
+                if (usuario != null && !usuario.Tipo)
                 {
-                    context.Configuration.LazyLoadingEnabled = false;
-                    context.Configuration.ProxyCreationEnabled = false;
-                    context.Configuration.AutoDetectChangesEnabled = false;
-                    context.Configuration.ValidateOnSaveEnabled = false;
-
-                    // OPTIMIZACIÓN CRÍTICA AUTORIZANTES: Eliminar JOIN costoso y usar consultas separadas
-                    sw.Restart();
-
-                    List<AutorizanteEF> autorizantesBase;
-
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
-                    {
-                        var filtroAreaIds = usuario.IvcAreaIds;
-                        var obrasDelArea = context.Obras.AsNoTracking()
-                            .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
-                            .Select(o => o.Id)
-                            .ToList();
-                        sw.Restart();
-                        autorizantesBase = context.Autorizantes.AsNoTracking()
-                            .Where(a => obrasDelArea.Contains(a.ObraId))
-                            .ToList();
-                        Debug.WriteLine($"Tiempo autorizantes filtrados por área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
-                    }
-                    else
-                    {
-                        autorizantesBase = context.Autorizantes.AsNoTracking().ToList();
-                        Debug.WriteLine($"Tiempo autorizantes SIN filtro de área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
-                    }
-
-                    // 2. Cargar obras por separado (más eficiente que Include)
-                    sw.Restart();
-                    var obraIdsNecesarias = autorizantesBase.Select(a => a.ObraId).Distinct().ToList();
-                    var obrasDict = context.Obras.AsNoTracking()
-                        .Where(o => obraIdsNecesarias.Contains(o.Id))
-                        .ToDictionary(o => o.Id);
-
-                    // Asignar obras a autorizantes
-                    foreach (var auth in autorizantesBase)
-                    {
-                        if (obrasDict.ContainsKey(auth.ObraId))
-                            auth.Obra = obrasDict[auth.ObraId];
-                    }
-                    Debug.WriteLine($"Tiempo carga obras separada: {sw.ElapsedMilliseconds} ms");
-
-                    // 3. Cargar datos relacionados en consultas separadas (más eficiente que JOINs masivos)
-                    sw.Restart();
-                    var empresaIds = autorizantesBase.Where(a => a.Obra?.EmpresaId != null).Select(a => a.Obra.EmpresaId.Value).Distinct().ToList();
-                    var areaIds = obrasDict.Values.Where(o => o.AreaId.HasValue).Select(o => o.AreaId.Value).Distinct().ToList();
-                    var barrioIds = autorizantesBase.Where(a => a.Obra?.BarrioId != null).Select(a => a.Obra.BarrioId.Value).Distinct().ToList();
-                    var contrataIds = autorizantesBase.Where(a => a.Obra?.ContrataId != null).Select(a => a.Obra.ContrataId.Value).Distinct().ToList();
-                    var obraIds = autorizantesBase.Where(a => a.Obra != null).Select(a => a.Obra.Id).Distinct().ToList();
-
-                    var empresasDict = context.Empresas.AsNoTracking()
-                        .Where(e => empresaIds.Contains(e.Id))
-                        .ToDictionary(e => e.Id);
-
-                    var areasDict = context.Areas.AsNoTracking()
-                        .Where(ar => areaIds.Contains(ar.Id))
-                        .ToDictionary(ar => ar.Id);
-
-                    var barriosDict = context.Barrios.AsNoTracking()
-                        .Where(b => barrioIds.Contains(b.Id))
-                        .ToDictionary(b => b.Id);
-
-                    var proyectosDict = context.Proyectos.AsNoTracking()
-                        .Include(p => p.LineaGestionEF)
-                        .Where(p => obraIds.Contains(p.ObraId))
-                        .ToDictionary(p => p.ObraId);
-
-                    var contratasDict = context.Contratas.AsNoTracking()
-                        .Where(c => contrataIds.Contains(c.Id))
-                        .ToDictionary(c => c.Id);
-
-                    // Agregar estos diccionarios para cargar los estados y conceptos
-                    var estadoIds = autorizantesBase.Select(a => a.EstadoId).Distinct().ToList();
-                    var estadosDict = context.EstadosAutorizante.AsNoTracking()
-                        .Where(e => estadoIds.Contains(e.Id))
-                        .ToDictionary(e => e.Id);
-
-                    var conceptoIds = autorizantesBase.Select(a => a.ConceptoId).Distinct().ToList();
-                    var conceptosDict = context.Conceptos.AsNoTracking()
-                        .Where(c => conceptoIds.Contains(c.Id))
-                        .ToDictionary(c => c.Id);
-
-                    Debug.WriteLine($"Tiempo datos relacionados: {sw.ElapsedMilliseconds} ms");
-
-
-                    // 4. Redeterminaciones optimizadas (carga simple sin Include costoso de Etapa)
-                    sw.Restart();
-                    var codigosAutorizanteBase = autorizantesBase.Select(a => a.CodigoAutorizante).ToList();
-
-                    // Cargar redeterminaciones directamente (sin Include costoso)
-                    var redeterminacionesList = context.Redeterminaciones.AsNoTracking()
-                        .Where(r => codigosAutorizanteBase.Contains(r.CodigoAutorizante))
+                    var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                    var obrasDelArea = context.Obras.AsNoTracking()
+                        .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
+                        .Select(o => o.Id)
                         .ToList();
-
-                    var redeterminacionesDict = redeterminacionesList.GroupBy(r => r.CodigoAutorizante)
-                        .ToDictionary(g => g.Key, g => g.ToList());
-
-                    Debug.WriteLine($"Tiempo redeterminaciones OPTIMIZADAS: {sw.ElapsedMilliseconds} ms");
-
-                    // 5. Ensamblar estructura final en memoria (súper rápido)
                     sw.Restart();
-                    foreach (var auth in autorizantesBase)
-                    {
-                        if (auth.Obra != null)
-                        {
-                            // Asignar relaciones desde diccionarios (O(1) lookup)
-                            if (auth.Obra.EmpresaId.HasValue && empresasDict.ContainsKey(auth.Obra.EmpresaId.Value))
-                                auth.Obra.Empresa = empresasDict[auth.Obra.EmpresaId.Value];
-
-                            if (auth.Obra.AreaId.HasValue && areasDict.ContainsKey(auth.Obra.AreaId.Value))
-                                auth.Obra.Area = areasDict[auth.Obra.AreaId.Value];
-
-                            if (auth.Obra.BarrioId.HasValue && barriosDict.ContainsKey(auth.Obra.BarrioId.Value))
-                                auth.Obra.Barrio = barriosDict[auth.Obra.BarrioId.Value];
-
-                            if (proyectosDict.ContainsKey(auth.Obra.Id))
-                                auth.Obra.Proyecto = proyectosDict[auth.Obra.Id];
-
-                            if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
-                                auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
-                        }
-                        // Asignar estado y concepto al autorizante
-                        if (estadosDict.ContainsKey(auth.EstadoId))
-                            auth.Estado = estadosDict[auth.EstadoId];
-
-                        if (conceptosDict.ContainsKey(auth.ConceptoId))
-                            auth.Concepto = conceptosDict[auth.ConceptoId];
-                        // Asignar redeterminaciones desde diccionario
-                        auth.Redeterminaciones = redeterminacionesDict.ContainsKey(auth.CodigoAutorizante)
-                            ? redeterminacionesDict[auth.CodigoAutorizante]
-                            : new List<RedeterminacionEF>();
-                    }
-                    Debug.WriteLine($"Tiempo ensamblado en memoria: {sw.ElapsedMilliseconds} ms");
-
-                    var autorizantes = autorizantesBase; // Resultado final optimizado
-                    Debug.WriteLine($"Tiempo total consulta autorizantes OPTIMIZADA: {sw.ElapsedMilliseconds} ms");
-
-                    sw.Restart();
-                    var codigosAutorizante = autorizantes.Select(a => a.CodigoAutorizante).ToList();
-                    var certificados = context.Certificados.AsNoTracking()
-                                            .Include(c => c.TipoPago)
-                                            .Where(c => codigosAutorizante.Contains(c.CodigoAutorizante))
-                                            .ToList();
-                    Debug.WriteLine($"Tiempo consulta certificados: {sw.ElapsedMilliseconds} ms");
-
-                    sw.Restart();
-                    var redeterminaciones = redeterminacionesList; // Ya están cargadas desde la optimización anterior
-                    Debug.WriteLine($"Tiempo consulta redeterminaciones: {sw.ElapsedMilliseconds} ms");
-
-                    sw.Restart();
-                    var expedientesReliq = context.ExpedientesReliq.AsNoTracking().ToList()
-                            .ToDictionary(
-                                e => new Tuple<string, int, int>(e.CodigoRedet, e.MesAprobacion.Month, e.MesAprobacion.Year),
-                                e => e.Expediente
-                            );
-                    Debug.WriteLine($"Tiempo consulta expedientesReliq: {sw.ElapsedMilliseconds} ms");
-
-                    // OPTIMIZACIÓN CONSERVADORA: Solo paralelismo en consultas SIGAF/SADE
-                    sw.Restart();
-                    var todosLosExpedientes = certificados.Select(c => c.ExpedientePago)
-                                                         .Concat(redeterminaciones.Select(r => r.Expediente))
-                                                         .Where(e => !string.IsNullOrWhiteSpace(e))
-                                                         .Distinct()
-                                                         .ToList();
-                    Debug.WriteLine($"Tiempo procesamiento todosLosExpedientes: {sw.ElapsedMilliseconds} ms");
-                    todosLosExpedientes = todosLosExpedientes.Union(expedientesReliq.Values.Where(e => !string.IsNullOrWhiteSpace(e))).ToList();
-
-                    // PARALELISMO CONSERVADOR: Solo SIGAF y SADE en paralelo
-                    sw.Restart();
-                    Dictionary<string, decimal> datosSigaf = null;
-                    Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade = null;
-
-                    // Ejecutar ambas consultas en paralelo para máximo rendimiento
-                    var taskSigaf = Task.Run(() => BuscarMuchosNumerosSigaf(todosLosExpedientes));
-                    var taskSade = Task.Run(() => BuscarMuchosDatosSade(todosLosExpedientes));
-
-                    // Esperar a que ambas terminen
-                    Task.WaitAll(taskSigaf, taskSade);
-
-                    datosSigaf = taskSigaf.Result;
-                    datosSade = taskSade.Result;
-
-                    Debug.WriteLine($"Tiempo consulta SIGAF/SADE EN PARALELO: {sw.ElapsedMilliseconds} ms");
-
-                    sw.Restart();
-                    CalcularMontoRedeterminaciones(redeterminaciones, autorizantes, certificados);
-                    Debug.WriteLine($"Tiempo CalcularMontoRedeterminaciones: {sw.ElapsedMilliseconds} ms");
-
-                    // OPTIMIZACIÓN 3: Proyección optimizada con let statements
-                    sw.Restart();
-                    var listaFinalDTO = (from cert in certificados
-                                         join auth in autorizantes on cert.CodigoAutorizante equals auth.CodigoAutorizante
-                                         let obra = auth.Obra
-                                         let empresa = obra?.Empresa
-                                         let area = obra?.Area
-                                         let barrio = obra?.Barrio
-                                         let proyecto = obra?.Proyecto
-                                         let lineaGestion = proyecto?.LineaGestionEF
-                                         let contrata = obra?.Contrata
-                                         let tipoPago = cert.TipoPago
-                                         //let estado= auth.Estado
-                                         select new CertificadoDTO
-                                         {
-                                             Id = cert.Id,
-                                             ExpedientePago = cert.ExpedientePago,
-                                             MontoTotal = cert.MontoTotal,
-                                             MesAprobacion = cert.MesAprobacion,
-                                             AutorizanteId = auth.Id,
-                                             CodigoAutorizante = cert.CodigoAutorizante,
-                                             AutorizanteEstado = auth.Estado?.Nombre,
-
-                                             ObraId = obra?.Id,
-                                             ObraDescripcion = obra?.Descripcion,
-                                             EmpresaId = obra?.EmpresaId,
-                                             EmpresaNombre = empresa?.Nombre,
-                                             AreaId = obra?.AreaId,
-                                             AreaNombre = area?.Nombre,
-                                             Contrata = contrata != null && obra != null ?
-                                                       string.Concat(contrata.Nombre, " ", obra.Numero, "/", obra.Anio) : null,
-                                             BarrioId = obra?.BarrioId,
-                                             BarrioNombre = barrio?.Nombre,
-                                             ProyectoId = proyecto?.Id,
-                                             ProyectoNombre = proyecto?.Nombre,
-                                             LineaGestionId = lineaGestion?.Id,
-                                             LineaGestionNombre = lineaGestion?.Nombre,
-                                             TipoPagoId = cert.TipoPagoId,
-                                             TipoPagoNombre = tipoPago?.Nombre,
-                                             EstadoRedetId = auth.Redeterminaciones?.OrderByDescending(r => r.Id).Select(r => (int?)r.EstadoRedetEFId).FirstOrDefault(),
-                                             Porcentaje = (auth.MontoAutorizado > 0) ? (cert.MontoTotal / auth.MontoAutorizado) * 100 : 0,
-                                             PorcEjecFisica = cert.PorcEjecFisica,
-                                         }).ToList();
-
-                    Debug.WriteLine($"Tiempo proyección inicial OPTIMIZADA: {sw.ElapsedMilliseconds} ms");
-
-                    // OPTIMIZACIÓN CONSERVADORA: Generar reliquidaciones con lookup optimizado
-                    sw.Restart();
-                    var listaReliqDTO = new List<CertificadoDTO>();
-                    int idReliq = 0;
-
-                    // Crear diccionario para lookup más rápido de autorizantes por redeterminación
-                    var autorizantesPorRedet = new Dictionary<int, AutorizanteEF>();
-                    foreach (var auth in autorizantes)
-                    {
-                        foreach (var redet in auth.Redeterminaciones)
-                        {
-                            autorizantesPorRedet[redet.Id] = auth;
-                        }
-                    }
-
-                    foreach (var redet in redeterminaciones)
-                    {
-                        if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
-
-                        if (!redet.Salto.HasValue || !redet.MontoRedet.HasValue) continue; // sin salto o sin porcentaje: no hay monto, no hay reliquidación
-                        if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
-
-                        // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
-                        // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
-                        var certificadosAfectados = listaFinalDTO
-                            .Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante
-                                     && c.MesAprobacion.HasValue
-                                     && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
-                                     && c.TipoPagoId != TipoPagoAnticipoId)
-                            .OrderBy(c => c.MesAprobacion)
-                            .ThenBy(c => c.Id)
-                            .ToList();
-
-                        bool esPrimerCertificadoPostSalto = true;
-                        foreach (var certAfectado in certificadosAfectados)
-                        {
-                            // Paso 3a / 3b (R3): el primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
-                            decimal porcentajeAplicado = (certAfectado.Porcentaje ?? 0)
-                                + (esPrimerCertificadoPostSalto ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
-                            esPrimerCertificadoPostSalto = false;
-
-                            decimal montoReliq = (redet.MontoRedet ?? 0) * (porcentajeAplicado / 100);
-
-                            var claveReliq = new Tuple<string, int, int>(redet.CodigoRedet, certAfectado.MesAprobacion.Value.Month, certAfectado.MesAprobacion.Value.Year);
-
-                            expedientesReliq.TryGetValue(claveReliq, out string expedienteFinalReliq);
-
-                            // CORRECCIÓN: La reliquidación debe tener los datos del autorizante de la redeterminación, no del certificado afectado
-                            var obraRedet = autorizanteDeRedet.Obra;
-                            var proyectoRedet = obraRedet?.Proyecto;
-                            var empresaRedet = obraRedet?.Empresa;
-                            var areaRedet = obraRedet?.Area;
-                            var barrioRedet = obraRedet?.Barrio;
-                            var contrataRedet = obraRedet?.Contrata;
-                            var lineaGestionRedet = proyectoRedet?.LineaGestionEF;
-
-                            listaReliqDTO.Add(new CertificadoDTO
-                            {
-                                IdReliquidacion = ++idReliq,
-                                ExpedientePago = expedienteFinalReliq,
-                                MesAprobacion = certAfectado.MesAprobacion,
-                                MontoTotal = montoReliq,
-                                EstadoRedetId = redet.EstadoRedetEFId,
-                                AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
-                                CodigoAutorizante = redet.CodigoRedet,
-                                AutorizanteEstado = MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
-                                // Datos de la obra de la redeterminación (no del certificado afectado)
-                                ObraId = obraRedet?.Id,
-                                ObraDescripcion = obraRedet?.Descripcion,
-                                EmpresaId = obraRedet?.EmpresaId,
-                                EmpresaNombre = empresaRedet?.Nombre,
-                                AreaId = obraRedet?.AreaId,
-                                AreaNombre = areaRedet?.Nombre,
-                                Contrata = contrataRedet != null && obraRedet != null ?
-                                          string.Concat(contrataRedet.Nombre, " ", obraRedet.Numero, "/", obraRedet.Anio) : null,
-                                BarrioId = obraRedet?.BarrioId,
-                                BarrioNombre = barrioRedet?.Nombre,
-                                // CORRECCIÓN PRINCIPAL: ProyectoId de la redeterminación, no del certificado afectado
-                                ProyectoId = proyectoRedet?.Id,
-                                ProyectoNombre = proyectoRedet?.Nombre,
-                                LineaGestionId = lineaGestionRedet?.Id,
-                                LineaGestionNombre = lineaGestionRedet?.Nombre,
-                                TipoPagoId = 3,
-                                TipoPagoNombre = "RELIQUIDACION",
-                                Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
-                            });
-                        }
-                    }
-
-                    Debug.WriteLine($"Tiempo generación de Reliquidaciones: {sw.ElapsedMilliseconds} ms");
-                    listaFinalDTO.AddRange(listaReliqDTO);
-
-                    // OPTIMIZACIÓN CONSERVADORA: Reutilizar datos SIGAF/SADE ya cargados
-                    sw.Restart();
-                    var expedientesConCertificados = listaFinalDTO
-                        .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago))
-                        .Select(c => c.ExpedientePago)
-                        .Distinct()
+                    autorizantesBase = context.Autorizantes.AsNoTracking()
+                        .Where(a => obrasDelArea.Contains(a.ObraId))
                         .ToList();
-
-                    // PASAMOS los datos ya cargados para evitar reconsultas
-                    var resultado = CalcularCertificadosPorExpedientes(
-                        expedientesConCertificados,
-                        listaFinalDTO,
-                        false,
-                        datosSigaf,  // Reutilizar datos ya cargados
-                        datosSade);  // Reutilizar datos ya cargados
-                    Debug.WriteLine($"Tiempo CalcularCertificadosPorExpedientes OPTIMIZADO: {sw.ElapsedMilliseconds} ms");
-
-                    swTotal.Stop();
-                    Debug.WriteLine($"Tiempo total ListarCertificadosYReliquidaciones OPTIMIZADO: {swTotal.ElapsedMilliseconds} ms");
-
-                    Debug.WriteLine($"Cantidad de listaFinalDTO: {listaFinalDTO.Count}");
-
-
-
-                    return resultado;
+                    Debug.WriteLine($"Tiempo autorizantes filtrados por área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
+                }
+                else
+                {
+                    autorizantesBase = context.Autorizantes.AsNoTracking().ToList();
+                    Debug.WriteLine($"Tiempo autorizantes SIN filtro de área ({autorizantesBase.Count} autorizantes): {sw.ElapsedMilliseconds} ms");
                 }
 
+                // 2. Cargar obras por separado (más eficiente que Include)
+                sw.Restart();
+                var obraIdsNecesarias = autorizantesBase.Select(a => a.ObraId).Distinct().ToList();
+                var obrasDict = context.Obras.AsNoTracking()
+                    .Where(o => obraIdsNecesarias.Contains(o.Id))
+                    .ToDictionary(o => o.Id);
 
-            }
-            finally
-            {
-                _cargandoDatos = false;
+                // Asignar obras a autorizantes
+                foreach (var auth in autorizantesBase)
+                {
+                    if (obrasDict.ContainsKey(auth.ObraId))
+                        auth.Obra = obrasDict[auth.ObraId];
+                }
+                Debug.WriteLine($"Tiempo carga obras separada: {sw.ElapsedMilliseconds} ms");
+
+                // 3. Cargar datos relacionados en consultas separadas (más eficiente que JOINs masivos)
+                sw.Restart();
+                var empresaIds = autorizantesBase.Where(a => a.Obra?.EmpresaId != null).Select(a => a.Obra.EmpresaId.Value).Distinct().ToList();
+                var areaIds = obrasDict.Values.Where(o => o.AreaId.HasValue).Select(o => o.AreaId.Value).Distinct().ToList();
+                var barrioIds = autorizantesBase.Where(a => a.Obra?.BarrioId != null).Select(a => a.Obra.BarrioId.Value).Distinct().ToList();
+                var contrataIds = autorizantesBase.Where(a => a.Obra?.ContrataId != null).Select(a => a.Obra.ContrataId.Value).Distinct().ToList();
+                var obraIds = autorizantesBase.Where(a => a.Obra != null).Select(a => a.Obra.Id).Distinct().ToList();
+
+                var empresasDict = context.Empresas.AsNoTracking()
+                    .Where(e => empresaIds.Contains(e.Id))
+                    .ToDictionary(e => e.Id);
+
+                var areasDict = context.Areas.AsNoTracking()
+                    .Where(ar => areaIds.Contains(ar.Id))
+                    .ToDictionary(ar => ar.Id);
+
+                var barriosDict = context.Barrios.AsNoTracking()
+                    .Where(b => barrioIds.Contains(b.Id))
+                    .ToDictionary(b => b.Id);
+
+                var proyectosDict = context.Proyectos.AsNoTracking()
+                    .Include(p => p.LineaGestionEF)
+                    .Where(p => obraIds.Contains(p.ObraId))
+                    .ToDictionary(p => p.ObraId);
+
+                var contratasDict = context.Contratas.AsNoTracking()
+                    .Where(c => contrataIds.Contains(c.Id))
+                    .ToDictionary(c => c.Id);
+
+                // Agregar estos diccionarios para cargar los estados y conceptos
+                var estadoIds = autorizantesBase.Select(a => a.EstadoId).Distinct().ToList();
+                var estadosDict = context.EstadosAutorizante.AsNoTracking()
+                    .Where(e => estadoIds.Contains(e.Id))
+                    .ToDictionary(e => e.Id);
+
+                var conceptoIds = autorizantesBase.Select(a => a.ConceptoId).Distinct().ToList();
+                var conceptosDict = context.Conceptos.AsNoTracking()
+                    .Where(c => conceptoIds.Contains(c.Id))
+                    .ToDictionary(c => c.Id);
+
+                Debug.WriteLine($"Tiempo datos relacionados: {sw.ElapsedMilliseconds} ms");
+
+
+                // 4. Redeterminaciones optimizadas (carga simple sin Include costoso de Etapa)
+                sw.Restart();
+                var codigosAutorizanteBase = autorizantesBase.Select(a => a.CodigoAutorizante).ToList();
+
+                // Cargar redeterminaciones directamente (sin Include costoso)
+                var redeterminacionesList = context.Redeterminaciones.AsNoTracking()
+                    .Where(r => codigosAutorizanteBase.Contains(r.CodigoAutorizante))
+                    .ToList();
+
+                var redeterminacionesDict = redeterminacionesList.GroupBy(r => r.CodigoAutorizante)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                Debug.WriteLine($"Tiempo redeterminaciones OPTIMIZADAS: {sw.ElapsedMilliseconds} ms");
+
+                // 5. Ensamblar estructura final en memoria (súper rápido)
+                sw.Restart();
+                foreach (var auth in autorizantesBase)
+                {
+                    if (auth.Obra != null)
+                    {
+                        // Asignar relaciones desde diccionarios (O(1) lookup)
+                        if (auth.Obra.EmpresaId.HasValue && empresasDict.ContainsKey(auth.Obra.EmpresaId.Value))
+                            auth.Obra.Empresa = empresasDict[auth.Obra.EmpresaId.Value];
+
+                        if (auth.Obra.AreaId.HasValue && areasDict.ContainsKey(auth.Obra.AreaId.Value))
+                            auth.Obra.Area = areasDict[auth.Obra.AreaId.Value];
+
+                        if (auth.Obra.BarrioId.HasValue && barriosDict.ContainsKey(auth.Obra.BarrioId.Value))
+                            auth.Obra.Barrio = barriosDict[auth.Obra.BarrioId.Value];
+
+                        if (proyectosDict.ContainsKey(auth.Obra.Id))
+                            auth.Obra.Proyecto = proyectosDict[auth.Obra.Id];
+
+                        if (auth.Obra.ContrataId.HasValue && contratasDict.ContainsKey(auth.Obra.ContrataId.Value))
+                            auth.Obra.Contrata = contratasDict[auth.Obra.ContrataId.Value];
+                    }
+                    // Asignar estado y concepto al autorizante
+                    if (estadosDict.ContainsKey(auth.EstadoId))
+                        auth.Estado = estadosDict[auth.EstadoId];
+
+                    if (conceptosDict.ContainsKey(auth.ConceptoId))
+                        auth.Concepto = conceptosDict[auth.ConceptoId];
+                    // Asignar redeterminaciones desde diccionario
+                    auth.Redeterminaciones = redeterminacionesDict.ContainsKey(auth.CodigoAutorizante)
+                        ? redeterminacionesDict[auth.CodigoAutorizante]
+                        : new List<RedeterminacionEF>();
+                }
+                Debug.WriteLine($"Tiempo ensamblado en memoria: {sw.ElapsedMilliseconds} ms");
+
+                var autorizantes = autorizantesBase; // Resultado final optimizado
+                Debug.WriteLine($"Tiempo total consulta autorizantes OPTIMIZADA: {sw.ElapsedMilliseconds} ms");
+
+                sw.Restart();
+                var codigosAutorizante = autorizantes.Select(a => a.CodigoAutorizante).ToList();
+                var certificados = context.Certificados.AsNoTracking()
+                                        .Include(c => c.TipoPago)
+                                        .Where(c => codigosAutorizante.Contains(c.CodigoAutorizante))
+                                        .ToList();
+                Debug.WriteLine($"Tiempo consulta certificados: {sw.ElapsedMilliseconds} ms");
+
+                sw.Restart();
+                var redeterminaciones = redeterminacionesList; // Ya están cargadas desde la optimización anterior
+                Debug.WriteLine($"Tiempo consulta redeterminaciones: {sw.ElapsedMilliseconds} ms");
+
+                sw.Restart();
+                var expedientesReliq = context.ExpedientesReliq.AsNoTracking().ToList()
+                        .ToDictionary(
+                            e => new Tuple<string, int, int>(e.CodigoRedet, e.MesAprobacion.Month, e.MesAprobacion.Year),
+                            e => e.Expediente
+                        );
+                Debug.WriteLine($"Tiempo consulta expedientesReliq: {sw.ElapsedMilliseconds} ms");
+
+                // OPTIMIZACIÓN CONSERVADORA: Solo paralelismo en consultas SIGAF/SADE
+                sw.Restart();
+                var todosLosExpedientes = certificados.Select(c => c.ExpedientePago)
+                                                     .Concat(redeterminaciones.Select(r => r.Expediente))
+                                                     .Where(e => !string.IsNullOrWhiteSpace(e))
+                                                     .Distinct()
+                                                     .ToList();
+                Debug.WriteLine($"Tiempo procesamiento todosLosExpedientes: {sw.ElapsedMilliseconds} ms");
+                todosLosExpedientes = todosLosExpedientes.Union(expedientesReliq.Values.Where(e => !string.IsNullOrWhiteSpace(e))).ToList();
+
+                // PARALELISMO CONSERVADOR: Solo SIGAF y SADE en paralelo
+                sw.Restart();
+                Dictionary<string, decimal> datosSigaf = null;
+                Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade = null;
+
+                // Ejecutar ambas consultas en paralelo para máximo rendimiento
+                var taskSigaf = Task.Run(() => BuscarMuchosNumerosSigaf(todosLosExpedientes));
+                var taskSade = Task.Run(() => BuscarMuchosDatosSade(todosLosExpedientes));
+
+                // Esperar a que ambas terminen
+                Task.WaitAll(taskSigaf, taskSade);
+
+                datosSigaf = taskSigaf.Result;
+                datosSade = taskSade.Result;
+
+                Debug.WriteLine($"Tiempo consulta SIGAF/SADE EN PARALELO: {sw.ElapsedMilliseconds} ms");
+
+                sw.Restart();
+                CalcularMontoRedeterminaciones(redeterminaciones, autorizantes, certificados);
+                Debug.WriteLine($"Tiempo CalcularMontoRedeterminaciones: {sw.ElapsedMilliseconds} ms");
+
+                // OPTIMIZACIÓN 3: Proyección optimizada con let statements
+                sw.Restart();
+                var listaFinalDTO = (from cert in certificados
+                                     join auth in autorizantes on cert.CodigoAutorizante equals auth.CodigoAutorizante
+                                     let obra = auth.Obra
+                                     let empresa = obra?.Empresa
+                                     let area = obra?.Area
+                                     let barrio = obra?.Barrio
+                                     let proyecto = obra?.Proyecto
+                                     let lineaGestion = proyecto?.LineaGestionEF
+                                     let contrata = obra?.Contrata
+                                     let tipoPago = cert.TipoPago
+                                     //let estado= auth.Estado
+                                     select new CertificadoDTO
+                                     {
+                                         Id = cert.Id,
+                                         ExpedientePago = cert.ExpedientePago,
+                                         MontoTotal = cert.MontoTotal,
+                                         MesAprobacion = cert.MesAprobacion,
+                                         AutorizanteId = auth.Id,
+                                         CodigoAutorizante = cert.CodigoAutorizante,
+                                         AutorizanteEstado = auth.Estado?.Nombre,
+
+                                         ObraId = obra?.Id,
+                                         ObraDescripcion = obra?.Descripcion,
+                                         EmpresaId = obra?.EmpresaId,
+                                         EmpresaNombre = empresa?.Nombre,
+                                         AreaId = obra?.AreaId,
+                                         AreaNombre = area?.Nombre,
+                                         Contrata = contrata != null && obra != null ?
+                                                   string.Concat(contrata.Nombre, " ", obra.Numero, "/", obra.Anio) : null,
+                                         BarrioId = obra?.BarrioId,
+                                         BarrioNombre = barrio?.Nombre,
+                                         ProyectoId = proyecto?.Id,
+                                         ProyectoNombre = proyecto?.Nombre,
+                                         LineaGestionId = lineaGestion?.Id,
+                                         LineaGestionNombre = lineaGestion?.Nombre,
+                                         TipoPagoId = cert.TipoPagoId,
+                                         TipoPagoNombre = tipoPago?.Nombre,
+                                         EstadoRedetId = auth.Redeterminaciones?.OrderByDescending(r => r.Id).Select(r => (int?)r.EstadoRedetEFId).FirstOrDefault(),
+                                         Porcentaje = (auth.MontoAutorizado > 0) ? (cert.MontoTotal / auth.MontoAutorizado) * 100 : 0,
+                                         PorcEjecFisica = cert.PorcEjecFisica,
+                                     }).ToList();
+
+                Debug.WriteLine($"Tiempo proyección inicial OPTIMIZADA: {sw.ElapsedMilliseconds} ms");
+
+                // OPTIMIZACIÓN CONSERVADORA: Generar reliquidaciones con lookup optimizado
+                sw.Restart();
+                var listaReliqDTO = new List<CertificadoDTO>();
+                int idReliq = 0;
+
+                // Crear diccionario para lookup más rápido de autorizantes por redeterminación
+                var autorizantesPorRedet = new Dictionary<int, AutorizanteEF>();
+                foreach (var auth in autorizantes)
+                {
+                    foreach (var redet in auth.Redeterminaciones)
+                    {
+                        autorizantesPorRedet[redet.Id] = auth;
+                    }
+                }
+
+                foreach (var redet in redeterminaciones)
+                {
+                    if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
+
+                    if (!redet.Salto.HasValue || !redet.MontoRedet.HasValue) continue; // sin salto o sin porcentaje: no hay monto, no hay reliquidación
+                    if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
+
+                    // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
+                    // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
+                    var certificadosAfectados = listaFinalDTO
+                        .Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante
+                                 && c.MesAprobacion.HasValue
+                                 && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
+                                 && c.TipoPagoId != TipoPagoAnticipoId)
+                        .OrderBy(c => c.MesAprobacion)
+                        .ThenBy(c => c.Id)
+                        .ToList();
+
+                    bool esPrimerCertificadoPostSalto = true;
+                    foreach (var certAfectado in certificadosAfectados)
+                    {
+                        // Paso 3a / 3b (R3): el primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
+                        decimal porcentajeAplicado = (certAfectado.Porcentaje ?? 0)
+                            + (esPrimerCertificadoPostSalto ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
+                        esPrimerCertificadoPostSalto = false;
+
+                        decimal montoReliq = (redet.MontoRedet ?? 0) * (porcentajeAplicado / 100);
+
+                        var claveReliq = new Tuple<string, int, int>(redet.CodigoRedet, certAfectado.MesAprobacion.Value.Month, certAfectado.MesAprobacion.Value.Year);
+
+                        expedientesReliq.TryGetValue(claveReliq, out string expedienteFinalReliq);
+
+                        // CORRECCIÓN: La reliquidación debe tener los datos del autorizante de la redeterminación, no del certificado afectado
+                        var obraRedet = autorizanteDeRedet.Obra;
+                        var proyectoRedet = obraRedet?.Proyecto;
+                        var empresaRedet = obraRedet?.Empresa;
+                        var areaRedet = obraRedet?.Area;
+                        var barrioRedet = obraRedet?.Barrio;
+                        var contrataRedet = obraRedet?.Contrata;
+                        var lineaGestionRedet = proyectoRedet?.LineaGestionEF;
+
+                        listaReliqDTO.Add(new CertificadoDTO
+                        {
+                            IdReliquidacion = ++idReliq,
+                            ExpedientePago = expedienteFinalReliq,
+                            MesAprobacion = certAfectado.MesAprobacion,
+                            MontoTotal = montoReliq,
+                            EstadoRedetId = redet.EstadoRedetEFId,
+                            AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
+                            CodigoAutorizante = redet.CodigoRedet,
+                            AutorizanteEstado = MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
+                            // Datos de la obra de la redeterminación (no del certificado afectado)
+                            ObraId = obraRedet?.Id,
+                            ObraDescripcion = obraRedet?.Descripcion,
+                            EmpresaId = obraRedet?.EmpresaId,
+                            EmpresaNombre = empresaRedet?.Nombre,
+                            AreaId = obraRedet?.AreaId,
+                            AreaNombre = areaRedet?.Nombre,
+                            Contrata = contrataRedet != null && obraRedet != null ?
+                                      string.Concat(contrataRedet.Nombre, " ", obraRedet.Numero, "/", obraRedet.Anio) : null,
+                            BarrioId = obraRedet?.BarrioId,
+                            BarrioNombre = barrioRedet?.Nombre,
+                            // CORRECCIÓN PRINCIPAL: ProyectoId de la redeterminación, no del certificado afectado
+                            ProyectoId = proyectoRedet?.Id,
+                            ProyectoNombre = proyectoRedet?.Nombre,
+                            LineaGestionId = lineaGestionRedet?.Id,
+                            LineaGestionNombre = lineaGestionRedet?.Nombre,
+                            TipoPagoId = 3,
+                            TipoPagoNombre = "RELIQUIDACION",
+                            Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
+                        });
+                    }
+                }
+
+                Debug.WriteLine($"Tiempo generación de Reliquidaciones: {sw.ElapsedMilliseconds} ms");
+                listaFinalDTO.AddRange(listaReliqDTO);
+
+                // OPTIMIZACIÓN CONSERVADORA: Reutilizar datos SIGAF/SADE ya cargados
+                sw.Restart();
+                var expedientesConCertificados = listaFinalDTO
+                    .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago))
+                    .Select(c => c.ExpedientePago)
+                    .Distinct()
+                    .ToList();
+
+                // PASAMOS los datos ya cargados para evitar reconsultas
+                var resultado = CalcularCertificadosPorExpedientes(
+                    expedientesConCertificados,
+                    listaFinalDTO,
+                    false,
+                    datosSigaf,  // Reutilizar datos ya cargados
+                    datosSade);  // Reutilizar datos ya cargados
+                Debug.WriteLine($"Tiempo CalcularCertificadosPorExpedientes OPTIMIZADO: {sw.ElapsedMilliseconds} ms");
+
+                swTotal.Stop();
+                Debug.WriteLine($"Tiempo total ListarCertificadosYReliquidaciones OPTIMIZADO: {swTotal.ElapsedMilliseconds} ms");
+
+                Debug.WriteLine($"Cantidad de listaFinalDTO: {listaFinalDTO.Count}");
+
+
+
+                return resultado;
             }
         }
 
@@ -1585,9 +1552,9 @@ namespace Negocio
                         .AsQueryable();
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         queryAutorizantes = queryAutorizantes.Where(a => a.Obra.AreaId.HasValue && filtroAreaIds.Contains(a.Obra.AreaId.Value));
                     }
 
@@ -1609,9 +1576,9 @@ namespace Negocio
                         .AsQueryable();
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.AreaId.HasValue && filtroAreaIds.Contains(r.Autorizante.Obra.AreaId.Value));
                     }
 
@@ -1840,9 +1807,9 @@ namespace Negocio
                     int totalAutorizantes;
                     int totalRedeterminaciones;
 
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         var obrasDelArea = context.Obras.AsNoTracking()
                             .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                             .Select(o => o.Id)
@@ -1905,9 +1872,9 @@ namespace Negocio
                         List<AutorizanteEF> autorizantes;
 
 
-                        if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                        if (usuario != null && !usuario.Tipo)
                         {
-                            var filtroAreaIds = usuario.IvcAreaIds;
+                            var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                             var obrasDelArea = context.Obras.AsNoTracking()
                                 .Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value))
                                 .Select(o => o.Id)
@@ -2013,9 +1980,9 @@ namespace Negocio
                             .AsQueryable();
 
                         // Aplicar filtro por área si el usuario lo tiene
-                        if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                        if (usuario != null && !usuario.Tipo)
                         {
-                            var filtroAreaIds = usuario.IvcAreaIds;
+                            var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                             queryRedeterminaciones = queryRedeterminaciones.Where(r => r.Autorizante.Obra.AreaId.HasValue && filtroAreaIds.Contains(r.Autorizante.Obra.AreaId.Value));
                         }
 
@@ -2568,9 +2535,9 @@ namespace Negocio
                                 select new { cert, auth, obra, area, barrio, empresa, tipoPago };
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         query = query.Where(x => x.obra.AreaId.HasValue && filtroAreaIds.Contains(x.obra.AreaId.Value));
                     }
 
@@ -2645,9 +2612,9 @@ namespace Negocio
                                 select new { cert, obra };
 
                     // Aplicar filtro por área si el usuario lo tiene
-                    if (usuario != null && !usuario.Tipo && usuario.IvcAreaIds != null && usuario.IvcAreaIds.Count > 0)
+                    if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
                         query = query.Where(x => x.obra.AreaId.HasValue && filtroAreaIds.Contains(x.obra.AreaId.Value));
                     }
 

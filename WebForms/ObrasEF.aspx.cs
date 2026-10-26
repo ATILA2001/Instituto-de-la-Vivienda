@@ -357,6 +357,12 @@ namespace WebForms
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             if (!Page.IsValid)
             {
                 // Mostrar errores de validación para ayudar al debugg
@@ -537,6 +543,13 @@ namespace WebForms
 
         protected void dgvObra_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);

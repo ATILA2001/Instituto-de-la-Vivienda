@@ -242,6 +242,12 @@ namespace WebForms
         // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarFormulacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             if (!Page.IsValid) return;
 
             try
@@ -384,6 +390,13 @@ namespace WebForms
 
         protected void dgvFormulacion_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarFormulacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 int obraId = Convert.ToInt32(dgvFormulacion.DataKeys[e.RowIndex].Value);

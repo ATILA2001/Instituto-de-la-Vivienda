@@ -8,7 +8,7 @@ using System.Configuration;
 
 namespace Negocio
 {
-    public class AccesoDatos
+    public class AccesoDatos : IDisposable
     {
 
         private SqlConnection conexion;
@@ -27,7 +27,6 @@ namespace Negocio
             var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringTest"].ConnectionString; // TEST.
             //var connectionString = ConfigurationManager.ConnectionStrings["ConnectionStringProd"].ConnectionString; // PRODUCCION.
 
-            Console.WriteLine(connectionString);
             conexion = new SqlConnection(connectionString);
             comando = new SqlCommand();
         }
@@ -58,13 +57,30 @@ namespace Negocio
             conexion.Open();
             lector = comando.ExecuteReader();
         }
+        /// <summary>
+        /// Cierra el lector (si lo hay) y la conexión, haya o no lector abierto.
+        /// Antes sólo se cerraba la conexión cuando existía un lector, por lo que
+        /// ejecutarAccion/ejecutarAccionScalar dejaban la conexión abierta hasta el GC
+        /// y bajo carga se agotaba el pool de conexiones.
+        /// </summary>
         public void cerrarConexion()
         {
             if (lector != null)
             {
                 lector.Close();
+                lector = null;
+            }
+            if (conexion != null && conexion.State != System.Data.ConnectionState.Closed)
+            {
                 conexion.Close();
             }
+        }
+
+        public void Dispose()
+        {
+            cerrarConexion();
+            comando?.Dispose();
+            conexion?.Dispose();
         }
         public void ejecutarAccion()
         {

@@ -684,10 +684,11 @@ INNER JOIN (
         /// </summary>
         public static UsuarioEF GetFullCurrentUser()
         {
-            // Implementar según la lógica de sesión del sistema
-            if (HttpContext.Current?.Session["Usuario"] != null)
+            // Siempre pasar por EnsureSessionUserFromClaims: valida que el usuario cacheado en
+            // Session corresponda al principal autenticado actual antes de devolverlo.
+            var userEntity = EnsureSessionUserFromClaims();
+            if (userEntity != null)
             {
-                var userEntity = (UsuarioEF)HttpContext.Current.Session["Usuario"];
                 return new UsuarioEF
                 {
                     Id = userEntity.Id,
@@ -703,12 +704,6 @@ INNER JOIN (
                 };
             }
 
-            var claimsUser = EnsureSessionUserFromClaims();
-            if (claimsUser != null)
-            {
-                return claimsUser;
-            }
-
             // Si no hay usuario en sesión, devolver un usuario por defecto sin área
             return new UsuarioEF
             {
@@ -722,7 +717,19 @@ INNER JOIN (
         }
 
         /// <summary>
+        /// Clave de Session que guarda el NameIdentifier del principal con el que se construyó Session["Usuario"].
+        /// </summary>
+        private const string SessionUsuarioAuthIdKey = "UsuarioAuthId";
+
+        /// <summary>
         /// Si hay claims autenticados, asegura Session["Usuario"] y devuelve el usuario; si no, devuelve null.
+        ///
+        /// El usuario cacheado sólo se reutiliza si pertenece al mismo principal (NameIdentifier) que
+        /// está autenticado ahora. La sesión ASP.NET (ASP.NET_SessionId) es independiente de la cookie
+        /// compartida de Auth.Web: si otra persona inicia sesión en el mismo navegador, o si el usuario
+        /// vuelve a loguearse tras un cambio de roles/áreas, Session["Usuario"] seguiría teniendo el
+        /// nombre, el flag de administrador y las áreas anteriores. SAI/SAF no tienen este problema
+        /// porque derivan todo del ClaimsPrincipal en cada request.
         /// </summary>
         public static UsuarioEF EnsureSessionUserFromClaims()
         {
@@ -732,15 +739,21 @@ INNER JOIN (
                 return null;
             }
 
-            if (context.Session["Usuario"] is UsuarioEF existing)
-            {
-                return existing;
-            }
-
             var principal = context.User as ClaimsPrincipal;
             if (principal?.Identity?.IsAuthenticated != true)
             {
+                // Sin principal autenticado no se devuelve ningún usuario cacheado.
+                context.Session.Remove("Usuario");
+                context.Session.Remove(SessionUsuarioAuthIdKey);
                 return null;
+            }
+
+            var currentAuthId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            if (context.Session["Usuario"] is UsuarioEF existing
+                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, currentAuthId, StringComparison.Ordinal))
+            {
+                return existing;
             }
 
             var built = BuildUserFromClaims(principal);
@@ -750,6 +763,7 @@ INNER JOIN (
             }
 
             context.Session["Usuario"] = built;
+            context.Session[SessionUsuarioAuthIdKey] = currentAuthId;
             return built;
         }
 
@@ -837,10 +851,12 @@ INNER JOIN (
                 }
                 catch (Exception dbEx)
                 {
-                    // Si falla la DB, construimos un usuario parcial sin área resuelta.
-                    // El usuario verá grillas vacías sin mensaje de error — loguear para diagnóstico.
+                    // Si falla la DB no se construye un usuario parcial: quedaría cacheado en Session
+                    // durante toda la sesión sin áreas resueltas (y antes, al no filtrar por lista vacía,
+                    // veía datos de todas las áreas). Se propaga para que Application_Error muestre el error.
                     Trace.TraceError("[BuildUserFromClaims] Error resolviendo áreas IVC desde DB. AuthAreaIds=[{0}]. Ex: {1}",
                         string.Join(",", authAreaIds), dbEx);
+                    throw new InvalidOperationException("No se pudo resolver el usuario actual contra la base de datos de IVC.", dbEx);
                 }
             }
 
@@ -879,6 +895,58 @@ INNER JOIN (
             if (user.Tipo) return false;
             if (user.IvcAreaIds == null || user.IvcAreaIds.Count == 0) return false;
             return user.IvcAreaIds.Contains(ivcAreaId);
+        }
+
+        /// <summary>
+        /// Lista de áreas IVC con la que debe filtrarse la data de un usuario no administrador.
+        /// Nunca devuelve null: un usuario sin áreas resueltas obtiene una lista vacía y, por lo
+        /// tanto, ninguna fila (fail-closed, igual que Auth.Web cuando el usuario no tiene áreas).
+        /// </summary>
+        public static List<int> AreaIdsParaFiltro(UsuarioEF usuario)
+        {
+            return usuario?.IvcAreaIds ?? new List<int>();
+        }
+
+        // Reglas de edición. Son las mismas que usan Site.Master y OnPreRender de las páginas para
+        // ocultar botones y columnas; se repiten acá para verificarlas también en los handlers de
+        // postback, porque ocultar un control no impide que el postback llegue (patrón de SAF).
+
+        /// <summary>
+        /// Puede dar de alta/modificar/eliminar en el módulo de planificación
+        /// (Obras, Autorizantes, Certificados, Legítimos): administrador, o usuario normal que no sea
+        /// de Redeterminaciones ni Secretaría con la planificación abierta (global o por override).
+        /// </summary>
+        public static bool PuedeModificarPlanificacion()
+        {
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
+            return user.Tipo || ABMPlaniNegocio.GetIsPlanningOpen() || user.IsPlanningOpenOverride;
+        }
+
+        /// <summary>
+        /// Puede modificar en Formulación: administrador, o usuario normal que no sea de
+        /// Redeterminaciones ni Secretaría con la formulación abierta.
+        /// </summary>
+        public static bool PuedeModificarFormulacion()
+        {
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (user.Tipo) return true;
+            if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
+            return ABMPlaniNegocio.GetIsFormulationOpen();
+        }
+
+        /// <summary>
+        /// Puede modificar en la página de Redeterminaciones: cualquier usuario con acceso a la página
+        /// salvo Secretaría (área de sólo lectura).
+        /// </summary>
+        public static bool PuedeModificarRedeterminaciones()
+        {
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (user.Tipo) return true;
+            return !IsUserInArea(Dominio.IvcAreaIds.Secretaria);
         }
 
     }
