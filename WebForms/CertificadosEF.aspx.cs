@@ -357,6 +357,12 @@ namespace WebForms
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             if (!Page.IsValid) return;
 
             try
@@ -634,6 +640,13 @@ namespace WebForms
 
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 var id = Convert.ToInt32(gridviewRegistros.DataKeys[e.RowIndex].Value);
@@ -812,6 +825,13 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                CargarPaginaActual();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -979,6 +999,13 @@ namespace WebForms
 
         protected void txtMontoInline_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                CargarPaginaActual();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -989,9 +1016,11 @@ namespace WebForms
 
                 if (string.IsNullOrWhiteSpace(nuevoValorStr)) return;
 
-                if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal nuevoMonto))
+                if (!MontoHelper.TryParseEsAr(nuevoValorStr, out decimal nuevoMonto))
                 {
-                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
+                    // Volver a bindear para que el textbox muestre el valor guardado y no el texto rechazado
+                    CargarPaginaActual();
                     return;
                 }
 
@@ -1299,6 +1328,13 @@ namespace WebForms
 
         protected void txtPorcEjecFisicaInline_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                CargarPaginaActual();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -1336,6 +1372,7 @@ namespace WebForms
                         System.Globalization.CultureInfo.InvariantCulture, out decimal parsed))
                     {
                         ToastService.Show(this.Page, "Error: El porcentaje ingresado no es válido.", ToastService.ToastType.Error);
+                        CargarPaginaActual();
                         return;
                     }
                     nuevoPorcentaje = parsed;

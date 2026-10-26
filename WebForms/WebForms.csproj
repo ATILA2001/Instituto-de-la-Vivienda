@@ -577,6 +577,8 @@
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <None Include="connectionStrings.example.config" />
+    <None Include="SharedCookie.example.config" />
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

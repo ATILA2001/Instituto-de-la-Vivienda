@@ -202,6 +202,13 @@ namespace WebForms
             }
         }
 
+        /// <summary>
+        /// Normaliza el returnUrl a una ruta local de esta aplicación.
+        /// Sólo se aceptan rutas relativas ("/x", "~/x" o "x"); cualquier URL absoluta o
+        /// protocol-relative ("//host") se descarta y se redirige a "/". El salto entre
+        /// aplicaciones lo resuelve Auth.Web (allowlist por cliente y /connect/switch-app),
+        /// no esta página. Misma regla que LogoutRedirectHelper.IsSafeLocalUrl en Auth.Web.
+        /// </summary>
         private static string NormalizeRedirectUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -210,9 +217,12 @@ namespace WebForms
             }
 
             var trimmed = url.Trim();
-            if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
+            if (Uri.TryCreate(trimmed, UriKind.Absolute, out _)
+                || trimmed.StartsWith("//", StringComparison.Ordinal)
+                || trimmed.StartsWith("/\\", StringComparison.Ordinal)
+                || trimmed.StartsWith("\\", StringComparison.Ordinal))
             {
-                return absolute.ToString();
+                return "/";
             }
 
             if (trimmed.StartsWith("~/", StringComparison.Ordinal))

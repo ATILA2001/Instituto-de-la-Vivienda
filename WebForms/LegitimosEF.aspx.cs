@@ -68,6 +68,12 @@ namespace WebForms
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             if (!Page.IsValid)
                 return;
             try
@@ -83,11 +89,28 @@ namespace WebForms
                     MesAprobacion = string.IsNullOrWhiteSpace(txtMesAprobacion.Text) ? (DateTime?)null : DateTime.Parse(txtMesAprobacion.Text),
                 };
 
-                // Si hay un id en sesión, es edición
+                // Si hay un id en sesión, es edición: se modifica la entidad cargada de la base,
+                // copiando sólo los campos del formulario. Modificar() marca toda la entidad como
+                // Modified, así que guardar el objeto nuevo pondría en NULL las columnas que el
+                // formulario no edita (PORC_EJEC_FISICA).
                 if (Session["EditingLegitimoEFId"] != null)
                 {
-                    legitimo.Id = (int)Session["EditingLegitimoEFId"];
-                    negocio.Modificar(legitimo);
+                    var entidad = negocio.ObtenerPorId((int)Session["EditingLegitimoEFId"]);
+                    if (entidad == null)
+                    {
+                        ToastService.Show(this.Page, "Error: No se encontró el legítimo a modificar.", ToastService.ToastType.Error);
+                        return;
+                    }
+
+                    entidad.ObraId = legitimo.ObraId;
+                    entidad.CodigoAutorizante = legitimo.CodigoAutorizante;
+                    entidad.Expediente = legitimo.Expediente;
+                    entidad.InicioEjecucion = legitimo.InicioEjecucion;
+                    entidad.FinEjecucion = legitimo.FinEjecucion;
+                    entidad.Certificado = legitimo.Certificado;
+                    entidad.MesAprobacion = legitimo.MesAprobacion;
+
+                    negocio.Modificar(entidad);
                     ToastService.Show(this.Page, "Legítimo modificado exitosamente.", ToastService.ToastType.Success);
                 }
                 else
@@ -157,6 +180,13 @@ namespace WebForms
 
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
             if (key == null)
             {
@@ -670,6 +700,13 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                CargarPaginaActual();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -768,6 +805,13 @@ namespace WebForms
 
         protected void txtCertificadoInline_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                CargarPaginaActual();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -778,9 +822,11 @@ namespace WebForms
 
                 if (string.IsNullOrWhiteSpace(nuevoValorStr)) return;
 
-                if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out decimal nuevoCertificado))
+                if (!MontoHelper.TryParseEsAr(nuevoValorStr, out decimal nuevoCertificado))
                 {
-                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
+                    // Volver a bindear para que el textbox muestre el valor guardado y no el texto rechazado
+                    CargarPaginaActual();
                     return;
                 }
 

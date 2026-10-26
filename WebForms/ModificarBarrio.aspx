@@ -4,9 +4,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
  <h1 class="text-center p-2">Modificar Barrio</h1>
 
- <asp:ScriptManager ID="ScriptManager1" runat="server" />
-
-
  <div class="container-fluid" style="max-width: 50%;">
      <div class="card mb-2">
          <div class="card-body">

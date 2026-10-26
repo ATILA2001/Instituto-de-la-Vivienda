@@ -24,13 +24,9 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
-            // Comprobación básica de usuario logueado
-            if (Session["Usuario"] == null)
-            {
-                UserHelper.EnsureSessionUserFromClaims();
-            }
-
-            if (Session["Usuario"] == null)
+            // Comprobación básica de usuario logueado. Siempre pasa por EnsureSessionUserFromClaims,
+            // que descarta el usuario cacheado en Session si no corresponde al principal actual.
+            if (UserHelper.EnsureSessionUserFromClaims() == null)
             {
                 Response.Redirect("Startup.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();

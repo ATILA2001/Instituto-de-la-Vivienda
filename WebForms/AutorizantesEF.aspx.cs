@@ -307,7 +307,10 @@ namespace WebForms
         /// </summary>
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            // Reiniciar a la primera página al aplicar filtros
+            // Reiniciar a la primera página al aplicar filtros. BindGrid pagina con _currentPageIndex
+            // (restaurado desde ViewState), así que no alcanza con resetear el control de paginación.
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
@@ -333,7 +336,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
             TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-            // Reiniciar a la primera página
+            // Reiniciar a la primera página (ver btnFiltrar_Click)
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
@@ -407,6 +412,12 @@ namespace WebForms
         /// </summary>
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
@@ -466,6 +477,12 @@ namespace WebForms
 
         protected void btnEditar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
@@ -1098,6 +1115,13 @@ namespace WebForms
 
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 if (gridviewRegistros.DataKeys == null || gridviewRegistros.DataKeys.Count <= e.RowIndex)
@@ -1152,6 +1176,13 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -1229,6 +1260,13 @@ namespace WebForms
 
         protected void ddlEstadoAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             DropDownList ddlEstadoAutorizante = (DropDownList)sender;
             GridViewRow row = (GridViewRow)ddlEstadoAutorizante.NamingContainer;
 
@@ -1301,17 +1339,19 @@ namespace WebForms
                     return;
                 }
 
-                // Ejecutar la actualización: preferir métodos por Id si existen
-                bool actualizado = false;
-                // Si es una redeterminación (IdRedeterminacion > 0) y existe negocio para redeterminaciones por Id
+                // Las filas de redeterminación muestran un estado general derivado de su etapa
+                // (ESTADOS_REDET). El combo de esta grilla lista ESTADOS_AUTORIZANTES, así que su
+                // valor no puede escribirse en REDETERMINACIONES.ETAPA (FK a otra tabla).
                 if (autorizanteDTO.IdRedeterminacion > 0)
                 {
-                    // Utilizar RedeterminacionNegocio para actualizar por Id
-                    var redNeg = new RedeterminacionNegocio();
-                    var red = new Dominio.Redeterminacion { Id = autorizanteDTO.IdRedeterminacion, Etapa = new Dominio.EstadoRedet { Id = nuevoEstadoId } };
-                    actualizado = redNeg.ActualizarEstado(red);
+                    ToastService.Show(this.Page, "La etapa de una redeterminación se modifica desde la página Redeterminaciones.", ToastService.ToastType.Warning);
+                    BindGrid();
+                    return;
                 }
-                else if (autorizanteDTO.Id > 0)
+
+                // Ejecutar la actualización: preferir métodos por Id si existen
+                bool actualizado = false;
+                if (autorizanteDTO.Id > 0)
                 {
                     // Autorizante normal: usar AutorizanteNegocioEF.ObtenerPorId + Modificar o crear método especializado
                     var authNeg = new AutorizanteNegocioEF();
