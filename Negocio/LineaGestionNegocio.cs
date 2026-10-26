@@ -37,7 +37,7 @@ namespace Negocio
 
                 return dt;
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
@@ -71,7 +71,7 @@ namespace Negocio
 
                 return lista;
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
@@ -101,7 +101,7 @@ namespace Negocio
                 // Ejecutar la inserción
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch
             {
                 throw; // Lanza la excepción si ocurre algún error
             }

@@ -65,23 +65,19 @@ namespace Negocio
         // Aprobado = 12, 22, 33, 39
         // En tramite todos los demas
 
-        private readonly int[] idsDesestimado = { 35, 36 }; // Rechazada, Fuera de Plazo
-        private readonly int[] idsNoIniciado = { 37, 38 }; // Pendiente, No presentada
-        private readonly int[] idsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
-        // Estado = new EstadoAutorizante { Id = redet.Etapa.Id, Nombre = redet.Etapa.Nombre }, /////////////////////////////////////////////////////////////////////////////////
-        private EstadoAutorizante MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
+        private EstadoAutorizanteEF MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
         {
-            if (idsDesestimado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizante { Id = 3, Nombre = "DESESTIMADO" };
+            if (IdsDesestimado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizanteEF { Id = 3, Nombre = "DESESTIMADO" };
 
-            if (idsNoIniciado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizante { Id = 4, Nombre = "NO INICIADO" };
+            if (IdsNoIniciado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizanteEF { Id = 4, Nombre = "NO INICIADO" };
 
-            if (idsAprobado.Contains(redet.Etapa.Id))
-                return new EstadoAutorizante { Id = 1, Nombre = "APROBADO" };
+            if (IdsAprobado.Contains(redet.Etapa.Id))
+                return new EstadoAutorizanteEF { Id = 1, Nombre = "APROBADO" };
 
-            return new EstadoAutorizante { Id = 2, Nombre = "EN TRAMITE" };
+            return new EstadoAutorizanteEF { Id = 2, Nombre = "EN TRAMITE" };
         }
 
 
@@ -1050,7 +1046,7 @@ namespace Negocio
         /// no acumula en las siguientes y no genera reliquidaciones. Las que están en trámite se calculan normalmente.
         /// </summary>
         private bool EsDesestimada(RedeterminacionEF redet) =>
-            redet.EstadoRedetEFId.HasValue && idsDesestimado.Contains(redet.EstadoRedetEFId.Value);
+            redet.EstadoRedetEFId.HasValue && IdsDesestimado.Contains(redet.EstadoRedetEFId.Value);
 
         /// <summary>
         /// Calcula MontoRedet de cada redeterminación (Pasos A, B y C de Docs/calculo-redeterminaciones.html)
