@@ -334,6 +334,13 @@ namespace WebForms
         }
         protected void dgvRedeterminacion_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarRedeterminaciones())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 var id = Convert.ToInt32(dgvRedeterminacion.DataKeys[e.RowIndex].Value);
@@ -360,8 +367,29 @@ namespace WebForms
             return ctl?.SelectedValues ?? new List<string>();
         }
 
+        /// <summary>
+        /// Convierte el porcentaje ingresado (formato es-AR, coma decimal) o devuelve null si está vacío.
+        /// Lanza InvalidOperationException ante un formato ambiguo (ej. "12.5") en vez de guardar 125.
+        /// </summary>
+        private static decimal? ParsearPorcentaje(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+                return null;
+
+            if (!MontoHelper.TryParseEsAr(texto, out decimal valor))
+                throw new InvalidOperationException("El porcentaje no es válido. Use coma para los decimales (ej.: 12,5).");
+
+            return valor;
+        }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarRedeterminaciones())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             if (!Page.IsValid) return;
 
             try
@@ -392,7 +420,7 @@ namespace WebForms
                     redetExistente.Tipo = txtTipo.Text.Trim();
                     redetExistente.EstadoRedetEFId = int.Parse(ddlEtapa.SelectedValue);
                     redetExistente.Observaciones = txtObservacion.Text.Trim();
-                    redetExistente.Porcentaje = string.IsNullOrWhiteSpace(txtPorcentaje.Text) ? (decimal?)null : decimal.Parse(txtPorcentaje.Text);
+                    redetExistente.Porcentaje = ParsearPorcentaje(txtPorcentaje.Text);
 
 
                     if (redeterminacionNegocio.Modificar(redetExistente))
@@ -422,7 +450,7 @@ namespace WebForms
                     redetNueva.Tipo = txtTipo.Text.Trim();
                     redetNueva.EstadoRedetEFId = int.Parse(ddlEtapa.SelectedValue);
                     redetNueva.Observaciones = txtObservacion.Text.Trim();
-                    redetNueva.Porcentaje = string.IsNullOrWhiteSpace(txtPorcentaje.Text) ? (decimal?)null : decimal.Parse(txtPorcentaje.Text);
+                    redetNueva.Porcentaje = ParsearPorcentaje(txtPorcentaje.Text);
 
                     redetNueva.CodigoAutorizante = new AutorizanteNegocioEF().ObtenerPorId(int.Parse(ddlAutorizante.SelectedValue)).CodigoAutorizante;
 
@@ -826,6 +854,13 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarRedeterminaciones())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             TextBox txt = (TextBox)sender;
             GridViewRow row = (GridViewRow)txt.NamingContainer;
 
@@ -904,6 +939,13 @@ namespace WebForms
 
         protected void ddlEtapas_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarRedeterminaciones())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             try
             {
                 var ddlEtapas = (DropDownList)sender;
@@ -927,6 +969,13 @@ namespace WebForms
 
         protected void ddlUsuario_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarRedeterminaciones())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             try
             {
                 var ddlUsuario = (DropDownList)sender;

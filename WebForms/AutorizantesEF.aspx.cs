@@ -307,7 +307,10 @@ namespace WebForms
         /// </summary>
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
-            // Reiniciar a la primera página al aplicar filtros
+            // Reiniciar a la primera página al aplicar filtros. BindGrid pagina con _currentPageIndex
+            // (restaurado desde ViewState), así que no alcanza con resetear el control de paginación.
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
@@ -333,7 +336,9 @@ namespace WebForms
         {
             txtBuscar.Text = string.Empty;
             TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-            // Reiniciar a la primera página
+            // Reiniciar a la primera página (ver btnFiltrar_Click)
+            _currentPageIndex = 0;
+            ViewState["CurrentPageIndex"] = _currentPageIndex;
             if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
             {
                 paginationControl.CurrentPageIndex = 0;
@@ -407,6 +412,12 @@ namespace WebForms
         /// </summary>
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
@@ -466,6 +477,12 @@ namespace WebForms
 
         protected void btnEditar_Click(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             // Verificar si la página es válida (todos los validadores pasaron)
             if (!Page.IsValid) return;
 
@@ -601,29 +618,9 @@ namespace WebForms
         #region Filtros y Búsqueda
 
         /// <summary>
-        /// Pobla los filtros TreeViewSearch del header del GridView con datos de BD.
-        /// 
-        /// FILTROS CONFIGURADOS:
-        /// - Área, Obra, Barrio, Proyecto, Empresa, Contrata: Consultas directas a BD
-        /// - Concepto: Incluye conceptos normales + "REDETERMINACION" especial
-        /// - Estado: Usa CalculoRedeterminacionNegocioEF.ObtenerEstadosParaFiltro()
-        /// - Mes Autorizante: Valores únicos de MesBase de autorizantes existentes
-        /// 
-        /// PATRÓN DE IMPLEMENTACIÓN:
-        /// - Función lambda bindFilter para reutilizar lógica
-        /// - Consultas AsNoTracking() para optimizar performance
-        /// - Ordenamiento alfabético en la mayoría de filtros
-        /// - Manejo especial para conceptos (incluye REDETERMINACION)
-        /// 
-        /// OPTIMIZACIÓN:
-        /// - Single using context para todas las consultas
-        /// - AsNoTracking() evita tracking innecesario de entities
-        /// - Select anónimo para obtener solo campos necesarios
-        /// 
-        /// DEPENDENCIAS:
-        /// - RequierE GridView.HeaderRow != null (llamar después de DataBind)
-        /// - TreeViewSearch controls en template del header
-        /// - CalculoRedeterminacionNegocioEF para estados especiales
+        /// Puebla los TreeViewSearch después del DataBind del GridView.
+        /// Actualmente combina catálogos de BD con valores derivados del snapshot
+        /// completo almacenado en Session["GridDataAutorizantes"].
         /// </summary>
         private void PoblarFiltrosHeader()
         {
@@ -849,43 +846,12 @@ namespace WebForms
         #region Carga de Datos Principal
 
         /// <summary>
-        /// Método central que carga datos paginados de autorizantes y redeterminaciones.
-        /// 
-        /// ARQUITECTURA DE PAGINACIÓN REAL:
-        /// 1. Consulta totalRecords con ContarTotalAutorizantes() (count optimizado)
-        /// 2. Carga solo pageSize registros usando ListarAutorizantesPaginados() 
-        /// 3. Guarda total en ViewState["TotalRecords"] para cálculos de paginación
-        /// 4. Guarda datos de página actual en Session["GridDataAutorizantes"]
-        /// 
-        /// DATOS COMBINADOS:
-        /// - Autorizantes reales de tabla Autorizantes
-        /// - Redeterminaciones calculadas dinámicamente (virtuales)
-        /// - Integración de datos SADE y SIGAF
-        /// - Estados mapeados según lógica de negocio
-        /// 
-        /// OPTIMIZACIONES IMPLEMENTADAS:
-        /// - Paginación en BD (no carga todos los registros)
-        /// - Variables externas currentPageIndex y pageSize
-        /// - Consulta de conteo separada (más eficiente)
-        /// - Session para evitar recálculos en filtros locales
-        /// 
-        /// FLUJO POST-CARGA:
-        /// 1. DataBind() al GridView con datos paginados
-        /// 2. PoblarFiltrosHeader() para filtros TreeViewSearch
-        /// 3. CalcularSubtotal() para totales de montos
-        /// 
-        /// DEPENDENCIAS:
-        /// - CalculoRedeterminacionNegocioEF para datos combinados
-        /// - Variables currentPageIndex, pageSize (paginación externa)
-        /// 
-        /// DIFERENCIAS CON OTROS MÓDULOS:
-        /// - Otros módulos cargan todo en memoria y paginan en cliente
-        /// - Este módulo pagina en servidor para manejar grandes volúmenes
-        /// - Session contiene solo datos de página actual (no todo el dataset)
+        /// Carga o reutiliza el snapshot completo de autorizantes y redeterminaciones.
+        /// La consolidación costosa se ejecuta solo cuando la caché no existe o fue
+        /// invalidada. BindGrid aplica filtros en memoria y pagina el resultado.
         /// </summary>
         private void CargarListaAutorizantesRedet()
         {
-            //ólo asegura cache completo y delega paginación/filtrado a BindGrid()
             try
             {
                 List<AutorizanteDTO> todos;
@@ -919,7 +885,10 @@ namespace WebForms
             ConfigurarPaginationControl();
         }
 
-        // Refresca grid desde cache aplicando filtros y paginación basada en currentPageIndex/pageSize
+        /// <summary>
+        /// Filtra el snapshot completo en memoria, obtiene la página visible y
+        /// actualiza el GridView, sus filtros y el control de paginación.
+        /// </summary>
         private void BindGrid()
         {
             if (Session["GridDataAutorizantes"] == null) return;
@@ -962,8 +931,7 @@ namespace WebForms
         }
 
         /// <summary>
-        /// Método para vincular datos paginados directamente al GridView
-        /// No aplica filtros en memoria ya que los datos vienen paginados de la base
+        /// Aplica los filtros TreeViewSearch sobre el snapshot recibido.
         /// </summary>
         private List<AutorizanteDTO> AplicarFiltrosTreeViewEnMemoria(List<AutorizanteDTO> autorizantes)
         {
@@ -1147,6 +1115,13 @@ namespace WebForms
 
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                e.Cancel = true;
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                return;
+            }
+
             try
             {
                 if (gridviewRegistros.DataKeys == null || gridviewRegistros.DataKeys.Count <= e.RowIndex)
@@ -1201,6 +1176,13 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             TextBox txtBox = (TextBox)sender;
             GridViewRow row = (GridViewRow)txtBox.NamingContainer;
 
@@ -1278,6 +1260,13 @@ namespace WebForms
 
         protected void ddlEstadoAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!UserHelper.PuedeModificarPlanificacion())
+            {
+                ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
+                BindGrid();
+                return;
+            }
+
             DropDownList ddlEstadoAutorizante = (DropDownList)sender;
             GridViewRow row = (GridViewRow)ddlEstadoAutorizante.NamingContainer;
 
@@ -1350,17 +1339,19 @@ namespace WebForms
                     return;
                 }
 
-                // Ejecutar la actualización: preferir métodos por Id si existen
-                bool actualizado = false;
-                // Si es una redeterminación (IdRedeterminacion > 0) y existe negocio para redeterminaciones por Id
+                // Las filas de redeterminación muestran un estado general derivado de su etapa
+                // (ESTADOS_REDET). El combo de esta grilla lista ESTADOS_AUTORIZANTES, así que su
+                // valor no puede escribirse en REDETERMINACIONES.ETAPA (FK a otra tabla).
                 if (autorizanteDTO.IdRedeterminacion > 0)
                 {
-                    // Utilizar RedeterminacionNegocio para actualizar por Id
-                    var redNeg = new RedeterminacionNegocio();
-                    var red = new Dominio.Redeterminacion { Id = autorizanteDTO.IdRedeterminacion, Etapa = new Dominio.EstadoRedet { Id = nuevoEstadoId } };
-                    actualizado = redNeg.ActualizarEstado(red);
+                    ToastService.Show(this.Page, "La etapa de una redeterminación se modifica desde la página Redeterminaciones.", ToastService.ToastType.Warning);
+                    BindGrid();
+                    return;
                 }
-                else if (autorizanteDTO.Id > 0)
+
+                // Ejecutar la actualización: preferir métodos por Id si existen
+                bool actualizado = false;
+                if (autorizanteDTO.Id > 0)
                 {
                     // Autorizante normal: usar AutorizanteNegocioEF.ObtenerPorId + Modificar o crear método especializado
                     var authNeg = new AutorizanteNegocioEF();

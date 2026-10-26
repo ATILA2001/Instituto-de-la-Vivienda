@@ -204,239 +204,6 @@ namespace Negocio
     }
 
     /// <summary>
-    /// Clase estática para almacenar y compartir datos entre diferentes servicios
-    /// </summary>
-    public static class DatosCompartidosHelper
-    {
-        // Lista de certificados (incluyendo redeterminaciones) en memoria
-        private static List<CertificadoDTO> _certificadosEnMemoria = new List<CertificadoDTO>();
-
-        // Lista de legítimos abonos en memoria
-        private static List<Legitimo> _legitimosEnMemoria = new List<Legitimo>();
-
-        // Indica si los certificados ya fueron cargados
-        private static bool _certificadosCargados = false;
-
-        // Indica si los legítimos ya fueron cargados
-        private static bool _legitimosCargados = false;
-
-        /// <summary>
-        /// Establece la lista de certificados compartidos
-        /// </summary>
-        public static void SetCertificados(List<CertificadoDTO> certificados)
-        {
-            _certificadosEnMemoria = certificados ?? new List<CertificadoDTO>();
-            _certificadosCargados = true;
-        }
-
-        /// <summary>
-        /// Establece la lista de legítimos abonos compartidos
-        /// </summary>
-        public static void SetLegitimos(List<Legitimo> legitimos)
-        {
-            _legitimosEnMemoria = legitimos ?? new List<Legitimo>();
-            _legitimosCargados = true;
-        }
-
-        /// <summary>
-        /// Obtiene los certificados compartidos
-        /// </summary>
-        public static List<CertificadoDTO> GetCertificados()
-        {
-            return _certificadosEnMemoria;
-        }
-
-        /// <summary>
-        /// Obtiene los legítimos abonos compartidos
-        /// </summary>
-        public static List<Legitimo> GetLegitimos()
-        {
-            return _legitimosEnMemoria;
-        }
-
-        /// <summary>
-        /// Indica si los certificados están cargados
-        /// </summary>
-        public static bool CertificadosCargados => _certificadosCargados;
-
-        /// <summary>
-        /// Indica si los legítimos están cargados
-        /// </summary>
-        public static bool LegitimosCargados => _legitimosCargados;
-
-        /// <summary>
-        /// Limpia todos los datos compartidos
-        /// </summary>
-        public static void LimpiarDatos()
-        {
-            _certificadosEnMemoria.Clear();
-            _legitimosEnMemoria.Clear();
-            _certificadosCargados = false;
-            _legitimosCargados = false;
-        }
-    }
-
-
-    /// <summary>
-    /// Clase helper para cálculos relacionados con SIGAF
-    /// </summary>
-    public static class SIGAFHelper
-    {
-        /// <summary>
-        /// Calcula el valor SIGAF para un expediente y monto específicos
-        /// </summary>
-        /// <param name="expediente">Número de expediente</param>
-        /// <param name="montoActual">Monto del certificado actual</param>
-        /// <param name="todosLosMontos">Lista de todos los montos asociados al mismo expediente</param>
-        /// <returns>Valor SIGAF calculado o null si no es posible calcularlo</returns>
-        /// 
-        /// <summary>
-        /// Calcula el SIGAF considerando certificados y legítimos abonos de memoria
-        /// </summary>
-        public static decimal? CalcularSIGAFCompartido(string expediente, decimal montoActual)
-        {
-            if (string.IsNullOrEmpty(expediente))
-                return null;
-
-            try
-            {
-                // Obtener total de devengados para el expediente
-                decimal totalImporteDevengados = ObtenerTotalImporteDevengados(expediente);
-
-                if (totalImporteDevengados <= 0)
-                    return null;
-
-                // Listas para almacenar todos los montos
-                List<decimal> montosTotal = new List<decimal>();
-
-                // Agregar montos de los certificados si están disponibles
-                if (DatosCompartidosHelper.CertificadosCargados)
-                {
-                    var certificadosMismoExpediente = DatosCompartidosHelper.GetCertificados()
-                        .Where(c => c.ExpedientePago == expediente)
-                        .ToList();
-
-                    montosTotal.AddRange(certificadosMismoExpediente.Select(c => c.MontoTotal));
-                }
-
-                // Si no hay montos en memoria, consultar la base de datos
-                if (montosTotal.Count == 0)
-                {
-                    return CalcularSIGAF(expediente, montoActual, new List<decimal> { montoActual });
-                }
-
-                // Si solo hay un monto (el actual), asignar todo el importe
-                if (montosTotal.Count == 1)
-                    return totalImporteDevengados;
-
-                // Calcular la suma de todos los montos
-                decimal sumaTotalMontos = montosTotal.Sum();
-
-                // Calcular la proporción
-                if (sumaTotalMontos > 0)
-                    return totalImporteDevengados * montoActual / sumaTotalMontos;
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al calcular SIGAF compartido: {ex.Message}");
-                return null;
-            }
-        }
-        public static decimal? CalcularSIGAF(string expediente, decimal montoActual, List<decimal> todosLosMontos)
-        {
-            if (string.IsNullOrEmpty(expediente))
-                return null;
-
-            try
-            {
-                // Obtener importe total de devengados para este expediente
-                decimal totalImporteDevengados = ObtenerTotalImporteDevengados(expediente);
-
-                // Si no hay importe devengado, no hay SIGAF
-                if (totalImporteDevengados <= 0)
-                    return null;
-
-                // Si solo hay un monto, asignar todo el importe
-                if (todosLosMontos.Count == 1)
-                    return totalImporteDevengados;
-
-                // Calcular la suma total de los montos
-                decimal montoTotalCertificados = todosLosMontos.Sum();
-
-                // Si hay más de un monto y la suma total es mayor que cero, calcular la proporción
-                if (montoTotalCertificados > 0)
-                    return totalImporteDevengados * montoActual / montoTotalCertificados;
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al calcular SIGAF: {ex.Message}");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Método para obtener el total de importes devengados para un expediente
-        /// </summary>
-        /// <param name="expediente">Número de expediente</param>
-        /// <returns>Total de importes devengados</returns>
-        public static decimal ObtenerTotalImporteDevengados(string expediente)
-        {
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                datos.setearConsulta("SELECT SUM(IMPORTE_PP) AS TotalImporte FROM DEVENGADOS WHERE EE_FINANCIERA = @EXPEDIENTE");
-                datos.agregarParametro("@EXPEDIENTE", expediente);
-                datos.ejecutarLectura();
-
-                decimal totalImporte = 0;
-                if (datos.Lector.Read() && datos.Lector["TotalImporte"] != DBNull.Value)
-                {
-                    totalImporte = Convert.ToDecimal(datos.Lector["TotalImporte"]);
-                }
-
-                return totalImporte;
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-        }
-
-        /// <summary>
-        /// Determina el estado de un expediente basado en si existe y si tiene registros en DEVENGADOS
-        /// </summary>
-        /// <param name="expediente">Número de expediente</param>
-        /// <returns>Estado del expediente (NO INICIADO, EN TRAMITE, DEVENGADO)</returns>
-        public static string DeterminarEstadoExpediente(string expediente)
-        {
-            if (string.IsNullOrWhiteSpace(expediente))
-                return "NO INICIADO";
-
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                datos.setearConsulta("SELECT 1 FROM DEVENGADOS WHERE EE_FINANCIERA = @EXPEDIENTE");
-                datos.agregarParametro("@EXPEDIENTE", expediente);
-                datos.ejecutarLectura();
-
-                if (datos.Lector.Read())
-                    return "DEVENGADO";
-                else
-                    return "EN TRAMITE";
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-        }
-    }
-
-
-    /// <summary>
     /// Clase helper para información relacionada con SADE (Sistema de Administración de Documentos Electrónicos)
     /// </summary>
     public static class SADEHelper
@@ -490,50 +257,6 @@ namespace Negocio
             public string Expediente { get; set; }
             public string Acdir { get; set; }
             public DateTime? Fecha { get; set; }
-        }
-
-        /// <summary>
-        /// Obtiene la información de ACDIR para un expediente específico
-        /// </summary>
-        /// <param name="expediente">Número de expediente</param>
-        /// <returns>Número especial ACDIR (GEDO)</returns>
-        public static string ObtenerInfoACDIR(string expediente)
-        {
-            if (string.IsNullOrEmpty(expediente))
-                return null;
-
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                // Pruebe ambas columnas posibles
-                datos.setearConsulta(@"
-                    SELECT TOP 1 
-                        NRO_ESPECIAL 
-                    FROM GEDO 
-                    WHERE NRO_EXPEDIENTE = @EXPEDIENTE 
-                    COLLATE SQL_Latin1_General_CP1_CI_AS
-                    ORDER BY FECHA_FIRMA DESC");
-
-                datos.agregarParametro("@EXPEDIENTE", expediente);
-                datos.ejecutarLectura();
-
-                if (datos.Lector.Read())
-                {
-                    string acdir = datos.Lector["NRO_ESPECIAL"]?.ToString();
-                    return acdir;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error en ObtenerInfoACDIR: {ex.Message}");
-                return null;
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
         }
 
         /// <summary>
@@ -684,10 +407,11 @@ INNER JOIN (
         /// </summary>
         public static UsuarioEF GetFullCurrentUser()
         {
-            // Implementar según la lógica de sesión del sistema
-            if (HttpContext.Current?.Session["Usuario"] != null)
+            // Siempre pasar por EnsureSessionUserFromClaims: valida que el usuario cacheado en
+            // Session corresponda al principal autenticado actual antes de devolverlo.
+            var userEntity = EnsureSessionUserFromClaims();
+            if (userEntity != null)
             {
-                var userEntity = (UsuarioEF)HttpContext.Current.Session["Usuario"];
                 return new UsuarioEF
                 {
                     Id = userEntity.Id,
@@ -703,12 +427,6 @@ INNER JOIN (
                 };
             }
 
-            var claimsUser = EnsureSessionUserFromClaims();
-            if (claimsUser != null)
-            {
-                return claimsUser;
-            }
-
             // Si no hay usuario en sesión, devolver un usuario por defecto sin área
             return new UsuarioEF
             {
@@ -722,7 +440,19 @@ INNER JOIN (
         }
 
         /// <summary>
+        /// Clave de Session que guarda el NameIdentifier del principal con el que se construyó Session["Usuario"].
+        /// </summary>
+        private const string SessionUsuarioAuthIdKey = "UsuarioAuthId";
+
+        /// <summary>
         /// Si hay claims autenticados, asegura Session["Usuario"] y devuelve el usuario; si no, devuelve null.
+        ///
+        /// El usuario cacheado sólo se reutiliza si pertenece al mismo principal (NameIdentifier) que
+        /// está autenticado ahora. La sesión ASP.NET (ASP.NET_SessionId) es independiente de la cookie
+        /// compartida de Auth.Web: si otra persona inicia sesión en el mismo navegador, o si el usuario
+        /// vuelve a loguearse tras un cambio de roles/áreas, Session["Usuario"] seguiría teniendo el
+        /// nombre, el flag de administrador y las áreas anteriores. SAI/SAF no tienen este problema
+        /// porque derivan todo del ClaimsPrincipal en cada request.
         /// </summary>
         public static UsuarioEF EnsureSessionUserFromClaims()
         {
@@ -732,15 +462,21 @@ INNER JOIN (
                 return null;
             }
 
-            if (context.Session["Usuario"] is UsuarioEF existing)
-            {
-                return existing;
-            }
-
             var principal = context.User as ClaimsPrincipal;
             if (principal?.Identity?.IsAuthenticated != true)
             {
+                // Sin principal autenticado no se devuelve ningún usuario cacheado.
+                context.Session.Remove("Usuario");
+                context.Session.Remove(SessionUsuarioAuthIdKey);
                 return null;
+            }
+
+            var currentAuthId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            if (context.Session["Usuario"] is UsuarioEF existing
+                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, currentAuthId, StringComparison.Ordinal))
+            {
+                return existing;
             }
 
             var built = BuildUserFromClaims(principal);
@@ -750,6 +486,7 @@ INNER JOIN (
             }
 
             context.Session["Usuario"] = built;
+            context.Session[SessionUsuarioAuthIdKey] = currentAuthId;
             return built;
         }
 
@@ -837,10 +574,12 @@ INNER JOIN (
                 }
                 catch (Exception dbEx)
                 {
-                    // Si falla la DB, construimos un usuario parcial sin área resuelta.
-                    // El usuario verá grillas vacías sin mensaje de error — loguear para diagnóstico.
+                    // Si falla la DB no se construye un usuario parcial: quedaría cacheado en Session
+                    // durante toda la sesión sin áreas resueltas (y antes, al no filtrar por lista vacía,
+                    // veía datos de todas las áreas). Se propaga para que Application_Error muestre el error.
                     Trace.TraceError("[BuildUserFromClaims] Error resolviendo áreas IVC desde DB. AuthAreaIds=[{0}]. Ex: {1}",
                         string.Join(",", authAreaIds), dbEx);
+                    throw new InvalidOperationException("No se pudo resolver el usuario actual contra la base de datos de IVC.", dbEx);
                 }
             }
 
@@ -881,74 +620,58 @@ INNER JOIN (
             return user.IvcAreaIds.Contains(ivcAreaId);
         }
 
-    }
-
-    public static class ClaimsPermissionHelper
-    {
-        public static class Actions
+        /// <summary>
+        /// Lista de áreas IVC con la que debe filtrarse la data de un usuario no administrador.
+        /// Nunca devuelve null: un usuario sin áreas resueltas obtiene una lista vacía y, por lo
+        /// tanto, ninguna fila (fail-closed, igual que Auth.Web cuando el usuario no tiene áreas).
+        /// </summary>
+        public static List<int> AreaIdsParaFiltro(UsuarioEF usuario)
         {
-            public const string Add    = "add";
-            public const string Edit   = "edit";
-            public const string Delete = "delete";
+            return usuario?.IvcAreaIds ?? new List<int>();
         }
 
-        public static bool CanDo(string action)
+        // Reglas de edición. Son las mismas que usan Site.Master y OnPreRender de las páginas para
+        // ocultar botones y columnas; se repiten acá para verificarlas también en los handlers de
+        // postback, porque ocultar un control no impide que el postback llegue (patrón de SAF).
+
+        /// <summary>
+        /// Puede dar de alta/modificar/eliminar en el módulo de planificación
+        /// (Obras, Autorizantes, Certificados, Legítimos): administrador, o usuario normal que no sea
+        /// de Redeterminaciones ni Secretaría con la planificación abierta (global o por override).
+        /// </summary>
+        public static bool PuedeModificarPlanificacion()
         {
-            if (string.IsNullOrWhiteSpace(action)) return false;
-            var user = UserHelper.GetFullCurrentUser();
-            if (user?.Tipo == true) return true;
-
-            var principal = HttpContext.Current?.User as ClaimsPrincipal;
-            if (principal?.Identity?.IsAuthenticated != true) return false;
-
-            var permsJson = principal.Claims
-                .FirstOrDefault(c => string.Equals(c.Type, "perms_json", StringComparison.OrdinalIgnoreCase))?.Value;
-
-            var actions = GetActionsForCurrentPage(permsJson);
-            return actions?.Any(a => string.Equals(a, action, StringComparison.OrdinalIgnoreCase)) == true;
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
+            return user.Tipo || ABMPlaniNegocio.GetIsPlanningOpen() || user.IsPlanningOpenOverride;
         }
 
-        private static string[] GetActionsForCurrentPage(string permsJson)
+        /// <summary>
+        /// Puede modificar en Formulación: administrador, o usuario normal que no sea de
+        /// Redeterminaciones ni Secretaría con la formulación abierta.
+        /// </summary>
+        public static bool PuedeModificarFormulacion()
         {
-            if (string.IsNullOrWhiteSpace(permsJson)) return null;
-            try
-            {
-                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var payload = System.Text.Json.JsonSerializer.Deserialize<PermissionsPayload>(permsJson, options);
-                var currentPath = NormalizePath(HttpContext.Current?.Request?.Path);
-                if (string.IsNullOrWhiteSpace(currentPath)) return null;
-                var page = payload?.pages?.FirstOrDefault(p =>
-                    string.Equals(NormalizePath(p.url), currentPath, StringComparison.OrdinalIgnoreCase));
-                return page?.actions;
-            }
-            catch
-            {
-                return null;
-            }
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (user.Tipo) return true;
+            if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
+            return ABMPlaniNegocio.GetIsFormulationOpen();
         }
 
-        private static string NormalizePath(string url)
+        /// <summary>
+        /// Puede modificar en la página de Redeterminaciones: cualquier usuario con acceso a la página
+        /// salvo Secretaría (área de sólo lectura).
+        /// </summary>
+        public static bool PuedeModificarRedeterminaciones()
         {
-            if (string.IsNullOrWhiteSpace(url)) return string.Empty;
-            url = url.Trim();
-            if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
-                url = absolute.PathAndQuery ?? "/";
-            if (url.StartsWith("~/")) url = url.Substring(1);
-            if (!url.StartsWith("/")) url = "/" + url;
-            var q = url.IndexOf("?", StringComparison.Ordinal);
-            return q >= 0 ? url.Substring(0, q) : url;
+            var user = GetFullCurrentUser();
+            if (user == null) return false;
+            if (user.Tipo) return true;
+            return !IsUserInArea(Dominio.IvcAreaIds.Secretaria);
         }
 
-        private sealed class PermissionsPayload
-        {
-            public PagePermission[] pages { get; set; }
-        }
-
-        private sealed class PagePermission
-        {
-            public string url { get; set; }
-            public string[] actions { get; set; }
-        }
     }
 }
 

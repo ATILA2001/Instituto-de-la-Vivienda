@@ -24,7 +24,7 @@ namespace Negocio
                     {
                         if (!UserHelper.IsUserAdmin())
                         {
-                            var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
+                            var filtroAreaIds = UserHelper.AreaIdsParaFiltro(UserHelper.GetFullCurrentUser());
                             if (filtroAreaIds != null && filtroAreaIds.Count > 0)
                             {
                                 obraIds = context.Obras.AsNoTracking()

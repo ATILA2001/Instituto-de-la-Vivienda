@@ -34,9 +34,8 @@ namespace Negocio
                     // 3. Usuario tiene un área asignada
                     if (usuario != null && !usuario.Tipo)
                     {
-                        var filtroAreaIds = usuario.IvcAreaIds;
-                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                            query = query.Where(a => a.Obra.AreaId.HasValue && filtroAreaIds.Contains(a.Obra.AreaId.Value));
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                        query = query.Where(a => a.Obra.AreaId.HasValue && filtroAreaIds.Contains(a.Obra.AreaId.Value));
                     }
 
                     return query
@@ -312,43 +311,28 @@ namespace Negocio
         /// - Sincronización de estados desde sistemas externos
         /// 
         /// PARÁMETROS:
-        /// - codigoAutorizante: string - Código del autorizante O redeterminación
-        /// - estadoId: int - ID del nuevo estado a asignar
-        /// 
+        /// - codigoAutorizante: string - Código del autorizante
+        /// - estadoId: int - ID del nuevo estado (tabla ESTADOS_AUTORIZANTES)
+        ///
         /// RETORNO:
-        /// - true: Estado actualizado correctamente en cualquiera de las dos tablas
-        /// - false: Código no encontrado en ninguna tabla o error en actualización
-        /// 
-        /// EJEMPLO DE CÓDIGOS:
-        /// - Autorizante: "AUT-2024-001"
-        /// - Redeterminación: "AUT-2024-001-R1", "AUT-2024-001-R2"
-        /// 
-        /// TABLA DE MAPEO DE CAMPOS:
-        /// - Autorizantes.EstadoId -> EstadoAutorizanteEF.Id
-        /// - Redeterminaciones.EstadoRedetEFId -> EstadoAutorizanteEF.Id
-        /// 
+        /// - true: Estado actualizado correctamente
+        /// - false: Código no encontrado o sin cambios
+        ///
         /// CONSIDERACIONES:
-        /// - Estados deben existir en tabla EstadoAutorizanteEF
-        /// - Validación de FK aplicada automáticamente
-        /// - Ambas tablas referencian la misma tabla de estados
+        /// - Sólo aplica a AUTORIZANTES. Las redeterminaciones tienen su propia tabla de
+        ///   etapas (ESTADOS_REDET) y se actualizan con RedeterminacionNegocioEF.ActualizarEstado;
+        ///   escribir aquí un id de ESTADOS_AUTORIZANTES en REDETERMINACIONES.ETAPA violaría la FK.
         /// </summary>
         public bool ActualizarEstado(string codigoAutorizante, int estadoId)
         {
             using (var context = new IVCdbContext())
             {
                 var autorizante = context.Autorizantes.FirstOrDefault(a => a.CodigoAutorizante == codigoAutorizante);
-                if (autorizante != null)
-                {
-                    autorizante.EstadoId = estadoId;
-                    return context.SaveChanges() > 0;
-                }
-                var redet = context.Redeterminaciones.FirstOrDefault(r => r.CodigoRedet == codigoAutorizante);
-                if (redet != null)
-                {
-                    redet.EstadoRedetEFId = estadoId;
-                    return context.SaveChanges() > 0;
-                }
-                return false;
+                if (autorizante == null)
+                    return false;
+
+                autorizante.EstadoId = estadoId;
+                return context.SaveChanges() > 0;
             }
         }
 

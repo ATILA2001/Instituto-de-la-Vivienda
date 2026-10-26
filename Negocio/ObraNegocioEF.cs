@@ -31,9 +31,8 @@ namespace Negocio
 
                     if (!UserHelper.IsUserAdmin())
                     {
-                        var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
-                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                            query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(UserHelper.GetFullCurrentUser());
+                        query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
                     }
 
                     return query.OrderBy(o => o.Descripcion).ToList();
@@ -56,9 +55,8 @@ namespace Negocio
                     .Where(o => !context.Formulaciones.Any(f => f.ObraId == o.Id && anios.Contains(f.FechaPeriodo.Year)) || (includeObraId.HasValue && o.Id == includeObraId.Value));
                 if (usuario != null && !usuario.Tipo)
                 {
-                    var filtroAreaIds = usuario.IvcAreaIds;
-                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                        query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
+                    var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                    query = query.Where(o => o.AreaId.HasValue && filtroAreaIds.Contains(o.AreaId.Value));
                 }
                 return query.OrderBy(o => o.Descripcion).ToList();
             }

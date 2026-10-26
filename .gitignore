@@ -3,7 +3,6 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-.github/
 connectionStrings.config
 SharedCookie.config
 *.csproj.user

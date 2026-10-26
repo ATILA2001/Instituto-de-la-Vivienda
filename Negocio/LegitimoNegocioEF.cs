@@ -23,9 +23,8 @@ namespace Negocio
 
                 if (!usuario.Tipo)
                 {
-                    var filtroAreaIds = usuario.IvcAreaIds;
-                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
+                    var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                    query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
                 }
 
                 var list = query.ToList();
@@ -109,9 +108,8 @@ namespace Negocio
 
                 if (!usuario.Tipo)
                 {
-                    var filtroAreaIds = usuario.IvcAreaIds;
-                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
+                    var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                    query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
                 }
 
                 if (!string.IsNullOrEmpty(filtroGeneral))
@@ -141,9 +139,8 @@ namespace Negocio
 
             if (!usuario.Tipo)
             {
-                var filtroAreaIds = usuario.IvcAreaIds;
-                if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                    query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
+                var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
             }
 
             return query;
@@ -336,9 +333,8 @@ namespace Negocio
 
                 if (!usuario.Tipo)
                 {
-                    var filtroAreaIds = usuario.IvcAreaIds;
-                    if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                        query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
+                    var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                    query = query.Where(l => l.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(l.ObraEF.AreaId.Value));
                 }
 
                 if (!string.IsNullOrEmpty(filtroGeneral))

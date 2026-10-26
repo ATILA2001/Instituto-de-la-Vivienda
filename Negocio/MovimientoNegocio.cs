@@ -77,7 +77,7 @@ namespace Negocio
 
                 return lista;
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
@@ -132,7 +132,7 @@ namespace Negocio
                 return true;
 
             }
-            catch (Exception ex)
+            catch
             {
 
                 throw;
