@@ -100,8 +100,8 @@ namespace Negocio.Redeterminaciones
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SADE] Error en carga masiva: {ex.Message}");
-                return new Dictionary<string, (string, DateTime?)>();
+                Trace.TraceError("[SADE] Error en carga masiva: {0}", ex);
+                throw;
             }
         }
 
@@ -141,8 +141,8 @@ namespace Negocio.Redeterminaciones
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SIGAF] Error en carga masiva: {ex.Message}");
-                return new Dictionary<string, decimal>();
+                Trace.TraceError("[SIGAF] Error en carga masiva: {0}", ex);
+                throw;
             }
         }
 
@@ -180,21 +180,14 @@ namespace Negocio.Redeterminaciones
                     for (int i = 0; i < faltantes.Count; i += TamanioLoteAcdir)
                     {
                         var lote = faltantes.Skip(i).Take(TamanioLoteAcdir).ToList();
-                        try
-                        {
-                            foreach (var fila in ConsultarAcdir(lote))
-                                cacheActual[fila.Expediente] = fila.Acdir;
+                        foreach (var fila in ConsultarAcdir(lote))
+                            cacheActual[fila.Expediente] = fila.Acdir;
 
-                            var encontrados = new HashSet<string>(cacheActual.Keys);
-                            foreach (var expediente in lote)
-                            {
-                                if (!encontrados.Contains(expediente))
-                                    cacheActual[expediente] = null;
-                            }
-                        }
-                        catch (Exception exLote)
+                        var encontrados = new HashSet<string>(cacheActual.Keys);
+                        foreach (var expediente in lote)
                         {
-                            Debug.WriteLine($"[ACDIR] Error en lote: {exLote.Message}");
+                            if (!encontrados.Contains(expediente))
+                                cacheActual[expediente] = null;
                         }
                     }
 
@@ -211,8 +204,8 @@ namespace Negocio.Redeterminaciones
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ACDIR] Error en consulta bulk: {ex.Message}");
-                return resultado;
+                Trace.TraceError("[ACDIR] Error en consulta bulk: {0}", ex);
+                throw;
             }
         }
 

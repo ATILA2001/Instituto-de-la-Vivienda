@@ -281,8 +281,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error en ListarAutorizantesYRedeterminaciones: {ex.Message}");
-                return new List<AutorizanteDTO>();
+                // Antes devolvía una lista vacía: la grilla se mostraba sin registros y sin ningún aviso.
+                Trace.TraceError("[ListarAutorizantesYRedeterminaciones] {0}", ex);
+                throw;
             }
         }
 
@@ -759,8 +760,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en RecalcularCertificadosPorExpedientes: {ex.Message}");
-                return todosLosCertificados; // Devolvemos la lista original sin cambios en caso de error
+                // Antes devolvía la lista sin recalcular y la página la cacheaba como si estuviera actualizada.
+                Trace.TraceError("[CalcularCertificadosPorExpedientes] {0}", ex);
+                throw;
             }
         }
 
@@ -902,8 +904,8 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en CalcularSigafDirecto: {ex.Message}");
-                return null;
+                Trace.TraceError("[CalcularSIGAF] expediente {0}: {1}", expedientePago, ex);
+                throw;
             }
         }
 
@@ -1777,16 +1779,16 @@ namespace Negocio
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Error en ListarAutorizantesCompleto: {ex.Message}");
-                        return new List<AutorizanteDTO>();
+                        Trace.TraceError("[ListarAutorizantesCompleto] {0}", ex);
+                        throw;
                     }
 
                 } // using IVCdbContext
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error en ListarAutorizantesCompleto: {ex.Message}");
-                return new List<AutorizanteDTO>();
+                Trace.TraceError("[ListarAutorizantesCompleto] {0}", ex);
+                throw;
             }
         }
         #endregion

@@ -1151,6 +1151,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("Error al recalcular SIGAF/buzón/fecha SADE: " + ex);
+                ToastService.Show(this.Page, "No se pudieron recalcular SIGAF y SADE. Los datos mostrados pueden estar desactualizados; recargue la página.", ToastService.ToastType.Error);
             }
             finally
             {
