@@ -12,8 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.UI.WebControls;
+using Negocio.Infraestructura;
 using System.Data.SqlClient;
 using System.Security.Claims;
 
@@ -191,15 +190,12 @@ namespace Negocio
         /// </summary>
         private static void DescargarArchivo(ExcelPackage package, string fileName)
         {
-            HttpContext context = HttpContext.Current;
-            if (context == null)
+            var contexto = ContextoWeb.Actual;
+            if (contexto == null)
                 throw new InvalidOperationException("Esta función solo puede usarse en un contexto web.");
 
-            context.Response.Clear();
-            context.Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            context.Response.AddHeader("content-disposition", $"attachment;  filename={fileName}.xlsx");
-            context.Response.BinaryWrite(package.GetAsByteArray());
-            context.Response.End();
+            contexto.EnviarArchivo(package.GetAsByteArray(), fileName + ".xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
     }
 
@@ -385,16 +381,12 @@ INNER JOIN (
         // Session cache helpers for ACDIR
         private static Dictionary<string, string> ObtenerCacheAcdir()
         {
-            if (HttpContext.Current?.Session == null) return null;
-            return HttpContext.Current.Session["CacheAcdir"] as Dictionary<string, string>;
+            return ContextoWeb.Actual?.ObtenerDeSesion("CacheAcdir") as Dictionary<string, string>;
         }
 
         private static void GuardarCacheAcdir(Dictionary<string, string> cache)
         {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session["CacheAcdir"] = cache;
-            }
+            ContextoWeb.Actual?.GuardarEnSesion("CacheAcdir", cache);
         }
     }
 
@@ -456,26 +448,26 @@ INNER JOIN (
         /// </summary>
         public static UsuarioEF EnsureSessionUserFromClaims()
         {
-            var context = HttpContext.Current;
-            if (context?.Session == null)
+            var contexto = ContextoWeb.Actual;
+            if (contexto == null || !contexto.SesionDisponible)
             {
                 return null;
             }
 
-            var principal = context.User as ClaimsPrincipal;
+            var principal = contexto.Usuario;
             if (principal?.Identity?.IsAuthenticated != true)
             {
                 // Sin principal autenticado no se devuelve ningún usuario cacheado. Si había uno, se limpia
                 // toda la Session: las grillas y exportaciones cachean listas ya filtradas por área.
-                if (context.Session["Usuario"] != null)
-                    context.Session.Clear();
+                if (contexto.ObtenerDeSesion("Usuario") != null)
+                    contexto.LimpiarSesion();
                 return null;
             }
 
             var identidadActual = ClaveDeIdentidad(principal);
 
-            if (context.Session["Usuario"] is UsuarioEF existing
-                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, identidadActual, StringComparison.Ordinal))
+            if (contexto.ObtenerDeSesion("Usuario") is UsuarioEF existing
+                && string.Equals(contexto.ObtenerDeSesion(SessionUsuarioAuthIdKey) as string, identidadActual, StringComparison.Ordinal))
             {
                 return existing;
             }
@@ -483,8 +475,8 @@ INNER JOIN (
             // Cambió la persona, o la misma persona volvió a loguearse con otros roles/áreas/permisos.
             // Las listas cacheadas en Session (GridDataAutorizantes, CertificadosCompleto, CacheSade, etc.)
             // fueron calculadas con la identidad anterior: se descartan todas.
-            if (context.Session["Usuario"] != null)
-                context.Session.Clear();
+            if (contexto.ObtenerDeSesion("Usuario") != null)
+                contexto.LimpiarSesion();
 
             var built = BuildUserFromClaims(principal);
             if (built == null)
@@ -492,8 +484,8 @@ INNER JOIN (
                 return null;
             }
 
-            context.Session["Usuario"] = built;
-            context.Session[SessionUsuarioAuthIdKey] = identidadActual;
+            contexto.GuardarEnSesion("Usuario", built);
+            contexto.GuardarEnSesion(SessionUsuarioAuthIdKey, identidadActual);
             return built;
         }
 

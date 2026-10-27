@@ -8,7 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
-using System.Web;
+using Negocio.Infraestructura;
 using Negocio.Redeterminaciones;
 
 namespace Negocio
@@ -326,8 +326,7 @@ namespace Negocio
         /// </summary>
         private Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerCacheSade()
         {
-            if (HttpContext.Current?.Session == null) return null;
-            return HttpContext.Current.Session["CacheSade"] as Dictionary<string, (string, DateTime?)>;
+            return ContextoWeb.Actual?.ObtenerDeSesion("CacheSade") as Dictionary<string, (string, DateTime?)>;
         }
 
         /// <summary>
@@ -335,10 +334,7 @@ namespace Negocio
         /// </summary>
         private void GuardarCacheSade(Dictionary<string, (string Buzon, DateTime? Fecha)> cache)
         {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session["CacheSade"] = cache;
-            }
+            ContextoWeb.Actual?.GuardarEnSesion("CacheSade", cache);
         }
 
         /// <summary>
@@ -1341,10 +1337,7 @@ namespace Negocio
         /// </summary>
         public static void LimpiarCacheSade()
         {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session.Remove("CacheSade");
-            }
+            ContextoWeb.Actual?.QuitarDeSesion("CacheSade");
             Debug.WriteLine("[CACHE SADE] Cache limpiado manualmente");
         }
 
