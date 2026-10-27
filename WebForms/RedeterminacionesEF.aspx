@@ -123,8 +123,8 @@
 											ControlToValidate="txtPorcentaje"
 											ValidationGroup="AgregarRedeterminacion"
 											runat="server"
-											ValidationExpression="^[0-9]+([,][0-9]{1,4})?$"
-											ErrorMessage="Solo números positivos con coma decimal (ej.: 12,5)"
+											ValidationExpression="^-?[0-9]+([,][0-9]+)?$"
+											ErrorMessage="Solo números con coma decimal (ej.: 12,5 o -4,2)"
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true" />

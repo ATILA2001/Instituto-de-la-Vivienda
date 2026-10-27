@@ -109,6 +109,9 @@ namespace WebForms
                     entidad.FinEjecucion = legitimo.FinEjecucion;
                     entidad.Certificado = legitimo.Certificado;
                     entidad.MesAprobacion = legitimo.MesAprobacion;
+                    // ObtenerPorId trae la navegación ObraEF cargada; si cambió ObraId, adjuntar el grafo en el
+                    // contexto nuevo de Modificar lanzaría una violación de integridad referencial de EF.
+                    entidad.ObraEF = null;
 
                     negocio.Modificar(entidad);
                     ToastService.Show(this.Page, "Legítimo modificado exitosamente.", ToastService.ToastType.Success);
@@ -693,10 +696,20 @@ namespace WebForms
                 var legitimo = (Dominio.LegitimoEF)e.Row.DataItem;
                 if (e.Row.FindControl("txtCertificadoInline") is TextBox txtCert)
                 {
-                    txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente);
+                    txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente) && PuedeModificar;
+                }
+                // Misma regla que verifican los handlers inline: sin permiso, el control se ve deshabilitado.
+                if (e.Row.FindControl("txtExpediente") is TextBox txtExp)
+                {
+                    txtExp.Enabled = PuedeModificar;
                 }
             }
         }
+
+        private bool? _puedeModificar;
+        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
+        private bool PuedeModificar =>
+            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarPlanificacion()).Value;
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -1010,7 +1023,8 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al exportar: {0}", ex);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

@@ -643,9 +643,8 @@ namespace WebForms
                     // Para usuarios no admin, restringir a sus áreas (IvcAreaIds), igual que ObraNegocioEF.ListarParaDDL
                     if (!UserHelper.IsUserAdmin())
                     {
-                        var filtroAreaIds = UserHelper.GetFullCurrentUser().IvcAreaIds;
-                        if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                            areasQuery = areasQuery.Where(a => filtroAreaIds.Contains(a.Id));
+                        var filtroAreaIds = UserHelper.AreaIdsParaFiltro(UserHelper.GetFullCurrentUser());
+                        areasQuery = areasQuery.Where(a => filtroAreaIds.Contains(a.Id));
                     }
 
                     var areas = areasQuery.OrderBy(a => a.Nombre).Select(a => new { a.Id, a.Nombre }).ToList();

@@ -14,6 +14,11 @@ namespace IVC.Tests
         [DataRow("$1.234", "1234")]
         [DataRow("0,1234", "0.1234")]
         [DataRow("  12,5  ", "12.5")]
+        [DataRow("-4,20", "-4.20")]          // porcentajes negativos existen en producción
+        [DataRow("$ -1.234,56", "-1234.56")]  // ToString("C") de un negativo en es-AR
+        [DataRow("-$ 1.234,56", "-1234.56")]  // variante según configuración regional
+        [DataRow("12,500000", "12.5")]        // escala de la columna mayor a 4 decimales
+        [DataRow("$ 1.234,56", "1234.56")] // NBSP entre símbolo y número
         public void TryParseEsAr_AceptaFormatosEsAr(string texto, string esperadoInvariante)
         {
             var esperado = decimal.Parse(esperadoInvariante, System.Globalization.CultureInfo.InvariantCulture);
@@ -29,7 +34,8 @@ namespace IVC.Tests
         [DataRow("1234.56")]     // punto decimal: en es-AR sería 123456
         [DataRow("1,234.56")]    // formato en-US
         [DataRow("1.23")]        // punto con dos decimales
-        [DataRow("12,34567")]    // más de 4 decimales
+        [DataRow("--12")]
+        [DataRow("12-")]
         [DataRow("abc")]
         [DataRow("")]
         [DataRow("   ")]

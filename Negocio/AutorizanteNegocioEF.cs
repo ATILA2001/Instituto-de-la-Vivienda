@@ -251,13 +251,39 @@ namespace Negocio
                 {
                     var sqlEx = dbEx.InnerException?.InnerException as SqlException
                                 ?? dbEx.InnerException as SqlException;
-                    if (sqlEx != null)
-                        throw new InvalidOperationException(sqlEx.Message.Split('\n')[0].Trim(), dbEx);
-                    throw;
+                    if (sqlEx == null)
+                        throw;
+
+                    // El texto de SqlException (nombres de tablas, constraints, columnas) no debe llegar al usuario:
+                    // la página muestra el mensaje de InvalidOperationException en un toast. Se loguea el detalle
+                    // y se traduce el número de error a un mensaje de negocio.
+                    System.Diagnostics.Trace.TraceError("[AutorizanteNegocioEF.Modificar] Error SQL {0} al guardar {1}: {2}",
+                        sqlEx.Number, autorizanteModificado.CodigoAutorizante, sqlEx);
+                    throw new InvalidOperationException(MensajeParaErrorSql(sqlEx.Number), dbEx);
                 }
             }
         }
 
+
+        /// <summary>
+        /// Mensaje apto para el usuario según el número de error de SQL Server.
+        /// </summary>
+        private static string MensajeParaErrorSql(int numeroError)
+        {
+            switch (numeroError)
+            {
+                case 2601:
+                case 2627:
+                    return "Ya existe un autorizante con ese código.";
+                case 547:
+                    return "No se pudo guardar: alguno de los valores seleccionados (obra, concepto, estado, contrata) no es válido o el registro está relacionado con otros datos.";
+                case 8152:
+                case 2628:
+                    return "Alguno de los textos ingresados supera el largo permitido.";
+                default:
+                    return "No se pudo guardar el autorizante por un error de base de datos. Intente nuevamente.";
+            }
+        }
 
         public bool Eliminar(int id)
         {

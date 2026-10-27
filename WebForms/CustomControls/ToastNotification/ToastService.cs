@@ -31,7 +31,9 @@ namespace WebForms.CustomControls
 
  string bgClass = GetBackgroundClass(type);
  string icon = GetIcon(type);
- string safeMessage = EscapeJavaScript(message ?? string.Empty);
+ // JavaScriptStringEncode escapa también < > & / y U+2028/2029, que el escape manual anterior no cubría.
+ // Sumado a que el mensaje se inserta como nodo de texto (no innerHTML), el contenido nunca se interpreta como HTML.
+ string safeMessage = HttpUtility.JavaScriptStringEncode(message ?? string.Empty);
 
  // Ensure a container exists, create toast element, show and remove after hidden
  string script = $@"
@@ -66,7 +68,10 @@ toastEl.style.width = 'fit-content';
 body.style.whiteSpace = 'nowrap';
     body.style.overflow = 'hidden';
     body.style.textOverflow = 'ellipsis';
- body.innerHTML = '<i class=\'{icon} me-2\'></i>' + '{safeMessage}';
+ var iconEl = document.createElement('i');
+ iconEl.className = '{icon} me-2';
+ body.appendChild(iconEl);
+ body.appendChild(document.createTextNode('{safeMessage}'));
 
  var btn = document.createElement('button');
  btn.type = 'button';
@@ -112,16 +117,6 @@ body.style.whiteSpace = 'nowrap';
  case ToastType.Info:
  default: return "bi bi-info-circle-fill";
  }
- }
-
- private static string EscapeJavaScript(string text)
- {
- return text
- .Replace("\\", "\\\\")
- .Replace("'", "\\'")
- .Replace("\"", "\\\"")
- .Replace("\n", "\\n")
- .Replace("\r", "\\r");
  }
  }
 }
