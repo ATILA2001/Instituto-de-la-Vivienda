@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 using System.Web;
+using Negocio.Redeterminaciones;
 
 namespace Negocio
 {
@@ -316,7 +317,7 @@ namespace Negocio
         // Aprobado = 12, 22, 33, 39
         // En tramite todos los demas
 
-        private readonly int[] IdsDesestimado = { 35, 36 }; // Rechazada, Fuera de Plazo
+        private readonly int[] IdsDesestimado = RedeterminacionCalculator.EtapasDesestimadas; // Rechazada, Fuera de Plazo (R6)
         private readonly int[] IdsNoIniciado = { 37, 38 }; // Pendiente, No presentada
         private readonly int[] IdsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
@@ -673,33 +674,24 @@ namespace Negocio
                     }
                 }
 
+                // Certificados reales por autorizante: la regla se aplica por autorizante (R5).
+                var certificadosDtoPorAutorizante = listaFinalDTO
+                    .Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante))
+                    .GroupBy(c => c.CodigoAutorizante)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
                 foreach (var redet in redeterminaciones)
                 {
                     if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
 
-                    if (!redet.Salto.HasValue || !redet.MontoRedet.HasValue) continue; // sin salto o sin porcentaje: no hay monto, no hay reliquidación
-                    if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
+                    certificadosDtoPorAutorizante.TryGetValue(autorizanteDeRedet.CodigoAutorizante, out var certificadosDelAutorizante);
 
-                    // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
-                    // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
-                    var certificadosAfectados = listaFinalDTO
-                        .Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante
-                                 && c.MesAprobacion.HasValue
-                                 && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
-                                 && c.TipoPagoId != TipoPagoAnticipoId)
-                        .OrderBy(c => c.MesAprobacion)
-                        .ThenBy(c => c.Id)
-                        .ToList();
-
-                    bool esPrimerCertificadoPostSalto = true;
-                    foreach (var certAfectado in certificadosAfectados)
+                    // Pasos 2 y 3 (R1, R2, R3, R6): la regla vive en RedeterminacionCalculator.
+                    foreach (var reliq in RedeterminacionCalculator.GenerarReliquidaciones(redet, certificadosDelAutorizante))
                     {
-                        // Paso 3a / 3b (R3): el primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
-                        decimal porcentajeAplicado = (certAfectado.Porcentaje ?? 0)
-                            + (esPrimerCertificadoPostSalto ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
-                        esPrimerCertificadoPostSalto = false;
-
-                        decimal montoReliq = (redet.MontoRedet ?? 0) * (porcentajeAplicado / 100);
+                        var certAfectado = reliq.Certificado;
+                        decimal porcentajeAplicado = reliq.PorcentajeAplicado;
+                        decimal montoReliq = reliq.Monto;
 
                         var claveReliq = new Tuple<string, int, int>(redet.CodigoRedet, certAfectado.MesAprobacion.Value.Month, certAfectado.MesAprobacion.Value.Year);
 
@@ -740,7 +732,7 @@ namespace Negocio
                             ProyectoNombre = proyectoRedet?.Nombre,
                             LineaGestionId = lineaGestionRedet?.Id,
                             LineaGestionNombre = lineaGestionRedet?.Nombre,
-                            TipoPagoId = 3,
+                            TipoPagoId = RedeterminacionCalculator.TipoPagoReliquidacionId,
                             TipoPagoNombre = "RELIQUIDACION",
                             Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
                         });
@@ -996,26 +988,15 @@ namespace Negocio
                     return null;
 
                 decimal totalDevengado = datosSigaf[expedientePago];
-                if (totalDevengado <= 0)
-                    return null;
 
-                // Filtrar certificados válidos del mismo expediente
-                var certificadosMismoExpediente = todosLosCertificados
-                    ?.Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago) &&
+                // Montos de todos los pagos (certificados y reliquidaciones) del mismo expediente; R4: sin legítimos.
+                var montosMismoExpediente = (todosLosCertificados ?? new List<CertificadoDTO>())
+                    .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago) &&
                           c.ExpedientePago.Equals(expedientePago, StringComparison.OrdinalIgnoreCase))
-                    ?.ToList() ?? new List<CertificadoDTO>();
+                    .Select(c => c.MontoTotal)
+                    .ToList();
 
-                if (!certificadosMismoExpediente.Any())
-                    return totalDevengado;
-
-                if (certificadosMismoExpediente.Count == 1)
-                    return totalDevengado;
-
-                decimal sumaTotalMontos = certificadosMismoExpediente.Sum(c => c.MontoTotal);
-                if (sumaTotalMontos > 0)
-                    return totalDevengado * montoTotal / sumaTotalMontos;
-
-                return null;
+                return RedeterminacionCalculator.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
             }
             catch (Exception ex)
             {
@@ -1025,36 +1006,11 @@ namespace Negocio
         }
 
         /// <summary>
-        /// Id del tipo de pago "anticipo financiero". Regla R2: cuenta como ejecutado (ya está pagado)
-        /// y no se redetermina, por lo tanto nunca genera reliquidación.
-        /// </summary>
-        private const int TipoPagoAnticipoId = 1;
-
-        private static DateTime PrimerDiaDelMes(DateTime fecha) => new DateTime(fecha.Year, fecha.Month, 1);
-
-        /// <summary>Regla R1: la comparación contra el salto es mes a mes y el mes del salto cuenta como ANTERIOR (ejecutado).</summary>
-        private static bool EsMesAnteriorOIgual(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) <= PrimerDiaDelMes(salto);
-
-        /// <summary>Regla R1: solo los meses estrictamente posteriores al del salto generan reliquidación.</summary>
-        private static bool EsMesPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) > PrimerDiaDelMes(salto);
-
-        /// <summary>
-        /// Regla R6: una redeterminación Rechazada (etapa 35) o Fuera de Plazo (etapa 36) tiene monto cero,
-        /// no acumula en las siguientes y no genera reliquidaciones. Las que están en trámite se calculan normalmente.
-        /// </summary>
-        private bool EsDesestimada(RedeterminacionEF redet) =>
-            redet.EstadoRedetEFId.HasValue && IdsDesestimado.Contains(redet.EstadoRedetEFId.Value);
-
-        /// <summary>
-        /// Calcula MontoRedet de cada redeterminación (Pasos A, B y C de Docs/calculo-redeterminaciones.html)
-        /// y deja en PorcentajeEjecutadoPreSalto el porcentaje ya ejecutado, que usa el Paso 3b de las reliquidaciones.
-        /// Reglas vigentes: ver Docs/calculo-redeterminaciones.html, Sección 6. Debe dar lo mismo que la vista SQL
-        /// dbo.vw_PBI_Redeterminaciones (Database/vw_PowerBI_Redeterminaciones.sql).
+        /// Calcula MontoRedet y PorcentajeEjecutadoPreSalto de cada redeterminación (Pasos A, B y C).
+        /// Las reglas viven en RedeterminacionCalculator; acá sólo se cargan los certificados si no se recibieron.
         /// </summary>
         private void CalcularMontoRedeterminaciones(List<RedeterminacionEF> redeterminaciones, List<AutorizanteEF> autorizantes, List<CertificadoEF> certificados = null)
         {
-            var redeterminacionesCalculadas = new List<RedeterminacionEF>();
-
             // Si no se recibieron certificados, se cargan UNA sola vez para todos los autorizantes involucrados.
             if (certificados == null)
             {
@@ -1074,53 +1030,7 @@ namespace Negocio
                 }
             }
 
-            // Agrupar por autorizante. IMPORTANTE: no reasignar ni filtrar la lista recibida dentro del bucle;
-            // hacerlo dejaba solo los certificados del primer autorizante y el resto se calculaba con faltante = 100%.
-            var certificadosPorAutorizante = certificados
-                .Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante))
-                .GroupBy(c => c.CodigoAutorizante)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            var autorizantesPorCodigo = autorizantes
-                .Where(a => !string.IsNullOrEmpty(a.CodigoAutorizante))
-                .GroupBy(a => a.CodigoAutorizante)
-                .ToDictionary(g => g.Key, g => g.First());
-
-            // Mismo orden que la vista SQL (ROW_NUMBER por autorizante): Nro ascendente, nulos al final, desempate por Id.
-            var redeterminacionesOrdenadas = redeterminaciones
-                .OrderBy(r => r.Nro.HasValue ? 0 : 1)
-                .ThenBy(r => r.Nro)
-                .ThenBy(r => r.Id);
-
-            foreach (var redet in redeterminacionesOrdenadas)
-            {
-                if (string.IsNullOrEmpty(redet.CodigoAutorizante) || !autorizantesPorCodigo.TryGetValue(redet.CodigoAutorizante, out var autorizante)) continue;
-                if (!redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
-
-                certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosDelAutorizante);
-
-                // Paso A. R1: hasta el mes del salto inclusive. R2: todos los tipos de pago, incluido el anticipo.
-                decimal sumaMontosTotal = (certificadosDelAutorizante ?? new List<CertificadoEF>())
-                    .Where(c => c.MesAprobacion.HasValue && EsMesAnteriorOIgual(c.MesAprobacion.Value, redet.Salto.Value))
-                    .Sum(c => c.MontoTotal);
-                decimal porcentajeUtilizado = (autorizante.MontoAutorizado > 0) ? (sumaMontosTotal / autorizante.MontoAutorizado) * 100 : 0;
-                // Paso B
-                decimal faltante = Math.Max(0, 100 - porcentajeUtilizado);
-                redet.PorcentajeEjecutadoPreSalto = porcentajeUtilizado;
-                // Paso C. Base = MontoAutorizado + todas las redeterminaciones ya calculadas del mismo autorizante
-                // (en el orden de arriba). Para la primera la suma es 0, así que la misma fórmula sirve para Nro = 1.
-                decimal sumaMontosRedetAnteriores = redeterminacionesCalculadas
-                    .Where(r => r.CodigoAutorizante == redet.CodigoAutorizante && r.MontoRedet.HasValue)
-                    .Sum(r => r.MontoRedet.Value);
-
-                // R6: rechazada o fuera de plazo => monto cero (y por lo tanto no suma en la base de las siguientes).
-                decimal montoCalculado = EsDesestimada(redet)
-                    ? 0
-                    : (((autorizante.MontoAutorizado + sumaMontosRedetAnteriores) * redet.Porcentaje.Value) / 100) * (faltante / 100);
-
-                redet.MontoRedet = montoCalculado;
-                redeterminacionesCalculadas.Add(redet);
-            }
+            RedeterminacionCalculator.CalcularMontos(redeterminaciones, autorizantes, certificados);
         }
 
         /// <summary>
@@ -1131,19 +1041,7 @@ namespace Negocio
             try
             {
                 // 3. Estado
-                string estado;
-                if (string.IsNullOrEmpty(expedientePago))
-                {
-                    estado = "NO INICIADO";
-                }
-                else if (sigaf > 0)
-                {
-                    estado = "DEVENGADO";
-                }
-                else
-                {
-                    estado = "EN TRAMITE";
-                }
+                string estado = RedeterminacionCalculator.DeterminarEstado(expedientePago, sigaf);
 
                 // 4. Datos SADE (consulta en memoria)
                 var (buzon, fecha) = datosSade.ContainsKey(expedientePago) ? datosSade[expedientePago] : (null, null);
