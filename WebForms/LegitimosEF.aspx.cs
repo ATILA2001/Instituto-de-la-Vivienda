@@ -1010,7 +1010,8 @@ namespace WebForms
             }
             catch (Exception ex)
             {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al exportar: {0}", ex);
+                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
