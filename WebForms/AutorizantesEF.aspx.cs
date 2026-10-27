@@ -683,7 +683,7 @@ namespace WebForms
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
                     var negocio = new CalculoRedeterminacionNegocioEF();
-                    cblsHeaderEstado.DataSource = negocio.ObtenerEstadosParaFiltro();
+                    cblsHeaderEstado.DataSource = Negocio.Redeterminaciones.EstadoRedetMapper.ObtenerEstadosParaFiltro();
                     cblsHeaderEstado.DataTextField = "Nombre";
                     cblsHeaderEstado.DataValueField = "Id";
                     cblsHeaderEstado.DataBind();

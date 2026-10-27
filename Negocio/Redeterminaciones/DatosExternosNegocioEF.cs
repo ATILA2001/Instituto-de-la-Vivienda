@@ -116,6 +116,36 @@ namespace Negocio.Redeterminaciones
             return ContextoWeb.Actual?.ObtenerDeSesion(ClaveCacheSade) as Dictionary<string, (string, DateTime?)>;
         }
 
+        // ---------- SIGAF (DEVENGADOS) ----------
+
+        /// <summary>
+        /// Suma de IMPORTE_PP devengado por expediente, en una sola consulta. Sin caché: el devengado
+        /// cambia con cada carga de SIGAF y la grilla debe reflejarlo.
+        /// </summary>
+        public Dictionary<string, decimal> ObtenerDevengadosPorExpediente(List<string> expedientes)
+        {
+            if (expedientes == null || !expedientes.Any())
+                return new Dictionary<string, decimal>();
+
+            try
+            {
+                using (var context = new IVCdbContext())
+                {
+                    return context.Devengados
+                        .AsNoTracking()
+                        .Where(d => expedientes.Contains(d.EeFinanciera))
+                        .GroupBy(d => d.EeFinanciera)
+                        .Select(g => new { Expediente = g.Key, Total = g.Sum(d => (decimal?)d.ImportePp) ?? 0 })
+                        .ToDictionary(r => r.Expediente, r => r.Total);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SIGAF] Error en carga masiva: {ex.Message}");
+                return new Dictionary<string, decimal>();
+            }
+        }
+
         // ---------- ACDIR (GEDO) ----------
 
         private class AcdirRowDto

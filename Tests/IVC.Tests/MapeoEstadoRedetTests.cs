@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Negocio;
+using Negocio.Redeterminaciones;
 
 namespace IVC.Tests
 {
@@ -14,7 +14,7 @@ namespace IVC.Tests
         [TestMethod]
         public void EtapaNull_EsNoIniciado()
         {
-            var estado = new CalculoRedeterminacionNegocioEF().MapearEstadoDesdeId(null);
+            var estado = EstadoRedetMapper.MapearEstadoDesdeId(null);
 
             Assert.AreEqual(4, estado.Id);
             Assert.AreEqual("NO INICIADO", estado.Nombre);
@@ -33,7 +33,7 @@ namespace IVC.Tests
         [DataRow(99, 2, "EN TRAMITE")]
         public void EtapaConocida_MapeaAlEstadoGeneral(int etapaId, int estadoEsperado, string nombreEsperado)
         {
-            var estado = new CalculoRedeterminacionNegocioEF().MapearEstadoDesdeId(etapaId);
+            var estado = EstadoRedetMapper.MapearEstadoDesdeId(etapaId);
 
             Assert.AreEqual(estadoEsperado, estado.Id);
             Assert.AreEqual(nombreEsperado, estado.Nombre);

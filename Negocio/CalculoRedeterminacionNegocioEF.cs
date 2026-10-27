@@ -47,7 +47,7 @@ namespace Negocio
     /// MAPEO DE ESTADOS REDETERMINACIONES:
     /// - Estados específicos de redeterminaciones se mapean a estados generales
     /// - Permite visualización unificada en UI con estados comprensibles
-    /// - IdsDesestimado, IdsNoIniciado, IdsAprobado definen reglas de mapeo
+    /// - El mapeo etapa -> estado general vive en EstadoRedetMapper; las reglas de cálculo en RedeterminacionCalculator
     /// 
     /// PATRÓN DE INTEGRACIÓN:
     /// - Métodos BuscarMuchos*() para consultas bulk optimizadas
@@ -67,15 +67,6 @@ namespace Negocio
         // En tramite todos los demas
 
 
-        /// <summary>
-        /// Estado general de una redeterminación a partir de su etapa. Delega en MapearEstadoDesdeId
-        /// para usar un único mapeo y tolerar ETAPA null (antes redet.Etapa.Id lanzaba NRE y la grilla
-        /// de autorizantes quedaba vacía).
-        /// </summary>
-        private EstadoAutorizanteEF MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
-        {
-            return MapearEstadoDesdeId(redet.EstadoRedetEFId);
-        }
 
 
 
@@ -226,7 +217,7 @@ namespace Negocio
                         var auth = redet.Autorizante;
                         var obra = auth?.Obra;
 
-                        var estado = MapearEstadoRedetAEstadoAutorizante(redet);
+                        var estado = EstadoRedetMapper.MapearEstadoDesdeId(redet.EstadoRedetEFId);
                         var dto = new AutorizanteDTO
                         {
                             IdRedeterminacion = redet.Id,
@@ -317,79 +308,9 @@ namespace Negocio
         // Aprobado = 12, 22, 33, 39
         // En tramite todos los demas
 
-        private readonly int[] IdsDesestimado = RedeterminacionCalculator.EtapasDesestimadas; // Rechazada, Fuera de Plazo (R6)
-        private readonly int[] IdsNoIniciado = { 37, 38 }; // Pendiente, No presentada
-        private readonly int[] IdsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
         private readonly DatosExternosNegocioEF _datosExternos = new DatosExternosNegocioEF();
-        /// <summary>
-        /// Mapea un ID específico de estado de redeterminación a un estado general.
-        /// 
-        /// LÓGICA DE MAPEO:
-        /// 1. null o IdsNoIniciado -> "NO INICIADO" (Id=4)
-        /// 2. IdsAprobado -> "APROBADO" (Id=1)  
-        /// 3. IdsDesestimado -> "DESESTIMADO" (Id=3)
-        /// 4. Cualquier otro -> "EN TRAMITE" (Id=2)
-        /// 
-        /// PARÁMETROS:
-        /// - estadoRedetId: ID específico de estado de redeterminación (puede ser null)
-        /// 
-        /// RETORNO:
-        /// - EstadoAutorizanteEF con ID y Nombre del estado general mapeado
-        /// 
-        /// USO:
-        /// - Convertir estados granulares de redeterminaciones a vista unificada
-        /// - Consistencia entre autorizantes y redeterminaciones en UI
-        /// - Filtros y agrupaciones por estado general
-        /// </summary>
-        public EstadoAutorizanteEF MapearEstadoDesdeId(int? estadoRedetId)
-        {
-            //int? estadoRedetId = dto.EstadoRedetId;
 
-            if (!estadoRedetId.HasValue || IdsNoIniciado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 4, Nombre = "NO INICIADO" };
-
-            if (IdsAprobado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 1, Nombre = "APROBADO" };
-
-            if (IdsDesestimado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 3, Nombre = "DESESTIMADO" };
-
-            return new EstadoAutorizanteEF { Id = 2, Nombre = "EN TRAMITE" };
-        }
-
-        /// <summary>
-        /// Genera lista de estados únicos para uso en filtros TreeViewSearch.
-        /// 
-        /// PROPÓSITO:
-        /// - Proporcionar opciones de filtrado consistentes en UI
-        /// - Evitar duplicados en listas de selección
-        /// - Ordenar alfabéticamente para mejor UX
-        /// 
-        /// IMPLEMENTACIÓN:
-        /// - Utiliza MapearEstadoDesdeId() con IDs representativos
-        /// - Genera un estado de cada categoría principal
-        /// - OrderBy para ordenamiento alfabético
-        /// 
-        /// RETORNO:
-        /// - Lista de EstadoAutorizanteEF únicos y ordenados
-        /// - Incluye: APROBADO, DESESTIMADO, EN TRAMITE, NO INICIADO
-        /// 
-        /// USO:
-        /// - Poblar filtros TreeViewSearch de estado
-        /// - Dropdowns de selección de estado
-        /// - Interfaces de búsqueda y reportes
-        /// </summary>
-        public List<EstadoAutorizanteEF> ObtenerEstadosParaFiltro()
-        {
-            return new List<EstadoAutorizanteEF>
-            {
-                MapearEstadoDesdeId(12), // APROBADO
-                MapearEstadoDesdeId(35), // DESESTIMADO
-                MapearEstadoDesdeId(37), // NO INICIADO
-                MapearEstadoDesdeId(0)   // EN TRAMITE
-            }.OrderBy(e => e.Nombre).ToList();
-        }
 
         /// <summary>
         /// NUEVO MÉTODO: Réplica de la lógica de negocio original que genera reliquidaciones.
@@ -696,7 +617,7 @@ namespace Negocio
                             EstadoRedetId = redet.EstadoRedetEFId,
                             AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
                             CodigoAutorizante = redet.CodigoRedet,
-                            AutorizanteEstado = MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
+                            AutorizanteEstado = EstadoRedetMapper.MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
                             // Datos de la obra de la redeterminación (no del certificado afectado)
                             ObraId = obraRedet?.Id,
                             ObraDescripcion = obraRedet?.Descripcion,
@@ -1097,40 +1018,7 @@ namespace Negocio
         /// <returns>Un diccionario con el expediente como clave y la suma de importes como valor.</returns>
         private Dictionary<string, decimal> BuscarMuchosNumerosSigaf(List<string> expedientes)
         {
-            // Se valida la entrada para evitar consultas innecesarias.
-            if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, decimal>();
-
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    // La consulta se traduce a un eficiente "WHERE ... IN (...)" en SQL.
-                    return context.Devengados
-                        .AsNoTracking()
-                        .Where(d => expedientes.Contains(d.EeFinanciera))
-                        // Se agrupa por expediente para poder sumarizar por cada uno.
-                        // Esto es el equivalente a ejecutar la consulta original para cada expediente.
-                        .GroupBy(d => d.EeFinanciera)
-                        // Se proyecta el resultado.
-                        .Select(g => new
-                        {
-                            // g.Key es el expediente por el que se agrupó.
-                            Expediente = g.Key,
-                            // Se realiza la suma de ImportePp para el grupo.
-                            // El cast a decimal? y el ?? 0 replican la lógica de manejar nulos.
-                            TotalImporte = g.Sum(d => (decimal?)d.ImportePp) ?? 0
-                        })
-                        // Se convierte el resultado en un diccionario para búsquedas en memoria instantáneas (O(1)).
-                        .ToDictionary(r => r.Expediente, r => r.TotalImporte);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Se registra el error y se devuelve un diccionario vacío para no detener la ejecución.
-                System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SIGAF: {ex.Message}");
-                return new Dictionary<string, decimal>();
-            }
+            return _datosExternos.ObtenerDevengadosPorExpediente(expedientes);
         }
 
         #endregion
@@ -1490,8 +1378,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11, // Las redeterminaciones no tienen concepto específico
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
@@ -1851,8 +1739,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11,
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
