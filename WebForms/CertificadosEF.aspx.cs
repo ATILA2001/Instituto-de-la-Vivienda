@@ -688,6 +688,11 @@ namespace WebForms
             }
         }
 
+        private bool? _puedeModificar;
+        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
+        private bool PuedeModificar =>
+            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarPlanificacion()).Value;
+
         protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
@@ -702,6 +707,15 @@ namespace WebForms
                 else if (e.Row.FindControl("txtMontoInline") is TextBox txtMonto)
                 {
                     txtMonto.Enabled = !string.IsNullOrWhiteSpace(certificado.ExpedientePago);
+                }
+
+                // Misma regla que verifican los handlers inline: sin permiso, los controles se ven deshabilitados.
+                if (!PuedeModificar)
+                {
+                    foreach (var id in new[] { "txtExpediente", "txtMontoInline", "txtPorcEjecFisicaInline" })
+                    {
+                        if (e.Row.FindControl(id) is TextBox txt) txt.Enabled = false;
+                    }
                 }
             }
         }

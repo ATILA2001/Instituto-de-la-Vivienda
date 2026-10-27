@@ -14,9 +14,12 @@ namespace Negocio
     /// </summary>
     public static class MontoHelper
     {
-        // Acepta: "1234", "1234,5", "1.234,56", "$ 1.234,56", "$1.234". Rechaza: "12.5", "1234.56", "1,234.56".
+        // Acepta: "1234", "-12,5", "1.234,56", "$ 1.234,56", "$ -1.234,56", "-$ 1.234,56", "0,123456".
+        // Rechaza: "12.5", "1234.56", "1,234.56" (punto decimal o formato en-US).
+        // El signo puede ir antes o después del símbolo de moneda porque ToString("C") en es-AR lo ubica según
+        // la configuración regional del servidor.
         private static readonly Regex FormatoEsAr = new Regex(
-            @"^\$?\s*(\d{1,3}(\.\d{3})+|\d+)(,\d{1,4})?$",
+            @"^(?:-\s*\$?\s*|\$?\s*-?\s*)(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$",
             RegexOptions.Compiled);
 
         /// <summary>
@@ -29,16 +32,24 @@ namespace Negocio
             if (string.IsNullOrWhiteSpace(texto))
                 return false;
 
-            var limpio = texto.Trim();
+            // Normalizar espacios duros (NBSP) que llegan al pegar desde Excel/Word o del propio ToString("C").
+            var limpio = texto.Replace(' ', ' ').Trim();
             if (!FormatoEsAr.IsMatch(limpio))
                 return false;
 
-            limpio = limpio.Replace("$", string.Empty)
+            bool negativo = limpio.Contains("-");
+            limpio = limpio.Replace("-", string.Empty)
+                           .Replace("$", string.Empty)
                            .Replace(" ", string.Empty)
                            .Replace(".", string.Empty)
                            .Replace(',', '.');
 
-            return decimal.TryParse(limpio, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out valor);
+            if (!decimal.TryParse(limpio, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out valor))
+                return false;
+
+            if (negativo)
+                valor = -valor;
+            return true;
         }
     }
 }

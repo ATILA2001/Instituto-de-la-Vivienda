@@ -44,7 +44,6 @@ namespace WebForms
                 "/Startup.aspx",
                 "/Inicio.aspx",
                 "/AccessDenied.aspx",
-                "/LogoutConfirmation.aspx",
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
@@ -211,20 +210,16 @@ namespace WebForms
             if (string.IsNullOrWhiteSpace(cookieVersion))
                 return;
 
-            // Verificar caché de sesión (TTL 5 min)
-            var session = Context.Session;
-            if (session != null)
+            // Caché por usuario en HttpRuntime.Cache (TTL 5 min), como hace SAI con IMemoryCache.
+            // En Application_AuthorizeRequest la Session todavía no existe (se adquiere después), así que
+            // un caché en Session nunca aplicaba y cada request llamaba a Auth.Web.
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var cacheKey = string.IsNullOrWhiteSpace(userId) ? null : "PermsVersion_" + userId;
+            if (cacheKey != null && HttpRuntime.Cache[cacheKey] is string cachedVersion)
             {
-                var cachedVersion = session["PermsVersion_Cached"] as string;
-                var cachedAt = session["PermsVersion_CachedAt"] as DateTime?;
-
-                if (cachedVersion != null && cachedAt.HasValue
-                    && (DateTime.UtcNow - cachedAt.Value).TotalMinutes < 5)
-                {
-                    if (!string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
-                        RedirectToLogin();
-                    return;
-                }
+                if (!string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
+                    RedirectToLogin();
+                return;
             }
 
             // Llamar a Auth.Web: GET /api/permissions/version
@@ -247,8 +242,9 @@ namespace WebForms
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 request.Timeout = 2000; // 2 segundos máximo
                 request.Method = "GET";
-                // Reenviar la cookie de sesión compartida para que el endpoint pueda autenticar
-                var cookieHeader = Context.Request.Headers["Cookie"];
+                // Reenviar sólo la cookie compartida (y sus chunks "<nombre>C1", "<nombre>C2", ...) para que el
+                // endpoint pueda autenticar. No se reenvía el header Cookie completo: incluiría ASP.NET_SessionId.
+                var cookieHeader = BuildSharedCookieHeader(Context.Request);
                 if (!string.IsNullOrWhiteSpace(cookieHeader))
                     request.Headers["Cookie"] = cookieHeader;
 
@@ -268,15 +264,36 @@ namespace WebForms
                 return;
             }
 
-            // Actualizar caché de sesión con la versión obtenida
-            if (session != null && serverVersion != null)
+            if (cacheKey != null && serverVersion != null)
             {
-                session["PermsVersion_Cached"] = serverVersion;
-                session["PermsVersion_CachedAt"] = DateTime.UtcNow;
+                HttpRuntime.Cache.Insert(cacheKey, serverVersion, null,
+                    DateTime.UtcNow.AddMinutes(5), System.Web.Caching.Cache.NoSlidingExpiration);
             }
 
             if (!string.Equals(cookieVersion, serverVersion, StringComparison.Ordinal))
                 RedirectToLogin();
+        }
+
+        /// <summary>
+        /// Header Cookie con la cookie de autenticación compartida y sus chunks, nada más.
+        /// </summary>
+        private static string BuildSharedCookieHeader(HttpRequest request)
+        {
+            var sharedCookieName = Environment.GetEnvironmentVariable("SharedCookie__Name")
+                ?? WebConfigurationManager.AppSettings["SharedCookieName"];
+            if (string.IsNullOrWhiteSpace(sharedCookieName))
+                return null;
+
+            var partes = new List<string>();
+            foreach (string nombre in request.Cookies.AllKeys)
+            {
+                bool esCompartida = string.Equals(nombre, sharedCookieName, StringComparison.OrdinalIgnoreCase)
+                    || nombre.StartsWith(sharedCookieName + "C", StringComparison.OrdinalIgnoreCase);
+                if (esCompartida)
+                    partes.Add(nombre + "=" + request.Cookies[nombre]?.Value);
+            }
+
+            return partes.Count == 0 ? null : string.Join("; ", partes);
         }
 
         protected void Application_Error(object sender, EventArgs e)

@@ -465,19 +465,26 @@ INNER JOIN (
             var principal = context.User as ClaimsPrincipal;
             if (principal?.Identity?.IsAuthenticated != true)
             {
-                // Sin principal autenticado no se devuelve ningún usuario cacheado.
-                context.Session.Remove("Usuario");
-                context.Session.Remove(SessionUsuarioAuthIdKey);
+                // Sin principal autenticado no se devuelve ningún usuario cacheado. Si había uno, se limpia
+                // toda la Session: las grillas y exportaciones cachean listas ya filtradas por área.
+                if (context.Session["Usuario"] != null)
+                    context.Session.Clear();
                 return null;
             }
 
-            var currentAuthId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var identidadActual = ClaveDeIdentidad(principal);
 
             if (context.Session["Usuario"] is UsuarioEF existing
-                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, currentAuthId, StringComparison.Ordinal))
+                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, identidadActual, StringComparison.Ordinal))
             {
                 return existing;
             }
+
+            // Cambió la persona, o la misma persona volvió a loguearse con otros roles/áreas/permisos.
+            // Las listas cacheadas en Session (GridDataAutorizantes, CertificadosCompleto, CacheSade, etc.)
+            // fueron calculadas con la identidad anterior: se descartan todas.
+            if (context.Session["Usuario"] != null)
+                context.Session.Clear();
 
             var built = BuildUserFromClaims(principal);
             if (built == null)
@@ -486,8 +493,27 @@ INNER JOIN (
             }
 
             context.Session["Usuario"] = built;
-            context.Session[SessionUsuarioAuthIdKey] = currentAuthId;
+            context.Session[SessionUsuarioAuthIdKey] = identidadActual;
             return built;
+        }
+
+        /// <summary>
+        /// Identidad efectiva del principal: NameIdentifier más los claims que afectan a lo que el usuario
+        /// puede ver o hacer en IVC (roles, áreas y versión de permisos). Si cualquiera cambia, el
+        /// UsuarioEF cacheado deja de ser válido aunque sea la misma persona.
+        /// </summary>
+        private static string ClaveDeIdentidad(ClaimsPrincipal principal)
+        {
+            string Join(string type) => string.Join(",", principal.Claims
+                .Where(c => string.Equals(c.Type, type, StringComparison.OrdinalIgnoreCase))
+                .Select(c => c.Value)
+                .OrderBy(v => v, StringComparer.Ordinal));
+
+            return string.Join("|",
+                principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty,
+                Join(ClaimTypes.Role),
+                Join("area"),
+                principal.FindFirst("perms_version")?.Value ?? string.Empty);
         }
 
         private static UsuarioEF BuildUserFromClaims(ClaimsPrincipal principal)
@@ -642,9 +668,22 @@ INNER JOIN (
         public static bool PuedeModificarPlanificacion()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            // Estado == false es el usuario "por defecto" que se devuelve sin sesión autenticada: nunca puede modificar.
+            if (user == null || !user.Estado) return false;
             if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
             return user.Tipo || ABMPlaniNegocio.GetIsPlanningOpen() || user.IsPlanningOpenOverride;
+        }
+
+        /// <summary>
+        /// Puede actualizar inline el expediente y el estado de un autorizante en la grilla de Autorizantes.
+        /// Además de quienes pueden modificar planificación, el área Redeterminaciones hace el seguimiento
+        /// del trámite y edita esos dos campos aunque no pueda crear, modificar por modal ni eliminar.
+        /// </summary>
+        public static bool PuedeEditarSeguimientoAutorizante()
+        {
+            var user = GetFullCurrentUser();
+            if (user == null || !user.Estado) return false;
+            return PuedeModificarPlanificacion() || IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
         }
 
         /// <summary>
@@ -654,7 +693,7 @@ INNER JOIN (
         public static bool PuedeModificarFormulacion()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            if (user == null || !user.Estado) return false;
             if (user.Tipo) return true;
             if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
             return ABMPlaniNegocio.GetIsFormulationOpen();
@@ -667,7 +706,7 @@ INNER JOIN (
         public static bool PuedeModificarRedeterminaciones()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            if (user == null || !user.Estado) return false;
             if (user.Tipo) return true;
             return !IsUserInArea(Dominio.IvcAreaIds.Secretaria);
         }

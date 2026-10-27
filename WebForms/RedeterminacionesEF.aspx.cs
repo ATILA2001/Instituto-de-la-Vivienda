@@ -43,7 +43,20 @@ namespace WebForms
         protected void Page_PreRender(object sender, EventArgs e)
         {
             rfvAutorizante.Enabled = ViewState["EditingRedeterminacionId"] == null;
+
+            // Esta página no tiene panelShowAddButton ni gridviewRegistros, así que Site.Master no le oculta
+            // nada a Secretaría. Se aplica acá la misma regla que verifican los handlers.
+            btnShowAddModal.Visible = PuedeModificar;
+            var acciones = dgvRedeterminacion.Columns.OfType<DataControlField>()
+                .FirstOrDefault(c => c.HeaderText == "Acciones");
+            if (acciones != null)
+                acciones.Visible = PuedeModificar;
         }
+
+        private bool? _puedeModificar;
+        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
+        private bool PuedeModificar =>
+            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarRedeterminaciones()).Value;
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
@@ -222,6 +235,15 @@ namespace WebForms
                 }
             }
 
+            if (e.Row.RowType == DataControlRowType.DataRow && !PuedeModificar)
+            {
+                // Sin permiso, los controles inline se ven deshabilitados (misma regla que los handlers).
+                foreach (var id in new[] { "ddlEtapas", "ddlUsuario", "txtExpediente" })
+                {
+                    if (e.Row.FindControl(id) is WebControl ctl) ctl.Enabled = false;
+                }
+            }
+
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 // Lógica existente para poblar el DropDownList de Usuario en cada fila
@@ -301,7 +323,8 @@ namespace WebForms
                 txtSalto.Text = redet.Salto?.ToString("yyyy-MM-dd") ?? string.Empty;
                 txtNro.Text = redet.Nro?.ToString() ?? string.Empty;
                 txtTipo.Text = redet.Tipo;
-                txtPorcentaje.Text = redet.Porcentaje?.ToString() ?? string.Empty;
+                // Sin ceros de relleno de la escala de la columna ("12,500000" -> "12,5"); conserva el signo.
+                txtPorcentaje.Text = redet.Porcentaje?.ToString("0.######") ?? string.Empty;
                 txtObservacion.Text = redet.Observaciones;
 
                 if (ddlEtapa.Items.Count == 0)

@@ -477,9 +477,8 @@ namespace WebForms
 
                         if (!usuario.Tipo)
                         {
-                            var filtroAreaIds = usuario.IvcAreaIds;
-                            if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
+                            var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                            querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                         }
                         if (!string.IsNullOrWhiteSpace(filtroGeneral))
                         {

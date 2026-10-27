@@ -70,6 +70,11 @@ namespace WebForms
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
+        private bool? _puedeEditarSeguimiento;
+        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
+        private bool PuedeEditarSeguimiento =>
+            _puedeEditarSeguimiento ?? (_puedeEditarSeguimiento = UserHelper.PuedeEditarSeguimientoAutorizante()).Value;
+
         private int _currentPageIndex = 0;
 
         /// <summary>
@@ -1176,7 +1181,7 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarSeguimiento)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 BindGrid();
@@ -1260,7 +1265,7 @@ namespace WebForms
 
         protected void ddlEstadoAutorizante_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarSeguimiento)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 BindGrid();
@@ -1445,6 +1450,13 @@ namespace WebForms
                         ddlEstadoAutorizante.CssClass = "form-control text-center";
                         ddlEstadoAutorizante.BorderStyle = BorderStyle.None;
                         ddlEstadoAutorizante.BackColor = Color.Transparent;
+                    }
+                    else
+                    {
+                        // Misma regla que verifican los handlers: si el usuario no puede editar, que no vea
+                        // el control habilitado y reciba un rechazo recién al cambiarlo.
+                        txtExpediente.Enabled = PuedeEditarSeguimiento;
+                        ddlEstadoAutorizante.Enabled = PuedeEditarSeguimiento;
                     }
                 }
             }
