@@ -503,6 +503,7 @@ INNER JOIN (
 
             return string.Join("|",
                 principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty,
+                principal.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty,
                 Join(ClaimTypes.Role),
                 Join("area"),
                 principal.FindFirst("perms_version")?.Value ?? string.Empty);
