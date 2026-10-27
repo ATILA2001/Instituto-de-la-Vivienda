@@ -147,6 +147,7 @@
     <Compile Include="LineaGestionNegocio.cs" />
     <Compile Include="Infraestructura\IContextoWeb.cs" />
     <Compile Include="MontoHelper.cs" />
+    <Compile Include="Redeterminaciones\DatosExternosNegocioEF.cs" />
     <Compile Include="Redeterminaciones\RedeterminacionCalculator.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />

@@ -1234,7 +1234,7 @@ namespace WebForms
                             }
                             else
                             {
-                                var (FechaUltimoPase, BuzonDestino) = SADEHelper.ObtenerInfoSADE(nuevoExpediente);
+                                var (FechaUltimoPase, BuzonDestino) = new Negocio.Redeterminaciones.DatosExternosNegocioEF().ObtenerUltimoPaseSade(nuevoExpediente);
                                 autorizanteEnLista.BuzonSade = BuzonDestino;
                                 autorizanteEnLista.FechaSade = FechaUltimoPase;
                             }

@@ -182,7 +182,7 @@ namespace Negocio
 
                     var datosSade = BuscarMuchosDatosSade(expedientesValidos);
                     // Después de obtener datosSade, agrega:
-                    var datosAcdir = AcdirHelper.ObtenerInfoACDIRBulk(expedientesValidos);
+                    var datosAcdir = _datosExternos.ObtenerAcdirBulk(expedientesValidos);
 
 
                     // Convertir autorizantes a DTO
@@ -321,22 +321,7 @@ namespace Negocio
         private readonly int[] IdsNoIniciado = { 37, 38 }; // Pendiente, No presentada
         private readonly int[] IdsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
-        /// <summary>
-        /// Obtiene el cache de SADE desde la sesión HTTP
-        /// </summary>
-        private Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerCacheSade()
-        {
-            return ContextoWeb.Actual?.ObtenerDeSesion("CacheSade") as Dictionary<string, (string, DateTime?)>;
-        }
-
-        /// <summary>
-        /// Guarda el cache de SADE en la sesión HTTP
-        /// </summary>
-        private void GuardarCacheSade(Dictionary<string, (string Buzon, DateTime? Fecha)> cache)
-        {
-            ContextoWeb.Actual?.GuardarEnSesion("CacheSade", cache);
-        }
-
+        private readonly DatosExternosNegocioEF _datosExternos = new DatosExternosNegocioEF();
         /// <summary>
         /// Mapea un ID específico de estado de redeterminación a un estado general.
         /// 
@@ -1210,98 +1195,7 @@ namespace Negocio
         /// <returns>Un diccionario con el expediente como clave y una tupla (Buzon, Fecha) como valor.</returns>
         private Dictionary<string, (string Buzon, DateTime? Fecha)> BuscarMuchosDatosSade(List<string> expedientes)
         {
-            // Se valida la entrada.
-            if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, (string, DateTime?)>();
-
-            // Verificar si tenemos cache válido en sesión
-            var cacheSade = ObtenerCacheSade();
-
-            if (cacheSade != null)
-            {
-                Debug.WriteLine($"[CACHE SADE] Cache disponible. Items en cache: {cacheSade.Count}");
-
-                // Verificar si TODOS los expedientes solicitados están en cache (incluso los que no tienen datos)
-                bool todoEnCache = expedientes.All(exp => cacheSade.ContainsKey(exp));
-
-                if (todoEnCache)
-                {
-                    // Filtrar del cache solo los expedientes solicitados que SÍ tienen datos SADE
-                    var resultadoCache = new Dictionary<string, (string, DateTime?)>();
-                    foreach (var expediente in expedientes)
-                    {
-                        if (cacheSade.ContainsKey(expediente) && cacheSade[expediente].Buzon != null)
-                        {
-                            resultadoCache[expediente] = cacheSade[expediente];
-                        }
-                    }
-
-                    Debug.WriteLine($"[CACHE SADE] Todos los expedientes están en cache. Expedientes con datos SADE: {resultadoCache.Count}/{expedientes.Count}");
-                    Debug.WriteLine($"[CACHE SADE] Usando cache para {expedientes.Count} expedientes");
-                    return resultadoCache;
-                }
-                else
-                {
-                    var expedientesEnCache = expedientes.Count(exp => cacheSade.ContainsKey(exp));
-                    Debug.WriteLine($"[CACHE SADE] Cache incompleto. Expedientes en cache: {expedientesEnCache}/{expedientes.Count}");
-                }
-            }
-            else
-            {
-                Debug.WriteLine($"[CACHE SADE] Cache no disponible");
-            }
-
-            Debug.WriteLine($"[CACHE SADE] Consultando BD para {expedientes.Count} expedientes");
-
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    // Se agrupa por expediente para poder encontrar el "TOP 1" de cada uno.
-                    var ultimosPases = context.PasesSade
-                        .AsNoTracking()
-                        .Where(p => expedientes.Contains(p.Expediente))
-                        .GroupBy(p => p.Expediente)
-                        // Para cada grupo (g), se ordena por fecha descendente y se toma el primero.
-                        // Esto replica exactamente la lógica "SELECT TOP 1 ... ORDER BY FECHA DESC".
-                        .Select(g => g.OrderByDescending(p => p.FechaUltimoPase).FirstOrDefault())
-                        .ToList(); // Se materializa la lista de los pases más recientes.
-
-                    // Se convierte la lista resultante en un diccionario para búsquedas rápidas.
-                    var resultado = ultimosPases
-                        .Where(p => p != null) // Se asegura de no incluir grupos que no tuvieran pases.
-                        .ToDictionary(p => p.Expediente, p => (p.BuzonDestino, p.FechaUltimoPase));
-
-                    // Actualizar cache con los resultados Y con los expedientes que no tienen datos
-                    var cacheActual = ObtenerCacheSade() ?? new Dictionary<string, (string, DateTime?)>();
-
-                    // Agregar expedientes con datos
-                    foreach (var kvp in resultado)
-                    {
-                        cacheActual[kvp.Key] = kvp.Value;
-                    }
-
-                    // Agregar expedientes SIN datos (marcarlos como consultados con null)
-                    foreach (var expediente in expedientes)
-                    {
-                        if (!resultado.ContainsKey(expediente))
-                        {
-                            cacheActual[expediente] = (null, null); // Sin datos SADE
-                        }
-                    }
-
-                    GuardarCacheSade(cacheActual);
-                    Debug.WriteLine($"[CACHE SADE] Cache actualizado con {resultado.Count} expedientes CON datos + {expedientes.Count - resultado.Count} expedientes SIN datos. Total en cache: {cacheActual.Count}");
-
-                    return resultado;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Se registra el error y se devuelve un diccionario vacío.
-                System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SADE: {ex.Message}");
-                return new Dictionary<string, (string, DateTime?)>();
-            }
+            return _datosExternos.ObtenerUltimosPasesSade(expedientes);
         }
 
         /// <summary>
@@ -1328,8 +1222,8 @@ namespace Negocio
         /// </summary>
         public Dictionary<string, string> ObtenerAcdirBulk(List<string> expedientes)
         {
-            // Delega la implementación a AcdirHelper, manteniendo la separación de responsabilidades
-            return AcdirHelper.ObtenerInfoACDIRBulk(expedientes ?? new List<string>());
+            // Delega en DatosExternosNegocioEF
+            return _datosExternos.ObtenerAcdirBulk(expedientes ?? new List<string>());
         }
 
         /// <summary>
@@ -1337,7 +1231,7 @@ namespace Negocio
         /// </summary>
         public static void LimpiarCacheSade()
         {
-            ContextoWeb.Actual?.QuitarDeSesion("CacheSade");
+            DatosExternosNegocioEF.LimpiarCacheSade();
             Debug.WriteLine("[CACHE SADE] Cache limpiado manualmente");
         }
 
