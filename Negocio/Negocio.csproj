@@ -148,8 +148,10 @@
     <Compile Include="Infraestructura\IContextoWeb.cs" />
     <Compile Include="MontoHelper.cs" />
     <Compile Include="Redeterminaciones\DatosExternosNegocioEF.cs" />
-    <Compile Include="Redeterminaciones\EstadoRedetMapper.cs" />
-    <Compile Include="Redeterminaciones\RedeterminacionCalculator.cs" />
+    <Compile Include="Redeterminaciones\EstadoGeneral.cs" />
+    <Compile Include="Redeterminaciones\UltimoPaseSade.cs" />
+    <Compile Include="Redeterminaciones\MapeoEstadoRedet.cs" />
+    <Compile Include="Redeterminaciones\ReglasRedeterminaciones.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
     <Compile Include="ObraNegocioEF.cs" />

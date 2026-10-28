@@ -14,7 +14,7 @@ namespace IVC.Tests
     /// faltante 75 %). Una redeterminación del 10 % vale 1.000 * 0,10 * 0,75 = 75.
     /// </summary>
     [TestClass]
-    public class RedeterminacionCalculatorTests
+    public class ReglasRedeterminacionesTests
     {
         private static readonly DateTime Salto = new DateTime(2026, 3, 15);
 
@@ -35,7 +35,7 @@ namespace IVC.Tests
                 MontoTotal = monto,
                 MesAprobacion = mes,
                 TipoPagoId = tipoPago,
-                Porcentaje = RedeterminacionCalculator.PorcentajeSobreAutorizado(monto, montoAutorizado),
+                Porcentaje = ReglasRedeterminaciones.PorcentajeSobreAutorizado(monto, montoAutorizado),
             };
 
         // ---------- Paso A/B/C: MontoRedet ----------
@@ -46,7 +46,7 @@ namespace IVC.Tests
             var redet = Redet(1, "A-1", 1, 10m, Salto);
             var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 28)) }; // mismo mes, día posterior
 
-            RedeterminacionCalculator.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(25m, redet.PorcentajeEjecutadoPreSalto);
             Assert.AreEqual(75m, redet.MontoRedet);
@@ -58,7 +58,7 @@ namespace IVC.Tests
             var redet = Redet(1, "A-1", 1, 10m, Salto);
             var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 4, 1)) };
 
-            RedeterminacionCalculator.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(0m, redet.PorcentajeEjecutadoPreSalto);
             Assert.AreEqual(100m, redet.MontoRedet); // faltante 100 %
@@ -68,9 +68,9 @@ namespace IVC.Tests
         public void R2_AnticipoPreSalto_CuentaComoEjecutado()
         {
             var redet = Redet(1, "A-1", 1, 10m, Salto);
-            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 1, 1), RedeterminacionCalculator.TipoPagoAnticipoId) };
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 1, 1), ReglasRedeterminaciones.TipoPagoAnticipoId) };
 
-            RedeterminacionCalculator.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(75m, redet.MontoRedet);
         }
@@ -82,7 +82,7 @@ namespace IVC.Tests
             var r2 = Redet(2, "A-1", 2, 10m, new DateTime(2026, 6, 1));
             var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 1)) };
 
-            RedeterminacionCalculator.CalcularMontos(new[] { r2, r1 }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { r2, r1 }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(75m, r1.MontoRedet);
             Assert.AreEqual((1000m + 75m) * 0.10m * 0.75m, r2.MontoRedet); // 80,625
@@ -95,7 +95,7 @@ namespace IVC.Tests
             var r2 = Redet(2, "A-1", 2, 10m, new DateTime(2026, 6, 1));
             var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 1)) };
 
-            RedeterminacionCalculator.CalcularMontos(new[] { r1, r2 }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { r1, r2 }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(0m, r1.MontoRedet);
             Assert.AreEqual(75m, r2.MontoRedet); // base sin la desestimada
@@ -104,9 +104,9 @@ namespace IVC.Tests
         [TestMethod]
         public void R6_FueraDePlazo_TambienDesestimada()
         {
-            Assert.IsTrue(RedeterminacionCalculator.EsDesestimada(36));
-            Assert.IsFalse(RedeterminacionCalculator.EsDesestimada(37));
-            Assert.IsFalse(RedeterminacionCalculator.EsDesestimada(null));
+            Assert.IsTrue(ReglasRedeterminaciones.EsDesestimada(36));
+            Assert.IsFalse(ReglasRedeterminaciones.EsDesestimada(37));
+            Assert.IsFalse(ReglasRedeterminaciones.EsDesestimada(null));
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace IVC.Tests
             var redet = Redet(1, "A-1", 1, 10m, Salto);
             var certs = new[] { Certificado(1, "A-1", 1500m, new DateTime(2026, 1, 1)) }; // 150 % ejecutado
 
-            RedeterminacionCalculator.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(150m, redet.PorcentajeEjecutadoPreSalto);
             Assert.AreEqual(0m, redet.MontoRedet);
@@ -127,7 +127,7 @@ namespace IVC.Tests
             var redet = Redet(1, "A-1", 1, 10m, Salto);
             var certs = new[] { Certificado(1, "A-1", 100m, new DateTime(2026, 1, 1)) };
 
-            RedeterminacionCalculator.CalcularMontos(new[] { redet }, new[] { Autorizante(monto: 0m) }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante(monto: 0m) }, certs);
 
             Assert.AreEqual(0m, redet.PorcentajeEjecutadoPreSalto);
             Assert.AreEqual(0m, redet.MontoRedet);
@@ -139,9 +139,9 @@ namespace IVC.Tests
             var sinSalto = Redet(1, "A-1", 1, 10m, null);
             var sinPorcentaje = Redet(2, "A-1", 2, null, Salto);
 
-            var calculadas = RedeterminacionCalculator.CalcularMontos(new[] { sinSalto, sinPorcentaje }, new[] { Autorizante() }, new CertificadoEF[0]);
+            ReglasRedeterminaciones.CalcularMontos(new[] { sinSalto, sinPorcentaje }, new[] { Autorizante() }, new CertificadoEF[0]);
 
-            Assert.AreEqual(0, calculadas.Count);
+            Assert.IsNull(sinSalto.PorcentajeEjecutadoPreSalto);
             Assert.IsNull(sinSalto.MontoRedet);
             Assert.IsNull(sinPorcentaje.MontoRedet);
         }
@@ -155,7 +155,7 @@ namespace IVC.Tests
             var r2 = Redet(2, "A-2", 1, 10m, Salto);
             var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 1, 1)) }; // sólo A-1 tiene ejecutado
 
-            RedeterminacionCalculator.CalcularMontos(new[] { r1, r2 }, new[] { a1, a2 }, certs);
+            ReglasRedeterminaciones.CalcularMontos(new[] { r1, r2 }, new[] { a1, a2 }, certs);
 
             Assert.AreEqual(75m, r1.MontoRedet);
             Assert.AreEqual(100m, r2.MontoRedet); // faltante 100 %, no hereda los certificados de A-1
@@ -172,7 +172,7 @@ namespace IVC.Tests
                 Redet(2, "A-1", 1, 1m, Salto),
             };
 
-            var ids = RedeterminacionCalculator.OrdenarParaAcumular(lista).Select(r => r.Id).ToArray();
+            var ids = ReglasRedeterminaciones.OrdenarParaAcumular(lista).Select(r => r.Id).ToArray();
 
             CollectionAssert.AreEqual(new[] { 2, 3, 4, 5 }, ids);
         }
@@ -191,7 +191,7 @@ namespace IVC.Tests
                 Dto(2, 100m, new DateTime(2026, 4, 1)),  // posterior: reliquida
             };
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(RedetCalculada(), certs);
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
 
             Assert.AreEqual(1, reliq.Count);
             Assert.AreEqual(2, reliq[0].Certificado.Id);
@@ -206,7 +206,7 @@ namespace IVC.Tests
                 Dto(2, 100m, new DateTime(2026, 5, 1)), // 10 %
             };
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(RedetCalculada(), certs);
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
 
             Assert.AreEqual(35m, reliq[0].PorcentajeAplicado);
             Assert.AreEqual(75m * 0.35m, reliq[0].Monto); // 26,25
@@ -224,7 +224,7 @@ namespace IVC.Tests
                 Dto(1, 100m, new DateTime(2026, 4, 1)),
             };
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(RedetCalculada(), certs);
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
 
             CollectionAssert.AreEqual(new[] { 1, 2, 9 }, reliq.Select(r => r.Certificado.Id).ToArray());
             Assert.AreEqual(35m, reliq[0].PorcentajeAplicado);
@@ -233,9 +233,9 @@ namespace IVC.Tests
         [TestMethod]
         public void R2_AnticipoPostSalto_NoReliquida()
         {
-            var certs = new[] { Dto(1, 100m, new DateTime(2026, 4, 1), tipoPago: RedeterminacionCalculator.TipoPagoAnticipoId) };
+            var certs = new[] { Dto(1, 100m, new DateTime(2026, 4, 1), tipoPago: ReglasRedeterminaciones.TipoPagoAnticipoId) };
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(RedetCalculada(), certs);
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
 
             Assert.AreEqual(0, reliq.Count);
         }
@@ -245,7 +245,7 @@ namespace IVC.Tests
         {
             var certs = new[] { Dto(1, 100m, new DateTime(2026, 4, 1)) };
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(RedetCalculada(montoRedet: 0m, etapa: 36), certs);
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(montoRedet: 0m, etapa: 36), certs);
 
             Assert.AreEqual(0, reliq.Count);
         }
@@ -256,7 +256,7 @@ namespace IVC.Tests
             var redet = RedetCalculada();
             redet.MontoRedet = null;
 
-            var reliq = RedeterminacionCalculator.GenerarReliquidaciones(redet, new[] { Dto(1, 100m, new DateTime(2026, 4, 1)) });
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(redet, new[] { Dto(1, 100m, new DateTime(2026, 4, 1)) });
 
             Assert.AreEqual(0, reliq.Count);
         }
@@ -266,20 +266,20 @@ namespace IVC.Tests
         [TestMethod]
         public void Sigaf_UnSoloPago_SeLlevaTodoElDevengado()
         {
-            Assert.AreEqual(500m, RedeterminacionCalculator.ProrratearSigaf(500m, 80m, new[] { 80m }));
+            Assert.AreEqual(500m, ReglasRedeterminaciones.ProrratearSigaf(500m, 80m, new[] { 80m }));
         }
 
         [TestMethod]
         public void Sigaf_VariosPagos_ProporcionalAlMonto()
         {
-            Assert.AreEqual(100m, RedeterminacionCalculator.ProrratearSigaf(400m, 25m, new[] { 25m, 75m }));
+            Assert.AreEqual(100m, ReglasRedeterminaciones.ProrratearSigaf(400m, 25m, new[] { 25m, 75m }));
         }
 
         [TestMethod]
         public void Sigaf_SinDevengadoOSumaCero_Null()
         {
-            Assert.IsNull(RedeterminacionCalculator.ProrratearSigaf(0m, 25m, new[] { 25m, 75m }));
-            Assert.IsNull(RedeterminacionCalculator.ProrratearSigaf(400m, 0m, new[] { 0m, 0m }));
+            Assert.IsNull(ReglasRedeterminaciones.ProrratearSigaf(0m, 25m, new[] { 25m, 75m }));
+            Assert.IsNull(ReglasRedeterminaciones.ProrratearSigaf(400m, 0m, new[] { 0m, 0m }));
         }
 
         [DataTestMethod]
@@ -290,7 +290,7 @@ namespace IVC.Tests
         [DataRow("EX-1", null, "EN TRAMITE")]
         public void Estado_SegunExpedienteYSigaf(string expediente, double? sigaf, string esperado)
         {
-            Assert.AreEqual(esperado, RedeterminacionCalculator.DeterminarEstado(expediente, (decimal?)sigaf));
+            Assert.AreEqual(esperado, ReglasRedeterminaciones.DeterminarEstado(expediente, (decimal?)sigaf));
         }
     }
 }

@@ -7,12 +7,12 @@ using Dominio.DTO;
 namespace Negocio.Redeterminaciones
 {
     /// <summary>
-    /// Reglas de cálculo de redeterminaciones y reliquidaciones, sin acceso a datos ni a HttpContext.
+    /// Reglas de cálculo de redeterminaciones y reliquidaciones, sin acceso a datos ni a la web.
     ///
     /// Es la única implementación de las reglas R1 a R6 del lado de la aplicación y debe dar lo mismo que
     /// las vistas SQL de Database/vw_PowerBI_Redeterminaciones.sql (documentación funcional en
     /// Docs/calculo-redeterminaciones.html, Sección 6). Cualquier cambio de regla se hace acá, en las
-    /// vistas y en los tests de Tests/IVC.Tests/RedeterminacionCalculatorTests.cs.
+    /// vistas y en los tests de Tests/IVC.Tests/ReglasRedeterminacionesTests.cs.
     ///
     /// Reglas vigentes (fijadas el 22/09/2026, R6 el 01/10/2026):
     ///  R1. El certificado del mes del salto cuenta como ejecutado. La comparación es mes a mes.
@@ -24,7 +24,7 @@ namespace Negocio.Redeterminaciones
     ///  R5. Cada autorizante se calcula con sus propios certificados.
     ///  R6. Rechazada (35) o Fuera de Plazo (36): monto cero, no acumula y no reliquida.
     /// </summary>
-    public static class RedeterminacionCalculator
+    public static class ReglasRedeterminaciones
     {
         /// <summary>Tipo de pago "anticipo financiero" (R2).</summary>
         public const int TipoPagoAnticipoId = 1;
@@ -33,7 +33,7 @@ namespace Negocio.Redeterminaciones
         public const int TipoPagoReliquidacionId = 3;
 
         /// <summary>Etapas de ESTADOS_REDET que anulan el monto (R6): 35 Rechazada, 36 Fuera de Plazo.</summary>
-        public static readonly int[] EtapasDesestimadas = { 35, 36 };
+        public static readonly IReadOnlyList<int> EtapasDesestimadas = Array.AsReadOnly(new[] { 35, 36 });
 
         public static DateTime PrimerDiaDelMes(DateTime fecha) => new DateTime(fecha.Year, fecha.Month, 1);
 
@@ -51,12 +51,11 @@ namespace Negocio.Redeterminaciones
             montoAutorizado > 0 ? monto / montoAutorizado * 100 : 0;
 
         /// <summary>
-        /// Calcula MontoRedet y PorcentajeEjecutadoPreSalto de cada redeterminación (Pasos A, B y C).
-        /// Modifica las redeterminaciones recibidas. Las que no tienen salto o porcentaje, o cuyo autorizante
-        /// no está en la lista, quedan con MontoRedet null.
+        /// Calcula MontoRedet y PorcentajeEjecutadoPreSalto de cada redeterminación (Pasos A, B y C) y los
+        /// escribe en las redeterminaciones recibidas. Las que no tienen salto o porcentaje, o cuyo autorizante
+        /// no está en la lista, no se tocan.
         /// </summary>
-        /// <returns>Las redeterminaciones calculadas, en el orden en que se acumularon.</returns>
-        public static List<RedeterminacionEF> CalcularMontos(
+        public static void CalcularMontos(
             IEnumerable<RedeterminacionEF> redeterminaciones,
             IEnumerable<AutorizanteEF> autorizantes,
             IEnumerable<CertificadoEF> certificados)
@@ -106,8 +105,6 @@ namespace Negocio.Redeterminaciones
 
                 calculadas.Add(redet);
             }
-
-            return calculadas;
         }
 
         /// <summary>
@@ -151,12 +148,7 @@ namespace Negocio.Redeterminaciones
                 decimal porcentajeAplicado = (cert.Porcentaje ?? 0) + (esPrimero ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
                 esPrimero = false;
 
-                resultado.Add(new ReliquidacionCalculada
-                {
-                    Certificado = cert,
-                    PorcentajeAplicado = porcentajeAplicado,
-                    Monto = redet.MontoRedet.Value * (porcentajeAplicado / 100),
-                });
+                resultado.Add(new ReliquidacionCalculada(cert, porcentajeAplicado, redet.MontoRedet.Value * (porcentajeAplicado / 100)));
             }
 
             return resultado;
@@ -188,10 +180,17 @@ namespace Negocio.Redeterminaciones
     }
 
     /// <summary>Resultado de GenerarReliquidaciones: el certificado afectado y el monto que se reliquida sobre él.</summary>
-    public class ReliquidacionCalculada
+    public sealed class ReliquidacionCalculada
     {
-        public CertificadoDTO Certificado { get; set; }
-        public decimal PorcentajeAplicado { get; set; }
-        public decimal Monto { get; set; }
+        public ReliquidacionCalculada(CertificadoDTO certificado, decimal porcentajeAplicado, decimal monto)
+        {
+            Certificado = certificado;
+            PorcentajeAplicado = porcentajeAplicado;
+            Monto = monto;
+        }
+
+        public CertificadoDTO Certificado { get; }
+        public decimal PorcentajeAplicado { get; }
+        public decimal Monto { get; }
     }
 }

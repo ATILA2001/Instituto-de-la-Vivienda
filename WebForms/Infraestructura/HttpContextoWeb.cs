@@ -38,15 +38,5 @@ namespace WebForms.Infraestructura
         public void LimpiarSesion() => _context.Session?.Clear();
 
         public ClaimsPrincipal Usuario => _context.User as ClaimsPrincipal;
-
-        public void EnviarArchivo(byte[] contenido, string nombreArchivo, string contentType)
-        {
-            var response = _context.Response;
-            response.Clear();
-            response.ContentType = contentType;
-            response.AddHeader("content-disposition", "attachment;  filename=" + nombreArchivo);
-            response.BinaryWrite(contenido);
-            response.End();
-        }
     }
 }

@@ -320,7 +320,7 @@ namespace WebForms
 
                 };
 
-                ExcelHelper.ExportarDatosGenericos(todosLosCertificados, mapeoColumnas, "Certificados");
+                Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(todosLosCertificados, mapeoColumnas), "Certificados");
                 ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
             catch (Exception)

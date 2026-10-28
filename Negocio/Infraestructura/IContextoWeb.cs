@@ -4,9 +4,9 @@ using System.Security.Claims;
 namespace Negocio.Infraestructura
 {
     /// <summary>
-    /// Lo único que la capa de negocio necesita del request web: la sesión del usuario, su principal
-    /// autenticado y la capacidad de enviarle un archivo. Permite que Negocio no dependa de System.Web
-    /// y que las reglas que usan sesión o claims se prueben con un contexto falso.
+    /// Lo único que la capa de negocio necesita del request web: la sesión del usuario y su principal
+    /// autenticado. Permite que Negocio no dependa de System.Web y que las reglas que usan sesión o
+    /// claims se prueben con un contexto falso.
     /// </summary>
     public interface IContextoWeb
     {
@@ -24,9 +24,6 @@ namespace Negocio.Infraestructura
 
         /// <summary>Principal del request; null si no hay request o no es un ClaimsPrincipal.</summary>
         ClaimsPrincipal Usuario { get; }
-
-        /// <summary>Envía un archivo como descarga y termina la respuesta.</summary>
-        void EnviarArchivo(byte[] contenido, string nombreArchivo, string contentType);
     }
 
     /// <summary>

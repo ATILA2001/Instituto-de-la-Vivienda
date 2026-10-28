@@ -11,7 +11,6 @@ namespace IVC.Tests
         public bool SesionDisponible { get; set; } = true;
         public ClaimsPrincipal Usuario { get; set; }
         public int VecesLimpiada { get; private set; }
-        public string UltimoArchivoEnviado { get; private set; }
 
         public object ObtenerDeSesion(string clave) => Sesion.TryGetValue(clave, out var v) ? v : null;
 
@@ -24,8 +23,6 @@ namespace IVC.Tests
             Sesion.Clear();
             VecesLimpiada++;
         }
-
-        public void EnviarArchivo(byte[] contenido, string nombreArchivo, string contentType) => UltimoArchivoEnviado = nombreArchivo;
 
         /// <summary>Registra este contexto como el actual para el código de Negocio.</summary>
         public ContextoWebFalso Registrar()

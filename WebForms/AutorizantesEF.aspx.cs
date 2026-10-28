@@ -1,6 +1,7 @@
 using Dominio;
 using Dominio.DTO;
 using Negocio;
+using Negocio.Redeterminaciones;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -70,6 +71,8 @@ namespace WebForms
         /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
         /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
         /// </summary>
+        private readonly DatosExternosNegocioEF _datosExternos = new DatosExternosNegocioEF();
+
         private bool? _puedeEditarSeguimiento;
         /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
         private bool PuedeEditarSeguimiento =>
@@ -257,7 +260,7 @@ namespace WebForms
                     { "GEDO", "Acdir"   }
                 };
 
-                Negocio.ExcelHelper.ExportarDatosGenericos(datosParaExportar, mapeoColumnas, "Autorizantes");
+                Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(datosParaExportar, mapeoColumnas), "Autorizantes");
                 // El download es la confirmación de éxito (Response.End() impide mostrar toast)
             }
             catch (Exception)
@@ -683,7 +686,7 @@ namespace WebForms
                 if (gridviewRegistros.HeaderRow?.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
                 {
                     var negocio = new CalculoRedeterminacionNegocioEF();
-                    cblsHeaderEstado.DataSource = Negocio.Redeterminaciones.EstadoRedetMapper.ObtenerEstadosParaFiltro();
+                    cblsHeaderEstado.DataSource = MapeoEstadoRedet.ObtenerEstadosParaFiltro();
                     cblsHeaderEstado.DataTextField = "Nombre";
                     cblsHeaderEstado.DataValueField = "Id";
                     cblsHeaderEstado.DataBind();
@@ -1234,9 +1237,9 @@ namespace WebForms
                             }
                             else
                             {
-                                var (FechaUltimoPase, BuzonDestino) = new Negocio.Redeterminaciones.DatosExternosNegocioEF().ObtenerUltimoPaseSade(nuevoExpediente);
-                                autorizanteEnLista.BuzonSade = BuzonDestino;
-                                autorizanteEnLista.FechaSade = FechaUltimoPase;
+                                var pase = _datosExternos.ObtenerUltimoPaseSade(nuevoExpediente);
+                                autorizanteEnLista.BuzonSade = pase.Buzon;
+                                autorizanteEnLista.FechaSade = pase.Fecha;
                             }
                             // También reflejar en el objeto usado en esta operación
                             autorizante.BuzonSade = autorizanteEnLista.BuzonSade;

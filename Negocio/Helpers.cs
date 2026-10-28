@@ -24,8 +24,12 @@ namespace Negocio
         /// <summary>
         /// Exporta datos de cualquier tipo a Excel usando un mapeo (Header -> RutaPropiedad)
         /// </summary>
-        public static void ExportarDatosGenericos<T>(IEnumerable<T> datos,
-            Dictionary<string, string> mapeoColumnas, string fileName)
+        /// <summary>
+        /// Genera un libro Excel (.xlsx) con una hoja "Datos": una columna por entrada del mapeo
+        /// (encabezado -> ruta de propiedad) y una fila por elemento. Devuelve el archivo en memoria;
+        /// enviarlo al navegador es responsabilidad de la capa web.
+        /// </summary>
+        public static byte[] GenerarXlsx<T>(IEnumerable<T> datos, Dictionary<string, string> mapeoColumnas)
         {
             if (mapeoColumnas == null || mapeoColumnas.Count == 0)
                 throw new ArgumentException("El mapeo de columnas está vacío");
@@ -49,13 +53,7 @@ namespace Negocio
                     mapeoNormalizado[claveNormalizada] = kvp.Value;
                 }
 
-                // Depuración: imprimir mapeo normalizado
-                System.Diagnostics.Debug.WriteLine("Mapeo normalizado:");
-                foreach (var kvp in mapeoNormalizado)
-                {
-                    System.Diagnostics.Debug.WriteLine($"- Encabezado: '{kvp.Key}' | Ruta: '{kvp.Value}'");
-                }
-
+                
                 // Agregar encabezados desde el mapeo (usar la clave original como texto)
                 foreach (var kvp in mapeoColumnas)
                 {
@@ -75,7 +73,6 @@ namespace Negocio
                         string rutaPropiedad = kvp.Value;
 
                         object valor = ObtenerValorPorRuta(item, rutaPropiedad);
-                        System.Diagnostics.Debug.WriteLine($"Fila {fila}: Encabezado '{header}' -> Ruta '{rutaPropiedad}' -> Valor: {valor}");
 
                         // Formatear según tipo de dato
                         if (valor is decimal || valor is double || valor is float)
@@ -99,7 +96,7 @@ namespace Negocio
                 }
 
                 AjustarAnchosColumnas(worksheet, columnaActual - 1);
-                DescargarArchivo(package, fileName);
+                return package.GetAsByteArray();
             }
         }
 
@@ -183,18 +180,6 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Descarga el archivo Excel generado
-        /// </summary>
-        private static void DescargarArchivo(ExcelPackage package, string fileName)
-        {
-            var contexto = ContextoWeb.Actual;
-            if (contexto == null)
-                throw new InvalidOperationException("Esta función solo puede usarse en un contexto web.");
-
-            contexto.EnviarArchivo(package.GetAsByteArray(), fileName + ".xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        }
     }
 
     public static class UserHelper

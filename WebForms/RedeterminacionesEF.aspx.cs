@@ -951,7 +951,7 @@ namespace WebForms
  { "Fecha SADE", "FechaSade" }
  };
 
-                ExcelHelper.ExportarDatosGenericos(redeterminaciones, mapeoColumnas, "Redeterminaciones");
+                Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(redeterminaciones, mapeoColumnas), "Redeterminaciones");
                 ToastService.Show(this.Page, "Exportación completada con éxito.", ToastService.ToastType.Success);
             }
             catch (Exception)

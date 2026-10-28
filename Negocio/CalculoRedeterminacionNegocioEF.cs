@@ -47,7 +47,7 @@ namespace Negocio
     /// MAPEO DE ESTADOS REDETERMINACIONES:
     /// - Estados específicos de redeterminaciones se mapean a estados generales
     /// - Permite visualización unificada en UI con estados comprensibles
-    /// - El mapeo etapa -> estado general vive en EstadoRedetMapper; las reglas de cálculo en RedeterminacionCalculator
+    /// - El mapeo etapa -> estado general vive en MapeoEstadoRedet; las reglas de cálculo en ReglasRedeterminaciones
     /// 
     /// PATRÓN DE INTEGRACIÓN:
     /// - Métodos BuscarMuchos*() para consultas bulk optimizadas
@@ -173,7 +173,7 @@ namespace Negocio
 
                     var datosSade = BuscarMuchosDatosSade(expedientesValidos);
                     // Después de obtener datosSade, agrega:
-                    var datosAcdir = _datosExternos.ObtenerAcdirBulk(expedientesValidos);
+                    var datosAcdir = _datosExternos.ObtenerAcdirs(expedientesValidos);
 
 
                     // Convertir autorizantes a DTO
@@ -217,7 +217,7 @@ namespace Negocio
                         var auth = redet.Autorizante;
                         var obra = auth?.Obra;
 
-                        var estado = EstadoRedetMapper.MapearEstadoDesdeId(redet.EstadoRedetEFId);
+                        var estado = MapeoEstadoRedet.MapearEstadoDesdeId(redet.EstadoRedetEFId);
                         var dto = new AutorizanteDTO
                         {
                             IdRedeterminacion = redet.Id,
@@ -556,7 +556,7 @@ namespace Negocio
                                          TipoPagoId = cert.TipoPagoId,
                                          TipoPagoNombre = tipoPago?.Nombre,
                                          EstadoRedetId = auth.Redeterminaciones?.OrderByDescending(r => r.Id).Select(r => (int?)r.EstadoRedetEFId).FirstOrDefault(),
-                                         Porcentaje = (auth.MontoAutorizado > 0) ? (cert.MontoTotal / auth.MontoAutorizado) * 100 : 0,
+                                         Porcentaje = ReglasRedeterminaciones.PorcentajeSobreAutorizado(cert.MontoTotal, auth.MontoAutorizado),
                                          PorcEjecFisica = cert.PorcEjecFisica,
                                      }).ToList();
 
@@ -589,8 +589,8 @@ namespace Negocio
 
                     certificadosDtoPorAutorizante.TryGetValue(autorizanteDeRedet.CodigoAutorizante, out var certificadosDelAutorizante);
 
-                    // Pasos 2 y 3 (R1, R2, R3, R6): la regla vive en RedeterminacionCalculator.
-                    foreach (var reliq in RedeterminacionCalculator.GenerarReliquidaciones(redet, certificadosDelAutorizante))
+                    // Pasos 2 y 3 (R1, R2, R3, R6): la regla vive en ReglasRedeterminaciones.
+                    foreach (var reliq in ReglasRedeterminaciones.GenerarReliquidaciones(redet, certificadosDelAutorizante))
                     {
                         var certAfectado = reliq.Certificado;
                         decimal porcentajeAplicado = reliq.PorcentajeAplicado;
@@ -618,7 +618,7 @@ namespace Negocio
                             EstadoRedetId = redet.EstadoRedetEFId,
                             AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
                             CodigoAutorizante = redet.CodigoRedet,
-                            AutorizanteEstado = EstadoRedetMapper.MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
+                            AutorizanteEstado = MapeoEstadoRedet.MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
                             // Datos de la obra de la redeterminación (no del certificado afectado)
                             ObraId = obraRedet?.Id,
                             ObraDescripcion = obraRedet?.Descripcion,
@@ -635,7 +635,7 @@ namespace Negocio
                             ProyectoNombre = proyectoRedet?.Nombre,
                             LineaGestionId = lineaGestionRedet?.Id,
                             LineaGestionNombre = lineaGestionRedet?.Nombre,
-                            TipoPagoId = RedeterminacionCalculator.TipoPagoReliquidacionId,
+                            TipoPagoId = ReglasRedeterminaciones.TipoPagoReliquidacionId,
                             TipoPagoNombre = "RELIQUIDACION",
                             Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
                         });
@@ -687,7 +687,7 @@ namespace Negocio
             List<CertificadoDTO> todosLosCertificados,
             bool persistirEnBD = false,
             Dictionary<string, decimal> datosSigafPrecargados = null,
-            Dictionary<string, (string Buzon, DateTime? Fecha)> datosSadePrecargados = null)
+            Dictionary<string, UltimoPaseSade> datosSadePrecargados = null)
         {
             try
             {
@@ -785,7 +785,7 @@ namespace Negocio
 
                             // Certificados normales (no reliquidaciones)
                             var certificadosNormales = certificados
-                                .Where(c => c.TipoPagoId != 3 && c.Id > 0)
+                                .Where(c => c.TipoPagoId != ReglasRedeterminaciones.TipoPagoReliquidacionId && c.Id > 0)
                                 .ToList();
 
                             foreach (var certDTO in certificadosNormales)
@@ -808,7 +808,7 @@ namespace Negocio
 
                             // Reliquidaciones
                             var reliquidaciones = certificados
-                                .Where(c => c.TipoPagoId == 3 && c.MesAprobacion.HasValue)
+                                .Where(c => c.TipoPagoId == ReglasRedeterminaciones.TipoPagoReliquidacionId && c.MesAprobacion.HasValue)
                                 .ToList();
 
                             foreach (var reliqDTO in reliquidaciones)
@@ -900,7 +900,7 @@ namespace Negocio
                     .Select(c => c.MontoTotal)
                     .ToList();
 
-                return RedeterminacionCalculator.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
+                return ReglasRedeterminaciones.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
             }
             catch (Exception ex)
             {
@@ -911,7 +911,7 @@ namespace Negocio
 
         /// <summary>
         /// Calcula MontoRedet y PorcentajeEjecutadoPreSalto de cada redeterminación (Pasos A, B y C).
-        /// Las reglas viven en RedeterminacionCalculator; acá sólo se cargan los certificados si no se recibieron.
+        /// Las reglas viven en ReglasRedeterminaciones; acá sólo se cargan los certificados si no se recibieron.
         /// </summary>
         private void CalcularMontoRedeterminaciones(List<RedeterminacionEF> redeterminaciones, List<AutorizanteEF> autorizantes, List<CertificadoEF> certificados = null)
         {
@@ -1020,7 +1020,7 @@ namespace Negocio
         /// <returns>Un diccionario con el expediente como clave y la suma de importes como valor.</returns>
         private Dictionary<string, decimal> BuscarMuchosNumerosSigaf(List<string> expedientes)
         {
-            return _datosExternos.ObtenerDevengadosPorExpediente(expedientes);
+            return _datosExternos.ObtenerDevengados(expedientes);
         }
 
         #endregion
@@ -1055,7 +1055,7 @@ namespace Negocio
         /// - Filtro inicial con Contains() para reducir dataset
         /// 
         /// ESTRUCTURA DE RETORNO:
-        /// - Dictionary<string, (string Buzon, DateTime? Fecha)>
+        /// - Dictionary<string, UltimoPaseSade>
         /// - Key: Expediente
         /// - Value.Buzon: Buzón de destino del último pase
         /// - Value.Fecha: Fecha del último pase
@@ -1083,7 +1083,7 @@ namespace Negocio
         /// </summary>
         /// <param name="expedientes">Lista de expedientes a consultar.</param>
         /// <returns>Un diccionario con el expediente como clave y una tupla (Buzon, Fecha) como valor.</returns>
-        private Dictionary<string, (string Buzon, DateTime? Fecha)> BuscarMuchosDatosSade(List<string> expedientes)
+        private Dictionary<string, UltimoPaseSade> BuscarMuchosDatosSade(List<string> expedientes)
         {
             return _datosExternos.ObtenerUltimosPasesSade(expedientes);
         }
@@ -1091,7 +1091,7 @@ namespace Negocio
         /// <summary>
         /// Wrapper público para exponer la consulta bulk de SADE a otras clases.
         /// </summary>
-        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerDatosSadeBulk(List<string> expedientes)
+        public Dictionary<string, UltimoPaseSade> ObtenerDatosSadeBulk(List<string> expedientes)
         {
             return BuscarMuchosDatosSade(expedientes ?? new List<string>());
         }
@@ -1113,7 +1113,7 @@ namespace Negocio
         public Dictionary<string, string> ObtenerAcdirBulk(List<string> expedientes)
         {
             // Delega en DatosExternosNegocioEF
-            return _datosExternos.ObtenerAcdirBulk(expedientes ?? new List<string>());
+            return _datosExternos.ObtenerAcdirs(expedientes ?? new List<string>());
         }
 
         /// <summary>
@@ -1380,8 +1380,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11, // Las redeterminaciones no tienen concepto específico
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
@@ -1741,8 +1741,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11,
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = EstadoRedetMapper.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
@@ -2036,7 +2036,7 @@ namespace Negocio
                                 ExpedientePago = item.Reliq.Expediente,
                                 MontoTotal = 0, // Las reliquidaciones no tienen monto en esta tabla
                                 MesAprobacion = item.Reliq.MesAprobacion,
-                                TipoPagoId = 3, // Reliquidación siempre es tipo 3
+                                TipoPagoId = ReglasRedeterminaciones.TipoPagoReliquidacionId, // Reliquidación siempre es tipo 3
                                 ObraId = item.Obra.Id,
                                 ObraDescripcion = item.Obra.Descripcion,
                                 AutorizanteId = item.Auth.Id,

@@ -301,7 +301,7 @@ namespace WebForms
                         { "Fecha Fin", "FechaFin" }
                     };
 
-                    ExcelHelper.ExportarDatosGenericos(obrasCompleto, mapeo, "ObrasEF");
+                    Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(obrasCompleto, mapeo), "ObrasEF");
                     ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
                 }
                 else

@@ -11,12 +11,12 @@ namespace Negocio.Redeterminaciones
 {
     /// <summary>
     /// Acceso a los datos externos que alimentan las grillas de redeterminaciones: último pase SADE
-    /// (PASES_SADE) y número especial ACDIR (GEDO). Único lugar que consulta esas tablas y que maneja
-    /// su caché en sesión. Reemplaza a los antiguos SADEHelper (SQL crudo vía AccesoDatos) y AcdirHelper.
+    /// (PASES_SADE), devengado SIGAF (DEVENGADOS) y número especial ACDIR (GEDO). Único lugar que
+    /// consulta esas tablas y que maneja su caché en sesión.
     ///
     /// Caché: se guarda en sesión el resultado de cada expediente consultado, también cuando no tiene
     /// datos, para no volver a la base en el mismo request ni en los siguientes. Se limpia al modificar
-    /// expedientes (LimpiarCacheSade).
+    /// expedientes (LimpiarCacheSade). El devengado no se cachea porque cambia con cada carga de SIGAF.
     /// </summary>
     public class DatosExternosNegocioEF
     {
@@ -28,11 +28,11 @@ namespace Negocio.Redeterminaciones
 
         // ---------- SADE ----------
 
-        /// <summary>Último pase SADE de un expediente, o (null, null) si no hay.</summary>
-        public (DateTime? FechaUltimoPase, string BuzonDestino) ObtenerUltimoPaseSade(string expediente)
+        /// <summary>Último pase SADE de un expediente; SinDatos si no hay.</summary>
+        public UltimoPaseSade ObtenerUltimoPaseSade(string expediente)
         {
             if (string.IsNullOrWhiteSpace(expediente))
-                return (null, null);
+                return UltimoPaseSade.SinDatos;
 
             using (var context = new IVCdbContext())
             {
@@ -42,7 +42,7 @@ namespace Negocio.Redeterminaciones
                     .OrderByDescending(p => p.FechaUltimoPase)
                     .FirstOrDefault();
 
-                return pase == null ? (null, null) : (pase.FechaUltimoPase, pase.BuzonDestino);
+                return pase == null ? UltimoPaseSade.SinDatos : new UltimoPaseSade(pase.BuzonDestino, pase.FechaUltimoPase);
             }
         }
 
@@ -50,26 +50,23 @@ namespace Negocio.Redeterminaciones
         /// Último pase SADE de varios expedientes. Devuelve sólo los que tienen datos.
         /// Usa la caché de sesión si contiene todos los expedientes pedidos; si no, consulta la base y la actualiza.
         /// </summary>
-        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerUltimosPasesSade(List<string> expedientes)
+        public Dictionary<string, UltimoPaseSade> ObtenerUltimosPasesSade(List<string> expedientes)
         {
             if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, (string, DateTime?)>();
+                return new Dictionary<string, UltimoPaseSade>();
 
             var cache = ObtenerCacheSade();
             if (cache != null && expedientes.All(cache.ContainsKey))
             {
-                var desdeCache = new Dictionary<string, (string, DateTime?)>();
-                foreach (var expediente in expedientes)
-                {
-                    if (cache[expediente].Buzon != null)
-                        desdeCache[expediente] = cache[expediente];
-                }
-                return desdeCache;
+                return expedientes
+                    .Distinct()
+                    .Where(e => cache[e].TieneDatos)
+                    .ToDictionary(e => e, e => cache[e]);
             }
 
             try
             {
-                Dictionary<string, (string, DateTime?)> resultado;
+                Dictionary<string, UltimoPaseSade> resultado;
                 using (var context = new IVCdbContext())
                 {
                     // "TOP 1 ... ORDER BY fecha DESC" por expediente.
@@ -82,17 +79,17 @@ namespace Negocio.Redeterminaciones
 
                     resultado = ultimosPases
                         .Where(p => p != null)
-                        .ToDictionary(p => p.Expediente, p => (p.BuzonDestino, p.FechaUltimoPase));
+                        .ToDictionary(p => p.Expediente, p => new UltimoPaseSade(p.BuzonDestino, p.FechaUltimoPase));
                 }
 
-                // Actualizar la caché con los que tienen datos y marcar los que no (null) como consultados.
-                var cacheActual = cache ?? new Dictionary<string, (string, DateTime?)>();
+                // Actualizar la caché con los que tienen datos y marcar los que no como consultados.
+                var cacheActual = cache ?? new Dictionary<string, UltimoPaseSade>();
                 foreach (var kvp in resultado)
                     cacheActual[kvp.Key] = kvp.Value;
                 foreach (var expediente in expedientes)
                 {
                     if (!resultado.ContainsKey(expediente))
-                        cacheActual[expediente] = (null, null);
+                        cacheActual[expediente] = UltimoPaseSade.SinDatos;
                 }
                 ContextoWeb.Actual?.GuardarEnSesion(ClaveCacheSade, cacheActual);
 
@@ -111,18 +108,15 @@ namespace Negocio.Redeterminaciones
             ContextoWeb.Actual?.QuitarDeSesion(ClaveCacheSade);
         }
 
-        private static Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerCacheSade()
+        private static Dictionary<string, UltimoPaseSade> ObtenerCacheSade()
         {
-            return ContextoWeb.Actual?.ObtenerDeSesion(ClaveCacheSade) as Dictionary<string, (string, DateTime?)>;
+            return ContextoWeb.Actual?.ObtenerDeSesion(ClaveCacheSade) as Dictionary<string, UltimoPaseSade>;
         }
 
         // ---------- SIGAF (DEVENGADOS) ----------
 
-        /// <summary>
-        /// Suma de IMPORTE_PP devengado por expediente, en una sola consulta. Sin caché: el devengado
-        /// cambia con cada carga de SIGAF y la grilla debe reflejarlo.
-        /// </summary>
-        public Dictionary<string, decimal> ObtenerDevengadosPorExpediente(List<string> expedientes)
+        /// <summary>Suma de IMPORTE_PP devengado por expediente, en una sola consulta.</summary>
+        public Dictionary<string, decimal> ObtenerDevengados(List<string> expedientes)
         {
             if (expedientes == null || !expedientes.Any())
                 return new Dictionary<string, decimal>();
@@ -159,7 +153,7 @@ namespace Negocio.Redeterminaciones
         /// Número especial ACDIR (GEDO) más reciente por expediente. Devuelve sólo los expedientes que tienen uno.
         /// Consulta en lotes, con caché de sesión (también de los no encontrados).
         /// </summary>
-        public Dictionary<string, string> ObtenerAcdirBulk(List<string> expedientes)
+        public Dictionary<string, string> ObtenerAcdirs(List<string> expedientes)
         {
             var resultado = new Dictionary<string, string>();
             var expedientesValidos = (expedientes ?? new List<string>())
@@ -180,13 +174,13 @@ namespace Negocio.Redeterminaciones
                     for (int i = 0; i < faltantes.Count; i += TamanioLoteAcdir)
                     {
                         var lote = faltantes.Skip(i).Take(TamanioLoteAcdir).ToList();
+
                         foreach (var fila in ConsultarAcdir(lote))
                             cacheActual[fila.Expediente] = fila.Acdir;
 
-                        var encontrados = new HashSet<string>(cacheActual.Keys);
                         foreach (var expediente in lote)
                         {
-                            if (!encontrados.Contains(expediente))
+                            if (!cacheActual.ContainsKey(expediente))
                                 cacheActual[expediente] = null;
                         }
                     }
@@ -210,8 +204,9 @@ namespace Negocio.Redeterminaciones
         }
 
         /// <summary>
-        /// Fila de GEDO con la mayor FECHA_FIRMA por expediente. SQL parametrizado: la entidad AcdirEF no
-        /// mapea FECHA_FIRMA y GEDO tiene varias filas por expediente.
+        /// Fila de GEDO con la mayor FECHA_FIRMA por expediente. SQL parametrizado: la entidad AcdirEF declara
+        /// NRO_EXPEDIENTE como clave pero GEDO tiene varias filas por expediente y no mapea FECHA_FIRMA; hasta
+        /// corregir ese mapeo, la consulta se hace a mano.
         /// </summary>
         private static List<AcdirRowDto> ConsultarAcdir(List<string> lote)
         {
