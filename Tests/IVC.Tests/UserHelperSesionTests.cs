@@ -10,6 +10,7 @@ namespace IVC.Tests
     /// versión de permisos) y cualquier cambio descarta toda la sesión.
     /// </summary>
     [TestClass]
+    [DoNotParallelize] // registra un contexto web global al proceso
     public class UserHelperSesionTests
     {
         [TestCleanup]

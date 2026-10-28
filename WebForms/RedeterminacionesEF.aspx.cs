@@ -597,116 +597,125 @@ namespace WebForms
 
         private void BindGrid()
         {
-            string filtroGeneral = txtBuscar?.Text?.Trim();
-            var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
-            var selAutorizanteCodigos = GetSelectedValues("cblsHeaderAutorizante");
-            var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
-            var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
-            var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
-            var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
-            // Contrata: aplicar la misma lógica que AutorizantesEF -> valores tipo string (nombres/etiquetas de contrata)
-            var selContrataNombres = GetSelectedValues("cblsHeaderContrata");
-
-            // Filtros de Obra (directos)
-            var selObraFinal = selObra.Distinct().ToList();
-
-            string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
-            bool mismatch = ShowOnlyMismatchedRecords;
-
-            int pageIndex = paginationControl.CurrentPageIndex;
-            int pageSize = paginationControl.PageSize;
-
-            List<RedeterminacionEF> fullList;
-
-            // Forzar filtrado en memoria si hay filtros especiales o filtro de contrata (por nombre/etiqueta)
-            bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0 || (selContrataNombres != null && selContrataNombres.Count > 0);
-            if (requiresInMemory)
+            try
             {
-                // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra directa)
-                fullList = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
+                string filtroGeneral = txtBuscar?.Text?.Trim();
+                var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra"));
+                var selAutorizanteCodigos = GetSelectedValues("cblsHeaderAutorizante");
+                var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
+                var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
+                var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
+                var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
+                // Contrata: aplicar la misma lógica que AutorizantesEF -> valores tipo string (nombres/etiquetas de contrata)
+                var selContrataNombres = GetSelectedValues("cblsHeaderContrata");
 
-                // Aplicar filtros simples en memoria (usuario/empresa/área)
-                if (selUsuario.Count > 0)
-                    fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+                // Filtros de Obra (directos)
+                var selObraFinal = selObra.Distinct().ToList();
 
-                if (selEmpresa.Count > 0)
-                    fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
+                bool mismatch = ShowOnlyMismatchedRecords;
 
-                if (selArea.Count > 0)
-                    fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                int pageIndex = paginationControl.CurrentPageIndex;
+                int pageSize = paginationControl.PageSize;
 
-                // Guardar dataset completo para poblar encabezados (antes de aplicar filtro de Contrata)
-                var headerFull = AplicarFiltrosEspeciales(fullList.ToList(), buzonFilter, mismatch);
-                Session["RedeterminacionesHeaderFull"] = headerFull;
+                List<RedeterminacionEF> fullList;
 
-                // Aplicar filtro de contrata por nombre/etiqueta (case-insensitive) para la grilla
-                if (selContrataNombres != null && selContrataNombres.Count > 0)
+                // Forzar filtrado en memoria si hay filtros especiales o filtro de contrata (por nombre/etiqueta)
+                bool requiresInMemory = mismatch || buzonFilter != "all" || selEmpresa.Count > 0 || selArea.Count > 0 || (selContrataNombres != null && selContrataNombres.Count > 0);
+                if (requiresInMemory)
                 {
-                    var nombresContrata = new HashSet<string>(selContrataNombres.Where(s => !string.IsNullOrWhiteSpace(s)), StringComparer.OrdinalIgnoreCase);
-                    fullList = fullList.Where(r =>
- (!string.IsNullOrWhiteSpace(r.Contrata) && nombresContrata.Contains(r.Contrata)) ||
- (r.Autorizante?.Obra?.Contrata != null && !string.IsNullOrWhiteSpace(r.Autorizante.Obra.Contrata.Nombre) && nombresContrata.Contains(r.Autorizante.Obra.Contrata.Nombre))
- ).ToList();
+                    // Cargar lista completa filtrada por criterios básicos desde BD (incluye Obra directa)
+                    fullList = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
+
+                    // Aplicar filtros simples en memoria (usuario/empresa/área)
+                    if (selUsuario.Count > 0)
+                        fullList = fullList.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+
+                    if (selEmpresa.Count > 0)
+                        fullList = fullList.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+
+                    if (selArea.Count > 0)
+                        fullList = fullList.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+
+                    // Guardar dataset completo para poblar encabezados (antes de aplicar filtro de Contrata)
+                    var headerFull = AplicarFiltrosEspeciales(fullList.ToList(), buzonFilter, mismatch);
+                    Session["RedeterminacionesHeaderFull"] = headerFull;
+
+                    // Aplicar filtro de contrata por nombre/etiqueta (case-insensitive) para la grilla
+                    if (selContrataNombres != null && selContrataNombres.Count > 0)
+                    {
+                        var nombresContrata = new HashSet<string>(selContrataNombres.Where(s => !string.IsNullOrWhiteSpace(s)), StringComparer.OrdinalIgnoreCase);
+                        fullList = fullList.Where(r =>
+     (!string.IsNullOrWhiteSpace(r.Contrata) && nombresContrata.Contains(r.Contrata)) ||
+     (r.Autorizante?.Obra?.Contrata != null && !string.IsNullOrWhiteSpace(r.Autorizante.Obra.Contrata.Nombre) && nombresContrata.Contains(r.Autorizante.Obra.Contrata.Nombre))
+     ).ToList();
+                    }
+
+                    // Filtros especiales (mismatch / buzón) para la grilla
+                    fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
+
+                    int total = fullList.Count;
+                    if (pageIndex * pageSize >= Math.Max(1, total))
+                    {
+                        pageIndex = 0;
+                        paginationControl.CurrentPageIndex = 0;
+                    }
+                    paginationControl.TotalRecords = total;
+                    paginationControl.UpdatePaginationControls();
+                    paginationControl.SubtotalText = $"Total: {total} registros";
+
+                    // Guardar lista completa en sesión para otros usos (p. ej., export)
+                    Session["RedeterminacionesGridData"] = fullList;
+
+                    var pagina = fullList
+                    .Skip(pageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                    dgvRedeterminacion.DataSource = pagina;
+                    dgvRedeterminacion.DataBind();
                 }
-
-                // Filtros especiales (mismatch / buzón) para la grilla
-                fullList = AplicarFiltrosEspeciales(fullList, buzonFilter, mismatch);
-
-                int total = fullList.Count;
-                if (pageIndex * pageSize >= Math.Max(1, total))
+                else
                 {
-                    pageIndex = 0;
-                    paginationControl.CurrentPageIndex = 0;
+                    // Usar paginación en BD para grilla
+                    int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
+                    if (pageIndex * pageSize >= Math.Max(1, total))
+                    {
+                        pageIndex = 0;
+                        paginationControl.CurrentPageIndex = 0;
+                    }
+                    paginationControl.TotalRecords = total;
+                    paginationControl.UpdatePaginationControls();
+                    paginationControl.SubtotalText = $"Total: {total} registros";
+
+                    var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
+
+                    // Para encabezados: armar dataset completo con filtros básicos (sin paginación)
+                    var headerFull = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
+                    if (selUsuario.Count > 0)
+                        headerFull = headerFull.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+                    if (selEmpresa.Count > 0)
+                        headerFull = headerFull.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+                    if (selArea.Count > 0)
+                        headerFull = headerFull.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+                    headerFull = AplicarFiltrosEspeciales(headerFull, buzonFilter, mismatch);
+                    // Nota: no aplicar aquí el filtro de Contrata para que el header muestre todas las opciones
+                    Session["RedeterminacionesHeaderFull"] = headerFull;
+
+                    // Guardar la página actual en sesión para otros usos
+                    Session["RedeterminacionesGridData"] = pagina;
+
+                    dgvRedeterminacion.DataSource = pagina;
+                    dgvRedeterminacion.DataBind();
                 }
-                paginationControl.TotalRecords = total;
-                paginationControl.UpdatePaginationControls();
-                paginationControl.SubtotalText = $"Total: {total} registros";
-
-                // Guardar lista completa en sesión para otros usos (p. ej., export)
-                Session["RedeterminacionesGridData"] = fullList;
-
-                var pagina = fullList
-                .Skip(pageIndex * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-                dgvRedeterminacion.DataSource = pagina;
-                dgvRedeterminacion.DataBind();
+                PoblarFiltrosHeader();
             }
-            else
+            catch (Exception ex)
             {
-                // Usar paginación en BD para grilla
-                int total = _negocio.ContarConFiltros(filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
-                if (pageIndex * pageSize >= Math.Max(1, total))
-                {
-                    pageIndex = 0;
-                    paginationControl.CurrentPageIndex = 0;
-                }
-                paginationControl.TotalRecords = total;
-                paginationControl.UpdatePaginationControls();
-                paginationControl.SubtotalText = $"Total: {total} registros";
-
-                var pagina = _negocio.ListarPaginadoConFiltros(pageIndex, pageSize, filtroGeneral, selObraFinal, selAutorizanteCodigos, selEstado, selUsuario);
-
-                // Para encabezados: armar dataset completo con filtros básicos (sin paginación)
-                var headerFull = _negocio.Listar(selEstado, selAutorizanteCodigos, selObraFinal, filtroGeneral);
-                if (selUsuario.Count > 0)
-                    headerFull = headerFull.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
-                if (selEmpresa.Count > 0)
-                    headerFull = headerFull.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
-                if (selArea.Count > 0)
-                    headerFull = headerFull.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
-                headerFull = AplicarFiltrosEspeciales(headerFull, buzonFilter, mismatch);
-                // Nota: no aplicar aquí el filtro de Contrata para que el header muestre todas las opciones
-                Session["RedeterminacionesHeaderFull"] = headerFull;
-
-                // Guardar la página actual en sesión para otros usos
-                Session["RedeterminacionesGridData"] = pagina;
-
-                dgvRedeterminacion.DataSource = pagina;
-                dgvRedeterminacion.DataBind();
+                // Antes los listados devolvían vacío ante un error; ahora lo propagan y acá se muestra.
+                System.Diagnostics.Trace.TraceError("[RedeterminacionesEF.BindGrid] {0}", ex);
+                ToastService.Show(this.Page, "No se pudieron cargar las redeterminaciones. Intente nuevamente.", ToastService.ToastType.Error);
             }
-            PoblarFiltrosHeader();
         }
 
         private void PoblarFiltrosHeader()

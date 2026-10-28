@@ -114,7 +114,9 @@ namespace WebForms
             if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+            // Si la carga falló, ya se mostró el toast; sin lista no hay nada que bindear.
+            if (!(Session["CertificadosCompleto"] is List<CertificadoDTO> certificadosCompleta))
+                return;
 
             // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
@@ -1180,7 +1182,9 @@ namespace WebForms
             if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+            // Si la carga falló, ya se mostró el toast.
+            if (!(Session["CertificadosCompleto"] is List<CertificadoDTO> certificadosCompleta))
+                return new List<CertificadoDTO>();
 
             // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();

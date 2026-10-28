@@ -497,18 +497,10 @@ namespace Negocio
 
                 // PARALELISMO CONSERVADOR: Solo SIGAF y SADE en paralelo
                 sw.Restart();
-                Dictionary<string, decimal> datosSigaf = null;
-                Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade = null;
-
-                // Ejecutar ambas consultas en paralelo para máximo rendimiento
-                var taskSigaf = Task.Run(() => BuscarMuchosNumerosSigaf(todosLosExpedientes));
-                var taskSade = Task.Run(() => BuscarMuchosDatosSade(todosLosExpedientes));
-
-                // Esperar a que ambas terminen
-                Task.WaitAll(taskSigaf, taskSade);
-
-                datosSigaf = taskSigaf.Result;
-                datosSade = taskSade.Result;
+                // Secuencial a propósito: dentro de Task.Run no hay HttpContext, la caché SADE de sesión no
+                // se leía ni se escribía y las excepciones llegaban envueltas en AggregateException.
+                var datosSigaf = BuscarMuchosNumerosSigaf(todosLosExpedientes);
+                var datosSade = BuscarMuchosDatosSade(todosLosExpedientes);
 
                 Debug.WriteLine($"Tiempo consulta SIGAF/SADE EN PARALELO: {sw.ElapsedMilliseconds} ms");
 
@@ -934,29 +926,22 @@ namespace Negocio
                 }
             }
 
-            RedeterminacionCalculator.CalcularMontos(redeterminaciones, autorizantes, certificados);
+            ReglasRedeterminaciones.CalcularMontos(redeterminaciones, autorizantes, certificados);
         }
 
         /// <summary>
         /// Calcula las propiedades adicionales para un certificado (Porcentaje, Estado, Sigaf, BuzonSade, FechaSade)
         /// </summary>
-        public (string Estado, string BuzonSade, DateTime? FechaSade) CalcularPropiedadesAdicionales(string expedientePago, decimal? montoTotal, decimal? sigaf, Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade)
+        public (string Estado, string BuzonSade, DateTime? FechaSade) CalcularPropiedadesAdicionales(string expedientePago, decimal? montoTotal, decimal? sigaf, Dictionary<string, UltimoPaseSade> datosSade)
         {
-            try
-            {
-                // 3. Estado
-                string estado = RedeterminacionCalculator.DeterminarEstado(expedientePago, sigaf);
+            string estado = ReglasRedeterminaciones.DeterminarEstado(expedientePago, sigaf);
 
-                // 4. Datos SADE (consulta en memoria)
-                var (buzon, fecha) = datosSade.ContainsKey(expedientePago) ? datosSade[expedientePago] : (null, null);
+            // Dictionary no admite clave null: un pago sin expediente antes caía en el catch y quedaba con Estado "ERROR".
+            var pase = datosSade != null && datosSade.TryGetValue(expedientePago ?? "", out var encontrado)
+                ? encontrado
+                : UltimoPaseSade.SinDatos;
 
-                return (estado, buzon, fecha);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error en RealizarCalculosAdicionales: {ex.Message}");
-                return ("ERROR", null, null);
-            }
+            return (estado, pase.Buzon, pase.Fecha);
         }
 
 

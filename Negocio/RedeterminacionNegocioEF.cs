@@ -320,7 +320,7 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Trace.TraceError("[ContarPorUsuarioConFiltros] {0}", ex);
+                Trace.TraceError("[ContarConFiltros] {0}", ex);
                 throw;
             }
         }
