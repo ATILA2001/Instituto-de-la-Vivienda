@@ -258,15 +258,17 @@ Calc AS
 ),
 Tope AS
 (
-    -- R7: acumulado de las reliquidaciones anteriores de la misma redeterminación (en el orden de R3)
+    -- R7: acumulado de las reliquidaciones anteriores de la misma redeterminación (en el orden de R3).
+    -- Se calcula y acumula en decimal(28,12): redondeando cada fila a 4 decimales la suma superaba el
+    -- MontoRedet por fracciones de centavo y el tope recortaba reliquidaciones legítimas.
     SELECT
         c.*,
         CAST(c.MontoRedet
              * (c.PorcentajeCertificado + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END)
-             / 100 AS decimal(19,4))                                        AS MontoReliquidacionSinTope,
+             / 100 AS decimal(28,12))                                       AS MontoReliquidacionSinTope,
         ISNULL(SUM(CAST(c.MontoRedet
              * (c.PorcentajeCertificado + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END)
-             / 100 AS decimal(19,4)))
+             / 100 AS decimal(28,12)))
              OVER (PARTITION BY c.RedeterminacionId ORDER BY c.OrdenPostSalto
                    ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)   AS AcumuladoPrevio
     FROM Calc c
@@ -296,7 +298,7 @@ SELECT
     CAST(c.PorcentajeCertificado
          + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END
          AS decimal(19,6))                                                  AS PorcentajeAplicado,
-    c.MontoReliquidacionSinTope,
+    CAST(c.MontoReliquidacionSinTope AS decimal(19,4))                      AS MontoReliquidacionSinTope,
     -- R7: recortada al resto disponible del MontoRedet
     CAST(CASE WHEN c.AcumuladoPrevio + c.MontoReliquidacionSinTope > c.MontoRedet
               THEN c.MontoRedet - c.AcumuladoPrevio
