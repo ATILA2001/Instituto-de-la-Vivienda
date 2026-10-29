@@ -21,7 +21,7 @@
          reutilizaba la lista filtrada del primer autorizante para todos los demás).
      R6. (01/10/2026) Una redeterminación RECHAZADA (etapa 35) o FUERA DE PLAZO (etapa 36) tiene MontoRedet = 0,
          no acumula en la base de las siguientes y no genera reliquidaciones. Las que están EN TRÁMITE se
-         calculan normalmente. Los Ids 35 y 36 son los mismos que usa la app (idsDesestimado).
+         calculan normalmente. Los Ids 35 y 36 son los mismos que usa la app (ReglasRedeterminaciones.EtapasDesestimadas).
 
    FÓRMULAS:
      Ejecutado        = SUM(MONTO_TOTAL) de certificados del autorizante con mes <= mes del salto (todos los tipos de pago, incluido el anticipo)
@@ -73,7 +73,7 @@ AS
 WITH RedetFlags AS
 (
     -- R6: ÚNICO lugar donde se enumeran las etapas que anulan el monto (35 Rechazada, 36 Fuera de Plazo).
-    -- Mismos Ids que idsDesestimado en Negocio/CalculoRedeterminacionNegocioEF.cs. Sin etapa => 0 (se calcula).
+    -- Mismos Ids que EtapasDesestimadas en Negocio/Redeterminaciones/ReglasRedeterminaciones.cs. Sin etapa => 0 (se calcula).
     SELECT
         r.Id,
         CAST(CASE WHEN r.ETAPA IN (35, 36) THEN 1 ELSE 0 END AS bit) AS EsDesestimada
