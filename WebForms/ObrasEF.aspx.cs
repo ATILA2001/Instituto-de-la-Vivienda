@@ -605,9 +605,9 @@ namespace WebForms
 
             List<ObraDTO> obrasCompleto = (List<ObraDTO>)Session["ObrasCompleto"];
 
-            bindFilter("cblsHeaderArea", _negocio.ListarAreas().Select(a => new { a.Id, a.Nombre }).ToList(), "Nombre", "Id");
-            bindFilter("cblsHeaderEmpresa", _negocio.ListarEmpresas().Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-            // bindFilter("cblsHeaderBarrio", Negocio.ListarBarrios().Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
+            // Área y empresa salen del snapshot del usuario, no de la tabla completa (no mostrar otras áreas).
+            bindFilter("cblsHeaderArea", Infraestructura.FiltrosHeader.Distintos(obrasCompleto, o => o.AreaId, o => o.Area), "Nombre", "Id");
+            bindFilter("cblsHeaderEmpresa", Infraestructura.FiltrosHeader.Distintos(obrasCompleto, o => o.EmpresaId, o => o.Empresa), "Nombre", "Id");
             var barriosDesdeObras = obrasCompleto
                     .Select(o => new
                     {

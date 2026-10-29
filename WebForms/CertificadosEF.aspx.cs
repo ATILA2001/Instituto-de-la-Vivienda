@@ -740,17 +740,17 @@ namespace WebForms
                     }
                 };
 
-                bindFilter("cblsHeaderArea", context.Areas.AsNoTracking().OrderBy(a => a.Nombre).Select(a => new { a.Id, a.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderObra", context.Obras.AsNoTracking().OrderBy(o => o.Descripcion).Select(o => new { o.Id, o.Descripcion }).ToList(), "Descripcion", "Id");
-                bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderProyecto", context.Proyectos.AsNoTracking().OrderBy(p => p.Nombre).Select(p => new { p.Id, p.Nombre }).ToList(), "Nombre", "Id");
-                bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
-
-
                 if (Session["CertificadosCompleto"] == null)
                     CargarListaCertificadosCompleta();
 
                 List<CertificadoDTO> certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+
+                // Área, obra y proyecto salen del snapshot del usuario, no de la tabla completa (no mostrar otras áreas).
+                bindFilter("cblsHeaderArea", Infraestructura.FiltrosHeader.Distintos(certificadosCompleta, c => c.AreaId, c => c.AreaNombre), "Nombre", "Id");
+                bindFilter("cblsHeaderObra", Infraestructura.FiltrosHeader.Distintos(certificadosCompleta, c => c.ObraId, c => c.ObraDescripcion), "Nombre", "Id");
+                bindFilter("cblsHeaderProyecto", Infraestructura.FiltrosHeader.Distintos(certificadosCompleta, c => c.ProyectoId, c => c.ProyectoNombre), "Nombre", "Id");
+                bindFilter("cblsHeaderBarrio", context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).Select(b => new { b.Id, b.Nombre }).ToList(), "Nombre", "Id");
+                bindFilter("cblsHeaderEmpresa", context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).Select(e => new { e.Id, e.Nombre }).ToList(), "Nombre", "Id");
                 var codigosAutorizante = certificadosCompleta
                     .Select(c => new { c.CodigoAutorizante })
                     .Distinct()

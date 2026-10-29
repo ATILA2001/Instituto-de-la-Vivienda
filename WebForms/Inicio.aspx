@@ -96,9 +96,9 @@
         <div class="plafi-home__grid">
             <asp:Repeater ID="rptPages" runat="server">
                 <ItemTemplate>
-                    <a class="plafi-home__tile" href="<%# Eval("Url") %>">
-                        <strong><%# Eval("Title") %></strong>
-                        <small><%# Eval("Description") %></small>
+                    <a class="plafi-home__tile" href="<%#: Eval("Url") %>">
+                        <strong><%#: Eval("Title") %></strong>
+                        <small><%#: Eval("Description") %></small>
                     </a>
                 </ItemTemplate>
             </asp:Repeater>

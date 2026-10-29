@@ -216,21 +216,5 @@ namespace Negocio
                 throw new ApplicationException("Error al eliminar la obra", ex);
             }
         }
-
-        // Helpers para filtros
-        public List<AreaEF> ListarAreas()
-        {
-            using (var context = new IVCdbContext()) return context.Areas.AsNoTracking().OrderBy(a => a.Nombre).ToList();
-        }
-
-        public List<EmpresaEF> ListarEmpresas()
-        {
-            using (var context = new IVCdbContext()) return context.Empresas.AsNoTracking().OrderBy(e => e.Nombre).ToList();
-        }
-
-        public List<BarrioEF> ListarBarrios()
-        {
-            using (var context = new IVCdbContext()) return context.Barrios.AsNoTracking().OrderBy(b => b.Nombre).ToList();
-        }
     }
 }

@@ -153,7 +153,7 @@
 								OnAcceptChanges="OnAcceptChanges" />
 						</HeaderTemplate>
 						<ItemTemplate>
-							<%# Eval("Obra.Area.Nombre") %>
+							<%#: Eval("Obra.Area.Nombre") %>
 						</ItemTemplate>
 					</asp:TemplateField>
 
@@ -171,7 +171,7 @@
 								OnAcceptChanges="OnAcceptChanges" />
 						</HeaderTemplate>
 						<ItemTemplate>
-							<%# Eval("Proyecto") %>
+							<%#: Eval("Proyecto") %>
 						</ItemTemplate>
 					</asp:TemplateField>
 
@@ -186,7 +186,7 @@
 								OnAcceptChanges="OnAcceptChanges" />
 						</HeaderTemplate>
 						<ItemTemplate>
-							<%# Eval("LineaGestion.Nombre") %>
+							<%#: Eval("LineaGestion.Nombre") %>
 						</ItemTemplate>
 					</asp:TemplateField>
 

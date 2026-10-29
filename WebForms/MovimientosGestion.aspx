@@ -152,7 +152,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Obra.Descripcion") %>
+                            <%#: Eval("Obra.Descripcion") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -172,7 +172,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Fecha", "{0:dd-MM-yyyy}") %>
+                            <%#: Eval("Fecha", "{0:dd-MM-yyyy}") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
