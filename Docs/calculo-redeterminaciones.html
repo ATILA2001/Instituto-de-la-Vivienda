@@ -252,8 +252,8 @@
         <div class="title">Reliquidación</div>
         <div class="desc">
           Pago generado automáticamente para cada certificado
-          aprobado en un <strong>mes posterior</strong> al del Salto de una redeterminación
-          (los anticipos financieros no generan reliquidación).
+          aprobado en el <strong>mes del Salto o en uno posterior</strong> de una redeterminación
+          (de cualquier tipo de pago, incluidos los anticipos financieros, desde el 28/10/2026).
           El <strong>primer</strong> certificado post-Salto absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Sección 4, Paso 3b).
           Representa la parte proporcional del ajuste.
         </div>
@@ -341,15 +341,16 @@
 
     <div class="alert alert-info" style="margin-top:16px">
       💡 <strong>Regla clave del Salto (la comparación es siempre mes a mes, nunca por día):</strong>
-      Los certificados aprobados <em>hasta el mes del Salto inclusive</em> determinan cuánto ya se pagó (reducen el faltante);
-      el anticipo financiero también cuenta, porque ya está pagado y no se redetermina.
-      Los certificados aprobados en <em>meses posteriores al Salto</em> generan una reliquidación, salvo los anticipos.
+      Los certificados aprobados en <em>meses estrictamente anteriores al del Salto</em> determinan cuánto ya se pagó (reducen el faltante);
+      el anticipo financiero también cuenta.
+      Los certificados aprobados en <em>el mes del Salto o en meses posteriores</em> generan una reliquidación, incluidos los anticipos (R1 y R2, 28/10/2026).
       El <em>primero</em> de ellos absorbe retroactivamente el porcentaje ya ejecutado pre-Salto (ver Paso 3b).
     </div>
     <div class="alert alert-warn">
-      ⚠️ <strong>Cambio de regla (23/09/2026):</strong> hasta esa fecha la aplicación comparaba fecha contra fecha con "menor estricto",
+      ⚠️ <strong>Cambios de regla:</strong> hasta el 23/09/2026 la aplicación comparaba fecha contra fecha con "menor estricto",
       de modo que un certificado del mismo mes del Salto no contaba como ejecutado <em>ni</em> generaba reliquidación.
-      Ahora el mes del Salto pertenece al período "anterior". Ver Sección 6.
+      Entre el 23/09 y el 28/10/2026 el mes del Salto contó como "anterior". Desde el 28/10/2026, por dictamen del área,
+      el cálculo se hace al 1° del mes del Salto: ese mes <em>reliquida</em> (MesAprobacion es el mes de ejecución de la obra). Ver Sección 6.
     </div>
   </div>
 
@@ -361,7 +362,7 @@
 
     <div class="alert alert-info">
       Las redeterminaciones se procesan en orden por <strong>Nro</strong> (1, 2, 3…), por separado para cada autorizante.
-      Solo se consideran certificados aprobados <strong>hasta el mes del Salto inclusive</strong> para determinar el porcentaje ya utilizado.
+      Solo se consideran certificados aprobados en <strong>meses anteriores al del Salto</strong> para determinar el porcentaje ya utilizado.
       Una redeterminación <strong>Rechazada</strong> o <strong>Fuera de Plazo</strong> tiene monto cero y no entra en la acumulación (regla R6, Sección 6).
     </div>
 
@@ -382,7 +383,7 @@ PorcentajeUtilizado = (SumaCerts / auth.MontoAutorizado) × 100
 <span class="comment">// Si MontoAutorizado = 0 → PorcentajeUtilizado = 0</span>
       </div>
       <div class="note">
-        📌 El anticipo financiero (TipoPago = 1) <strong>sí</strong> cuenta como ejecutado: ya fue pagado y no está sujeto a redeterminación.
+        📌 El anticipo financiero (TipoPago = 1) <strong>sí</strong> cuenta como ejecutado, igual que cualquier otro certificado.
       </div>
     </div>
 
@@ -530,18 +531,17 @@ cert.Porcentaje = (cert.MontoTotal / auth.MontoAutorizado) × 100
       </p>
       <div class="formula">
 <span class="highlight">SI</span>  cert.CodigoAutorizante == redet.CodigoAutorizante
-<span class="highlight">Y</span>   mes(cert.MesAprobacion) <span class="highlight">&gt; mes(redet.Salto)</span>
-<span class="highlight">Y</span>   cert.TipoPago <span class="highlight">≠ 1 (anticipo financiero)</span>
-<span class="comment">// Solo certificados de meses POSTERIORES al Salto reciben reliquidación</span>
-<span class="comment">// El anticipo financiero no se redetermina, por lo tanto nunca reliquida</span>
+<span class="highlight">Y</span>   mes(cert.MesAprobacion) <span class="highlight">&gt;= mes(redet.Salto)</span>
+<span class="comment">// Certificados del mes del Salto y POSTERIORES reciben reliquidación, de cualquier tipo de pago</span>
+<span class="comment">// (incluido el anticipo financiero, por dictamen del área del 28/10/2026; antes se excluía)</span>
 <span class="comment">// El PRIMERO de ellos (ordenados por MesAprobacion y luego Id) absorbe el porcentaje acumulado pre-Salto (ver Paso 3b)</span>
       </div>
     </div>
 
     <div class="formula-card a-blue">
-      <div class="badge">Paso 3a — Cálculo del monto (certificados posteriores al Salto)</div>
+      <div class="badge">Paso 3a — Cálculo del monto (certificados del mes del Salto y posteriores)</div>
       <p style="font-size:.85rem;color:#444;margin-bottom:8px">
-        Para todos los certificados (excepto anticipos) con <code>mes(MesAprobacion) &gt; mes(redet.Salto)</code>, salvo el primero de ellos (ver Paso 3b).
+        Para todos los certificados (de cualquier tipo de pago) con <code>mes(MesAprobacion) &gt;= mes(redet.Salto)</code>, salvo el primero de ellos (ver Paso 3b).
       </p>
       <div class="formula">
 MontoReliq = redet.MontoRedet × ( cert.Porcentaje / 100 )
@@ -564,10 +564,10 @@ MontoReliq = cert.MontoTotal × (redet.Porcentaje/100) × (Faltante/100)
       <div class="badge">Paso 3b — Cálculo del monto (primer certificado post-Salto)</div>
       <p style="font-size:.85rem;color:#444;margin-bottom:8px">
         Para el <strong>primer</strong> certificado (ordenando por <code>MesAprobacion</code> y luego por <code>Id</code>) cuyo
-        <code>mes(MesAprobacion) &gt; mes(redet.Salto)</code>, el porcentaje acumulado
+        <code>mes(MesAprobacion) &gt;= mes(redet.Salto)</code>, el porcentaje acumulado
         pre-Salto se suma al porcentaje propio: este primer pago absorbe retroactivamente
-        el trabajo ya ejecutado hasta el mes del Salto. Así, cuando los certificados posteriores cubren el faltante,
-        la suma de las reliquidaciones iguala al MontoRedet.
+        el trabajo ya ejecutado antes del mes del Salto. Así, cuando los certificados posteriores cubren el faltante,
+        la suma de las reliquidaciones iguala al MontoRedet, y por el tope (R7) nunca lo supera.
       </p>
       <div class="formula">
 <span class="comment">// Variables previas</span>
@@ -692,7 +692,7 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
           <tr>
             <th>Certificado</th>
             <th>MesAprobacion</th>
-            <th>¿Mes posterior al Salto R1?</th>
+            <th>¿Mes del Salto R1 o posterior?</th>
             <th>Porcentaje cert.</th>
             <th>MontoReliq</th>
             <th>Cálculo</th>
@@ -765,19 +765,19 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
         <tbody>
           <tr>
             <td><strong>R1</strong></td>
-            <td>El certificado del <strong>mes del Salto</strong> cuenta como <strong>anterior</strong> (ejecutado). La comparación es mes a mes: <code>mes(MesAprobacion) &lt;= mes(Salto)</code>. Reliquidan solo los meses posteriores.</td>
-            <td>Comparaba fecha contra fecha con "menor estricto" para lo ejecutado y "mayor estricto" para reliquidar. Un certificado del mismo mes del Salto quedaba en un hueco: no reducía el faltante ni reliquidaba.</td>
+            <td>El cálculo se hace al 1° del mes del Salto: cuentan como ejecutado los certificados de meses <strong>estrictamente anteriores</strong> (<code>mes(MesAprobacion) &lt; mes(Salto)</code>) y reliquidan los del <strong>mes del Salto y posteriores</strong>. MesAprobacion es el mes de ejecución de la obra. Dictamen del área del 28/10/2026.</td>
+            <td>Entre el 23/09 y el 28/10/2026 el mes del Salto contaba como ejecutado y no reliquidaba. Antes, la comparación fecha contra fecha dejaba al certificado del mes del Salto en un hueco: ni reducía el faltante ni reliquidaba.</td>
             <td>Paso A · Paso 2 · vistas</td>
           </tr>
           <tr>
             <td><strong>R2</strong></td>
-            <td>El <strong>anticipo financiero</strong> (TipoPago = 1) <strong>sí</strong> cuenta como ejecutado, porque ya está pagado y no se redetermina. Por lo mismo, un anticipo posterior al Salto <strong>no</strong> genera reliquidación.</td>
-            <td>Lo contaba como ejecutado (igual que ahora), pero si caía después del Salto sí le generaba una reliquidación. Una de las versiones ADO heredadas lo excluía de lo ejecutado.</td>
+            <td>El <strong>anticipo financiero</strong> (TipoPago = 1) se trata <strong>igual que un certificado</strong>: cuenta como ejecutado si es de un mes anterior al Salto y genera reliquidación si es del mes del Salto o posterior. Dictamen del área del 28/10/2026: en la práctica casi siempre se pide redeterminar el anticipo.</td>
+            <td>Entre el 22/09 y el 28/10/2026 el anticipo posterior al Salto <strong>no</strong> reliquidaba. Una de las versiones ADO heredadas lo excluía de lo ejecutado.</td>
             <td>Paso A · Paso 2 · vistas</td>
           </tr>
           <tr>
             <td><strong>R3</strong></td>
-            <td>El <strong>Paso 3b</strong> aplica: el primer certificado posterior al Salto absorbe el porcentaje acumulado pre-Salto.</td>
+            <td>El <strong>Paso 3b</strong> aplica: el primer certificado del mes del Salto o posterior absorbe el porcentaje acumulado pre-Salto. Confirmado por el área el 28/10/2026 frente a la alternativa de repartir proporcionalmente al faltante.</td>
             <td>Solo existía en las versiones ADO heredadas; el camino Entity Framework que usan las pantallas no lo aplicaba, aunque esta documentación ya lo describía.</td>
             <td>Paso 3b · vistas</td>
           </tr>
@@ -799,16 +799,17 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
             <td>Se calculaba completa, acumulaba y reliquidaba. En producción eran seis rechazadas (unos 390 millones y 64 reliquidaciones), cinco de ellas provisorias ya reemplazadas por su definitiva, es decir, contadas dos veces.</td>
             <td>Paso C · Paso 2 · vistas</td>
           </tr>
+          <tr>
+            <td><strong>R7</strong></td>
+            <td><strong>Tope</strong> (28/10/2026): la suma de las reliquidaciones de una redeterminación no supera su MontoRedet. La reliquidación que lo alcanza se recorta al resto disponible y las siguientes no se generan. El porcentaje aplicado se informa sin recortar; la vista expone además <code>MontoReliquidacionSinTope</code>.</td>
+            <td>No había tope. Sólo actúa cuando el autorizante certifica más del 100 % de su monto autorizado (la suma de porcentajes aplicados es siempre el total certificado, con cualquier versión de R1). En producción (04/10/2026) ninguna redeterminación lo excedía.</td>
+            <td>Paso 3a · vistas</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="alert alert-warn" style="margin-top:14px">
-      ⚠️ <strong>Caso límite a tener en cuenta:</strong> un anticipo aprobado <em>después</em> del Salto de una redeterminación no reliquida en esa redeterminación
-      pero sí cuenta como ejecutado para las redeterminaciones cuyo Salto sea igual o posterior a su mes.
-      En ese caso la suma de reliquidaciones queda por debajo del MontoRedet en la parte proporcional del anticipo.
-    </div>
-  </div>
+      </div>
 
   <!-- ══════════════════════════════════════════════
        7. VISTAS SQL PARA POWER BI
@@ -836,7 +837,7 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
       <div class="flow-box a-orange">
         <div class="f-icon">🔄</div>
         <div class="f-title">vw_PBI_Reliquidaciones</div>
-        <div class="f-sub">Una fila por redeterminación × certificado posterior al Salto. Porcentaje aplicado, marca de "primer post-Salto", <strong>MontoReliquidacion</strong>, expediente de EXPEDIENTES_RELIQ.</div>
+        <div class="f-sub">Una fila por redeterminación × certificado del mes del Salto o posterior, mientras no se cubra el tope (R7). Porcentaje aplicado, marca de "primer post-Salto", <strong>MontoReliquidacion</strong> (recortada) y sin tope, expediente de EXPEDIENTES_RELIQ.</div>
       </div>
       <div class="flow-arrow">→</div>
       <div class="flow-box a-green">
@@ -861,7 +862,7 @@ MontoReliq = redet.MontoRedet × <span class="highlight">( (certPorcentaje + por
       <div class="tl-step" data-n="2">
         <h4>vw_PBI_Reliquidaciones — Pasos 1, 2, 3a y 3b</h4>
         <p>
-          Cruza cada redeterminación calculada con los certificados del mismo autorizante de meses posteriores al Salto, excluyendo anticipos (R2).
+          Cruza cada redeterminación calculada con los certificados del mismo autorizante del mes del Salto y posteriores, de cualquier tipo de pago (R1, R2). Un acumulado por ventana (<code>SUM ... OVER</code>) aplica el tope (R7).
           <code>ROW_NUMBER()</code> por redeterminación identifica al primer certificado post-Salto, que recibe el porcentaje acumulado pre-Salto (R3).
           El expediente sale de <code>EXPEDIENTES_RELIQ</code> por (código de redeterminación, año, mes). La clave estable de cada fila es
           <code>ReliquidacionKey = RedeterminacionId-CertificadoId</code>.
@@ -940,7 +941,7 @@ GROUP BY rd.CodigoRedet, rd.MontoRedet;
           <tr>
             <td>Pasos A, B y C</td>
             <td><code>Negocio/Redeterminaciones/ReglasRedeterminaciones.cs</code> → <code>CalcularMontos</code> (la invoca <code>CalculoRedeterminacionNegocioEF.CalcularMontoRedeterminaciones</code>)</td>
-            <td>Agrupa los certificados por autorizante una sola vez (R5), aplica R1 y R2 con los helpers <code>EsMesAnteriorOIgual</code> / <code>EsMesPosterior</code>, calcula <code>MontoRedet</code> y deja el porcentaje ejecutado pre-Salto en <code>RedeterminacionEF.PorcentajeEjecutadoPreSalto</code> para el Paso 3b.</td>
+            <td>Agrupa los certificados por autorizante una sola vez (R5), aplica R1 y R2 con los helpers <code>EsMesAnterior</code> / <code>EsMesDelSaltoOPosterior</code>, calcula <code>MontoRedet</code> y deja el porcentaje ejecutado pre-Salto en <code>RedeterminacionEF.PorcentajeEjecutadoPreSalto</code> para el Paso 3b.</td>
           </tr>
           <tr>
             <td>Pasos 1, 2, 3a y 3b</td>

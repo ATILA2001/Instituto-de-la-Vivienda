@@ -4,15 +4,18 @@
 
    Capas (cada una se apoya en la anterior):
      1. dbo.vw_PBI_Redeterminaciones  -> una fila por redeterminación, con MontoRedet calculado
-     2. dbo.vw_PBI_Reliquidaciones    -> una fila por (redeterminación x certificado posterior al salto)
+     2. dbo.vw_PBI_Reliquidaciones    -> una fila por (redeterminación x certificado del mes del salto o posterior, hasta el tope)
      3. dbo.vw_PBI_Pagos              -> certificados reales + reliquidaciones, con SIGAF prorrateado,
                                          estado derivado y último pase SADE
 
-   REGLAS DE NEGOCIO (fijadas el 22/09/2026):
-     R1. El certificado del MES DEL SALTO cuenta como ANTERIOR (ejecutado). La comparación es a nivel
-         mes (EOMONTH), no a nivel día. Reliquidan solo los certificados de meses POSTERIORES al salto.
-     R2. El anticipo financiero (TIPO_PAGO = 1) SÍ cuenta como ejecutado pre-salto (reduce el faltante) y,
-         como NO se redetermina, un anticipo posterior al salto NO genera reliquidación.
+   REGLAS DE NEGOCIO (fijadas el 22/09/2026; R6 el 01/10/2026; R1, R2 y R7 el 28/10/2026 por dictamen del área):
+     R1. El cálculo se hace al 1° del MES DEL SALTO: cuentan como ejecutado los certificados de meses
+         ESTRICTAMENTE ANTERIORES y reliquidan los del mes del salto y POSTERIORES. La comparación es a nivel
+         mes (EOMONTH), no a nivel día. MES_APROBACION es el mes de ejecución de la obra.
+         (Hasta el 28/10/2026 el mes del salto contaba como ejecutado y no reliquidaba.)
+     R2. (28/10/2026, dictamen del área) El anticipo financiero (TIPO_PAGO = 1) se trata IGUAL que un certificado:
+         cuenta como ejecutado si es de un mes anterior al salto y reliquida si es del mes del salto o posterior.
+         Hasta esa fecha no reliquidaba.
      R3. "Paso 3b": el PRIMER certificado posterior al salto absorbe el porcentaje acumulado
          pre-salto (su porcentaje aplicado = porcentaje propio + porcentaje ejecutado pre-salto).
      R4. Los legítimos abonos NO participan del reparto del SIGAF por expediente.
@@ -22,9 +25,12 @@
      R6. (01/10/2026) Una redeterminación RECHAZADA (etapa 35) o FUERA DE PLAZO (etapa 36) tiene MontoRedet = 0,
          no acumula en la base de las siguientes y no genera reliquidaciones. Las que están EN TRÁMITE se
          calculan normalmente. Los Ids 35 y 36 son los mismos que usa la app (ReglasRedeterminaciones.EtapasDesestimadas).
+     R7. (28/10/2026) TOPE: la suma de las reliquidaciones de una redeterminación no supera su MontoRedet. La que
+         lo alcanza se recorta al resto disponible y las siguientes no se generan (MontoReliquidacionSinTope
+         conserva el valor sin recortar).
 
    FÓRMULAS:
-     Ejecutado        = SUM(MONTO_TOTAL) de certificados del autorizante con mes <= mes del salto (todos los tipos de pago, incluido el anticipo)
+     Ejecutado        = SUM(MONTO_TOTAL) de certificados del autorizante con mes < mes del salto (todos los tipos de pago, incluido el anticipo)
      PorcentajeUtil   = Ejecutado / MONTO_AUTORIZADO * 100          (0 si MONTO_AUTORIZADO = 0)
      Faltante         = MAX(0, 100 - PorcentajeUtil)
      MontoRedet[1]    = MONTO_AUTORIZADO * Ponderacion/100 * Faltante/100
@@ -96,13 +102,13 @@ Base AS
         CAST(a.MONTO_AUTORIZADO AS decimal(19,6))       AS MontoAutorizado,
         ROW_NUMBER() OVER (PARTITION BY r.CODIGO_AUTORIZANTE
                            ORDER BY CASE WHEN r.Nro IS NULL THEN 1 ELSE 0 END, r.Nro, r.Id) AS Orden,
-        -- R1 + R2: ejecutado hasta el mes del salto inclusive, incluido el anticipo. R5: solo certificados de ESTE autorizante.
+        -- R1 + R2: ejecutado en meses estrictamente anteriores al del salto, incluido el anticipo. R5: solo certificados de ESTE autorizante.
         CAST(ISNULL((
             SELECT SUM(c.MONTO_TOTAL)
             FROM dbo.Certificados c
             WHERE c.CODIGO_AUTORIZANTE = r.CODIGO_AUTORIZANTE
               AND c.MES_APROBACION IS NOT NULL
-              AND EOMONTH(c.MES_APROBACION) <= EOMONTH(r.Salto)
+              AND EOMONTH(c.MES_APROBACION) < EOMONTH(r.Salto)
         ), 0) AS decimal(19,6))                         AS EjecutadoPreSalto
     FROM dbo.Redeterminaciones r
     INNER JOIN dbo.Autorizantes a ON a.CODIGO_AUTORIZANTE = r.CODIGO_AUTORIZANTE
@@ -232,15 +238,14 @@ WITH Post AS
         c.MES_APROBACION                                AS MesAprobacion,
         c.MONTO_TOTAL                                   AS MontoCertificado,
         c.TIPO_PAGO                                     AS TipoPagoCertificado,
-        -- R3: orden de los certificados posteriores al salto; el primero absorbe lo acumulado pre-salto
+        -- R3: orden de los certificados del mes del salto y posteriores; el primero absorbe lo acumulado pre-salto
         ROW_NUMBER() OVER (PARTITION BY rd.RedeterminacionId ORDER BY c.MES_APROBACION, c.Id) AS OrdenPostSalto
     FROM dbo.vw_PBI_Redeterminaciones rd
     INNER JOIN dbo.Certificados c ON c.CODIGO_AUTORIZANTE = rd.CodigoAutorizante
     WHERE rd.MontoRedet IS NOT NULL
       AND rd.EsDesestimada = 0                              -- R6: rechazada / fuera de plazo no reliquida
       AND c.MES_APROBACION IS NOT NULL
-      AND EOMONTH(c.MES_APROBACION) > rd.SaltoMes          -- R1: solo meses posteriores al salto
-      AND c.TIPO_PAGO <> 1                                  -- R2: el anticipo financiero no se redetermina
+      AND EOMONTH(c.MES_APROBACION) >= rd.SaltoMes         -- R1: mes del salto y posteriores. R2: todos los tipos de pago, incluido el anticipo
 ),
 Calc AS
 (
@@ -250,6 +255,23 @@ Calc AS
                   THEN p.MontoCertificado / p.MontoAutorizado * 100
                   ELSE 0 END AS decimal(28,12))        AS PorcentajeCertificado
     FROM Post p
+),
+Tope AS
+(
+    -- R7: acumulado de las reliquidaciones anteriores de la misma redeterminación (en el orden de R3).
+    -- Se calcula y acumula en decimal(28,12): redondeando cada fila a 4 decimales la suma superaba el
+    -- MontoRedet por fracciones de centavo y el tope recortaba reliquidaciones legítimas.
+    SELECT
+        c.*,
+        CAST(c.MontoRedet
+             * (c.PorcentajeCertificado + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END)
+             / 100 AS decimal(28,12))                                       AS MontoReliquidacionSinTope,
+        ISNULL(SUM(CAST(c.MontoRedet
+             * (c.PorcentajeCertificado + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END)
+             / 100 AS decimal(28,12)))
+             OVER (PARTITION BY c.RedeterminacionId ORDER BY c.OrdenPostSalto
+                   ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)   AS AcumuladoPrevio
+    FROM Calc c
 )
 SELECT
     CONCAT(c.RedeterminacionId, '-', c.CertificadoId)   AS ReliquidacionKey,
@@ -276,15 +298,18 @@ SELECT
     CAST(c.PorcentajeCertificado
          + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END
          AS decimal(19,6))                                                  AS PorcentajeAplicado,
-    CAST(c.MontoRedet
-         * (c.PorcentajeCertificado + CASE WHEN c.OrdenPostSalto = 1 THEN c.PorcentajeUtilizado ELSE 0 END)
-         / 100 AS decimal(19,4))                                            AS MontoReliquidacion,
+    CAST(c.MontoReliquidacionSinTope AS decimal(19,4))                      AS MontoReliquidacionSinTope,
+    -- R7: recortada al resto disponible del MontoRedet
+    CAST(CASE WHEN c.AcumuladoPrevio + c.MontoReliquidacionSinTope > c.MontoRedet
+              THEN c.MontoRedet - c.AcumuladoPrevio
+              ELSE c.MontoReliquidacionSinTope END AS decimal(19,4))          AS MontoReliquidacion,
     er.EXPEDIENTE                                                           AS ExpedienteReliq
-FROM Calc c
+FROM Tope c
 LEFT JOIN dbo.EXPEDIENTES_RELIQ er
        ON er.CODIGO_REDET = c.CodigoRedet
       AND YEAR(er.MES_APROBACION)  = YEAR(c.MesAprobacion)
-      AND MONTH(er.MES_APROBACION) = MONTH(c.MesAprobacion);
+      AND MONTH(er.MES_APROBACION) = MONTH(c.MesAprobacion)
+WHERE c.AcumuladoPrevio < c.MontoRedet;                -- R7: con el tope cubierto no se generan más reliquidaciones
 GO
 
 

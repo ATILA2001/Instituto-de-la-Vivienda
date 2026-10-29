@@ -14,21 +14,21 @@ namespace Negocio.Redeterminaciones
     /// Docs/calculo-redeterminaciones.html, Sección 6). Cualquier cambio de regla se hace acá, en las
     /// vistas y en los tests de Tests/IVC.Tests/ReglasRedeterminacionesTests.cs.
     ///
-    /// Reglas vigentes (fijadas el 22/09/2026, R6 el 01/10/2026):
-    ///  R1. El certificado del mes del salto cuenta como ejecutado. La comparación es mes a mes.
-    ///      Reliquidan sólo los certificados de meses posteriores al salto.
-    ///  R2. El anticipo financiero (tipo de pago 1) cuenta como ejecutado y, como no se redetermina,
-    ///      nunca genera reliquidación.
+    /// Reglas vigentes (fijadas el 22/09/2026; R6 el 01/10/2026; R1, R2 y R7 el 28/10/2026 por dictamen del área):
+    ///  R1. El cálculo se hace al primero del mes del salto: cuentan como ejecutado los certificados de meses
+    ///      estrictamente anteriores, y reliquidan los del mes del salto y posteriores. La comparación es mes a mes
+    ///      (MesAprobacion es el mes de ejecución de la obra).
+    ///  R2. El anticipo financiero (tipo de pago 1) se trata igual que un certificado: cuenta como ejecutado
+    ///      si es de un mes anterior al salto y reliquida si es del mes del salto o posterior.
     ///  R3. El primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
     ///  R4. Los legítimos abonos no participan del reparto del SIGAF (se resuelve fuera de esta clase).
     ///  R5. Cada autorizante se calcula con sus propios certificados.
     ///  R6. Rechazada (35) o Fuera de Plazo (36): monto cero, no acumula y no reliquida.
+    ///  R7. Tope: la suma de las reliquidaciones de una redeterminación no supera su MontoRedet. La que lo
+    ///      alcanza se recorta al resto disponible y las siguientes no se generan.
     /// </summary>
     public static class ReglasRedeterminaciones
     {
-        /// <summary>Tipo de pago "anticipo financiero" (R2).</summary>
-        public const int TipoPagoAnticipoId = 1;
-
         /// <summary>Tipo de pago con el que se exponen las reliquidaciones virtuales.</summary>
         public const int TipoPagoReliquidacionId = 3;
 
@@ -37,11 +37,11 @@ namespace Negocio.Redeterminaciones
 
         public static DateTime PrimerDiaDelMes(DateTime fecha) => new DateTime(fecha.Year, fecha.Month, 1);
 
-        /// <summary>R1: el mes del salto cuenta como anterior (ejecutado).</summary>
-        public static bool EsMesAnteriorOIgual(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) <= PrimerDiaDelMes(salto);
+        /// <summary>R1: sólo los meses estrictamente anteriores al del salto cuentan como ejecutado.</summary>
+        public static bool EsMesAnterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) < PrimerDiaDelMes(salto);
 
-        /// <summary>R1: sólo los meses estrictamente posteriores al del salto reliquidan.</summary>
-        public static bool EsMesPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) > PrimerDiaDelMes(salto);
+        /// <summary>R1: el mes del salto y los posteriores reliquidan.</summary>
+        public static bool EsMesDelSaltoOPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) >= PrimerDiaDelMes(salto);
 
         /// <summary>R6.</summary>
         public static bool EsDesestimada(int? etapaId) => etapaId.HasValue && EtapasDesestimadas.Contains(etapaId.Value);
@@ -83,9 +83,9 @@ namespace Negocio.Redeterminaciones
 
                 certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosDelAutorizante);
 
-                // Paso A. R1: hasta el mes del salto inclusive. R2: todos los tipos de pago, incluido el anticipo.
+                // Paso A. R1: meses estrictamente anteriores al del salto. R2: todos los tipos de pago, incluido el anticipo.
                 decimal ejecutadoPreSalto = (certificadosDelAutorizante ?? new List<CertificadoEF>())
-                    .Where(c => c.MesAprobacion.HasValue && EsMesAnteriorOIgual(c.MesAprobacion.Value, redet.Salto.Value))
+                    .Where(c => c.MesAprobacion.HasValue && EsMesAnterior(c.MesAprobacion.Value, redet.Salto.Value))
                     .Sum(c => c.MontoTotal);
                 decimal porcentajeUtilizado = PorcentajeSobreAutorizado(ejecutadoPreSalto, autorizante.MontoAutorizado);
 
@@ -132,23 +132,32 @@ namespace Negocio.Redeterminaciones
             if (EsDesestimada(redet.EstadoRedetEFId))
                 return resultado;
 
-            // Paso 2. R1: sólo meses posteriores al salto. R2: el anticipo no se redetermina.
+            // Paso 2. R1: mes del salto y posteriores. R2: todos los tipos de pago, incluido el anticipo.
             // Orden por mes y luego por Id para que "el primer certificado post-salto" sea estable (R3).
             var afectados = (certificadosDelAutorizante ?? Enumerable.Empty<CertificadoDTO>())
                 .Where(c => c.MesAprobacion.HasValue
-                         && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
-                         && c.TipoPagoId != TipoPagoAnticipoId)
+                         && EsMesDelSaltoOPosterior(c.MesAprobacion.Value, redet.Salto.Value))
                 .OrderBy(c => c.MesAprobacion)
                 .ThenBy(c => c.Id);
 
             bool esPrimero = true;
+            decimal tope = redet.MontoRedet.Value;
+            decimal acumulado = 0;
             foreach (var cert in afectados)
             {
+                // R7: una vez alcanzado el MontoRedet no se generan más reliquidaciones.
+                if (acumulado >= tope)
+                    break;
+
                 // Paso 3a / 3b (R3): el primero absorbe el porcentaje ejecutado pre-salto.
                 decimal porcentajeAplicado = (cert.Porcentaje ?? 0) + (esPrimero ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
                 esPrimero = false;
 
-                resultado.Add(new ReliquidacionCalculada(cert, porcentajeAplicado, redet.MontoRedet.Value * (porcentajeAplicado / 100)));
+                // R7: la que supera el tope se recorta al resto disponible.
+                decimal monto = Math.Min(tope * (porcentajeAplicado / 100), tope - acumulado);
+                acumulado += monto;
+
+                resultado.Add(new ReliquidacionCalculada(cert, porcentajeAplicado, monto));
             }
 
             return resultado;

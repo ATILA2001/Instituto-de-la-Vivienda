@@ -41,15 +41,28 @@ namespace IVC.Tests
         // ---------- Paso A/B/C: MontoRedet ----------
 
         [TestMethod]
-        public void R1_CertificadoDelMesDelSalto_CuentaComoEjecutado()
+        public void R1_CertificadoDelMesAnterior_CuentaComoEjecutado()
         {
             var redet = Redet(1, "A-1", 1, 10m, Salto);
-            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 28)) }; // mismo mes, día posterior
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 2, 28)) };
 
             ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
             Assert.AreEqual(25m, redet.PorcentajeEjecutadoPreSalto);
             Assert.AreEqual(75m, redet.MontoRedet);
+        }
+
+        [TestMethod]
+        public void R1_CertificadoDelMesDelSalto_NoCuentaComoEjecutado()
+        {
+            // Dictamen del área (28/10/2026): el cálculo se hace al 1° del mes del salto; ese mes reliquida.
+            var redet = Redet(1, "A-1", 1, 10m, Salto);
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 1)) }; // mismo mes, día anterior al salto
+
+            ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
+
+            Assert.AreEqual(0m, redet.PorcentajeEjecutadoPreSalto);
+            Assert.AreEqual(100m, redet.MontoRedet);
         }
 
         [TestMethod]
@@ -68,7 +81,7 @@ namespace IVC.Tests
         public void R2_AnticipoPreSalto_CuentaComoEjecutado()
         {
             var redet = Redet(1, "A-1", 1, 10m, Salto);
-            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 1, 1), ReglasRedeterminaciones.TipoPagoAnticipoId) };
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 1, 1), TipoPagoAnticipoId) };
 
             ReglasRedeterminaciones.CalcularMontos(new[] { redet }, new[] { Autorizante() }, certs);
 
@@ -80,7 +93,7 @@ namespace IVC.Tests
         {
             var r1 = Redet(1, "A-1", 1, 10m, Salto);
             var r2 = Redet(2, "A-1", 2, 10m, new DateTime(2026, 6, 1));
-            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 1)) };
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 2, 1)) }; // anterior al salto de marzo
 
             ReglasRedeterminaciones.CalcularMontos(new[] { r2, r1 }, new[] { Autorizante() }, certs);
 
@@ -93,7 +106,7 @@ namespace IVC.Tests
         {
             var r1 = Redet(1, "A-1", 1, 10m, Salto, etapa: 35); // Rechazada
             var r2 = Redet(2, "A-1", 2, 10m, new DateTime(2026, 6, 1));
-            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 3, 1)) };
+            var certs = new[] { Certificado(1, "A-1", 250m, new DateTime(2026, 2, 1)) }; // anterior al salto de marzo
 
             ReglasRedeterminaciones.CalcularMontos(new[] { r1, r2 }, new[] { Autorizante() }, certs);
 
@@ -179,22 +192,28 @@ namespace IVC.Tests
 
         // ---------- Paso 2/3: reliquidaciones ----------
 
+        /// <summary>Tipo de pago "anticipo financiero": desde el 28/10/2026 se trata igual que un certificado (R2).</summary>
+        private const int TipoPagoAnticipoId = 1;
+
         private static RedeterminacionEF RedetCalculada(decimal montoRedet = 75m, decimal preSalto = 25m, int? etapa = 12) =>
             new RedeterminacionEF { Id = 1, CodigoAutorizante = "A-1", Salto = Salto, MontoRedet = montoRedet, PorcentajeEjecutadoPreSalto = preSalto, EstadoRedetEFId = etapa };
 
         [TestMethod]
-        public void R1_SoloCertificadosDeMesesPosterioresAlSalto()
+        public void R1_ReliquidanElMesDelSaltoYLosPosteriores()
         {
             var certs = new[]
             {
-                Dto(1, 250m, new DateTime(2026, 3, 31)), // mes del salto: no reliquida
+                Dto(3, 100m, new DateTime(2026, 2, 28)), // anterior: no reliquida
+                Dto(1, 100m, new DateTime(2026, 3, 1)),  // mes del salto: reliquida y es el primero (R3)
                 Dto(2, 100m, new DateTime(2026, 4, 1)),  // posterior: reliquida
             };
 
             var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
 
-            Assert.AreEqual(1, reliq.Count);
-            Assert.AreEqual(2, reliq[0].Certificado.Id);
+            Assert.AreEqual(2, reliq.Count);
+            Assert.AreEqual(1, reliq[0].Certificado.Id);
+            Assert.AreEqual(35m, reliq[0].PorcentajeAplicado);
+            Assert.AreEqual(2, reliq[1].Certificado.Id);
         }
 
         [TestMethod]
@@ -231,11 +250,67 @@ namespace IVC.Tests
         }
 
         [TestMethod]
-        public void R2_AnticipoPostSalto_NoReliquida()
+        public void R2_AnticipoPostSalto_ReliquidaComoUnCertificado()
         {
-            var certs = new[] { Dto(1, 100m, new DateTime(2026, 4, 1), tipoPago: ReglasRedeterminaciones.TipoPagoAnticipoId) };
+            // Dictamen del área (28/10/2026): el anticipo se redetermina y reliquida igual que un certificado.
+            var certs = new[]
+            {
+                Dto(1, 100m, new DateTime(2026, 4, 1), tipoPago: TipoPagoAnticipoId), // 10 % propio + 25 % pre-salto
+                Dto(2, 100m, new DateTime(2026, 5, 1)),
+            };
 
             var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
+
+            Assert.AreEqual(2, reliq.Count);
+            Assert.AreEqual(1, reliq[0].Certificado.Id);
+            Assert.AreEqual(35m, reliq[0].PorcentajeAplicado, "el anticipo, si es el primero post-salto, absorbe el pre-salto (R3)");
+            Assert.AreEqual(75m * 0.35m, reliq[0].Monto);
+            Assert.AreEqual(10m, reliq[1].PorcentajeAplicado);
+        }
+
+        [TestMethod]
+        public void R7_LaReliquidacionQueSuperaElTope_SeRecortaYLasSiguientesNoSeGeneran()
+        {
+            // MontoRedet 75, pre-salto 25 %. Primero 50 % + 25 % = 75 % => 56,25; segundo 50 % => 37,50 pero sólo quedan 18,75.
+            var certs = new[]
+            {
+                Dto(1, 500m, new DateTime(2026, 4, 1)),
+                Dto(2, 500m, new DateTime(2026, 5, 1)),
+                Dto(3, 100m, new DateTime(2026, 6, 1)),
+            };
+
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
+
+            Assert.AreEqual(2, reliq.Count, "la tercera no se genera: el tope ya está cubierto");
+            Assert.AreEqual(56.25m, reliq[0].Monto);
+            Assert.AreEqual(50m, reliq[1].PorcentajeAplicado, "el porcentaje aplicado se informa sin recortar");
+            Assert.AreEqual(18.75m, reliq[1].Monto);
+            Assert.AreEqual(75m, reliq.Sum(r => r.Monto));
+        }
+
+        [TestMethod]
+        public void R7_SumaExactaAlTope_NoRecortaYNoGeneraMas()
+        {
+            var certs = new[]
+            {
+                Dto(1, 500m, new DateTime(2026, 4, 1)), // 75 % => 56,25
+                Dto(2, 250m, new DateTime(2026, 5, 1)), // 25 % => 18,75; suma 75 = MontoRedet
+                Dto(3, 100m, new DateTime(2026, 6, 1)),
+            };
+
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(), certs);
+
+            Assert.AreEqual(2, reliq.Count);
+            Assert.AreEqual(18.75m, reliq[1].Monto);
+        }
+
+        [TestMethod]
+        public void R7_MontoRedetCero_NoGeneraReliquidaciones()
+        {
+            // Autorizante 100 % ejecutado antes del salto: no hay nada que reliquidar.
+            var certs = new[] { Dto(1, 100m, new DateTime(2026, 4, 1)) };
+
+            var reliq = ReglasRedeterminaciones.GenerarReliquidaciones(RedetCalculada(montoRedet: 0m, preSalto: 100m), certs);
 
             Assert.AreEqual(0, reliq.Count);
         }
