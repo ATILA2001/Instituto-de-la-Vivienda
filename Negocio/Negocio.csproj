@@ -117,7 +117,6 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -146,7 +145,13 @@
     <Compile Include="LegitimoNegocioEF.cs" />
     <Compile Include="LineaGestionFFNegocio.cs" />
     <Compile Include="LineaGestionNegocio.cs" />
+    <Compile Include="Infraestructura\IContextoWeb.cs" />
     <Compile Include="MontoHelper.cs" />
+    <Compile Include="Redeterminaciones\DatosExternosNegocioEF.cs" />
+    <Compile Include="Redeterminaciones\EstadoGeneral.cs" />
+    <Compile Include="Redeterminaciones\UltimoPaseSade.cs" />
+    <Compile Include="Redeterminaciones\MapeoEstadoRedet.cs" />
+    <Compile Include="Redeterminaciones\ReglasRedeterminaciones.cs" />
     <Compile Include="MovimientoNegocio.cs" />
     <Compile Include="ObraNegocio.cs" />
     <Compile Include="ObraNegocioEF.cs" />

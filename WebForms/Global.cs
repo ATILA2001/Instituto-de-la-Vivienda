@@ -16,6 +16,9 @@ namespace WebForms
     {
         void Application_Start(object sender, EventArgs e)
         {
+            // Negocio accede a sesión, principal y descarga de archivos a través de esta abstracción (sin System.Web).
+            Negocio.Infraestructura.ContextoWeb.Registrar(Infraestructura.HttpContextoWeb.DelRequestActual);
+
             // Configurar el modo de validaci�n no intrusiva
             ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.WebForms;
 

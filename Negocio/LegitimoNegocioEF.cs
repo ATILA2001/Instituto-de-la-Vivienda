@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using Negocio.Redeterminaciones;
 
 namespace Negocio
 {
@@ -237,7 +238,7 @@ namespace Negocio
                             sigafVal = sVal;
 
                         // Calcular propiedades adicionales exactamente como en CertificadosEF
-                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, (string, DateTime?)>());
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, UltimoPaseSade>());
 
                         l.Sigaf = sigafVal;
                         l.BuzonSade = buzon;
@@ -293,7 +294,7 @@ namespace Negocio
                         if (!string.IsNullOrWhiteSpace(l.Expediente) && datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sVal))
                             sigafVal = sVal;
 
-                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, (string, DateTime?)>());
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, UltimoPaseSade>());
 
                         l.Sigaf = sigafVal;
                         l.BuzonSade = buzon;

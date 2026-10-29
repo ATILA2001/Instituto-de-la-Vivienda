@@ -7,7 +7,7 @@ Aplicación web interna para la gestión de obras, autorizantes, certificados, r
 | Proyecto | Tecnología | Contenido |
 |---|---|---|
 | `Dominio` | .NET Framework 4.8, Entity Framework 6 | Entidades (`*EF.cs`), `IVCdbContext`, DTOs, anillo de claves de DataProtection |
-| `Negocio` | .NET Framework 4.8 | Reglas de negocio y acceso a datos. Las clases `*NegocioEF` usan EF6; las clases `*Negocio` sin sufijo usan ADO.NET (`AccesoDatos`) y quedan sólo para Barrios, Empresas, Proyectos, Movimientos y Líneas de Gestión |
+| `Negocio` | .NET Framework 4.8 | Reglas de negocio y acceso a datos. `Redeterminaciones/` tiene las reglas de cálculo puras (`ReglasRedeterminaciones`), el mapeo de etapas y el servicio de datos externos (SADE, SIGAF, ACDIR); `Infraestructura/` define `IContextoWeb`, la única dependencia del request que usa esta capa. Las clases `*NegocioEF` usan EF6; las clases `*Negocio` sin sufijo usan ADO.NET (`AccesoDatos`) y quedan sólo para Barrios, Empresas, Proyectos, Movimientos y Líneas de Gestión |
 | `WebForms` | ASP.NET WebForms + OWIN | Páginas, master pages, controles (`CustomControls/`) y el pipeline de autenticación/autorización (`Global.cs`, `Startup.Auth.cs`, `Sso/`) |
 | `Tests/IVC.Tests` | MSTest, net48 | Pruebas unitarias de `Negocio` |
 | `Database/` | SQL | Vistas para Power BI que replican las reglas de redeterminaciones |

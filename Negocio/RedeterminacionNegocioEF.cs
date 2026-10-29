@@ -320,8 +320,8 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"ContarPorUsuarioConFiltros error: {ex.Message}");
-                return 0;
+                Trace.TraceError("[ContarConFiltros] {0}", ex);
+                throw;
             }
         }
 
@@ -450,8 +450,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"ListarPaginadoConFiltros error: {ex.Message}");
-                return new List<RedeterminacionEF>();
+                // Antes devolvía una lista vacía: la grilla se mostraba sin registros y sin ningún aviso.
+                Trace.TraceError("[ListarPaginadoConFiltros] {0}", ex);
+                throw;
             }
         }
     }

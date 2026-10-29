@@ -8,7 +8,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
-using System.Web;
+using Negocio.Infraestructura;
+using Negocio.Redeterminaciones;
 
 namespace Negocio
 {
@@ -46,7 +47,7 @@ namespace Negocio
     /// MAPEO DE ESTADOS REDETERMINACIONES:
     /// - Estados específicos de redeterminaciones se mapean a estados generales
     /// - Permite visualización unificada en UI con estados comprensibles
-    /// - IdsDesestimado, IdsNoIniciado, IdsAprobado definen reglas de mapeo
+    /// - El mapeo etapa -> estado general vive en MapeoEstadoRedet; las reglas de cálculo en ReglasRedeterminaciones
     /// 
     /// PATRÓN DE INTEGRACIÓN:
     /// - Métodos BuscarMuchos*() para consultas bulk optimizadas
@@ -66,15 +67,6 @@ namespace Negocio
         // En tramite todos los demas
 
 
-        /// <summary>
-        /// Estado general de una redeterminación a partir de su etapa. Delega en MapearEstadoDesdeId
-        /// para usar un único mapeo y tolerar ETAPA null (antes redet.Etapa.Id lanzaba NRE y la grilla
-        /// de autorizantes quedaba vacía).
-        /// </summary>
-        private EstadoAutorizanteEF MapearEstadoRedetAEstadoAutorizante(RedeterminacionEF redet)
-        {
-            return MapearEstadoDesdeId(redet.EstadoRedetEFId);
-        }
 
 
 
@@ -181,7 +173,7 @@ namespace Negocio
 
                     var datosSade = BuscarMuchosDatosSade(expedientesValidos);
                     // Después de obtener datosSade, agrega:
-                    var datosAcdir = AcdirHelper.ObtenerInfoACDIRBulk(expedientesValidos);
+                    var datosAcdir = _datosExternos.ObtenerAcdirs(expedientesValidos);
 
 
                     // Convertir autorizantes a DTO
@@ -225,7 +217,7 @@ namespace Negocio
                         var auth = redet.Autorizante;
                         var obra = auth?.Obra;
 
-                        var estado = MapearEstadoRedetAEstadoAutorizante(redet);
+                        var estado = MapeoEstadoRedet.MapearEstadoDesdeId(redet.EstadoRedetEFId);
                         var dto = new AutorizanteDTO
                         {
                             IdRedeterminacion = redet.Id,
@@ -289,8 +281,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error en ListarAutorizantesYRedeterminaciones: {ex.Message}");
-                return new List<AutorizanteDTO>();
+                // Antes devolvía una lista vacía: la grilla se mostraba sin registros y sin ningún aviso.
+                Trace.TraceError("[ListarAutorizantesYRedeterminaciones] {0}", ex);
+                throw;
             }
         }
 
@@ -316,98 +309,9 @@ namespace Negocio
         // Aprobado = 12, 22, 33, 39
         // En tramite todos los demas
 
-        private readonly int[] IdsDesestimado = { 35, 36 }; // Rechazada, Fuera de Plazo
-        private readonly int[] IdsNoIniciado = { 37, 38 }; // Pendiente, No presentada
-        private readonly int[] IdsAprobado = { 12, 22, 33, 39 };// RD-11/11-Notificada, RP-09/09-Notificada, RO-11/11-Notificada, ACDIR
 
-        /// <summary>
-        /// Obtiene el cache de SADE desde la sesión HTTP
-        /// </summary>
-        private Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerCacheSade()
-        {
-            if (HttpContext.Current?.Session == null) return null;
-            return HttpContext.Current.Session["CacheSade"] as Dictionary<string, (string, DateTime?)>;
-        }
+        private readonly DatosExternosNegocioEF _datosExternos = new DatosExternosNegocioEF();
 
-        /// <summary>
-        /// Guarda el cache de SADE en la sesión HTTP
-        /// </summary>
-        private void GuardarCacheSade(Dictionary<string, (string Buzon, DateTime? Fecha)> cache)
-        {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session["CacheSade"] = cache;
-            }
-        }
-
-        /// <summary>
-        /// Mapea un ID específico de estado de redeterminación a un estado general.
-        /// 
-        /// LÓGICA DE MAPEO:
-        /// 1. null o IdsNoIniciado -> "NO INICIADO" (Id=4)
-        /// 2. IdsAprobado -> "APROBADO" (Id=1)  
-        /// 3. IdsDesestimado -> "DESESTIMADO" (Id=3)
-        /// 4. Cualquier otro -> "EN TRAMITE" (Id=2)
-        /// 
-        /// PARÁMETROS:
-        /// - estadoRedetId: ID específico de estado de redeterminación (puede ser null)
-        /// 
-        /// RETORNO:
-        /// - EstadoAutorizanteEF con ID y Nombre del estado general mapeado
-        /// 
-        /// USO:
-        /// - Convertir estados granulares de redeterminaciones a vista unificada
-        /// - Consistencia entre autorizantes y redeterminaciones en UI
-        /// - Filtros y agrupaciones por estado general
-        /// </summary>
-        public EstadoAutorizanteEF MapearEstadoDesdeId(int? estadoRedetId)
-        {
-            //int? estadoRedetId = dto.EstadoRedetId;
-
-            if (!estadoRedetId.HasValue || IdsNoIniciado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 4, Nombre = "NO INICIADO" };
-
-            if (IdsAprobado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 1, Nombre = "APROBADO" };
-
-            if (IdsDesestimado.Contains(estadoRedetId.Value))
-                return new EstadoAutorizanteEF { Id = 3, Nombre = "DESESTIMADO" };
-
-            return new EstadoAutorizanteEF { Id = 2, Nombre = "EN TRAMITE" };
-        }
-
-        /// <summary>
-        /// Genera lista de estados únicos para uso en filtros TreeViewSearch.
-        /// 
-        /// PROPÓSITO:
-        /// - Proporcionar opciones de filtrado consistentes en UI
-        /// - Evitar duplicados en listas de selección
-        /// - Ordenar alfabéticamente para mejor UX
-        /// 
-        /// IMPLEMENTACIÓN:
-        /// - Utiliza MapearEstadoDesdeId() con IDs representativos
-        /// - Genera un estado de cada categoría principal
-        /// - OrderBy para ordenamiento alfabético
-        /// 
-        /// RETORNO:
-        /// - Lista de EstadoAutorizanteEF únicos y ordenados
-        /// - Incluye: APROBADO, DESESTIMADO, EN TRAMITE, NO INICIADO
-        /// 
-        /// USO:
-        /// - Poblar filtros TreeViewSearch de estado
-        /// - Dropdowns de selección de estado
-        /// - Interfaces de búsqueda y reportes
-        /// </summary>
-        public List<EstadoAutorizanteEF> ObtenerEstadosParaFiltro()
-        {
-            return new List<EstadoAutorizanteEF>
-            {
-                MapearEstadoDesdeId(12), // APROBADO
-                MapearEstadoDesdeId(35), // DESESTIMADO
-                MapearEstadoDesdeId(37), // NO INICIADO
-                MapearEstadoDesdeId(0)   // EN TRAMITE
-            }.OrderBy(e => e.Nombre).ToList();
-        }
 
         /// <summary>
         /// NUEVO MÉTODO: Réplica de la lógica de negocio original que genera reliquidaciones.
@@ -593,18 +497,10 @@ namespace Negocio
 
                 // PARALELISMO CONSERVADOR: Solo SIGAF y SADE en paralelo
                 sw.Restart();
-                Dictionary<string, decimal> datosSigaf = null;
-                Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade = null;
-
-                // Ejecutar ambas consultas en paralelo para máximo rendimiento
-                var taskSigaf = Task.Run(() => BuscarMuchosNumerosSigaf(todosLosExpedientes));
-                var taskSade = Task.Run(() => BuscarMuchosDatosSade(todosLosExpedientes));
-
-                // Esperar a que ambas terminen
-                Task.WaitAll(taskSigaf, taskSade);
-
-                datosSigaf = taskSigaf.Result;
-                datosSade = taskSade.Result;
+                // Secuencial a propósito: dentro de Task.Run no hay HttpContext, la caché SADE de sesión no
+                // se leía ni se escribía y las excepciones llegaban envueltas en AggregateException.
+                var datosSigaf = BuscarMuchosNumerosSigaf(todosLosExpedientes);
+                var datosSade = BuscarMuchosDatosSade(todosLosExpedientes);
 
                 Debug.WriteLine($"Tiempo consulta SIGAF/SADE EN PARALELO: {sw.ElapsedMilliseconds} ms");
 
@@ -652,7 +548,7 @@ namespace Negocio
                                          TipoPagoId = cert.TipoPagoId,
                                          TipoPagoNombre = tipoPago?.Nombre,
                                          EstadoRedetId = auth.Redeterminaciones?.OrderByDescending(r => r.Id).Select(r => (int?)r.EstadoRedetEFId).FirstOrDefault(),
-                                         Porcentaje = (auth.MontoAutorizado > 0) ? (cert.MontoTotal / auth.MontoAutorizado) * 100 : 0,
+                                         Porcentaje = ReglasRedeterminaciones.PorcentajeSobreAutorizado(cert.MontoTotal, auth.MontoAutorizado),
                                          PorcEjecFisica = cert.PorcEjecFisica,
                                      }).ToList();
 
@@ -673,33 +569,24 @@ namespace Negocio
                     }
                 }
 
+                // Certificados reales por autorizante: la regla se aplica por autorizante (R5).
+                var certificadosDtoPorAutorizante = listaFinalDTO
+                    .Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante))
+                    .GroupBy(c => c.CodigoAutorizante)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
                 foreach (var redet in redeterminaciones)
                 {
                     if (!autorizantesPorRedet.TryGetValue(redet.Id, out var autorizanteDeRedet)) continue;
 
-                    if (!redet.Salto.HasValue || !redet.MontoRedet.HasValue) continue; // sin salto o sin porcentaje: no hay monto, no hay reliquidación
-                    if (EsDesestimada(redet)) continue; // R6: rechazada o fuera de plazo no reliquida
+                    certificadosDtoPorAutorizante.TryGetValue(autorizanteDeRedet.CodigoAutorizante, out var certificadosDelAutorizante);
 
-                    // Paso 2. R1: solo meses POSTERIORES al del salto. R2: el anticipo financiero no se redetermina.
-                    // Se ordena por mes y luego por Id para que "el primer certificado post-salto" sea estable (Paso 3b).
-                    var certificadosAfectados = listaFinalDTO
-                        .Where(c => c.CodigoAutorizante == autorizanteDeRedet.CodigoAutorizante
-                                 && c.MesAprobacion.HasValue
-                                 && EsMesPosterior(c.MesAprobacion.Value, redet.Salto.Value)
-                                 && c.TipoPagoId != TipoPagoAnticipoId)
-                        .OrderBy(c => c.MesAprobacion)
-                        .ThenBy(c => c.Id)
-                        .ToList();
-
-                    bool esPrimerCertificadoPostSalto = true;
-                    foreach (var certAfectado in certificadosAfectados)
+                    // Pasos 2 y 3 (R1, R2, R3, R6): la regla vive en ReglasRedeterminaciones.
+                    foreach (var reliq in ReglasRedeterminaciones.GenerarReliquidaciones(redet, certificadosDelAutorizante))
                     {
-                        // Paso 3a / 3b (R3): el primer certificado posterior al salto absorbe el porcentaje ejecutado pre-salto.
-                        decimal porcentajeAplicado = (certAfectado.Porcentaje ?? 0)
-                            + (esPrimerCertificadoPostSalto ? (redet.PorcentajeEjecutadoPreSalto ?? 0) : 0);
-                        esPrimerCertificadoPostSalto = false;
-
-                        decimal montoReliq = (redet.MontoRedet ?? 0) * (porcentajeAplicado / 100);
+                        var certAfectado = reliq.Certificado;
+                        decimal porcentajeAplicado = reliq.PorcentajeAplicado;
+                        decimal montoReliq = reliq.Monto;
 
                         var claveReliq = new Tuple<string, int, int>(redet.CodigoRedet, certAfectado.MesAprobacion.Value.Month, certAfectado.MesAprobacion.Value.Year);
 
@@ -723,7 +610,7 @@ namespace Negocio
                             EstadoRedetId = redet.EstadoRedetEFId,
                             AutorizanteId = autorizanteDeRedet.Id, // ID del autorizante de la redeterminación
                             CodigoAutorizante = redet.CodigoRedet,
-                            AutorizanteEstado = MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
+                            AutorizanteEstado = MapeoEstadoRedet.MapearEstadoDesdeId(redet.EstadoRedetEFId).Nombre,
                             // Datos de la obra de la redeterminación (no del certificado afectado)
                             ObraId = obraRedet?.Id,
                             ObraDescripcion = obraRedet?.Descripcion,
@@ -740,7 +627,7 @@ namespace Negocio
                             ProyectoNombre = proyectoRedet?.Nombre,
                             LineaGestionId = lineaGestionRedet?.Id,
                             LineaGestionNombre = lineaGestionRedet?.Nombre,
-                            TipoPagoId = 3,
+                            TipoPagoId = ReglasRedeterminaciones.TipoPagoReliquidacionId,
                             TipoPagoNombre = "RELIQUIDACION",
                             Porcentaje = porcentajeAplicado, // Porcentaje propio del certificado + acumulado pre-salto si es el primero (Paso 3b)
                         });
@@ -792,7 +679,7 @@ namespace Negocio
             List<CertificadoDTO> todosLosCertificados,
             bool persistirEnBD = false,
             Dictionary<string, decimal> datosSigafPrecargados = null,
-            Dictionary<string, (string Buzon, DateTime? Fecha)> datosSadePrecargados = null)
+            Dictionary<string, UltimoPaseSade> datosSadePrecargados = null)
         {
             try
             {
@@ -865,8 +752,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en RecalcularCertificadosPorExpedientes: {ex.Message}");
-                return todosLosCertificados; // Devolvemos la lista original sin cambios en caso de error
+                // Antes devolvía la lista sin recalcular y la página la cacheaba como si estuviera actualizada.
+                Trace.TraceError("[CalcularCertificadosPorExpedientes] {0}", ex);
+                throw;
             }
         }
 
@@ -889,7 +777,7 @@ namespace Negocio
 
                             // Certificados normales (no reliquidaciones)
                             var certificadosNormales = certificados
-                                .Where(c => c.TipoPagoId != 3 && c.Id > 0)
+                                .Where(c => c.TipoPagoId != ReglasRedeterminaciones.TipoPagoReliquidacionId && c.Id > 0)
                                 .ToList();
 
                             foreach (var certDTO in certificadosNormales)
@@ -912,7 +800,7 @@ namespace Negocio
 
                             // Reliquidaciones
                             var reliquidaciones = certificados
-                                .Where(c => c.TipoPagoId == 3 && c.MesAprobacion.HasValue)
+                                .Where(c => c.TipoPagoId == ReglasRedeterminaciones.TipoPagoReliquidacionId && c.MesAprobacion.HasValue)
                                 .ToList();
 
                             foreach (var reliqDTO in reliquidaciones)
@@ -996,65 +884,29 @@ namespace Negocio
                     return null;
 
                 decimal totalDevengado = datosSigaf[expedientePago];
-                if (totalDevengado <= 0)
-                    return null;
 
-                // Filtrar certificados válidos del mismo expediente
-                var certificadosMismoExpediente = todosLosCertificados
-                    ?.Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago) &&
+                // Montos de todos los pagos (certificados y reliquidaciones) del mismo expediente; R4: sin legítimos.
+                var montosMismoExpediente = (todosLosCertificados ?? new List<CertificadoDTO>())
+                    .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago) &&
                           c.ExpedientePago.Equals(expedientePago, StringComparison.OrdinalIgnoreCase))
-                    ?.ToList() ?? new List<CertificadoDTO>();
+                    .Select(c => c.MontoTotal)
+                    .ToList();
 
-                if (!certificadosMismoExpediente.Any())
-                    return totalDevengado;
-
-                if (certificadosMismoExpediente.Count == 1)
-                    return totalDevengado;
-
-                decimal sumaTotalMontos = certificadosMismoExpediente.Sum(c => c.MontoTotal);
-                if (sumaTotalMontos > 0)
-                    return totalDevengado * montoTotal / sumaTotalMontos;
-
-                return null;
+                return ReglasRedeterminaciones.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en CalcularSigafDirecto: {ex.Message}");
-                return null;
+                Trace.TraceError("[CalcularSIGAF] expediente {0}: {1}", expedientePago, ex);
+                throw;
             }
         }
 
         /// <summary>
-        /// Id del tipo de pago "anticipo financiero". Regla R2: cuenta como ejecutado (ya está pagado)
-        /// y no se redetermina, por lo tanto nunca genera reliquidación.
-        /// </summary>
-        private const int TipoPagoAnticipoId = 1;
-
-        private static DateTime PrimerDiaDelMes(DateTime fecha) => new DateTime(fecha.Year, fecha.Month, 1);
-
-        /// <summary>Regla R1: la comparación contra el salto es mes a mes y el mes del salto cuenta como ANTERIOR (ejecutado).</summary>
-        private static bool EsMesAnteriorOIgual(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) <= PrimerDiaDelMes(salto);
-
-        /// <summary>Regla R1: solo los meses estrictamente posteriores al del salto generan reliquidación.</summary>
-        private static bool EsMesPosterior(DateTime fecha, DateTime salto) => PrimerDiaDelMes(fecha) > PrimerDiaDelMes(salto);
-
-        /// <summary>
-        /// Regla R6: una redeterminación Rechazada (etapa 35) o Fuera de Plazo (etapa 36) tiene monto cero,
-        /// no acumula en las siguientes y no genera reliquidaciones. Las que están en trámite se calculan normalmente.
-        /// </summary>
-        private bool EsDesestimada(RedeterminacionEF redet) =>
-            redet.EstadoRedetEFId.HasValue && IdsDesestimado.Contains(redet.EstadoRedetEFId.Value);
-
-        /// <summary>
-        /// Calcula MontoRedet de cada redeterminación (Pasos A, B y C de Docs/calculo-redeterminaciones.html)
-        /// y deja en PorcentajeEjecutadoPreSalto el porcentaje ya ejecutado, que usa el Paso 3b de las reliquidaciones.
-        /// Reglas vigentes: ver Docs/calculo-redeterminaciones.html, Sección 6. Debe dar lo mismo que la vista SQL
-        /// dbo.vw_PBI_Redeterminaciones (Database/vw_PowerBI_Redeterminaciones.sql).
+        /// Calcula MontoRedet y PorcentajeEjecutadoPreSalto de cada redeterminación (Pasos A, B y C).
+        /// Las reglas viven en ReglasRedeterminaciones; acá sólo se cargan los certificados si no se recibieron.
         /// </summary>
         private void CalcularMontoRedeterminaciones(List<RedeterminacionEF> redeterminaciones, List<AutorizanteEF> autorizantes, List<CertificadoEF> certificados = null)
         {
-            var redeterminacionesCalculadas = new List<RedeterminacionEF>();
-
             // Si no se recibieron certificados, se cargan UNA sola vez para todos los autorizantes involucrados.
             if (certificados == null)
             {
@@ -1074,87 +926,22 @@ namespace Negocio
                 }
             }
 
-            // Agrupar por autorizante. IMPORTANTE: no reasignar ni filtrar la lista recibida dentro del bucle;
-            // hacerlo dejaba solo los certificados del primer autorizante y el resto se calculaba con faltante = 100%.
-            var certificadosPorAutorizante = certificados
-                .Where(c => !string.IsNullOrEmpty(c.CodigoAutorizante))
-                .GroupBy(c => c.CodigoAutorizante)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            var autorizantesPorCodigo = autorizantes
-                .Where(a => !string.IsNullOrEmpty(a.CodigoAutorizante))
-                .GroupBy(a => a.CodigoAutorizante)
-                .ToDictionary(g => g.Key, g => g.First());
-
-            // Mismo orden que la vista SQL (ROW_NUMBER por autorizante): Nro ascendente, nulos al final, desempate por Id.
-            var redeterminacionesOrdenadas = redeterminaciones
-                .OrderBy(r => r.Nro.HasValue ? 0 : 1)
-                .ThenBy(r => r.Nro)
-                .ThenBy(r => r.Id);
-
-            foreach (var redet in redeterminacionesOrdenadas)
-            {
-                if (string.IsNullOrEmpty(redet.CodigoAutorizante) || !autorizantesPorCodigo.TryGetValue(redet.CodigoAutorizante, out var autorizante)) continue;
-                if (!redet.Salto.HasValue || !redet.Porcentaje.HasValue) continue;
-
-                certificadosPorAutorizante.TryGetValue(autorizante.CodigoAutorizante, out var certificadosDelAutorizante);
-
-                // Paso A. R1: hasta el mes del salto inclusive. R2: todos los tipos de pago, incluido el anticipo.
-                decimal sumaMontosTotal = (certificadosDelAutorizante ?? new List<CertificadoEF>())
-                    .Where(c => c.MesAprobacion.HasValue && EsMesAnteriorOIgual(c.MesAprobacion.Value, redet.Salto.Value))
-                    .Sum(c => c.MontoTotal);
-                decimal porcentajeUtilizado = (autorizante.MontoAutorizado > 0) ? (sumaMontosTotal / autorizante.MontoAutorizado) * 100 : 0;
-                // Paso B
-                decimal faltante = Math.Max(0, 100 - porcentajeUtilizado);
-                redet.PorcentajeEjecutadoPreSalto = porcentajeUtilizado;
-                // Paso C. Base = MontoAutorizado + todas las redeterminaciones ya calculadas del mismo autorizante
-                // (en el orden de arriba). Para la primera la suma es 0, así que la misma fórmula sirve para Nro = 1.
-                decimal sumaMontosRedetAnteriores = redeterminacionesCalculadas
-                    .Where(r => r.CodigoAutorizante == redet.CodigoAutorizante && r.MontoRedet.HasValue)
-                    .Sum(r => r.MontoRedet.Value);
-
-                // R6: rechazada o fuera de plazo => monto cero (y por lo tanto no suma en la base de las siguientes).
-                decimal montoCalculado = EsDesestimada(redet)
-                    ? 0
-                    : (((autorizante.MontoAutorizado + sumaMontosRedetAnteriores) * redet.Porcentaje.Value) / 100) * (faltante / 100);
-
-                redet.MontoRedet = montoCalculado;
-                redeterminacionesCalculadas.Add(redet);
-            }
+            ReglasRedeterminaciones.CalcularMontos(redeterminaciones, autorizantes, certificados);
         }
 
         /// <summary>
         /// Calcula las propiedades adicionales para un certificado (Porcentaje, Estado, Sigaf, BuzonSade, FechaSade)
         /// </summary>
-        public (string Estado, string BuzonSade, DateTime? FechaSade) CalcularPropiedadesAdicionales(string expedientePago, decimal? montoTotal, decimal? sigaf, Dictionary<string, (string Buzon, DateTime? Fecha)> datosSade)
+        public (string Estado, string BuzonSade, DateTime? FechaSade) CalcularPropiedadesAdicionales(string expedientePago, decimal? montoTotal, decimal? sigaf, Dictionary<string, UltimoPaseSade> datosSade)
         {
-            try
-            {
-                // 3. Estado
-                string estado;
-                if (string.IsNullOrEmpty(expedientePago))
-                {
-                    estado = "NO INICIADO";
-                }
-                else if (sigaf > 0)
-                {
-                    estado = "DEVENGADO";
-                }
-                else
-                {
-                    estado = "EN TRAMITE";
-                }
+            string estado = ReglasRedeterminaciones.DeterminarEstado(expedientePago, sigaf);
 
-                // 4. Datos SADE (consulta en memoria)
-                var (buzon, fecha) = datosSade.ContainsKey(expedientePago) ? datosSade[expedientePago] : (null, null);
+            // Dictionary no admite clave null: un pago sin expediente antes caía en el catch y quedaba con Estado "ERROR".
+            var pase = datosSade != null && datosSade.TryGetValue(expedientePago ?? "", out var encontrado)
+                ? encontrado
+                : UltimoPaseSade.SinDatos;
 
-                return (estado, buzon, fecha);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error en RealizarCalculosAdicionales: {ex.Message}");
-                return ("ERROR", null, null);
-            }
+            return (estado, pase.Buzon, pase.Fecha);
         }
 
 
@@ -1218,40 +1005,7 @@ namespace Negocio
         /// <returns>Un diccionario con el expediente como clave y la suma de importes como valor.</returns>
         private Dictionary<string, decimal> BuscarMuchosNumerosSigaf(List<string> expedientes)
         {
-            // Se valida la entrada para evitar consultas innecesarias.
-            if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, decimal>();
-
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    // La consulta se traduce a un eficiente "WHERE ... IN (...)" en SQL.
-                    return context.Devengados
-                        .AsNoTracking()
-                        .Where(d => expedientes.Contains(d.EeFinanciera))
-                        // Se agrupa por expediente para poder sumarizar por cada uno.
-                        // Esto es el equivalente a ejecutar la consulta original para cada expediente.
-                        .GroupBy(d => d.EeFinanciera)
-                        // Se proyecta el resultado.
-                        .Select(g => new
-                        {
-                            // g.Key es el expediente por el que se agrupó.
-                            Expediente = g.Key,
-                            // Se realiza la suma de ImportePp para el grupo.
-                            // El cast a decimal? y el ?? 0 replican la lógica de manejar nulos.
-                            TotalImporte = g.Sum(d => (decimal?)d.ImportePp) ?? 0
-                        })
-                        // Se convierte el resultado en un diccionario para búsquedas en memoria instantáneas (O(1)).
-                        .ToDictionary(r => r.Expediente, r => r.TotalImporte);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Se registra el error y se devuelve un diccionario vacío para no detener la ejecución.
-                System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SIGAF: {ex.Message}");
-                return new Dictionary<string, decimal>();
-            }
+            return _datosExternos.ObtenerDevengados(expedientes);
         }
 
         #endregion
@@ -1286,7 +1040,7 @@ namespace Negocio
         /// - Filtro inicial con Contains() para reducir dataset
         /// 
         /// ESTRUCTURA DE RETORNO:
-        /// - Dictionary<string, (string Buzon, DateTime? Fecha)>
+        /// - Dictionary<string, UltimoPaseSade>
         /// - Key: Expediente
         /// - Value.Buzon: Buzón de destino del último pase
         /// - Value.Fecha: Fecha del último pase
@@ -1314,106 +1068,15 @@ namespace Negocio
         /// </summary>
         /// <param name="expedientes">Lista de expedientes a consultar.</param>
         /// <returns>Un diccionario con el expediente como clave y una tupla (Buzon, Fecha) como valor.</returns>
-        private Dictionary<string, (string Buzon, DateTime? Fecha)> BuscarMuchosDatosSade(List<string> expedientes)
+        private Dictionary<string, UltimoPaseSade> BuscarMuchosDatosSade(List<string> expedientes)
         {
-            // Se valida la entrada.
-            if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, (string, DateTime?)>();
-
-            // Verificar si tenemos cache válido en sesión
-            var cacheSade = ObtenerCacheSade();
-
-            if (cacheSade != null)
-            {
-                Debug.WriteLine($"[CACHE SADE] Cache disponible. Items en cache: {cacheSade.Count}");
-
-                // Verificar si TODOS los expedientes solicitados están en cache (incluso los que no tienen datos)
-                bool todoEnCache = expedientes.All(exp => cacheSade.ContainsKey(exp));
-
-                if (todoEnCache)
-                {
-                    // Filtrar del cache solo los expedientes solicitados que SÍ tienen datos SADE
-                    var resultadoCache = new Dictionary<string, (string, DateTime?)>();
-                    foreach (var expediente in expedientes)
-                    {
-                        if (cacheSade.ContainsKey(expediente) && cacheSade[expediente].Buzon != null)
-                        {
-                            resultadoCache[expediente] = cacheSade[expediente];
-                        }
-                    }
-
-                    Debug.WriteLine($"[CACHE SADE] Todos los expedientes están en cache. Expedientes con datos SADE: {resultadoCache.Count}/{expedientes.Count}");
-                    Debug.WriteLine($"[CACHE SADE] Usando cache para {expedientes.Count} expedientes");
-                    return resultadoCache;
-                }
-                else
-                {
-                    var expedientesEnCache = expedientes.Count(exp => cacheSade.ContainsKey(exp));
-                    Debug.WriteLine($"[CACHE SADE] Cache incompleto. Expedientes en cache: {expedientesEnCache}/{expedientes.Count}");
-                }
-            }
-            else
-            {
-                Debug.WriteLine($"[CACHE SADE] Cache no disponible");
-            }
-
-            Debug.WriteLine($"[CACHE SADE] Consultando BD para {expedientes.Count} expedientes");
-
-            try
-            {
-                using (var context = new IVCdbContext())
-                {
-                    // Se agrupa por expediente para poder encontrar el "TOP 1" de cada uno.
-                    var ultimosPases = context.PasesSade
-                        .AsNoTracking()
-                        .Where(p => expedientes.Contains(p.Expediente))
-                        .GroupBy(p => p.Expediente)
-                        // Para cada grupo (g), se ordena por fecha descendente y se toma el primero.
-                        // Esto replica exactamente la lógica "SELECT TOP 1 ... ORDER BY FECHA DESC".
-                        .Select(g => g.OrderByDescending(p => p.FechaUltimoPase).FirstOrDefault())
-                        .ToList(); // Se materializa la lista de los pases más recientes.
-
-                    // Se convierte la lista resultante en un diccionario para búsquedas rápidas.
-                    var resultado = ultimosPases
-                        .Where(p => p != null) // Se asegura de no incluir grupos que no tuvieran pases.
-                        .ToDictionary(p => p.Expediente, p => (p.BuzonDestino, p.FechaUltimoPase));
-
-                    // Actualizar cache con los resultados Y con los expedientes que no tienen datos
-                    var cacheActual = ObtenerCacheSade() ?? new Dictionary<string, (string, DateTime?)>();
-
-                    // Agregar expedientes con datos
-                    foreach (var kvp in resultado)
-                    {
-                        cacheActual[kvp.Key] = kvp.Value;
-                    }
-
-                    // Agregar expedientes SIN datos (marcarlos como consultados con null)
-                    foreach (var expediente in expedientes)
-                    {
-                        if (!resultado.ContainsKey(expediente))
-                        {
-                            cacheActual[expediente] = (null, null); // Sin datos SADE
-                        }
-                    }
-
-                    GuardarCacheSade(cacheActual);
-                    Debug.WriteLine($"[CACHE SADE] Cache actualizado con {resultado.Count} expedientes CON datos + {expedientes.Count - resultado.Count} expedientes SIN datos. Total en cache: {cacheActual.Count}");
-
-                    return resultado;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Se registra el error y se devuelve un diccionario vacío.
-                System.Diagnostics.Debug.WriteLine($"Error en carga masiva de SADE: {ex.Message}");
-                return new Dictionary<string, (string, DateTime?)>();
-            }
+            return _datosExternos.ObtenerUltimosPasesSade(expedientes);
         }
 
         /// <summary>
         /// Wrapper público para exponer la consulta bulk de SADE a otras clases.
         /// </summary>
-        public Dictionary<string, (string Buzon, DateTime? Fecha)> ObtenerDatosSadeBulk(List<string> expedientes)
+        public Dictionary<string, UltimoPaseSade> ObtenerDatosSadeBulk(List<string> expedientes)
         {
             return BuscarMuchosDatosSade(expedientes ?? new List<string>());
         }
@@ -1434,8 +1097,8 @@ namespace Negocio
         /// </summary>
         public Dictionary<string, string> ObtenerAcdirBulk(List<string> expedientes)
         {
-            // Delega la implementación a AcdirHelper, manteniendo la separación de responsabilidades
-            return AcdirHelper.ObtenerInfoACDIRBulk(expedientes ?? new List<string>());
+            // Delega en DatosExternosNegocioEF
+            return _datosExternos.ObtenerAcdirs(expedientes ?? new List<string>());
         }
 
         /// <summary>
@@ -1443,10 +1106,7 @@ namespace Negocio
         /// </summary>
         public static void LimpiarCacheSade()
         {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session.Remove("CacheSade");
-            }
+            DatosExternosNegocioEF.LimpiarCacheSade();
             Debug.WriteLine("[CACHE SADE] Cache limpiado manualmente");
         }
 
@@ -1705,8 +1365,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11, // Las redeterminaciones no tienen concepto específico
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
@@ -2066,8 +1726,8 @@ namespace Negocio
                                 MesBase = null,
                                 ConceptoId = 11,
                                 ConceptoNombre = "REDETERMINACION",
-                                EstadoId = MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
-                                EstadoNombre = MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
+                                EstadoId = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Id,
+                                EstadoNombre = MapeoEstadoRedet.MapearEstadoDesdeId(r.EstadoRedetEFId).Nombre,
                                 ObraId = r.Autorizante?.ObraId,
                                 ObraDescripcion = r.Autorizante?.Obra?.Descripcion,
                                 ObraNumero = r.Autorizante?.Obra?.Numero,
@@ -2104,16 +1764,16 @@ namespace Negocio
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Error en ListarAutorizantesCompleto: {ex.Message}");
-                        return new List<AutorizanteDTO>();
+                        Trace.TraceError("[ListarAutorizantesCompleto] {0}", ex);
+                        throw;
                     }
 
                 } // using IVCdbContext
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error en ListarAutorizantesCompleto: {ex.Message}");
-                return new List<AutorizanteDTO>();
+                Trace.TraceError("[ListarAutorizantesCompleto] {0}", ex);
+                throw;
             }
         }
         #endregion
@@ -2361,7 +2021,7 @@ namespace Negocio
                                 ExpedientePago = item.Reliq.Expediente,
                                 MontoTotal = 0, // Las reliquidaciones no tienen monto en esta tabla
                                 MesAprobacion = item.Reliq.MesAprobacion,
-                                TipoPagoId = 3, // Reliquidación siempre es tipo 3
+                                TipoPagoId = ReglasRedeterminaciones.TipoPagoReliquidacionId, // Reliquidación siempre es tipo 3
                                 ObraId = item.Obra.Id,
                                 ObraDescripcion = item.Obra.Descripcion,
                                 AutorizanteId = item.Auth.Id,

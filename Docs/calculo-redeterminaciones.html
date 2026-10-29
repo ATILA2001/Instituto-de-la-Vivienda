@@ -939,12 +939,12 @@ GROUP BY rd.CodigoRedet, rd.MontoRedet;
         <tbody>
           <tr>
             <td>Pasos A, B y C</td>
-            <td><code>Negocio/CalculoRedeterminacionNegocioEF.cs</code> → <code>CalcularMontoRedeterminaciones</code></td>
+            <td><code>Negocio/Redeterminaciones/ReglasRedeterminaciones.cs</code> → <code>CalcularMontos</code> (la invoca <code>CalculoRedeterminacionNegocioEF.CalcularMontoRedeterminaciones</code>)</td>
             <td>Agrupa los certificados por autorizante una sola vez (R5), aplica R1 y R2 con los helpers <code>EsMesAnteriorOIgual</code> / <code>EsMesPosterior</code>, calcula <code>MontoRedet</code> y deja el porcentaje ejecutado pre-Salto en <code>RedeterminacionEF.PorcentajeEjecutadoPreSalto</code> para el Paso 3b.</td>
           </tr>
           <tr>
             <td>Pasos 1, 2, 3a y 3b</td>
-            <td><code>Negocio/CalculoRedeterminacionNegocioEF.cs</code> → <code>ListarCertificadosYReliquidaciones</code></td>
+            <td><code>Negocio/Redeterminaciones/ReglasRedeterminaciones.cs</code> → <code>GenerarReliquidaciones</code> (la invoca <code>CalculoRedeterminacionNegocioEF.ListarCertificadosYReliquidaciones</code>)</td>
             <td>Genera las reliquidaciones virtuales (tipo de pago 3) para la pantalla de Certificados. El campo <code>Porcentaje</code> de la reliquidación es el porcentaje <em>aplicado</em> (propio + acumulado pre-Salto si es la primera).</td>
           </tr>
           <tr>
@@ -975,7 +975,7 @@ GROUP BY rd.CodigoRedet, rd.MontoRedet;
   </div><!-- /page -->
 
 <footer>
-  Documentación de CalculoRedeterminacionNegocioEF.cs y Database/vw_PowerBI_Redeterminaciones.sql · Instituto de la Vivienda · Actualizado 23/09/2026
+  Documentación de Negocio/Redeterminaciones/ReglasRedeterminaciones.cs y Database/vw_PowerBI_Redeterminaciones.sql · Instituto de la Vivienda · Actualizado 28/10/2026
 </footer>
 
 </body>

@@ -78,7 +78,7 @@ namespace WebForms
                         { "Observaciones", "Observaciones" },
                         { "Prioridad", "PrioridadEF.Nombre" }
                     };
-                    ExcelHelper.ExportarDatosGenericos(lista, mapeoColumnas, "FormulacionesEF");
+                    Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(lista, mapeoColumnas), "FormulacionesEF");
                     ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
                 }
                 else

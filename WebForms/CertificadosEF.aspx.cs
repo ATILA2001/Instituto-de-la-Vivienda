@@ -114,7 +114,9 @@ namespace WebForms
             if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+            // Si la carga falló, ya se mostró el toast; sin lista no hay nada que bindear.
+            if (!(Session["CertificadosCompleto"] is List<CertificadoDTO> certificadosCompleta))
+                return;
 
             // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();
@@ -320,7 +322,7 @@ namespace WebForms
 
                 };
 
-                ExcelHelper.ExportarDatosGenericos(todosLosCertificados, mapeoColumnas, "Certificados");
+                Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(todosLosCertificados, mapeoColumnas), "Certificados");
                 ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
             catch (Exception)
@@ -1151,6 +1153,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("Error al recalcular SIGAF/buzón/fecha SADE: " + ex);
+                ToastService.Show(this.Page, "No se pudieron recalcular SIGAF y SADE. Los datos mostrados pueden estar desactualizados; recargue la página.", ToastService.ToastType.Error);
             }
             finally
             {
@@ -1179,7 +1182,9 @@ namespace WebForms
             if (Session["CertificadosCompleto"] == null)
                 CargarListaCertificadosCompleta();
 
-            var certificadosCompleta = (List<CertificadoDTO>)Session["CertificadosCompleto"];
+            // Si la carga falló, ya se mostró el toast.
+            if (!(Session["CertificadosCompleto"] is List<CertificadoDTO> certificadosCompleta))
+                return new List<CertificadoDTO>();
 
             // Aplicar filtro de texto general
             string filtro = txtBuscar.Text.Trim().ToLower();

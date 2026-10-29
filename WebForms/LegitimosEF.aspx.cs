@@ -1018,7 +1018,7 @@ namespace WebForms
                     { "Fecha SADE", "FechaSade" },
                 };
 
-                ExcelHelper.ExportarDatosGenericos(todos, mapeo, "Legitimos");
+                Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(todos, mapeo), "Legitimos");
                 ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
             }
             catch (Exception ex)
