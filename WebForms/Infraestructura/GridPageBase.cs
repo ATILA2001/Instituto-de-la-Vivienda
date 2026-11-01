@@ -244,6 +244,27 @@ namespace WebForms.Infraestructura
                 .ToList();
         }
 
+        /// <summary>Valores de texto seleccionados en un filtro de cabecera; null si no hay selección (no filtrar).</summary>
+        protected List<string> ValoresSeleccionados(string idFiltro)
+        {
+            var filtro = FiltroHeader(idFiltro);
+            return filtro != null && filtro.ExpandedSelectedValues.Any() ? filtro.ExpandedSelectedValues : null;
+        }
+
+        /// <summary>Fechas seleccionadas en un filtro de cabecera enlazado a una lista de fechas; null si no hay selección.</summary>
+        protected List<DateTime> FechasSeleccionadas(string idFiltro)
+        {
+            var filtro = FiltroHeader(idFiltro);
+            if (filtro == null || !filtro.SelectedValues.Any())
+                return null;
+
+            return filtro.SelectedValues
+                .Select(s => DateTime.TryParse(s, out DateTime fecha) ? (DateTime?)fecha.Date : null)
+                .Where(f => f.HasValue)
+                .Select(f => f.Value)
+                .ToList();
+        }
+
         /// <summary>Enlaza un filtro de cabecera con una lista de opciones (propiedades Nombre e Id).</summary>
         protected void BindFiltroHeader(string id, object datos, string campoTexto = "Nombre", string campoValor = "Id")
         {
