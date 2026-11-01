@@ -166,8 +166,8 @@ namespace Negocio
                         .Where(a => !string.IsNullOrEmpty(a.Expediente))
                         .Select(a => a.Expediente)
                         .Union(redeterminaciones
-                            .Where(r => !string.IsNullOrEmpty(r.Autorizante?.Expediente))
-                            .Select(r => r.Autorizante.Expediente))
+                            .Where(r => !string.IsNullOrEmpty(r.Expediente))
+                            .Select(r => r.Expediente))
                         .Distinct()
                         .ToList();
 

@@ -638,19 +638,6 @@ namespace WebForms
             BindGrid(); // Recargar completamente
         }
 
-        protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            try
-            {
-                dgvFormulacion.PageIndex = e.NewPageIndex;
-                BindGrid();
-            }
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
-            }
-        }
-
         /// <summary>
         /// Calcula el total plurianual para la OBRA: suma de todos los CertificadoEF.MontoTotal
         /// y LegitimoEF.Certificado para esa misma OBRA en los años2026,2027,2028

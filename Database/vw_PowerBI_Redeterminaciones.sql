@@ -187,10 +187,12 @@ SELECT
     er.Nombre                               AS EtapaNombre,
     fl.EsDesestimada,
     CASE WHEN fl.EsDesestimada = 1         THEN 3
+         WHEN r.ETAPA IS NULL              THEN 4
          WHEN r.ETAPA IN (37, 38)          THEN 4
          WHEN r.ETAPA IN (12, 22, 33, 39)  THEN 1
          ELSE 2 END                         AS EstadoGeneralId,
     CASE WHEN fl.EsDesestimada = 1         THEN 'DESESTIMADO'
+         WHEN r.ETAPA IS NULL              THEN 'NO INICIADO'
          WHEN r.ETAPA IN (37, 38)          THEN 'NO INICIADO'
          WHEN r.ETAPA IN (12, 22, 33, 39)  THEN 'APROBADO'
          ELSE 'EN TRAMITE' END              AS EstadoGeneral,
