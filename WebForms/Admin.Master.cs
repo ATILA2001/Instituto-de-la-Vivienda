@@ -36,7 +36,8 @@ namespace WebForms
             // perms_json (la lista de rutas que emite Auth.Web), que es configuración y no un rol.
             if (!usuario.Tipo)
             {
-                Response.Redirect("~/AccessDenied.aspx", false);
+                // Con returnUrl, como Global.RedirectToAccessDenied: en la URL se ve qué página se negó.
+                Response.Redirect("~/AccessDenied.aspx?returnUrl=" + Server.UrlEncode(Request.Path), false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();
             }

@@ -558,12 +558,13 @@ namespace WebForms
         {
             var obraNegocio = new ObraNegocioEF();
 
+            // La descripción se acorta para que la lista desplegable no supere el ancho de la pantalla.
             // ddlObraAgregar: solo obras sin formulación en el ciclo (más la que se edite, por las dudas).
             var obrasAgregar = obraNegocio.ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario)
                 .Select(o => new
                 {
                     o.Id,
-                    DescripcionCompleta = $"{o.Descripcion} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
+                    DescripcionCompleta = $"{Infraestructura.TextoCombo.Acortar(o.Descripcion)} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
                 })
                 .ToList();
 
@@ -572,7 +573,7 @@ namespace WebForms
                 .Select(o => new
                 {
                     o.Id,
-                    DescripcionCompleta = $"{o.Descripcion} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
+                    DescripcionCompleta = $"{Infraestructura.TextoCombo.Acortar(o.Descripcion)} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
                 })
                 .ToList();
 
