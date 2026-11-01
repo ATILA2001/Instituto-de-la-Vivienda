@@ -583,7 +583,9 @@ namespace WebForms
                             string obraDesc = autorizante.Obra?.Descripcion ?? "(Sin Obra)";
                             string empresaNombre = autorizante.Obra?.Empresa?.Nombre ?? "(Sin Empresa)";
                             string detalle = autorizante.Detalle ?? string.Empty;
-                            item.Text = $"{autorizante.CodigoAutorizante} - {obraDesc} - {empresaNombre} - {detalle}".Trim().Trim('-').Trim();
+                            // Obra y detalle acortados para que la lista desplegable no supere el ancho de la pantalla.
+                            item.Text = $"{autorizante.CodigoAutorizante} - {Infraestructura.TextoCombo.Acortar(obraDesc)} - {empresaNombre} - {Infraestructura.TextoCombo.Acortar(detalle, 40)}".Trim().Trim('-').Trim();
+                            item.Attributes["title"] = $"{autorizante.CodigoAutorizante} - {obraDesc} - {empresaNombre} - {detalle}".Trim().Trim('-').Trim();
                         }
                     }
                 }
