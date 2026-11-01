@@ -53,8 +53,8 @@
      - Si dos redeterminaciones del mismo autorizante comparten Nro, se desempata por Id.
    ===================================================================================== */
 
-USE IVC;
-GO
+/* Sin USE a propósito: ejecutar con la base elegida en SSMS (IVC_TEST o IVC). En SQL2019-IVC conviven
+   producción y test, y un USE fijo creó las vistas en producción cuando se quería probar en test (01/11/2026). */
 
 /* -------------------------------------------------------------------------------------
    Índices sugeridos (opcionales, mejoran el tiempo de refresco del tablero).
