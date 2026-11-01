@@ -572,12 +572,14 @@ namespace WebForms
                 if (claves?["Id"] != null) int.TryParse(claves["Id"].ToString(), out id);
                 if (claves?["IdRedeterminacion"] != null) int.TryParse(claves["IdRedeterminacion"].ToString(), out idRedeterminacion);
 
-                var lista = ListaCompleta;
-                var porClave = id > 0 ? lista.FirstOrDefault(a => a.Id == id) : null;
-                if (porClave == null && idRedeterminacion > 0)
-                    porClave = lista.FirstOrDefault(a => a.IdRedeterminacion == idRedeterminacion);
-                if (porClave != null)
-                    return porClave;
+                if (id > 0 || idRedeterminacion > 0)
+                {
+                    // Con clave válida no se cae al índice: si el registro ya no está en el snapshot,
+                    // mejor no encontrarlo que escribir sobre la fila que hoy ocupa esa posición.
+                    var lista = ListaCompleta;
+                    return (id > 0 ? lista.FirstOrDefault(a => a.Id == id) : null)
+                        ?? (idRedeterminacion > 0 ? lista.FirstOrDefault(a => a.IdRedeterminacion == idRedeterminacion) : null);
+                }
             }
 
             return ItemDeFila(fila.RowIndex);
