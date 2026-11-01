@@ -267,7 +267,7 @@
             OnRowDeleting="dgvFormulacion_RowDeleting"
             OnDataBound="dgvFormulacion_DataBound"
             ShowHeaderWhenEmpty="true"
-            AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
+            AutoGenerateColumns="false" AllowPaging="false" runat="server">
             <Columns>
                 <asp:BoundField HeaderText="ID" DataField="ObraId" Visible="false" />
 

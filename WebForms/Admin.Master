@@ -94,7 +94,7 @@
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="Redeterminaciones.aspx">Redeterminaciones</a>
+                                        <a class="dropdown-item" href="RedeterminacionesEF.aspx">Redeterminaciones</a>
                                     </li>
 
                                     <li>

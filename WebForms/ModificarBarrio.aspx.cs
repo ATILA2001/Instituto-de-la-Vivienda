@@ -20,7 +20,6 @@ namespace WebForms
             {
                 if (Request.QueryString["codM"] != null)
                 {
-                    ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.None;
                     codM = Convert.ToInt32(Request.QueryString["codM"]);
                     List<Barrio> temp = (List<Barrio>)Session["listaBarrio"];
                     Barrio selected = temp.Find(x => x.Id == codM);

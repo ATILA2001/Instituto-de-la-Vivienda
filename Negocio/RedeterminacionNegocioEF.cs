@@ -95,6 +95,7 @@ namespace Negocio
                 if (expedientes.Count > 0)
                 {
                     var pases = context.PasesSade
+                        .AsNoTracking()
                         .Where(p => expedientes.Contains(p.Expediente))
                         .ToList()
                         .GroupBy(p => p.Expediente)
@@ -428,6 +429,7 @@ namespace Negocio
                     if (expedientes.Count > 0)
                     {
                         var pases = ctx.PasesSade
+                            .AsNoTracking()
                             .Where(p => expedientes.Contains(p.Expediente))
                             .ToList()
                             .GroupBy(p => p.Expediente)

@@ -109,8 +109,8 @@ namespace WebForms
                 "MontoActual",
                 "MontoFaltante",
                 "Disponible Actual",
-                "Planificacion2025",
-                "Ejecucion presupuesto2025",
+                "Planificacion 2025",
+                "Ejecucion Presupuesto 2025",
                 "Monto de Obra inicial",
                 "Monto de Obra actual",
                 "Faltante de Obra");
