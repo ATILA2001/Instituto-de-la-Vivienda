@@ -252,7 +252,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Area") %>
+                            <%#: Eval("Area") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -265,13 +265,13 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Empresa") %>
+                            <%#: Eval("Empresa") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Contrata">
                         <ItemTemplate>
-                            <%# Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Anio") %>
+                            <%#: Eval("Contrata") + " " + Eval("Numero") + "/" + Eval("Anio") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -284,7 +284,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Barrio") %>
+                            <%#: Eval("Barrio") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -298,7 +298,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("Autorizado2026", "{0:C}") %>
+                                <%#: Eval("Autorizado2026", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -309,7 +309,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("MontoCertificado", "{0:C}") %>
+                                <%#: Eval("MontoCertificado", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -320,7 +320,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("Porcentaje", "{0:N2}%") %>
+                                <%#: Eval("Porcentaje", "{0:N2}%") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -331,7 +331,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("MontoInicial", "{0:C}") %>
+                                <%#: Eval("MontoInicial", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -342,7 +342,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("MontoActual", "{0:C}") %>
+                                <%#: Eval("MontoActual", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -353,7 +353,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
-                                <%# Eval("MontoFaltante", "{0:C}") %>
+                                <%#: Eval("MontoFaltante", "{0:C}") %>
                             </asp:PlaceHolder>
                         </ItemTemplate>
                     </asp:TemplateField>

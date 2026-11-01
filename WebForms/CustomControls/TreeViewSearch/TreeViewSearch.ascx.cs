@@ -214,10 +214,12 @@ namespace WebForms.CustomControls
                                 _dataSource = dtSource.AsEnumerable();
                             }
 
-                            if (_dataSource is IEnumerable<object> enumerableDataSource)
+                            // Cualquier IEnumerable, no sólo IEnumerable<object>: una List<T> de structs (o de tipos
+                            // por valor en general) no es IEnumerable<object> y el filtro quedaba vacío.
+                            if (_dataSource is System.Collections.IEnumerable enumerableDataSource)
                             {
                                 // Agrupar elementos por DataTextField
-                                var groupedItems = enumerableDataSource
+                                var groupedItems = enumerableDataSource.Cast<object>()
                                     .GroupBy(item => GetPropertyValue(item, DataTextField))
                                     .OrderBy(g => string.IsNullOrEmpty(g.Key) ? 0 : 1)
                                     .ThenBy(g => g.Key);

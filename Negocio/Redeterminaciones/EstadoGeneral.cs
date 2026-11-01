@@ -4,8 +4,10 @@ namespace Negocio.Redeterminaciones
     /// Estado general con el que se muestra una redeterminación en la grilla de Autorizantes.
     /// Son cuatro valores fijos de la aplicación, no filas de ESTADOS_AUTORIZANTES; se exponen con
     /// Id y Nombre para que las grillas y filtros los bindeen igual que a los estados reales.
+    /// Es una clase y no un struct: los controles bindean con "is IEnumerable&lt;object&gt;", que una
+    /// lista de structs no cumple (la covarianza no aplica a tipos por valor) y el filtro quedaba vacío.
     /// </summary>
-    public readonly struct EstadoGeneral
+    public sealed class EstadoGeneral
     {
         public static readonly EstadoGeneral Aprobado = new EstadoGeneral(1, "APROBADO");
         public static readonly EstadoGeneral EnTramite = new EstadoGeneral(2, "EN TRAMITE");

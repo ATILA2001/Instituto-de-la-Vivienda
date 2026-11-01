@@ -367,7 +367,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("AreaNombre") %>
+                        <%#: Eval("AreaNombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -381,7 +381,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("ObraDescripcion") %>
+                        <%#: Eval("ObraDescripcion") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -395,7 +395,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("Contrata") %>
+                        <%#: Eval("Contrata") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -410,7 +410,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("EmpresaNombre") %>
+                        <%#: Eval("EmpresaNombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -424,7 +424,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("CodigoAutorizante") %>
+                        <%#: Eval("CodigoAutorizante") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -437,7 +437,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("ConceptoNombre") %>
+                        <%#: Eval("ConceptoNombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
