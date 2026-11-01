@@ -216,12 +216,15 @@ namespace WebForms
             // Caché por usuario en HttpRuntime.Cache (TTL 5 min), como hace SAI con IMemoryCache.
             // En Application_AuthorizeRequest la Session todavía no existe (se adquiere después), así que
             // un caché en Session nunca aplicaba y cada request llamaba a Auth.Web.
+            // La caché guarda la última versión validada. Si la cookie coincide, no hay nada que consultar.
+            // Si no coincide, se consulta a Auth.Web en vez de redirigir: una cookie recién emitida tras un
+            // cambio de permisos trae una versión más nueva que la cacheada y, comparándola con la caché,
+            // el usuario quedaba en un bucle de login durante 5 minutos. SAI y SAF hacen lo mismo.
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var cacheKey = string.IsNullOrWhiteSpace(userId) ? null : "PermsVersion_" + userId;
-            if (cacheKey != null && HttpRuntime.Cache[cacheKey] is string cachedVersion)
+            if (cacheKey != null && HttpRuntime.Cache[cacheKey] is string cachedVersion
+                && string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
             {
-                if (!string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
-                    RedirectToLogin();
                 return;
             }
 
