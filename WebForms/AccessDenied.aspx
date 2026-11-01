@@ -9,6 +9,7 @@
         <p class="mb-4">No tenés permisos para visualizar esta página.</p>
         <div class="d-flex gap-2">
             <a class="btn btn-primary" href="javascript:history.back()">Volver atrás</a>
+            <asp:LinkButton ID="btnCerrarSesion" CssClass="btn btn-outline-secondary" OnClick="btnCerrarSesion_Click" Text="Cerrar sesión" runat="server" ToolTip="Cerrar sesión e ir al login" />
         </div>
     </div>
 </asp:Content>
