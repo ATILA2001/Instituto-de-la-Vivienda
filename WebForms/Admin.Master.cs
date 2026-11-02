@@ -22,6 +22,8 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
+            Infraestructura.ProteccionCsrf.Aplicar(Page);
+
             // Siempre pasa por EnsureSessionUserFromClaims, que descarta el usuario cacheado en Session si no
             // corresponde al principal actual.
             var usuario = UserHelper.EnsureSessionUserFromClaims();

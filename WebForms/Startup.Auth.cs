@@ -32,6 +32,11 @@ namespace WebForms
                     "El nombre de aplicación compartido no está configurado. " +
                     "Defina la variable de entorno 'SharedCookie__ApplicationName' o el appSetting 'SharedCookieApplicationName'.");
 
+            // Dominio de la cookie compartida. Debe coincidir con SharedCookie:Domain de Auth.Web, SAI y SAF:
+            // si Auth.Web la emite con Domain, el SignOut sin Domain manda un Set-Cookie host-only que no la borra.
+            var sharedCookieDomain = Environment.GetEnvironmentVariable("SharedCookie__Domain")
+                ?? WebConfigurationManager.AppSettings["SharedCookieDomain"];
+
             app.SetDefaultSignInAsAuthenticationType("Identity.Application");
 
             // Build a transient DI container to create DataProtection provider with our EF6-backed IXmlRepository
@@ -76,6 +81,7 @@ namespace WebForms
                 CookieSecure = CookieSecureOption.Always,
                 CookiePath = Environment.GetEnvironmentVariable("SharedCookie__Path")
                     ?? WebConfigurationManager.AppSettings["SharedCookiePath"] ?? "/",
+                CookieDomain = string.IsNullOrWhiteSpace(sharedCookieDomain) ? null : sharedCookieDomain.Trim(),
                 // Allow cross-site usage (Required when sharing cookie between different hostnames)
                 CookieSameSite = Microsoft.Owin.SameSiteMode.None,
             });
