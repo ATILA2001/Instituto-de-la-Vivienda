@@ -306,6 +306,7 @@ namespace WebForms
         {
             var ex = Server.GetLastError();
             Server.ClearError();
+            Trace.TraceError("[Application_Error] {0} {1}: {2}", Request?.HttpMethod, Request?.RawUrl, ex);
 
             string mensaje = "Ocurrió un error inesperado. Por favor, reintentá la operación o contactá al administrador.";
             if (ex is HttpException httpEx && httpEx.GetHttpCode() == 404)

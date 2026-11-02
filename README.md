@@ -57,3 +57,5 @@ La solución debe compilar sin errores. Los warnings `CS0168` que quedan corresp
 - `Global.cs` autoriza cada request contra el claim `perms_json` (lista de páginas permitidas) y revalida `perms_version` contra Auth.Web cada 5 minutos, con tolerancia a fallos (fail-open) igual que SAI y SAF.
 - El usuario de negocio (`UsuarioEF`) se construye desde los claims y se cachea en Session; se descarta si cambia el `NameIdentifier` autenticado.
 - Las reglas de edición por rol y estado de planificación están centralizadas en `UserHelper.PuedeModificar*` y se verifican en cada handler que escribe datos, además de ocultar los controles en la interfaz.
+- CSRF: los tres masters fijan `ViewStateUserKey` a la sesión (`Infraestructura/ProteccionCsrf`), así el ViewState de un usuario no sirve en el navegador de otro. La cookie compartida viaja con `SameSite=None` porque lo exige el SSO entre hosts.
+- `Web.config` emite las mismas cabeceras que SAI y SAF (`nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`) y la cookie de sesión es `Secure`, `HttpOnly` y `SameSite=Lax`.

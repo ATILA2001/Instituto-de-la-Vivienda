@@ -352,6 +352,7 @@
     <Compile Include="Infraestructura\FiltrosHeader.cs" />
     <Compile Include="Infraestructura\GridPageBase.cs" />
     <Compile Include="Infraestructura\HttpContextoWeb.cs" />
+    <Compile Include="Infraestructura\ProteccionCsrf.cs" />
     <Compile Include="Infraestructura\TextoCombo.cs" />
     <Compile Include="Sso\AspNetCoreTicketDataFormat.cs" />
     <Compile Include="Sso\SharedChunkingCookieManager.cs" />

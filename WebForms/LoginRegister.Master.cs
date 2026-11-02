@@ -17,6 +17,8 @@ namespace WebForms
     {
         protected void Page_Init(object sender, EventArgs e)
         {
+            Infraestructura.ProteccionCsrf.Aplicar(Page);
+
             // Skip authentication for certain pages
             string currentPage = System.IO.Path.GetFileName(Request.Url.AbsolutePath);
             if (currentPage.Equals("Error.aspx", StringComparison.OrdinalIgnoreCase))

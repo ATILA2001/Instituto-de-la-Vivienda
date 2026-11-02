@@ -20,7 +20,9 @@ namespace WebForms
             var user = Context.GetOwinContext().Authentication.User;
             if (user?.Identity?.IsAuthenticated != true)
             {
-                if (Context?.IsDebuggingEnabled == true && Request.QueryString["diag"] == "1")
+                // Diagnóstico de la cookie compartida: sólo con debug y desde el propio servidor (lista nombres
+                // de cookies, chunks y errores de Unprotect, que no deben verse desde afuera).
+                if (Context?.IsDebuggingEnabled == true && Request.IsLocal && Request.QueryString["diag"] == "1")
                 {
                 var diagHtml = new System.Text.StringBuilder();
                 diagHtml.AppendLine("<h3>No autenticado. Inicie sesión desde el portal de autenticación.</h3>");
@@ -224,6 +226,14 @@ namespace WebForms
             }
 
             var trimmed = url.Trim();
+
+            // TAB, LF, CR, NUL o espacios internos: el navegador los descarta al parsear el Location y
+            // "/<TAB>/evil.com" termina siendo "//evil.com". Auth.Web rechaza lo mismo.
+            if (Negocio.Infraestructura.SeguridadHttp.TieneCaracteresInvalidosParaUrl(trimmed))
+            {
+                return "/";
+            }
+
             if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
             {
                 bool esHttp = absolute.Scheme == Uri.UriSchemeHttp || absolute.Scheme == Uri.UriSchemeHttps;
@@ -249,7 +259,8 @@ namespace WebForms
 
         private static string BuildAuthLoginUrl(HttpContext context)
         {
-            var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+            var baseUrl = Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                ?? WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
                 ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
 
             if (string.IsNullOrWhiteSpace(baseUrl))
