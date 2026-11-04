@@ -31,6 +31,7 @@ namespace WebForms
         protected override TextBox CajaBusqueda => txtBuscar;
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "ObrasCompleto";
+        protected override int IdDe(ObraDTO item) => item.Id;
         protected override string MensajeErrorCarga => "Error al cargar las obras. Intente nuevamente.";
 
         protected override List<ObraDTO> CargarListaCompleta()
@@ -231,7 +232,7 @@ namespace WebForms
             }
 
             btnAgregar.Text = "Agregar";
-            Session["EditingObraId"] = null;
+            ViewState["EditingObraId"] = null;
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow", @"
                 $(document).ready(function() {
                     $('#modalAgregar .modal-title').text('Agregar Obra');
@@ -256,7 +257,7 @@ namespace WebForms
                 return;
             }
 
-            int? editingId = Session["EditingObraId"] as int?;
+            int? editingId = ViewState["EditingObraId"] as int?;
 
             // Crear o cargar la obra según si es edición o nueva
             ObraEF obra = editingId != null ? _negocio.ObtenerPorId(editingId.GetValueOrDefault()) : new ObraEF();
@@ -285,7 +286,7 @@ namespace WebForms
                 if (_negocio.Modificar(obra))
                 {
                     ToastService.Show(this.Page, "Obra modificada exitosamente!", ToastService.ToastType.Success);
-                    Session["EditingObraId"] = null;
+                    ViewState["EditingObraId"] = null;
                 }
                 else
                 {
@@ -347,7 +348,7 @@ namespace WebForms
                     return;
                 }
 
-                Session["EditingObraId"] = obraSeleccionada.Id;
+                ViewState["EditingObraId"] = obraSeleccionada.Id;
 
                 txtNumero.Text = obraSeleccionada.Numero?.ToString() ?? string.Empty;
                 txtAnio.Text = obraSeleccionada.Anio?.ToString() ?? string.Empty;

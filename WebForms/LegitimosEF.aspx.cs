@@ -33,6 +33,7 @@ namespace WebForms
         protected override TextBox CajaBusqueda => txtBuscar;
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "legitimosCompletos";
+        protected override int IdDe(LegitimoEF item) => item.Id;
         protected override string MensajeErrorCarga => "Error al cargar los legítimos. Intente nuevamente.";
 
         protected override List<LegitimoEF> CargarListaCompleta() =>
@@ -271,7 +272,7 @@ namespace WebForms
             txtCertificado.Text = string.Empty;
             txtMesAprobacion.Text = string.Empty;
             ddlObra.ClearSelection();
-            Session["EditingLegitimoEFId"] = null;
+            ViewState["EditingLegitimoEFId"] = null;
         }
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
@@ -284,7 +285,7 @@ namespace WebForms
 
             btnAgregar.Text = "Agregar";
             ddlObra.Enabled = true; // Permitir seleccionar obra al agregar
-            Session["EditingLegitimoEFId"] = null;
+            ViewState["EditingLegitimoEFId"] = null;
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -315,9 +316,9 @@ namespace WebForms
                 // copiando sólo los campos del formulario. Modificar() marca toda la entidad como
                 // Modified, así que guardar el objeto nuevo pondría en NULL las columnas que el
                 // formulario no edita (PORC_EJEC_FISICA).
-                if (Session["EditingLegitimoEFId"] != null)
+                if (ViewState["EditingLegitimoEFId"] != null)
                 {
-                    var entidad = negocio.ObtenerPorId((int)Session["EditingLegitimoEFId"]);
+                    var entidad = negocio.ObtenerPorId((int)ViewState["EditingLegitimoEFId"]);
                     if (entidad == null)
                     {
                         ToastService.Show(this.Page, "Error: No se encontró el legítimo a modificar.", ToastService.ToastType.Error);
@@ -346,7 +347,7 @@ namespace WebForms
 
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingLegitimoEFId"] = null;
+                ViewState["EditingLegitimoEFId"] = null;
                 BindDropDownList();
                 RecargarTrasCambio();
             }
@@ -375,7 +376,7 @@ namespace WebForms
                     return;
                 }
 
-                Session["EditingLegitimoEFId"] = legitimoId;
+                ViewState["EditingLegitimoEFId"] = legitimoId;
                 BindDropDownList();
                 SeleccionarValor(ddlObra, legitimo.ObraId.ToString());
                 txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
@@ -454,13 +455,6 @@ namespace WebForms
         // ------------------------------------------------------------------
         // Edición inline
         // ------------------------------------------------------------------
-
-        /// <summary>Elemento del snapshot que corresponde a la fila del control inline que disparó el evento.</summary>
-        private LegitimoEF ItemDelControlInline(object sender)
-        {
-            var fila = (sender as Control)?.NamingContainer as GridViewRow;
-            return fila == null ? null : ItemDeFila(fila.RowIndex);
-        }
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {

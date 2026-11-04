@@ -25,7 +25,13 @@ namespace WebForms.CustomControls
         private string _dataTextField;
         private string _dataValueField;
         private object _dataSource;
-        private static Dictionary<string, bool> _pageFiltersApplied = new Dictionary<string, bool>();
+        // Bandera "filtros guardados ya aplicados en este request", una por página. Vive en HttpContext.Items:
+        // antes era un Dictionary estático compartido por todos los usuarios y sin sincronización, así que dos
+        // usuarios cargando la misma página a la vez se pisaban (uno podía quedarse sin sus filtros guardados).
+        private static System.Collections.IDictionary _pageFiltersApplied =>
+            HttpContext.Current?.Items ?? new System.Collections.Hashtable();
+
+        private static string ClaveFiltrosAplicados(string pageName) => "TreeViewSearch_FiltrosAplicados_" + pageName;
 
 
 
@@ -107,11 +113,8 @@ namespace WebForms.CustomControls
                 {
                     chkList.Attributes["data-title-id"] = litTitle.ClientID;
                 }
-                string pageName = Page?.GetType().Name ?? "Unknown";
-                if (_pageFiltersApplied.ContainsKey(pageName))
-                {
-                    _pageFiltersApplied.Remove(pageName);
-                }
+                // La bandera es por request, no hace falta reiniciarla acá: hacerlo desde cada control recreado
+                // en un rebind volvía a disparar la aplicación de filtros (y un nuevo rebind) en cascada.
                 if (HasStoredFilters())
                 {
                     Page.LoadComplete += ApplyStoredFiltersOnLoadComplete;
@@ -121,11 +124,11 @@ namespace WebForms.CustomControls
         }
         private void ApplyStoredFiltersOnLoadComplete(object sender, EventArgs e)
         {
-            string pageName = Page?.GetType().Name ?? "Unknown";
+            string clave = ClaveFiltrosAplicados(Page?.GetType().Name ?? "Unknown");
 
-            if (!_pageFiltersApplied.ContainsKey(pageName))
+            if (!_pageFiltersApplied.Contains(clave))
             {
-                _pageFiltersApplied[pageName] = true;
+                _pageFiltersApplied[clave] = true;
 
                 // Remover el handler para evitar múltiples ejecuciones
                 Page.LoadComplete -= ApplyStoredFiltersOnLoadComplete;
@@ -137,12 +140,12 @@ namespace WebForms.CustomControls
 
         protected void Page_PreRenderComplete(object sender, EventArgs e)
         {
-            string pageName = Page?.GetType().Name ?? "Unknown";
+            string clave = ClaveFiltrosAplicados(Page?.GetType().Name ?? "Unknown");
 
             // Solo aplicar una vez por página y solo en primera carga
-            if (!Page.IsPostBack && !_pageFiltersApplied.ContainsKey(pageName))
+            if (!Page.IsPostBack && !_pageFiltersApplied.Contains(clave))
             {
-                _pageFiltersApplied[pageName] = true;
+                _pageFiltersApplied[clave] = true;
 
                 // Verificar si este control tiene filtros guardados
                 if (HasStoredFilters())

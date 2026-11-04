@@ -232,13 +232,13 @@ namespace WebForms
                 });", true);
 
             btnAgregar.Text = "Agregar";
-            Session["EditingObraId"] = null;
+            ViewState["EditingObraId"] = null;
         }
 
         // btnAgregar_Click: guardado compartido del modal (Agregar y Editar).
         // - Lee los campos compartidos y los 3 montos del ciclo.
         // - Llama a GuardarPivot, que hace upsert/borrado de las (hasta) 3 filas de la obra.
-        // - Modo edición si Session["EditingObraId"] está presente; si no, es alta.
+        // - Modo edición si ViewState["EditingObraId"] está presente; si no, es alta.
         // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
@@ -252,7 +252,7 @@ namespace WebForms
 
             try
             {
-                int? editingObraId = Session["EditingObraId"] as int?;
+                int? editingObraId = ViewState["EditingObraId"] as int?;
                 int obraId = editingObraId ?? int.Parse(ddlObraAgregar.SelectedValue);
 
                 var montos = new decimal?[]
@@ -296,7 +296,7 @@ namespace WebForms
 
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingObraId"] = null;
+                ViewState["EditingObraId"] = null;
                 Session["formulacionesCompletas"] = null;
 
                 // Refresca SOLO las obras (excluye la recién formulada). No rebindea unidad/prioridad
@@ -324,7 +324,7 @@ namespace WebForms
 
         // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición (por OBRA).
         // - Carga el pivot de la obra (sus filas del ciclo) y rellena los 3 montos + campos compartidos.
-        // - Define Session["EditingObraId"] para indicar modo edición.
+        // - Define ViewState["EditingObraId"] para indicar modo edición.
         // - Ajusta el texto del botón a "Actualizar" y muestra el modal.
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -338,7 +338,7 @@ namespace WebForms
                     return;
                 }
 
-                Session["EditingObraId"] = obraId;
+                ViewState["EditingObraId"] = obraId;
 
                 lblObra.Attributes["for"] = ddlObraEditar.ClientID;
                 ddlObraAgregar.Visible = false;
@@ -532,7 +532,7 @@ namespace WebForms
             try
             {
                 UsuarioEF usuario = UserHelper.GetFullCurrentUser();
-                int? obraEnEdicion = Session["EditingObraId"] as int?;
+                int? obraEnEdicion = ViewState["EditingObraId"] as int?;
 
                 BindObraDropDowns(obraEnEdicion, usuario);
 
