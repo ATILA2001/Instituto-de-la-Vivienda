@@ -44,6 +44,10 @@ namespace WebForms
         protected override TextBox CajaBusqueda => txtBuscar;
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "GridDataAutorizantes";
+        protected override int IdDe(AutorizanteDTO item) => item.Id;
+        protected override string NombreClaveVirtual => "IdRedeterminacion";
+        protected override string ClaveVirtualDe(AutorizanteDTO item) =>
+            item.IdRedeterminacion > 0 ? item.IdRedeterminacion.ToString() : null;
         protected override string MensajeErrorCarga => "No se pudieron cargar los autorizantes. Intente nuevamente.";
 
         protected override List<AutorizanteDTO> CargarListaCompleta()
@@ -362,8 +366,8 @@ namespace WebForms
                     $('#modalAgregarAutorizante').modal('show');
                 });", true);
 
-            Session["EditingAutorizanteId"] = null;
-            Session["EditingCodigoAutorizante"] = null;
+            ViewState["EditingAutorizanteId"] = null;
+            ViewState["EditingCodigoAutorizante"] = null;
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -415,8 +419,8 @@ namespace WebForms
 
             if (!Page.IsValid) return;
 
-            int autorizanteId = (int)Session["EditingAutorizanteId"];
-            var autorizanteExistente = _autorizanteNegocioEF.ObtenerPorId(autorizanteId);
+            int? autorizanteId = ViewState["EditingAutorizanteId"] as int?;
+            var autorizanteExistente = autorizanteId.HasValue ? _autorizanteNegocioEF.ObtenerPorId(autorizanteId.Value) : null;
             if (autorizanteExistente == null)
             {
                 ToastService.Show(this.Page, "Error: No se encontró el autorizante a modificar.", ToastService.ToastType.Error);
@@ -437,7 +441,7 @@ namespace WebForms
                 {
                     ToastService.Show(this.Page, "Autorizante modificado exitosamente!", ToastService.ToastType.Success);
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-                    Session["EditingAutorizanteId"] = null;
+                    ViewState["EditingAutorizanteId"] = null;
                 }
                 else
                 {
@@ -485,8 +489,8 @@ namespace WebForms
                 if (seleccionado.EstadoId.HasValue)
                     SeleccionarValor(ddlEstadoEditar, seleccionado.EstadoId.Value.ToString());
 
-                Session["EditingAutorizanteId"] = seleccionado.Id;
-                Session["EditingCodigoAutorizante"] = seleccionado.CodigoAutorizante;
+                ViewState["EditingAutorizanteId"] = seleccionado.Id;
+                ViewState["EditingCodigoAutorizante"] = seleccionado.CodigoAutorizante;
 
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowEditModal", @"
                     $(document).ready(function() {
@@ -553,37 +557,6 @@ namespace WebForms
         // ------------------------------------------------------------------
         // Edición inline (expediente y estado)
         // ------------------------------------------------------------------
-
-        /// <summary>
-        /// DTO del snapshot que corresponde a la fila del control inline que disparó el evento.
-        /// Se resuelve por las DataKeys de la fila (Id o IdRedeterminacion, persistidas en ViewState), que
-        /// identifican lo que está renderizado aunque el usuario haya tocado la búsqueda o los filtros sin
-        /// aplicarlos. El índice sobre el snapshot filtrado queda sólo como respaldo.
-        /// </summary>
-        private AutorizanteDTO ItemDelControlInline(object sender)
-        {
-            var fila = (sender as Control)?.NamingContainer as GridViewRow;
-            if (fila == null) return null;
-
-            if (gridviewRegistros.DataKeys != null && gridviewRegistros.DataKeys.Count > fila.RowIndex)
-            {
-                var claves = gridviewRegistros.DataKeys[fila.RowIndex]?.Values;
-                int id = 0, idRedeterminacion = 0;
-                if (claves?["Id"] != null) int.TryParse(claves["Id"].ToString(), out id);
-                if (claves?["IdRedeterminacion"] != null) int.TryParse(claves["IdRedeterminacion"].ToString(), out idRedeterminacion);
-
-                if (id > 0 || idRedeterminacion > 0)
-                {
-                    // Con clave válida no se cae al índice: si el registro ya no está en el snapshot,
-                    // mejor no encontrarlo que escribir sobre la fila que hoy ocupa esa posición.
-                    var lista = ListaCompleta;
-                    return (id > 0 ? lista.FirstOrDefault(a => a.Id == id) : null)
-                        ?? (idRedeterminacion > 0 ? lista.FirstOrDefault(a => a.IdRedeterminacion == idRedeterminacion) : null);
-                }
-            }
-
-            return ItemDeFila(fila.RowIndex);
-        }
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {

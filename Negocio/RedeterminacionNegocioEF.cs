@@ -46,6 +46,7 @@ namespace Negocio
                         (r.CodigoRedet ?? string.Empty).ToUpper().Contains(like) ||
                         (r.Expediente ?? string.Empty).ToUpper().Contains(like) ||
                         ((r.Observaciones ?? string.Empty).ToUpper().Contains(like)) ||
+                        (r.Tipo ?? string.Empty).ToUpper().Contains(like) ||
                         context.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && a.Obra != null && (a.Obra.Descripcion ?? string.Empty).ToUpper().Contains(like)) ||
                         context.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && a.Obra != null && a.Obra.Empresa != null && (a.Obra.Empresa.Nombre ?? string.Empty).ToUpper().Contains(like))
                     );

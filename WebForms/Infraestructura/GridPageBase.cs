@@ -54,6 +54,19 @@ namespace WebForms.Infraestructura
 
         protected virtual string MensajeErrorCarga => "Error al cargar los datos. Intente nuevamente.";
 
+        /// <summary>Valor de la DataKey "Id" en el DTO. Es la clave con la que se resuelve la fila editada.</summary>
+        protected abstract int IdDe(TDto item);
+
+        /// <summary>
+        /// Nombre de la segunda DataKey para las filas virtuales (reliquidaciones, redeterminaciones), o null si
+        /// la grilla no tiene. Debe figurar en DataKeyNames del markup y ser estable entre recargas del snapshot:
+        /// un contador por carga no sirve, porque otra pestaña puede regenerar el snapshot y correr la numeración.
+        /// </summary>
+        protected virtual string NombreClaveVirtual => null;
+
+        /// <summary>Valor de la clave virtual en el DTO; null o vacío si la fila es real.</summary>
+        protected virtual string ClaveVirtualDe(TDto item) => null;
+
         // ------------------------------------------------------------------
         // Estado de paginación (ViewState)
         // ------------------------------------------------------------------
@@ -103,12 +116,46 @@ namespace WebForms.Infraestructura
             return AplicarFiltrosHeader(datos) ?? new List<TDto>();
         }
 
-        /// <summary>Fila del snapshot filtrado que corresponde a una fila de la grilla en la página actual.</summary>
+        /// <summary>
+        /// DTO del snapshot que corresponde a una fila de la grilla, resuelto por las DataKeys de la fila
+        /// (persistidas en ViewState): identifican lo que está renderizado aunque el usuario haya tocado la
+        /// búsqueda o los filtros sin aplicarlos, o aunque otra pestaña haya cambiado el snapshot.
+        /// No se usa la posición: con el snapshot refiltrado, el índice podía apuntar a otro registro.
+        /// Devuelve null si la fila no tiene clave válida o el registro ya no está en el snapshot.
+        /// </summary>
         protected TDto ItemDeFila(int indiceEnPagina)
         {
-            var filtrados = DatosFiltrados();
-            int indice = PaginaActual * TamanoPagina + indiceEnPagina;
-            return indice >= 0 && indice < filtrados.Count ? filtrados[indice] : null;
+            var claves = Grilla.DataKeys;
+            if (claves == null || indiceEnPagina < 0 || indiceEnPagina >= claves.Count)
+                return null;
+
+            var valores = claves[indiceEnPagina]?.Values;
+            if (valores == null) return null;
+
+            int id = ValorDeClave(valores, "Id");
+            string claveVirtual = NombreClaveVirtual != null && valores.Contains(NombreClaveVirtual)
+                ? valores[NombreClaveVirtual]?.ToString()
+                : null;
+            if (id <= 0 && string.IsNullOrEmpty(claveVirtual)) return null;
+
+            var lista = ListaCompleta;
+            return (id > 0 ? lista.FirstOrDefault(d => IdDe(d) == id) : null)
+                ?? (!string.IsNullOrEmpty(claveVirtual)
+                    ? lista.FirstOrDefault(d => string.Equals(ClaveVirtualDe(d), claveVirtual, StringComparison.Ordinal))
+                    : null);
+        }
+
+        /// <summary>DTO de la fila que contiene al control (TextBox, DropDownList...) que disparó un evento inline.</summary>
+        protected TDto ItemDelControlInline(object sender)
+        {
+            var fila = (sender as Control)?.NamingContainer as GridViewRow;
+            return fila == null ? null : ItemDeFila(fila.RowIndex);
+        }
+
+        private static int ValorDeClave(System.Collections.Specialized.IOrderedDictionary valores, string nombre)
+        {
+            var valor = valores.Contains(nombre) ? valores[nombre] : null;
+            return valor != null && int.TryParse(valor.ToString(), out int id) ? id : 0;
         }
 
         // ------------------------------------------------------------------
@@ -197,12 +244,15 @@ namespace WebForms.Infraestructura
         // Exportación
         // ------------------------------------------------------------------
 
-        /// <summary>Descarga el snapshot completo como Excel con las columnas del mapeo (título -> propiedad).</summary>
+        /// <summary>
+        /// Descarga como Excel lo que la grilla muestra: el snapshot con el texto de búsqueda y los filtros de
+        /// cabecera aplicados (todas las páginas), con las columnas del mapeo (título -> propiedad).
+        /// </summary>
         protected void ExportarExcel(Dictionary<string, string> mapeoColumnas, string nombreArchivo)
         {
             try
             {
-                var datos = ListaCompleta;
+                var datos = DatosFiltrados();
                 if (datos.Count == 0)
                 {
                     ToastService.Show(Page, "No hay datos para exportar", ToastService.ToastType.Warning);

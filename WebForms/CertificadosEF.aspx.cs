@@ -38,6 +38,9 @@ namespace WebForms
         protected override TextBox CajaBusqueda => txtBuscar;
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "CertificadosCompleto";
+        protected override int IdDe(CertificadoDTO item) => item.Id;
+        protected override string NombreClaveVirtual => "ClaveReliquidacion";
+        protected override string ClaveVirtualDe(CertificadoDTO item) => item.ClaveReliquidacion;
         protected override string MensajeErrorCarga => "Error al cargar los certificados. Intente nuevamente.";
 
         protected override List<CertificadoDTO> CargarListaCompleta() =>
@@ -156,7 +159,7 @@ namespace WebForms
 
         protected void Page_PreRender(object sender, EventArgs e)
         {
-            rfvAutorizante.Enabled = Session["EditingCertificadoId"] == null;
+            rfvAutorizante.Enabled = ViewState["EditingCertificadoId"] == null;
         }
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
@@ -286,9 +289,7 @@ namespace WebForms
 
             btnAgregar.Text = "Agregar";
 
-            Session["EditingCertificadoId"] = null;
-            Session["EditingAutorizanteId"] = null;
-            Session["EditingCodigoAutorizante"] = null;
+            ViewState["EditingCertificadoId"] = null;
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -310,7 +311,7 @@ namespace WebForms
                 DateTime? nuevoMes = string.IsNullOrWhiteSpace(txtFecha.Text) ? (DateTime?)null : DateTime.Parse(txtFecha.Text);
                 int nuevoTipoPagoId = int.Parse(ddlTipo.SelectedValue);
 
-                int? editingId = Session["EditingCertificadoId"] as int?;
+                int? editingId = ViewState["EditingCertificadoId"] as int?;
 
                 if (editingId != null)
                 {
@@ -383,7 +384,7 @@ namespace WebForms
                     CargarPaginaActual();
                 }
 
-                Session["EditingCertificadoId"] = null;
+                ViewState["EditingCertificadoId"] = null;
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
             }
             catch (InvalidOperationException ex)
@@ -414,10 +415,6 @@ namespace WebForms
 
                 if (EsReliquidacion(seleccionado))
                 {
-                    Session["EditingTipoRegistro"] = "Reliquidacion";
-                    Session["EditingReliquidacionId"] = seleccionado.IdReliquidacion;
-                    Session["EditingCodigoAutorizante"] = seleccionado.CodigoAutorizante;
-
                     txtExpediente.Text = seleccionado.ExpedientePago;
                     txtMontoCertificado.Text = seleccionado.MontoTotal.ToString("0.00");
                     txtFecha.Text = seleccionado.MesAprobacion?.ToString("yyyy-MM-dd");
@@ -441,7 +438,7 @@ namespace WebForms
                     return;
                 }
 
-                Session["EditingCertificadoId"] = seleccionado.Id;
+                ViewState["EditingCertificadoId"] = seleccionado.Id;
                 txtExpediente.Text = certificadoEF.ExpedientePago;
                 txtMontoCertificado.Text = certificadoEF.MontoTotal.ToString("0.00");
                 txtFecha.Text = certificadoEF.MesAprobacion?.ToString("yyyy-MM-dd");
@@ -527,13 +524,6 @@ namespace WebForms
         // ------------------------------------------------------------------
         // Edición inline
         // ------------------------------------------------------------------
-
-        /// <summary>DTO del snapshot que corresponde a la fila del control inline que disparó el evento.</summary>
-        private CertificadoDTO ItemDelControlInline(object sender)
-        {
-            var fila = (sender as Control)?.NamingContainer as GridViewRow;
-            return fila == null ? null : ItemDeFila(fila.RowIndex);
-        }
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {

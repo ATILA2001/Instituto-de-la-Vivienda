@@ -597,6 +597,42 @@ namespace WebForms
             }
         }
 
+        /// <summary>
+        /// Lista completa (sin paginar) con todos los filtros de la pantalla: texto, cabeceras, contrata,
+        /// buzón y desfasaje. Es lo que se exporta a Excel.
+        /// </summary>
+        private List<RedeterminacionEF> ListarConFiltrosActuales()
+        {
+            string filtroGeneral = txtBuscar?.Text?.Trim();
+            var selObra = SafeParseIntList(GetSelectedValues("cblsHeaderObra")).Distinct().ToList();
+            var selAutorizanteCodigos = GetSelectedValues("cblsHeaderAutorizante");
+            var selEstado = SafeParseIntList(GetSelectedValues("cblsHeaderEstado"));
+            var selUsuario = SafeParseIntList(GetSelectedValues("cblsHeaderUsuario"));
+            var selEmpresa = SafeParseIntList(GetSelectedValues("cblsHeaderEmpresa"));
+            var selArea = SafeParseIntList(GetSelectedValues("cblsHeaderArea"));
+            var selContrataNombres = GetSelectedValues("cblsHeaderContrata");
+            string buzonFilter = ViewState["BuzonFilterValue"] as string ?? "all";
+
+            var lista = _negocio.Listar(selEstado, selAutorizanteCodigos, selObra, filtroGeneral);
+
+            if (selUsuario.Count > 0)
+                lista = lista.Where(r => r.UsuarioId.HasValue && selUsuario.Contains(r.UsuarioId.Value)).ToList();
+            if (selEmpresa.Count > 0)
+                lista = lista.Where(r => r.Autorizante?.Obra?.EmpresaId.HasValue == true && selEmpresa.Contains(r.Autorizante.Obra.EmpresaId.Value)).ToList();
+            if (selArea.Count > 0)
+                lista = lista.Where(r => r.Autorizante?.Obra?.AreaId.HasValue == true && selArea.Contains(r.Autorizante.Obra.AreaId.Value)).ToList();
+            if (selContrataNombres != null && selContrataNombres.Count > 0)
+            {
+                var nombresContrata = new HashSet<string>(selContrataNombres.Where(s => !string.IsNullOrWhiteSpace(s)), StringComparer.OrdinalIgnoreCase);
+                lista = lista.Where(r =>
+                    (!string.IsNullOrWhiteSpace(r.Contrata) && nombresContrata.Contains(r.Contrata)) ||
+                    (r.Autorizante?.Obra?.Contrata != null && !string.IsNullOrWhiteSpace(r.Autorizante.Obra.Contrata.Nombre) && nombresContrata.Contains(r.Autorizante.Obra.Contrata.Nombre))
+                ).ToList();
+            }
+
+            return AplicarFiltrosEspeciales(lista, buzonFilter, ShowOnlyMismatchedRecords);
+        }
+
         private void BindGrid()
         {
             try
@@ -666,9 +702,6 @@ namespace WebForms
                     paginationControl.UpdatePaginationControls();
                     paginationControl.SubtotalText = $"Total: {total} registros";
 
-                    // Guardar lista completa en sesión para otros usos (p. ej., export)
-                    Session["RedeterminacionesGridData"] = fullList;
-
                     var pagina = fullList
                     .Skip(pageIndex * pageSize)
                     .Take(pageSize)
@@ -703,9 +736,6 @@ namespace WebForms
                     headerFull = AplicarFiltrosEspeciales(headerFull, buzonFilter, mismatch);
                     // Nota: no aplicar aquí el filtro de Contrata para que el header muestre todas las opciones
                     Session["RedeterminacionesHeaderFull"] = headerFull;
-
-                    // Guardar la página actual en sesión para otros usos
-                    Session["RedeterminacionesGridData"] = pagina;
 
                     dgvRedeterminacion.DataSource = pagina;
                     dgvRedeterminacion.DataBind();
@@ -932,18 +962,9 @@ namespace WebForms
         {
             try
             {
-                // Obtener datos para la exportación
-                List<RedeterminacionEF> redeterminaciones;
-
-                if (Session["RedeterminacionesCompleto"] is List<RedeterminacionEF> cache && cache.Any())
-                {
-                    redeterminaciones = cache;
-                }
-                else
-                {
-                    redeterminaciones = new RedeterminacionNegocioEF().Listar();
-                    Session["RedeterminacionesCompleto"] = redeterminaciones;
-                }
+                // Lo mismo que muestra la grilla, con los filtros vigentes y sin paginar. Antes se exportaba una
+                // copia guardada en sesión en la primera exportación, que no se invalidaba al editar ni filtrar.
+                var redeterminaciones = ListarConFiltrosActuales();
 
                 var mapeoColumnas = new Dictionary<string, string>
  {

@@ -162,7 +162,7 @@
 	<hr class="mb-3" />
 
 	<div class="gridview-scroll-container">
-		<asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+		<asp:GridView ID="gridviewRegistros" DataKeyNames="Id,ClaveReliquidacion" CssClass="table1 table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
 			OnRowDeleting="gridviewRegistros_RowDeleting"
 			OnRowDataBound="gridviewRegistros_RowDataBound"
