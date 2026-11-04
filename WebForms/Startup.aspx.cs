@@ -20,7 +20,9 @@ namespace WebForms
             var user = Context.GetOwinContext().Authentication.User;
             if (user?.Identity?.IsAuthenticated != true)
             {
-                if (Context?.IsDebuggingEnabled == true && Request.QueryString["diag"] == "1")
+                // Diagnóstico de la cookie compartida: sólo con debug y desde el propio servidor (lista nombres
+                // de cookies, chunks y errores de Unprotect, que no deben verse desde afuera).
+                if (Context?.IsDebuggingEnabled == true && Request.IsLocal && Request.QueryString["diag"] == "1")
                 {
                 var diagHtml = new System.Text.StringBuilder();
                 diagHtml.AppendLine("<h3>No autenticado. Inicie sesión desde el portal de autenticación.</h3>");
@@ -168,7 +170,7 @@ namespace WebForms
             var returnUrl = Request.QueryString["returnUrl"];
             if (!string.IsNullOrWhiteSpace(returnUrl))
             {
-                Response.Redirect(NormalizeRedirectUrl(returnUrl), true);
+                Response.Redirect(NormalizeRedirectUrl(returnUrl, Request.Url), true);
                 return;
             }
 
@@ -176,8 +178,14 @@ namespace WebForms
             var firstPage = TryGetFirstPageFromPermissions(permsJsonTmp);
             if (!string.IsNullOrWhiteSpace(firstPage))
             {
-                Response.Redirect(NormalizeRedirectUrl(firstPage), true);
-                return;
+                var destino = NormalizeRedirectUrl(firstPage, Request.Url);
+                // "/" vuelve a esta misma página (documento por defecto) y haría un bucle de redirección:
+                // ocurre si la primera página de perms_json es una URL absoluta de otro host.
+                if (destino != "/")
+                {
+                    Response.Redirect(destino, true);
+                    return;
+                }
             }
 
             Response.Redirect("~/AccessDenied.aspx", true);
@@ -204,12 +212,13 @@ namespace WebForms
 
         /// <summary>
         /// Normaliza el returnUrl a una ruta local de esta aplicación.
-        /// Sólo se aceptan rutas relativas ("/x", "~/x" o "x"); cualquier URL absoluta o
-        /// protocol-relative ("//host") se descarta y se redirige a "/". El salto entre
-        /// aplicaciones lo resuelve Auth.Web (allowlist por cliente y /connect/switch-app),
-        /// no esta página. Misma regla que LogoutRedirectHelper.IsSafeLocalUrl en Auth.Web.
+        /// Se aceptan rutas relativas ("/x", "~/x" o "x") y URLs absolutas http/https del mismo host
+        /// que la request actual (Global.RedirectToLogin envía a Auth.Web el AbsoluteUri de IVC), que se
+        /// reducen a su path y query. Cualquier otra URL absoluta o protocol-relative ("//host") se
+        /// descarta y se redirige a "/". El salto entre aplicaciones lo resuelve Auth.Web (allowlist por
+        /// cliente y /connect/switch-app), no esta página.
         /// </summary>
-        private static string NormalizeRedirectUrl(string url)
+        private static string NormalizeRedirectUrl(string url, Uri requestUrl)
         {
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -217,8 +226,23 @@ namespace WebForms
             }
 
             var trimmed = url.Trim();
-            if (Uri.TryCreate(trimmed, UriKind.Absolute, out _)
-                || trimmed.StartsWith("//", StringComparison.Ordinal)
+
+            // TAB, LF, CR, NUL o espacios internos: el navegador los descarta al parsear el Location y
+            // "/<TAB>/evil.com" termina siendo "//evil.com". Auth.Web rechaza lo mismo.
+            if (Negocio.Infraestructura.SeguridadHttp.TieneCaracteresInvalidosParaUrl(trimmed))
+            {
+                return "/";
+            }
+
+            if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
+            {
+                bool esHttp = absolute.Scheme == Uri.UriSchemeHttp || absolute.Scheme == Uri.UriSchemeHttps;
+                bool mismoHost = requestUrl != null
+                    && string.Equals(absolute.Host, requestUrl.Host, StringComparison.OrdinalIgnoreCase);
+                return esHttp && mismoHost ? absolute.PathAndQuery : "/";
+            }
+
+            if (trimmed.StartsWith("//", StringComparison.Ordinal)
                 || trimmed.StartsWith("/\\", StringComparison.Ordinal)
                 || trimmed.StartsWith("\\", StringComparison.Ordinal))
             {
@@ -235,7 +259,8 @@ namespace WebForms
 
         private static string BuildAuthLoginUrl(HttpContext context)
         {
-            var baseUrl = WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
+            var baseUrl = Environment.GetEnvironmentVariable("AuthWeb__BaseUrl")
+                ?? WebConfigurationManager.AppSettings["AuthWebBaseUrl"]
                 ?? WebConfigurationManager.AppSettings["AuthWebUrl"];
 
             if (string.IsNullOrWhiteSpace(baseUrl))

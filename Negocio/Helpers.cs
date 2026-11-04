@@ -4,7 +4,6 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -12,9 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.UI.WebControls;
-using System.Data.SqlClient;
+using Negocio.Infraestructura;
 using System.Security.Claims;
 
 namespace Negocio
@@ -27,8 +24,12 @@ namespace Negocio
         /// <summary>
         /// Exporta datos de cualquier tipo a Excel usando un mapeo (Header -> RutaPropiedad)
         /// </summary>
-        public static void ExportarDatosGenericos<T>(IEnumerable<T> datos,
-            Dictionary<string, string> mapeoColumnas, string fileName)
+        /// <summary>
+        /// Genera un libro Excel (.xlsx) con una hoja "Datos": una columna por entrada del mapeo
+        /// (encabezado -> ruta de propiedad) y una fila por elemento. Devuelve el archivo en memoria;
+        /// enviarlo al navegador es responsabilidad de la capa web.
+        /// </summary>
+        public static byte[] GenerarXlsx<T>(IEnumerable<T> datos, Dictionary<string, string> mapeoColumnas)
         {
             if (mapeoColumnas == null || mapeoColumnas.Count == 0)
                 throw new ArgumentException("El mapeo de columnas está vacío");
@@ -52,13 +53,7 @@ namespace Negocio
                     mapeoNormalizado[claveNormalizada] = kvp.Value;
                 }
 
-                // Depuración: imprimir mapeo normalizado
-                System.Diagnostics.Debug.WriteLine("Mapeo normalizado:");
-                foreach (var kvp in mapeoNormalizado)
-                {
-                    System.Diagnostics.Debug.WriteLine($"- Encabezado: '{kvp.Key}' | Ruta: '{kvp.Value}'");
-                }
-
+                
                 // Agregar encabezados desde el mapeo (usar la clave original como texto)
                 foreach (var kvp in mapeoColumnas)
                 {
@@ -78,7 +73,6 @@ namespace Negocio
                         string rutaPropiedad = kvp.Value;
 
                         object valor = ObtenerValorPorRuta(item, rutaPropiedad);
-                        System.Diagnostics.Debug.WriteLine($"Fila {fila}: Encabezado '{header}' -> Ruta '{rutaPropiedad}' -> Valor: {valor}");
 
                         // Formatear según tipo de dato
                         if (valor is decimal || valor is double || valor is float)
@@ -102,7 +96,7 @@ namespace Negocio
                 }
 
                 AjustarAnchosColumnas(worksheet, columnaActual - 1);
-                DescargarArchivo(package, fileName);
+                return package.GetAsByteArray();
             }
         }
 
@@ -186,218 +180,7 @@ namespace Negocio
             }
         }
 
-        /// <summary>
-        /// Descarga el archivo Excel generado
-        /// </summary>
-        private static void DescargarArchivo(ExcelPackage package, string fileName)
-        {
-            HttpContext context = HttpContext.Current;
-            if (context == null)
-                throw new InvalidOperationException("Esta función solo puede usarse en un contexto web.");
-
-            context.Response.Clear();
-            context.Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            context.Response.AddHeader("content-disposition", $"attachment;  filename={fileName}.xlsx");
-            context.Response.BinaryWrite(package.GetAsByteArray());
-            context.Response.End();
-        }
     }
-
-    /// <summary>
-    /// Clase helper para información relacionada con SADE (Sistema de Administración de Documentos Electrónicos)
-    /// </summary>
-    public static class SADEHelper
-    {
-        /// <summary>
-        /// Obtiene la información de SADE para un expediente específico
-        /// </summary>
-        /// <param name="expediente">Número de expediente</param>
-        /// <returns>Tupla con fecha del último pase y buzón destino</returns>
-        public static (DateTime? FechaUltimoPase, string BuzonDestino) ObtenerInfoSADE(string expediente)
-        {
-            if (string.IsNullOrEmpty(expediente))
-                return (null, null);
-
-            AccesoDatos datos = new AccesoDatos();
-            try
-            {
-                datos.setearConsulta("SELECT [BUZON DESTINO], [FECHA ULTIMO PASE] FROM PASES_SADE WHERE EXPEDIENTE = @EXPEDIENTE COLLATE Modern_Spanish_CI_AS");
-                datos.agregarParametro("@EXPEDIENTE", expediente);
-                datos.ejecutarLectura();
-
-                if (datos.Lector.Read())
-                {
-                    DateTime? fechaUltimoPase = datos.Lector["FECHA ULTIMO PASE"] != DBNull.Value
-                        ? (DateTime?)Convert.ToDateTime(datos.Lector["FECHA ULTIMO PASE"])
-                        : null;
-
-                    string buzonDestino = datos.Lector["BUZON DESTINO"]?.ToString();
-
-                    return (fechaUltimoPase, buzonDestino);
-                }
-
-                return (null, null);
-            }
-            finally
-            {
-                datos.cerrarConexion();
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Clase helper para información relacionada con ACDIR (Administración Central de Dirección)
-    /// </summary>
-    public static class AcdirHelper
-    {
-        // DTO for SQL results
-        private class AcdirRowDto
-        {
-            public string Expediente { get; set; }
-            public string Acdir { get; set; }
-            public DateTime? Fecha { get; set; }
-        }
-
-        /// <summary>
-        /// Obtiene información de ACDIR para múltiples expedientes en una sola consulta
-        /// Implementación optimizada: usa EF bulk query in batches y cache en sesión para evitar N+1.
-        /// Ahora selecciona únicamente la fila más reciente por FECHA_FIRMA para cada expediente.
-        /// </summary>
-        /// <param name="expedientes">Lista de números de expediente</param>
-        /// <returns>Diccionario con expediente como clave y número ACDIR (GEDO) como valor</returns>
-        public static Dictionary<string, string> ObtenerInfoACDIRBulk(List<string> expedientes)
-        {
-            var resultado = new Dictionary<string, string>();
-            Stopwatch sw = Stopwatch.StartNew();
-
-            if (expedientes == null || !expedientes.Any())
-            {
-                Debug.WriteLine("ACDIR: No hay expedientes para consultar");
-                return resultado;
-            }
-
-            Debug.WriteLine($"ACDIR: Consultando {expedientes.Count} expedientes (bulk)");
-
-            // Filtrar expedientes vacíos y duplicados
-            var expedientesValidos = expedientes
-                .Where(e => !string.IsNullOrEmpty(e))
-                .Distinct()
-                .ToList();
-
-            if (expedientesValidos.Count == 0)
-                return resultado;
-
-            try
-            {
-                // Obtener cache de sesión si existe
-                var cacheActual = ObtenerCacheAcdir() ?? new Dictionary<string, string>();
-
-                // Determinar expedientes que faltan en cache
-                var missing = expedientesValidos.Where(e => !cacheActual.ContainsKey(e)).ToList();
-
-                // Batching to avoid large IN clauses / parameter limits
-                const int batchSize = 800;
-
-                if (missing.Any())
-                {
-                    for (int i = 0; i < missing.Count; i += batchSize)
-                    {
-                        var batch = missing.Skip(i).Take(batchSize).ToList();
-
-                        try
-                        {
-                            using (var context = new IVCdbContext())
-                            {
-                                // Build parameterized IN list
-                                var sqlParams = new List<SqlParameter>();
-                                var inList = new List<string>();
-                                for (int p = 0; p < batch.Count; p++)
-                                {
-                                    var paramName = "@p" + p;
-                                    inList.Add(paramName);
-                                    sqlParams.Add(new SqlParameter(paramName, batch[p]));
-                                }
-
-                                // Raw SQL: select rows from GEDO where FECHA_FIRMA is max per expediente
-                                var sql = $@"
-SELECT g.NRO_EXPEDIENTE AS Expediente, g.NRO_ESPECIAL AS Acdir, g.FECHA_FIRMA AS Fecha
-FROM GEDO g
-INNER JOIN (
-    SELECT NRO_EXPEDIENTE, MAX(FECHA_FIRMA) AS MaxFecha
-    FROM GEDO
-    WHERE NRO_EXPEDIENTE IN ({string.Join(",", inList)})
-    GROUP BY NRO_EXPEDIENTE
-) m ON g.NRO_EXPEDIENTE = m.NRO_EXPEDIENTE AND g.FECHA_FIRMA = m.MaxFecha
-";
-
-                                var rows = context.Database.SqlQuery<AcdirRowDto>(sql, sqlParams.ToArray()).ToList();
-
-                                // Store found values in cache
-                                foreach (var r in rows)
-                                {
-                                    cacheActual[r.Expediente] = r.Acdir;
-                                }
-
-                                // Mark not-found items explicitly in cache (null)
-                                var foundExpedientes = new HashSet<string>(rows.Select(r => r.Expediente));
-                                foreach (var exp in batch)
-                                {
-                                    if (!foundExpedientes.Contains(exp))
-                                    {
-                                        cacheActual[exp] = null;
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception exBatch)
-                        {
-                            Debug.WriteLine($"ACDIR: Error en batch query: {exBatch.Message}");
-                            // Continue with other batches
-                        }
-                    }
-
-                    // Persistir cache en sesión
-                    GuardarCacheAcdir(cacheActual);
-                }
-
-                // Construir resultado sólo con entradas que tienen valor (replica comportamiento previo de solo agregar si se encontró)
-                foreach (var exp in expedientesValidos)
-                {
-                    if (cacheActual.TryGetValue(exp, out var val) && !string.IsNullOrEmpty(val))
-                    {
-                        resultado[exp] = val;
-                    }
-                }
-
-                sw.Stop();
-                Debug.WriteLine($"ACDIR: Encontrados {resultado.Count} de {expedientesValidos.Count} expedientes en {sw.ElapsedMilliseconds}ms (bulk)");
-
-                return resultado;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"ACDIR: Error en consulta bulk: {ex.Message}");
-                return resultado;
-            }
-        }
-
-        // Session cache helpers for ACDIR
-        private static Dictionary<string, string> ObtenerCacheAcdir()
-        {
-            if (HttpContext.Current?.Session == null) return null;
-            return HttpContext.Current.Session["CacheAcdir"] as Dictionary<string, string>;
-        }
-
-        private static void GuardarCacheAcdir(Dictionary<string, string> cache)
-        {
-            if (HttpContext.Current?.Session != null)
-            {
-                HttpContext.Current.Session["CacheAcdir"] = cache;
-            }
-        }
-    }
-
 
     public static class UserHelper
     {
@@ -456,28 +239,35 @@ INNER JOIN (
         /// </summary>
         public static UsuarioEF EnsureSessionUserFromClaims()
         {
-            var context = HttpContext.Current;
-            if (context?.Session == null)
+            var contexto = ContextoWeb.Actual;
+            if (contexto == null || !contexto.SesionDisponible)
             {
                 return null;
             }
 
-            var principal = context.User as ClaimsPrincipal;
+            var principal = contexto.Usuario;
             if (principal?.Identity?.IsAuthenticated != true)
             {
-                // Sin principal autenticado no se devuelve ningún usuario cacheado.
-                context.Session.Remove("Usuario");
-                context.Session.Remove(SessionUsuarioAuthIdKey);
+                // Sin principal autenticado no se devuelve ningún usuario cacheado. Si había uno, se limpia
+                // toda la Session: las grillas y exportaciones cachean listas ya filtradas por área.
+                if (contexto.ObtenerDeSesion("Usuario") != null)
+                    contexto.LimpiarSesion();
                 return null;
             }
 
-            var currentAuthId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var identidadActual = ClaveDeIdentidad(principal);
 
-            if (context.Session["Usuario"] is UsuarioEF existing
-                && string.Equals(context.Session[SessionUsuarioAuthIdKey] as string, currentAuthId, StringComparison.Ordinal))
+            if (contexto.ObtenerDeSesion("Usuario") is UsuarioEF existing
+                && string.Equals(contexto.ObtenerDeSesion(SessionUsuarioAuthIdKey) as string, identidadActual, StringComparison.Ordinal))
             {
                 return existing;
             }
+
+            // Cambió la persona, o la misma persona volvió a loguearse con otros roles/áreas/permisos.
+            // Las listas cacheadas en Session (GridDataAutorizantes, CertificadosCompleto, CacheSade, etc.)
+            // fueron calculadas con la identidad anterior: se descartan todas.
+            if (contexto.ObtenerDeSesion("Usuario") != null)
+                contexto.LimpiarSesion();
 
             var built = BuildUserFromClaims(principal);
             if (built == null)
@@ -485,9 +275,29 @@ INNER JOIN (
                 return null;
             }
 
-            context.Session["Usuario"] = built;
-            context.Session[SessionUsuarioAuthIdKey] = currentAuthId;
+            contexto.GuardarEnSesion("Usuario", built);
+            contexto.GuardarEnSesion(SessionUsuarioAuthIdKey, identidadActual);
             return built;
+        }
+
+        /// <summary>
+        /// Identidad efectiva del principal: NameIdentifier más los claims que afectan a lo que el usuario
+        /// puede ver o hacer en IVC (roles, áreas y versión de permisos). Si cualquiera cambia, el
+        /// UsuarioEF cacheado deja de ser válido aunque sea la misma persona.
+        /// </summary>
+        private static string ClaveDeIdentidad(ClaimsPrincipal principal)
+        {
+            string Join(string type) => string.Join(",", principal.Claims
+                .Where(c => string.Equals(c.Type, type, StringComparison.OrdinalIgnoreCase))
+                .Select(c => c.Value)
+                .OrderBy(v => v, StringComparer.Ordinal));
+
+            return string.Join("|",
+                principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty,
+                principal.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty,
+                Join(ClaimTypes.Role),
+                Join("area"),
+                principal.FindFirst("perms_version")?.Value ?? string.Empty);
         }
 
         private static UsuarioEF BuildUserFromClaims(ClaimsPrincipal principal)
@@ -642,9 +452,22 @@ INNER JOIN (
         public static bool PuedeModificarPlanificacion()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            // Estado == false es el usuario "por defecto" que se devuelve sin sesión autenticada: nunca puede modificar.
+            if (user == null || !user.Estado) return false;
             if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
             return user.Tipo || ABMPlaniNegocio.GetIsPlanningOpen() || user.IsPlanningOpenOverride;
+        }
+
+        /// <summary>
+        /// Puede actualizar inline el expediente y el estado de un autorizante en la grilla de Autorizantes.
+        /// Además de quienes pueden modificar planificación, el área Redeterminaciones hace el seguimiento
+        /// del trámite y edita esos dos campos aunque no pueda crear, modificar por modal ni eliminar.
+        /// </summary>
+        public static bool PuedeEditarSeguimientoAutorizante()
+        {
+            var user = GetFullCurrentUser();
+            if (user == null || !user.Estado) return false;
+            return PuedeModificarPlanificacion() || IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
         }
 
         /// <summary>
@@ -654,7 +477,7 @@ INNER JOIN (
         public static bool PuedeModificarFormulacion()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            if (user == null || !user.Estado) return false;
             if (user.Tipo) return true;
             if (IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones) || IsUserInArea(Dominio.IvcAreaIds.Secretaria)) return false;
             return ABMPlaniNegocio.GetIsFormulationOpen();
@@ -667,7 +490,7 @@ INNER JOIN (
         public static bool PuedeModificarRedeterminaciones()
         {
             var user = GetFullCurrentUser();
-            if (user == null) return false;
+            if (user == null || !user.Estado) return false;
             if (user.Tipo) return true;
             return !IsUserInArea(Dominio.IvcAreaIds.Secretaria);
         }

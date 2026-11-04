@@ -1,69 +1,291 @@
-
 using Dominio;
 using Negocio;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Globalization;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using WebForms.CustomControls;
+using WebForms.Infraestructura;
 
 namespace WebForms
 {
-    public partial class LegitimosEF : System.Web.UI.Page
+    /// <summary>
+    /// Legítimos abonos. La paginación, el filtro de texto, los filtros de cabecera y la exportación
+    /// vienen de GridPageBase; acá queda lo propio: qué se carga, cómo se filtra, el alta, la edición
+    /// (modal e inline), la baja y el recálculo de SIGAF/SADE sobre el snapshot.
+    /// </summary>
+    public partial class LegitimosEF : GridPageBase<LegitimoEF>
     {
-        private LegitimoNegocioEF negocio = new LegitimoNegocioEF();
-        CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
+        private readonly LegitimoNegocioEF negocio = new LegitimoNegocioEF();
+        private readonly CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
 
-        #region Variables de Paginación Externa
+        private bool? _puedeModificar;
+        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
+        private bool PuedeModificar =>
+            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarPlanificacion()).Value;
 
-        /// <summary>
-        /// Índice de página actual (base 0). Se mantiene en ViewState para persistir entre postbacks.
-        /// Este sistema de paginación es independiente del GridView nativo y permite mejor control.
-        /// </summary>
-        private int currentPageIndex = 0;
+        // ------------------------------------------------------------------
+        // GridPageBase
+        // ------------------------------------------------------------------
 
-        /// <summary>
-        /// Cantidad de registros por página. Por defecto 12, configurable por el usuario.
-        /// Se mantiene en ViewState para persistir la preferencia del usuario.
-        /// </summary>
-        private int pageSize = 12;
+        protected override GridView Grilla => gridviewRegistros;
+        protected override TextBox CajaBusqueda => txtBuscar;
+        protected override PaginationControl Paginador => paginationControl;
+        protected override string ClaveSesion => "legitimosCompletos";
+        protected override int IdDe(LegitimoEF item) => item.Id;
+        protected override string MensajeErrorCarga => "Error al cargar los legítimos. Intente nuevamente.";
 
-        /// <summary>
-        /// Total de registros disponibles según filtros actuales.
-        /// Se calcula una vez y se almacena en ViewState para evitar recálculos.
-        /// </summary>
-        private int totalRecords = 0;
+        protected override List<LegitimoEF> CargarListaCompleta() =>
+            // Sin filtros: el negocio devuelve la lista completa del usuario con Empresa, Línea, SIGAF, SADE y Estado.
+            negocio.ListarPorUsuarioConFiltrosCompleto(UserHelper.GetFullCurrentUser(), null,
+                new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
 
-        #endregion
+        protected override bool CoincideTexto(LegitimoEF l, string filtro) =>
+            (l.Expediente?.ToUpper().Contains(filtro) ?? false) ||
+            (l.ObraEF?.Empresa?.Nombre?.ToUpper().Contains(filtro) ?? false) ||
+            (l.CodigoAutorizante?.ToUpper().Contains(filtro) ?? false) ||
+            (l.ObraEF?.Descripcion?.ToUpper().Contains(filtro) ?? false) ||
+            (l.ObraEF?.Area?.Nombre?.ToUpper().Contains(filtro) ?? false) ||
+            (l.ObraEF?.Barrio?.Nombre?.ToUpper().Contains(filtro) ?? false) ||
+            (l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre?.ToUpper().Contains(filtro) ?? false);
+
+        protected override List<LegitimoEF> AplicarFiltrosHeader(List<LegitimoEF> datos)
+        {
+            var areas = IdsSeleccionados("cblsHeaderArea");
+            var empresas = IdsSeleccionados("cblsHeaderEmpresa");
+            var lineas = IdsSeleccionados("cblsHeaderLineaGestion");
+            var autorizantes = ValoresSeleccionados("cblsHeaderAutorizante");
+            var estados = ValoresSeleccionados("cblsHeaderEstado");
+            var meses = FechasSeleccionadas("cblsHeaderMesAprobacion");
+
+            if (areas != null) datos = datos.Where(l => l.ObraEF?.Area != null && areas.Contains(l.ObraEF.Area.Id)).ToList();
+            if (empresas != null) datos = datos.Where(l => l.ObraEF?.Empresa != null && empresas.Contains(l.ObraEF.Empresa.Id)).ToList();
+            if (autorizantes != null) datos = datos.Where(l => !string.IsNullOrEmpty(l.CodigoAutorizante) && autorizantes.Contains(l.CodigoAutorizante)).ToList();
+            if (estados != null) datos = datos.Where(l => !string.IsNullOrEmpty(l.Estado) && estados.Contains(l.Estado)).ToList();
+            if (meses != null) datos = datos.Where(l => l.MesAprobacion.HasValue && meses.Contains(l.MesAprobacion.Value.Date)).ToList();
+            if (lineas != null) datos = datos.Where(l => l.ObraEF?.Proyecto?.LineaGestionEF != null && lineas.Contains(l.ObraEF.Proyecto.LineaGestionEF.Id)).ToList();
+
+            return datos;
+        }
+
+        protected override void PoblarFiltrosHeader(List<LegitimoEF> legitimos)
+        {
+            // Todas las opciones salen del snapshot del usuario.
+            BindFiltroHeader("cblsHeaderArea", FiltrosHeader.Distintos(legitimos, l => l.ObraEF?.Area?.Id, l => l.ObraEF?.Area?.Nombre));
+            BindFiltroHeader("cblsHeaderEmpresa", FiltrosHeader.Distintos(legitimos, l => l.ObraEF?.Empresa?.Id, l => l.ObraEF?.Empresa?.Nombre));
+            BindFiltroHeader("cblsHeaderLineaGestion", FiltrosHeader.Distintos(legitimos, l => l.ObraEF?.Proyecto?.LineaGestionEF?.Id, l => l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre));
+
+            var autorizantes = legitimos
+                .Where(l => !string.IsNullOrEmpty(l.CodigoAutorizante))
+                .Select(l => l.CodigoAutorizante)
+                .Distinct()
+                .OrderBy(a => a)
+                .Select(a => new { Id = a, Nombre = a })
+                .ToList();
+            BindFiltroHeader("cblsHeaderAutorizante", autorizantes);
+
+            var estados = new[] { "NO INICIADO", "EN TRAMITE", "DEVENGADO" }
+                .Select(e => new { Id = e, Nombre = e })
+                .ToList();
+            BindFiltroHeader("cblsHeaderEstado", estados);
+
+            // Meses de aprobación distintos: lista de fechas, el control arma el árbol año/mes/día.
+            if (FiltroHeader("cblsHeaderMesAprobacion") is TreeViewSearch filtroMes)
+            {
+                filtroMes.DataSource = legitimos
+                    .Where(l => l.MesAprobacion.HasValue)
+                    .Select(l => l.MesAprobacion.Value)
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToList();
+                filtroMes.DataBind();
+            }
+        }
+
+        protected override decimal Subtotal(List<LegitimoEF> legitimos) => legitimos.Sum(l => l.Certificado ?? 0m);
+
+        // ------------------------------------------------------------------
+        // Ciclo de vida
+        // ------------------------------------------------------------------
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Cargar valores de paginación desde ViewState
-            currentPageIndex = (int)(ViewState["CurrentPageIndex"] ?? 0);
-            pageSize = (int)(ViewState["PageSize"] ?? 12);
-
             if (!IsPostBack)
             {
                 BindDropDownList();
-                BindGrid();
+                CargarPaginaActual();
             }
+        }
+
+        protected void btnExportarExcel_Click(object sender, EventArgs e)
+        {
+            var mapeo = new Dictionary<string, string>
+            {
+                { "Área", "ObraEF.Area.Nombre" },
+                { "Obra", "ObraEF.Descripcion" },
+                { "Barrio", "ObraEF.Barrio.Nombre" },
+                { "Empresa", "Empresa" },
+                { "Línea Gestión", "Linea" },
+                { "Código Autorizante", "CodigoAutorizante" },
+                { "Expediente", "Expediente" },
+                { "Inicio Ejecución", "InicioEjecucion" },
+                { "Fin Ejecución", "FinEjecucion" },
+                { "Certificado", "Certificado" },
+                { "Mes Aprobación", "MesAprobacion" },
+                { "Estado", "Estado" },
+                { "Sigaf", "Sigaf" },
+                { "Buzón SADE", "BuzonSade" },
+                { "Fecha SADE", "FechaSade" },
+            };
+
+            ExportarExcel(mapeo, "Legitimos");
+        }
+
+        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType != DataControlRowType.DataRow) return;
+
+            var legitimo = (LegitimoEF)e.Row.DataItem;
+            if (e.Row.FindControl("txtCertificadoInline") is TextBox txtCert)
+            {
+                txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente) && PuedeModificar;
+            }
+            // Misma regla que verifican los handlers inline: sin permiso, el control se ve deshabilitado.
+            if (e.Row.FindControl("txtExpediente") is TextBox txtExp)
+            {
+                txtExp.Enabled = PuedeModificar;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Recálculo de SIGAF / SADE sobre el snapshot
+        // ------------------------------------------------------------------
+
+        /// <summary>Estado derivado del expediente y de SIGAF: sin expediente NO INICIADO, sin SIGAF EN TRAMITE, si no DEVENGADO.</summary>
+        private static void AplicarEstado(LegitimoEF l)
+        {
+            if (string.IsNullOrWhiteSpace(l.Expediente))
+            {
+                l.Estado = "NO INICIADO";
+                l.Sigaf = null;
+                l.BuzonSade = null;
+                l.FechaSade = null;
+            }
+            else if (!l.Sigaf.HasValue || l.Sigaf == 0)
+            {
+                l.Estado = "EN TRAMITE";
+            }
+            else
+            {
+                l.Estado = "DEVENGADO";
+            }
+        }
+
+        /// <summary>
+        /// Recalcula SIGAF, buzón y fecha SADE de los expedientes indicados sobre el snapshot en sesión,
+        /// limpia la caché SADE y vuelve a la primera página. Sin expedientes, sólo rebindea la página actual.
+        /// </summary>
+        private void RecalcularYRecargar(IEnumerable<string> expedientesAfectados)
+        {
+            var expedientes = (expedientesAfectados ?? Enumerable.Empty<string>())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Distinct()
+                .ToList();
+
+            if (expedientes.Count == 0)
+            {
+                CargarPaginaActual();
+                return;
+            }
+
+            try
+            {
+                var datosSade = calculoRedeterminacionNegocio.ObtenerDatosSadeBulk(expedientes);
+                var datosSigaf = calculoRedeterminacionNegocio.ObtenerSigafBulk(expedientes);
+
+                foreach (var l in ListaCompleta)
+                {
+                    if (string.IsNullOrWhiteSpace(l.Expediente)) continue;
+                    var exp = l.Expediente.Trim();
+                    if (!expedientes.Contains(exp)) continue;
+
+                    if (datosSade != null && datosSade.TryGetValue(exp, out var sadeInfo))
+                    {
+                        l.BuzonSade = sadeInfo.Buzon;
+                        l.FechaSade = sadeInfo.Fecha;
+                    }
+
+                    if (datosSigaf != null && datosSigaf.TryGetValue(exp, out var sigafVal))
+                    {
+                        l.Sigaf = sigafVal;
+                    }
+
+                    AplicarEstado(l);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al recalcular SIGAF/buzón/fecha SADE: " + ex);
+            }
+            finally
+            {
+                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
+            }
+
+            RecargarDesdePrimeraPagina();
+        }
+
+        // ------------------------------------------------------------------
+        // Alta y edición por modal
+        // ------------------------------------------------------------------
+
+        private void BindDropDownList()
+        {
+            try
+            {
+                var obras = new ObraNegocioEF().ListarParaDDL();
+                ddlObra.Items.Clear();
+                ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
+                foreach (var o in obras)
+                {
+                    string barrio = o.Barrio?.Nombre ?? "Sin barrio";
+                    var item = new ListItem($"{TextoCombo.Acortar(o.Descripcion)} - {barrio}", o.Id.ToString());
+                    item.Attributes["title"] = $"{o.Descripcion} - {barrio}";
+                    ddlObra.Items.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al cargar las obras del formulario: " + ex);
+                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
+            }
+        }
+
+        private void LimpiarFormulario()
+        {
+            txtAutorizante.Text = string.Empty;
+            txtExpediente.Text = string.Empty;
+            txtInicioEjecucion.Text = string.Empty;
+            txtFinEjecucion.Text = string.Empty;
+            txtCertificado.Text = string.Empty;
+            txtMesAprobacion.Text = string.Empty;
+            ddlObra.ClearSelection();
+            ViewState["EditingLegitimoEFId"] = null;
         }
 
         protected void btnShowAddModal_Click(object sender, EventArgs e)
         {
-            // Seguir patrón de CertificadosEF: limpiar formulario, ajustar título y mostrar modal en cliente
             LimpiarFormulario();
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ResetModalTitleAndShow",
                 "$(document).ready(function() { $('#modalAgregar .modal-title').text('Agregar Legítimo'); document.getElementById('" + btnAgregar.ClientID + "').value = 'Agregar'; $('#modalAgregar').modal('show'); });",
                 true);
 
-            // Asegurar texto del botón y limpiar id de edición
             btnAgregar.Text = "Agregar";
             ddlObra.Enabled = true; // Permitir seleccionar obra al agregar
-            Session["EditingLegitimoEFId"] = null;
+            ViewState["EditingLegitimoEFId"] = null;
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -76,6 +298,7 @@ namespace WebForms
 
             if (!Page.IsValid)
                 return;
+
             try
             {
                 var legitimo = new LegitimoEF
@@ -93,9 +316,9 @@ namespace WebForms
                 // copiando sólo los campos del formulario. Modificar() marca toda la entidad como
                 // Modified, así que guardar el objeto nuevo pondría en NULL las columnas que el
                 // formulario no edita (PORC_EJEC_FISICA).
-                if (Session["EditingLegitimoEFId"] != null)
+                if (ViewState["EditingLegitimoEFId"] != null)
                 {
-                    var entidad = negocio.ObtenerPorId((int)Session["EditingLegitimoEFId"]);
+                    var entidad = negocio.ObtenerPorId((int)ViewState["EditingLegitimoEFId"]);
                     if (entidad == null)
                     {
                         ToastService.Show(this.Page, "Error: No se encontró el legítimo a modificar.", ToastService.ToastType.Error);
@@ -109,6 +332,9 @@ namespace WebForms
                     entidad.FinEjecucion = legitimo.FinEjecucion;
                     entidad.Certificado = legitimo.Certificado;
                     entidad.MesAprobacion = legitimo.MesAprobacion;
+                    // ObtenerPorId trae la navegación ObraEF cargada; si cambió ObraId, adjuntar el grafo en el
+                    // contexto nuevo de Modificar lanzaría una violación de integridad referencial de EF.
+                    entidad.ObraEF = null;
 
                     negocio.Modificar(entidad);
                     ToastService.Show(this.Page, "Legítimo modificado exitosamente.", ToastService.ToastType.Success);
@@ -121,62 +347,63 @@ namespace WebForms
 
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingLegitimoEFId"] = null;
-                Session["legitimosCompletos"] = null;
+                ViewState["EditingLegitimoEFId"] = null;
                 BindDropDownList();
-                BindGrid();
+                RecargarTrasCambio();
             }
             catch (InvalidOperationException ex)
             {
                 ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al guardar el legítimo: " + ex);
                 ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
 
-        private void SelectDropDownListByValue(DropDownList dropDown, string value)
+        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (dropDown == null) return;
-            if (string.IsNullOrWhiteSpace(value)) return;
-            var item = dropDown.Items.FindByValue(value);
-            if (item != null)
+            try
             {
-                dropDown.ClearSelection();
-                item.Selected = true;
-            }
-        }
+                int legitimoId = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
+                var legitimo = negocio.ObtenerPorId(legitimoId);
+                if (legitimo == null)
+                {
+                    ToastService.Show(this.Page, "Error: No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
+                    return;
+                }
 
-        private void AbrirModalEdicionLegitimo(int legitimoId)
-        {
-            var legitimo = negocio.ObtenerPorId(legitimoId);
-            if (legitimo == null)
-            {
-                ToastService.Show(this.Page, "Error: No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
-                return;
-            }
+                ViewState["EditingLegitimoEFId"] = legitimoId;
+                BindDropDownList();
+                SeleccionarValor(ddlObra, legitimo.ObraId.ToString());
+                txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
+                txtExpediente.Text = legitimo.Expediente ?? string.Empty;
+                txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+                txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
+                txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
+                txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
+                ddlObra.Enabled = false;
+                btnAgregar.Text = "Actualizar";
 
-            Session["EditingLegitimoEFId"] = legitimoId;
-            BindDropDownList();
-            SelectDropDownListByValue(ddlObra, legitimo.ObraId.ToString());
-            txtAutorizante.Text = legitimo.CodigoAutorizante ?? string.Empty;
-            txtExpediente.Text = legitimo.Expediente ?? string.Empty;
-            txtInicioEjecucion.Text = legitimo.InicioEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-            txtFinEjecucion.Text = legitimo.FinEjecucion?.ToString("yyyy-MM-dd") ?? string.Empty;
-            txtCertificado.Text = legitimo.Certificado?.ToString() ?? string.Empty;
-            txtMesAprobacion.Text = legitimo.MesAprobacion?.ToString("yyyy-MM-dd") ?? string.Empty;
-            ddlObra.Enabled = false;
-            btnAgregar.Text = "Actualizar";
-
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "EditModal", @"
                 $(document).ready(function() {
                     $('#modalAgregar .modal-title').text('Modificar Legítimo');
                     $('#modalAgregar').modal('show');
                 });", true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al cargar el legítimo para edición: " + ex);
+                ToastService.Show(this.Page, "Error al cargar los datos del legítimo. Intente nuevamente.", ToastService.ToastType.Error);
+            }
         }
+
+        // ------------------------------------------------------------------
+        // Baja
+        // ------------------------------------------------------------------
 
         protected void gridviewRegistros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
@@ -188,12 +415,7 @@ namespace WebForms
             }
 
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
-            if (key == null)
-            {
-                ToastService.Show(this.Page, "Id inválido.", ToastService.ToastType.Error);
-                return;
-            }
-            if (!int.TryParse(key.ToString(), out int id))
+            if (key == null || !int.TryParse(key.ToString(), out int id))
             {
                 ToastService.Show(this.Page, "Id inválido.", ToastService.ToastType.Error);
                 return;
@@ -201,502 +423,38 @@ namespace WebForms
 
             try
             {
-                // Get the legitimo being deleted and its expediente first
-                var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                var legitimoAEliminar = listaCompleta?.FirstOrDefault(l => l.Id == id);
-                string expedienteAfectado = legitimoAEliminar?.Expediente;
+                var lista = ListaCompleta;
+                string expedienteAfectado = lista.FirstOrDefault(l => l.Id == id)?.Expediente;
 
-                // Delete from database
-                var ok = negocio.Eliminar(id);
-
-                if (ok)
+                if (negocio.Eliminar(id))
                 {
                     ToastService.Show(this.Page, "Legítimo eliminado exitosamente.", ToastService.ToastType.Success);
-
-                    // Update the in-memory cache if it exists
-                    if (listaCompleta != null)
-                    {
-                        // Remove the deleted item from the in-memory list
-                        listaCompleta.RemoveAll(l => l.Id == id);
-
-                        // Update session with modified list
-                        Session["legitimosCompletos"] = listaCompleta;
-
-                        // Invalidate filtered data cache to force recalculation
-                        Session["FilteredLegitimos"] = null;
-
-                        // Recalculate SIGAF/SADE data for affected expedientes
-                        if (!string.IsNullOrWhiteSpace(expedienteAfectado))
-                        {
-                            List<string> expedientesAfectados = new List<string> { expedienteAfectado };
-                            RecalcularYActualizarCache(expedientesAfectados, listaCompleta, false, true);
-                        }
-                        else
-                        {
-                            // If no expediente to recalculate, just reload the current page
-                            currentPageIndex = 0; // Reset to first page on delete
-                            ViewState["CurrentPageIndex"] = currentPageIndex;
-                            CargarPaginaActual();
-                        }
-                    }
-                    else
-                    {
-                        // If no cache exists, invalidate and reload from DB
-                        Session["legitimosCompletos"] = null;
-                        Session["FilteredLegitimos"] = null;
-                        CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-
-                        currentPageIndex = 0; // Reset to first page on delete
-                        ViewState["CurrentPageIndex"] = currentPageIndex;
-                        BindGrid();
-                    }
+                    lista.RemoveAll(l => l.Id == id);
+                    RecalcularYRecargar(new[] { expedienteAfectado });
                 }
                 else
                 {
-                    // If no cache exists, invalidate and reload from DB
-                    Session["legitimosCompletos"] = null;
-                    Session["FilteredLegitimos"] = null;
+                    InvalidarListaCompleta();
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-
-                    currentPageIndex = 0; // Reset to first page on delete
-                    ViewState["CurrentPageIndex"] = currentPageIndex;
-                    BindGrid();
+                    RecargarDesdePrimeraPagina();
                 }
             }
             catch (InvalidOperationException ex)
             {
                 ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
-                BindGrid();
-            }
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "No se pudo eliminar el registro. Intente nuevamente.", ToastService.ToastType.Error);
-                BindGrid();
-            }
-        }
-
-        protected void gridviewRegistros_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                int id = Convert.ToInt32(gridviewRegistros.SelectedDataKey.Value);
-                AbrirModalEdicionLegitimo(id);
-            }
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "Error al cargar los datos del legítimo. Intente nuevamente.", ToastService.ToastType.Error);
-            }
-        }
-
-        /// <summary>
-        /// Cargar la grilla usando el control de paginación
-        /// </summary>
-        private void BindGrid()
-        {
-            var usuario = UserHelper.GetFullCurrentUser();
-            if (usuario == null) return;
-
-            if (!(Session["legitimosCompletos"] is List<Dominio.LegitimoEF> listaCompleta))
-            {
-                try
-                {
-                    listaCompleta = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
-                }
-                catch
-                {
-                    listaCompleta = new List<Dominio.LegitimoEF>();
-                }
-                Session["legitimosCompletos"] = listaCompleta;
-            }
-
-            // Aplicar filtro de texto general
-            string filtro = txtBuscar?.Text?.Trim().ToLower();
-            var listaFiltrada = listaCompleta;
-            if (!string.IsNullOrEmpty(filtro))
-            {
-                listaFiltrada = listaFiltrada.Where(l =>
-                    (l.Expediente?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Empresa?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Descripcion?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Area?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Barrio?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre?.ToLower().Contains(filtro) ?? false)
-                ).ToList();
-            }
-
-            // Aplicar filtros de columnas (TreeViewSearch) en memoria
-            listaFiltrada = AplicarFiltrosTreeViewEnMemoria(listaFiltrada);
-
-            // Guardar lista filtrada opcionalmente en sesión para reuso
-            Session["FilteredLegitimos"] = listaFiltrada;
-
-            totalRecords = listaFiltrada.Count;
-            int page = currentPageIndex;
-            int size = pageSize;
-
-            if (page * size >= Math.Max(1, totalRecords))
-            {
-                page = 0;
-                this.paginationControl.CurrentPageIndex = 0;
-            }
-
-            this.paginationControl.Initialize(totalRecords, page, size);
-            this.paginationControl.TotalRecords = totalRecords;
-            this.paginationControl.UpdatePaginationControls();
-
-            var items = listaFiltrada.Skip(page * size).Take(size).ToList();
-
-            gridviewRegistros.DataSource = items;
-            gridviewRegistros.DataBind();
-
-            // calculando subtotal en memoria
-            var subtotalGlobal = listaFiltrada.Sum(l => l.Certificado ?? 0m);
-            // Actualizar subtotal en el control de paginación
-            if (FindControlRecursive(this, "paginationControl") is PaginationControl paginationControl)
-            {
-                paginationControl.UpdateSubtotal(subtotalGlobal, totalRecords);
-            }
-
-        }
-
-        private List<string> GetSelectedValues(string controlId)
-        {
-            if (gridviewRegistros.HeaderRow == null) return new List<string>();
-            var control = gridviewRegistros.HeaderRow.FindControl(controlId) as TreeViewSearch;
-            if (control == null) return new List<string>();
-            return control.SelectedValues ?? new List<string>();
-        }
-
-        private void BindDropDownList()
-        {
-            try
-            {
-                var usuario = UserHelper.GetFullCurrentUser();
-                // Cargar obras disponibles; si estamos editando incluir la obra en edición
-                int? obraEnEdicion = Session["EditingLegitimoEFId"] as int?;
-                int? includeObraId = null;
-                if (obraEnEdicion.HasValue)
-                {
-                    // obtener la legitimo y su obra
-                    var lista = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                    var actual = lista?.FirstOrDefault(x => x.Id == obraEnEdicion.Value);
-                    if (actual != null) includeObraId = actual.ObraId;
-                }
-
-                var obras = new ObraNegocioEF().ListarParaDDL();
-                ddlObra.Items.Clear();
-                ddlObra.Items.Add(new ListItem("Seleccione una obra", ""));
-                foreach (var o in obras)
-                {
-                    ddlObra.Items.Add(new ListItem($"{o.Descripcion} - {o.Barrio?.Nombre ?? "Sin barrio"}", o.Id.ToString()));
-                }
-            }
-
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
-            }
-        }
-
-        /// <summary>
-        /// Obtiene los datos completos (posiblemente en caché) y aplica los filtros actuales en memoria.
-        /// Útil para exportar o calcular subtotales que requieren la colección completa filtrada.
-        /// </summary>
-        private List<LegitimoEF> ObtenerDatosFiltradosActuales()
-        {
-            var lista = Session["legitimosCompletos"] as List<LegitimoEF>;
-            if (lista == null)
-            {
-                var usuario = UserHelper.GetFullCurrentUser();
-                if (usuario == null) return new List<LegitimoEF>();
-                try
-                {
-                    lista = negocio.ListarPorUsuarioConFiltrosCompleto(usuario, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
-
-                    // Asegurar que todos los registros tengan un Estado coherente (NO INICIADO por defecto)
-                    foreach (var l in lista)
-                    {
-                        try
-                        {
-                            // Misma lógica que Certificados: sin expediente => NO INICIADO,
-                            // con expediente y sin SIGAF => EN TRAMITE, si SIGAF>0 => DEVENGADO
-                            if (string.IsNullOrWhiteSpace(l.Expediente))
-                                l.Estado = "NO INICIADO";
-                            else if (!l.Sigaf.HasValue || l.Sigaf == 0)
-                                l.Estado = "EN TRAMITE";
-                            else
-                                l.Estado = "DEVENGADO";
-                        }
-                        catch { }
-                    }
-
-                    Session["legitimosCompletos"] = lista;
-                }
-                catch
-                {
-                    return new List<Dominio.LegitimoEF>();
-                }
-            }
-
-            // Filtro de texto general
-            string filtro = txtBuscar?.Text?.Trim().ToLower();
-            if (!string.IsNullOrEmpty(filtro))
-            {
-                lista = lista.Where(l =>
-                    (l.Expediente?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Empresa?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.CodigoAutorizante?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Descripcion?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Area?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Barrio?.Nombre?.ToLower().Contains(filtro) ?? false) ||
-                    (l.ObraEF?.Proyecto?.LineaGestionEF?.Nombre?.ToLower().Contains(filtro) ?? false)
-                ).ToList();
-            }
-
-            // Aplicar filtros de columnas (TreeViewSearch)
-            lista = AplicarFiltrosTreeViewEnMemoria(lista);
-
-            return lista;
-        }
-
-        private List<Dominio.LegitimoEF> AplicarFiltrosTreeViewEnMemoria(List<Dominio.LegitimoEF> data)
-        {
-            if (gridviewRegistros.HeaderRow == null) return data;
-
-            try
-            {
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea && cblsHeaderArea.ExpandedSelectedValues.Any())
-                {
-                    var selected = cblsHeaderArea.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
-                    if (selected.Any()) data = data.Where(d => d.ObraEF?.Area != null && selected.Contains(d.ObraEF.Area.Id)).ToList();
-                }
-
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa && cblsHeaderEmpresa.ExpandedSelectedValues.Any())
-                {
-                    var selected = cblsHeaderEmpresa.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
-                    if (selected.Any()) data = data.Where(d => d.ObraEF?.Empresa != null && selected.Contains(d.ObraEF.Empresa.Id)).ToList();
-                }
-
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderAutorizante") is TreeViewSearch cblsHeaderAutorizante && cblsHeaderAutorizante.ExpandedSelectedValues.Any())
-                {
-                    var selected = cblsHeaderAutorizante.ExpandedSelectedValues;
-                    if (selected.Any()) data = data.Where(d => !string.IsNullOrEmpty(d.CodigoAutorizante) && selected.Contains(d.CodigoAutorizante)).ToList();
-                }
-
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado && cblsHeaderEstado.ExpandedSelectedValues.Any())
-                {
-                    var selected = cblsHeaderEstado.ExpandedSelectedValues;
-                    if (selected.Any()) data = data.Where(d => !string.IsNullOrEmpty(d.Estado) && selected.Contains(d.Estado)).ToList();
-                }
-
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderMesAprobacion") is TreeViewSearch cblsHeaderMes && cblsHeaderMes.SelectedValues.Any())
-                {
-                    var selectedDates = cblsHeaderMes.SelectedValues.Select(s => { DateTime dt; return DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt) ? (DateTime?)dt.Date : null; }).Where(d => d.HasValue).Select(d => d.Value).ToList();
-                    if (selectedDates.Any()) data = data.Where(d => d.MesAprobacion.HasValue && selectedDates.Contains(d.MesAprobacion.Value.Date)).ToList();
-                }
-
-                if (gridviewRegistros.HeaderRow.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLinea && cblsHeaderLinea.ExpandedSelectedValues.Any())
-                {
-                    var selected = cblsHeaderLinea.ExpandedSelectedValues.Select(s => { int v; return int.TryParse(s, out v) ? (int?)v : null; }).Where(v => v.HasValue).Select(v => v.Value).ToList();
-                    if (selected.Any()) data = data.Where(d => d.ObraEF?.Proyecto?.LineaGestionEF != null && selected.Contains(d.ObraEF.Proyecto.LineaGestionEF.Id)).ToList();
-                }
-            }
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "Error al aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
-            }
-
-            return data;
-        }
-
-        private void LimpiarFormulario()
-        {
-            txtAutorizante.Text = string.Empty;
-            txtExpediente.Text = string.Empty;
-            txtInicioEjecucion.Text = string.Empty;
-            txtFinEjecucion.Text = string.Empty;
-            txtCertificado.Text = string.Empty;
-            txtMesAprobacion.Text = string.Empty;
-            ddlObra.ClearSelection();
-            Session["EditingLegitimoEFId"] = null;
-        }
-
-        protected void btnFiltrar_Click(object sender, EventArgs e)
-        {
-            paginationControl.CurrentPageIndex = 0;
-            paginationControl.UpdatePaginationControls();
-            BindGrid();
-        }
-
-        protected void BtnClearFilters_Click(object sender, EventArgs e)
-        {
-            // Limpiar filtros de texto y de columnas, reiniciar paginación y forzar recomputo
-            txtBuscar.Text = string.Empty;
-
-            // Limpia cualquier TreeViewSearch en la página (método utilitario del control)
-            TreeViewSearch.ClearAllFiltersOnPage(this.Page);
-
-
-
-            paginationControl.CurrentPageIndex = 0;
-            paginationControl.UpdatePaginationControls();
-
-
-            // Invalidar caché de datos filtrados en sesión si existe
-            Session["FilteredLegitimos"] = null;
-
-            BindGrid();
-        }
-
-        protected void gridviewRegistros_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            gridviewRegistros.PageIndex = e.NewPageIndex;
-            currentPageIndex = e.NewPageIndex;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-
-            var listaFiltrada = Session["FilteredLegitimos"] as List<Dominio.LegitimoEF>;
-            if (listaFiltrada != null)
-            {
                 CargarPaginaActual();
             }
-            else
+            catch (Exception ex)
             {
-                BindGrid();
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al eliminar el legítimo: " + ex);
+                ToastService.Show(this.Page, "No se pudo eliminar el registro. Intente nuevamente.", ToastService.ToastType.Error);
+                CargarPaginaActual();
             }
         }
 
-
-        #region Eventos del Control de Paginación
-
-        protected void paginationControl_PageChanged(object sender, PaginationEventArgs e)
-        {
-            currentPageIndex = e.PageIndex;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-            CargarPaginaActual();
-        }
-
-        protected void paginationControl_PageSizeChanged(object sender, PaginationEventArgs e)
-        {
-            pageSize = e.PageSize;
-            currentPageIndex = 0;
-            ViewState["PageSize"] = pageSize;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-            CargarPaginaActual();
-        }
-        #endregion
-
-        protected void gridviewRegistros_RowDataBound(object sender, GridViewRowEventArgs e)
-        {
-            if (e.Row.RowType == DataControlRowType.Header)
-            {
-                // Poblar filtros del header usando la lista completa almacenada en sesión
-                var usuarioActual = UserHelper.GetFullCurrentUser();
-                var legitimosCompletos = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                if (legitimosCompletos == null)
-                {
-                    try
-                    {
-                        legitimosCompletos = negocio.ListarPorUsuarioConFiltrosCompleto(usuarioActual, null, new List<int>(), new List<int>(), new List<string>(), new List<string>(), new List<DateTime?>());
-                    }
-                    catch { legitimosCompletos = new List<Dominio.LegitimoEF>(); }
-                    Session["legitimosCompletos"] = legitimosCompletos;
-                }
-
-                if (e.Row.FindControl("cblsHeaderArea") is TreeViewSearch cblsHeaderArea)
-                {
-                    var areasUnicas = legitimosCompletos
-                        .Where(l => l.ObraEF?.Area != null)
-                        .Select(l => l.ObraEF.Area)
-                        .Distinct()
-                        .OrderBy(a => a.Nombre)
-                        .Select(a => new { Id = a.Id.ToString(), Nombre = a.Nombre })
-                        .ToList();
-                    cblsHeaderArea.DataSource = areasUnicas;
-                    cblsHeaderArea.DataBind();
-                    cblsHeaderArea.AcceptChanges += OnAcceptChanges;
-                }
-
-                if (e.Row.FindControl("cblsHeaderAutorizante") is TreeViewSearch cblsHeaderAutorizante)
-                {
-                    var autorizantesUnicos = legitimosCompletos
-                        .Where(l => !string.IsNullOrEmpty(l.CodigoAutorizante))
-                        .Select(l => l.CodigoAutorizante)
-                        .Distinct()
-                        .OrderBy(a => a)
-                        .Select(a => new { Id = a, Nombre = a })
-                        .ToList();
-                    cblsHeaderAutorizante.DataSource = autorizantesUnicos;
-                    cblsHeaderAutorizante.DataBind();
-                    cblsHeaderAutorizante.AcceptChanges += OnAcceptChanges;
-                }
-
-                if (e.Row.FindControl("cblsHeaderEmpresa") is TreeViewSearch cblsHeaderEmpresa)
-                {
-                    var empresasUnicas = legitimosCompletos
-                        .Where(l => l.ObraEF?.Empresa != null)
-                        .Select(l => l.ObraEF.Empresa)
-                        .Distinct()
-                        .OrderBy(emp => emp.Nombre)
-                        .Select(emp => new { Id = emp.Id.ToString(), Nombre = emp.Nombre })
-                        .ToList();
-                    cblsHeaderEmpresa.DataSource = empresasUnicas;
-                    cblsHeaderEmpresa.DataBind();
-                    cblsHeaderEmpresa.AcceptChanges += OnAcceptChanges;
-                }
-
-                if (e.Row.FindControl("cblsHeaderLineaGestion") is TreeViewSearch cblsHeaderLineaGestion)
-                {
-                    var lineasUnicas = legitimosCompletos
-                        .Where(l => l.ObraEF?.Proyecto?.LineaGestionEF != null)
-                        .Select(l => l.ObraEF.Proyecto.LineaGestionEF)
-                        .Distinct()
-                        .OrderBy(lg => lg.Nombre)
-                        .Select(lg => new { Id = lg.Id.ToString(), lg.Nombre })
-                        .ToList();
-                    cblsHeaderLineaGestion.DataSource = lineasUnicas;
-                    cblsHeaderLineaGestion.DataBind();
-                    cblsHeaderLineaGestion.AcceptChanges += OnAcceptChanges;
-                }
-
-                if (e.Row.FindControl("cblsHeaderMesAprobacion") is TreeViewSearch cblsHeaderMes)
-                {
-                    var meses = legitimosCompletos
-                        .Where(l => l.MesAprobacion != null)
-                        .Select(l => l.MesAprobacion.Value)
-                        .Distinct()
-                        .OrderBy(m => m)
-                        .ToList();
-
-                    cblsHeaderMes.DataSource = meses;
-                    cblsHeaderMes.DataBind();
-                    cblsHeaderMes.AcceptChanges += OnAcceptChanges;
-                }
-
-                if (e.Row.FindControl("cblsHeaderEstado") is TreeViewSearch cblsHeaderEstado)
-                {
-                    var estadosCertificados = new[]
-                    {
-                        new { Id = "NO INICIADO", Nombre = "NO INICIADO" },
-                        new { Id = "EN TRAMITE", Nombre = "EN TRAMITE" },
-                        new { Id = "DEVENGADO", Nombre = "DEVENGADO" }
-                    };
-                    cblsHeaderEstado.DataSource = estadosCertificados;
-                    cblsHeaderEstado.DataTextField = "Nombre";
-                    cblsHeaderEstado.DataValueField = "Id";
-                    cblsHeaderEstado.DataBind();
-                    cblsHeaderEstado.AcceptChanges += OnAcceptChanges;
-                }
-            }
-            else if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                var legitimo = (Dominio.LegitimoEF)e.Row.DataItem;
-                if (e.Row.FindControl("txtCertificadoInline") is TextBox txtCert)
-                {
-                    txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente);
-                }
-            }
-        }
+        // ------------------------------------------------------------------
+        // Edición inline
+        // ------------------------------------------------------------------
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
@@ -707,98 +465,47 @@ namespace WebForms
                 return;
             }
 
-            TextBox txtBox = (TextBox)sender;
-            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
-
             try
             {
-                int rowIndex = row.RowIndex;
-                string nuevoExpediente = txtBox.Text.Trim();
+                string nuevoExpediente = ((TextBox)sender).Text.Trim();
 
-                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
-                if (datosFiltradosActuales == null)
-                {
-                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
-                    return;
-                }
-
-                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
-                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                var legitimo = ItemDelControlInline(sender);
+                if (legitimo == null)
                 {
                     ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
                     return;
                 }
 
-                var legitimo = datosFiltradosActuales[indiceReal];
                 string expedienteAnterior = legitimo.Expediente;
 
-                bool resultado = false;
-
-                // Si nuevo expediente vacío, limpiar; si no, actualizar.
-                if (legitimo.Id > 0)
-                {
-                    var entidad = negocio.ObtenerPorId(legitimo.Id);
-                    if (entidad != null)
-                    {
-                        entidad.Expediente = string.IsNullOrWhiteSpace(nuevoExpediente) ? string.Empty : nuevoExpediente;
-                        negocio.Modificar(entidad);
-                        resultado = true;
-
-                        // sincronizar en la lista en memoria (si existe)
-                        var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                        if (listaCompleta != null)
-                        {
-                            var enLista = listaCompleta.FirstOrDefault(x => x.Id == entidad.Id);
-                            if (enLista != null)
-                            {
-                                enLista.Expediente = entidad.Expediente;
-                                enLista.Sigaf = entidad.Sigaf;
-                                enLista.BuzonSade = entidad.BuzonSade;
-                                enLista.FechaSade = entidad.FechaSade;
-
-                                // Ajustar Estado coherente
-                                if (string.IsNullOrWhiteSpace(enLista.Expediente))
-                                {
-                                    enLista.Estado = "NO INICIADO";
-                                    enLista.Sigaf = null;
-                                    enLista.BuzonSade = null;
-                                    enLista.FechaSade = null;
-                                }
-                                else if (!enLista.Sigaf.HasValue || enLista.Sigaf == 0)
-                                {
-                                    enLista.Estado = "EN TRAMITE";
-                                }
-                                else
-                                {
-                                    enLista.Estado = "DEVENGADO";
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (resultado)
-                {
-                    var expedientesAfectados = new List<string>();
-                    if (!string.IsNullOrWhiteSpace(expedienteAnterior)) expedientesAfectados.Add(expedienteAnterior);
-                    if (!string.IsNullOrWhiteSpace(nuevoExpediente)) expedientesAfectados.Add(nuevoExpediente);
-
-                    // Recalcular datos relacionados (SIGAF/SADE) y actualizar cache
-                    RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
-
-                    ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Info);
-                }
-                else
+                var entidad = legitimo.Id > 0 ? negocio.ObtenerPorId(legitimo.Id) : null;
+                if (entidad == null)
                 {
                     ToastService.Show(this.Page, "No se detectaron cambios para guardar.", ToastService.ToastType.Warning);
+                    return;
                 }
+
+                entidad.Expediente = string.IsNullOrWhiteSpace(nuevoExpediente) ? string.Empty : nuevoExpediente;
+                negocio.Modificar(entidad);
+
+                // Sincronizar el snapshot: el expediente nuevo arranca sin SIGAF/SADE hasta el recálculo.
+                legitimo.Expediente = entidad.Expediente;
+                legitimo.Sigaf = entidad.Sigaf;
+                legitimo.BuzonSade = entidad.BuzonSade;
+                legitimo.FechaSade = entidad.FechaSade;
+                AplicarEstado(legitimo);
+
+                RecalcularYRecargar(new[] { expedienteAnterior, nuevoExpediente });
+
+                ToastService.Show(this.Page, "Expediente actualizado correctamente.", ToastService.ToastType.Info);
             }
             catch (InvalidOperationException ex)
             {
                 ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al actualizar el expediente: " + ex);
                 ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
@@ -812,14 +519,9 @@ namespace WebForms
                 return;
             }
 
-            TextBox txtBox = (TextBox)sender;
-            GridViewRow row = (GridViewRow)txtBox.NamingContainer;
-
             try
             {
-                int rowIndex = row.RowIndex;
-                string nuevoValorStr = txtBox.Text.Trim();
-
+                string nuevoValorStr = ((TextBox)sender).Text.Trim();
                 if (string.IsNullOrWhiteSpace(nuevoValorStr)) return;
 
                 if (!MontoHelper.TryParseEsAr(nuevoValorStr, out decimal nuevoCertificado))
@@ -830,21 +532,13 @@ namespace WebForms
                     return;
                 }
 
-                var datosFiltradosActuales = ObtenerDatosFiltradosActuales();
-                if (datosFiltradosActuales == null)
-                {
-                    ToastService.Show(this.Page, "Error: No hay datos en memoria.", ToastService.ToastType.Error);
-                    return;
-                }
-
-                int indiceReal = (currentPageIndex * pageSize) + rowIndex;
-                if (indiceReal < 0 || indiceReal >= datosFiltradosActuales.Count)
+                var legitimo = ItemDelControlInline(sender);
+                if (legitimo == null)
                 {
                     ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
                     return;
                 }
 
-                var legitimo = datosFiltradosActuales[indiceReal];
                 if (legitimo.Id <= 0)
                 {
                     ToastService.Show(this.Page, "Error: No se puede modificar este registro.", ToastService.ToastType.Error);
@@ -860,22 +554,9 @@ namespace WebForms
 
                 entidad.Certificado = nuevoCertificado;
                 negocio.Modificar(entidad);
+                legitimo.Certificado = nuevoCertificado;
 
-                var listaCompleta = Session["legitimosCompletos"] as List<Dominio.LegitimoEF>;
-                if (listaCompleta != null)
-                {
-                    var enLista = listaCompleta.FirstOrDefault(x => x.Id == entidad.Id);
-                    if (enLista != null) enLista.Certificado = nuevoCertificado;
-                }
-
-                var expedientesAfectados = new List<string>();
-                if (!string.IsNullOrWhiteSpace(legitimo.Expediente))
-                    expedientesAfectados.Add(legitimo.Expediente);
-
-                if (expedientesAfectados.Any())
-                    RecalcularYActualizarCache(expedientesAfectados, persistirEnBD: false, recargarVista: true);
-                else
-                    CargarPaginaActual();
+                RecalcularYRecargar(new[] { legitimo.Expediente });
 
                 ToastService.Show(this.Page, "Certificado actualizado correctamente.", ToastService.ToastType.Info);
             }
@@ -883,198 +564,11 @@ namespace WebForms
             {
                 ToastService.Show(this.Page, ex.Message, ToastService.ToastType.Error);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al actualizar el certificado: " + ex);
                 ToastService.Show(this.Page, "Error al actualizar el certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
-
-        /// <summary>
-        /// Recalcula SIGAF/SADE para expedientes y actualiza la sesión y vista.
-        /// </summary>
-        private void RecalcularYActualizarCache(List<string> expedientesAfectados, List<Dominio.LegitimoEF> listaCache = null, bool persistirEnBD = false, bool recargarVista = true)
-        {
-            if (expedientesAfectados == null) return;
-
-            expedientesAfectados = expedientesAfectados
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s.Trim())
-                .Distinct()
-                .ToList();
-
-            if (!expedientesAfectados.Any()) return;
-
-            try
-            {
-                if (listaCache == null)
-                {
-                    listaCache = Session["legitimosCompletos"] as List<Dominio.LegitimoEF> ?? ObtenerDatosFiltradosActuales();
-                }
-
-                if (listaCache == null) return;
-
-                // Obtener datos SADE y SIGAF para los expedientes modificados
-                var datosSade = calculoRedeterminacionNegocio.ObtenerDatosSadeBulk(expedientesAfectados);
-                var datosSigaf = calculoRedeterminacionNegocio.ObtenerSigafBulk(expedientesAfectados);
-
-                // Actualizar cada elemento de la cache que tenga expediente en la lista afectada
-                foreach (var l in listaCache)
-                {
-                    if (string.IsNullOrWhiteSpace(l.Expediente)) continue;
-                    var exp = l.Expediente.Trim();
-                    if (!expedientesAfectados.Contains(exp)) continue;
-
-                    if (datosSade != null && datosSade.TryGetValue(exp, out var sadeInfo))
-                    {
-                        l.BuzonSade = sadeInfo.Buzon;
-                        l.FechaSade = sadeInfo.Fecha;
-                    }
-
-                    if (datosSigaf != null && datosSigaf.TryGetValue(exp, out var sigafVal))
-                    {
-                        l.Sigaf = sigafVal;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(l.Expediente))
-                        l.Estado = "NO INICIADO";
-                    else if (!l.Sigaf.HasValue || l.Sigaf == 0)
-                        l.Estado = "EN TRAMITE";
-                    else
-                        l.Estado = "DEVENGADO";
-                }
-
-                // Guardar cambios en sesión e invalidar filtrado
-                Session["legitimosCompletos"] = listaCache;
-                Session["FilteredLegitimos"] = null;
-
-                if (recargarVista)
-                {
-                    currentPageIndex = 0;
-                    ViewState["CurrentPageIndex"] = currentPageIndex;
-                    CargarPaginaActual();
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error al recalcular SIGAF/buzon/fecha SADE para legitimos: " + ex);
-            }
-            finally
-            {
-                CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
-            }
-        }
-
-        public void OnAcceptChanges(object sender, EventArgs e)
-        {
-            // Reiniciar a la primera página al aplicar filtros
-            currentPageIndex = 0;
-            ViewState["CurrentPageIndex"] = currentPageIndex;
-
-            // Invalida la caché de filtrado para forzar que se apliquen los nuevos filtros
-            Session["FilteredLegitimos"] = null;
-
-            // Recalcular y cargar la primera página
-            var datosFiltrados = ObtenerDatosFiltradosActuales();
-            Session["FilteredLegitimos"] = datosFiltrados;
-            CargarPaginaActual();
-        }
-
-        protected void btnExportarExcel_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var todos = (List<LegitimoEF>)Session["legitimosCompletos"];
-
-
-                var mapeo = new Dictionary<string, string>
-                {
-                    { "Área", "ObraEF.Area.Nombre" },
-                    { "Obra", "ObraEF.Descripcion" },
-                    { "Barrio", "ObraEF.Barrio.Nombre" },
-                    { "Empresa", "Empresa" },
-                    { "Línea Gestión", "Linea" },
-                    { "Código Autorizante", "CodigoAutorizante" },
-                    { "Expediente", "Expediente" },
-                    { "Inicio Ejecución", "InicioEjecucion" },
-                    { "Fin Ejecución", "FinEjecucion" },
-                    { "Certificado", "Certificado" },
-                    { "Mes Aprobación", "MesAprobacion" },
-                    { "Estado", "Estado" },
-                    { "Sigaf", "Sigaf" },
-                    { "Buzón SADE", "BuzonSade" },
-                    { "Fecha SADE", "FechaSade" },
-                };
-
-                ExcelHelper.ExportarDatosGenericos(todos, mapeo, "Legitimos");
-                ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
-            }
-            catch (Exception ex)
-            {
-                ToastService.Show(this.Page, "Error al exportar: " + ex.Message, ToastService.ToastType.Error);
-            }
-        }
-
-        /// <summary>
-        /// Reconstituye y hace DataBind de la página actual usando la lista filtrada
-        /// </summary>
-        private void CargarPaginaActual()
-        {
-            // Reconstruir la lista filtrada si no existe en sesión (igual que en CertificadosEF)
-            var listaFiltrada = Session["FilteredLegitimos"] as List<Dominio.LegitimoEF>;
-            if (listaFiltrada == null)
-            {
-                listaFiltrada = ObtenerDatosFiltradosActuales();
-                Session["FilteredLegitimos"] = listaFiltrada;
-            }
-
-            int page = currentPageIndex;
-            int size = pageSize;
-
-            totalRecords = listaFiltrada.Count;
-
-            if (page * size >= Math.Max(1, totalRecords))
-            {
-                page = 0;
-                currentPageIndex = 0;
-                ViewState["CurrentPageIndex"] = 0;
-            }
-
-            paginationControl.Initialize(totalRecords, page, size);
-            paginationControl.TotalRecords = totalRecords;
-            paginationControl.UpdatePaginationControls();
-
-            var items = listaFiltrada.Skip(page * size).Take(size).ToList();
-
-            gridviewRegistros.DataSource = items;
-            gridviewRegistros.DataBind();
-
-            var subtotalGlobal = listaFiltrada.Sum(l => l.Certificado ?? 0m);
-            if (FindControlRecursive(this, "paginationControl") is PaginationControl pag)
-            {
-                pag.UpdateSubtotal(subtotalGlobal, totalRecords);
-            }
-        }
-
-        /// <summary>
-        /// Busca un control recursivamente en la jerarquía de controles.
-        /// Útil cuando el designer no expone el control directamente.
-        /// </summary>
-        private Control FindControlRecursive(Control root, string id)
-        {
-            if (root == null) return null;
-            if (root.ID == id)
-                return root;
-
-            foreach (Control control in root.Controls.Cast<Control>())
-            {
-                Control found = FindControlRecursive(control, id);
-                if (found != null)
-                    return found;
-            }
-
-            return null;
-        }
-
-
     }
 }

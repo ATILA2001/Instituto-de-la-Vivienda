@@ -46,6 +46,7 @@ namespace Negocio
                         (r.CodigoRedet ?? string.Empty).ToUpper().Contains(like) ||
                         (r.Expediente ?? string.Empty).ToUpper().Contains(like) ||
                         ((r.Observaciones ?? string.Empty).ToUpper().Contains(like)) ||
+                        (r.Tipo ?? string.Empty).ToUpper().Contains(like) ||
                         context.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && a.Obra != null && (a.Obra.Descripcion ?? string.Empty).ToUpper().Contains(like)) ||
                         context.Autorizantes.Any(a => a.CodigoAutorizante == r.CodigoAutorizante && a.Obra != null && a.Obra.Empresa != null && (a.Obra.Empresa.Nombre ?? string.Empty).ToUpper().Contains(like))
                     );
@@ -95,6 +96,7 @@ namespace Negocio
                 if (expedientes.Count > 0)
                 {
                     var pases = context.PasesSade
+                        .AsNoTracking()
                         .Where(p => expedientes.Contains(p.Expediente))
                         .ToList()
                         .GroupBy(p => p.Expediente)
@@ -320,8 +322,8 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"ContarPorUsuarioConFiltros error: {ex.Message}");
-                return 0;
+                Trace.TraceError("[ContarConFiltros] {0}", ex);
+                throw;
             }
         }
 
@@ -428,6 +430,7 @@ namespace Negocio
                     if (expedientes.Count > 0)
                     {
                         var pases = ctx.PasesSade
+                            .AsNoTracking()
                             .Where(p => expedientes.Contains(p.Expediente))
                             .ToList()
                             .GroupBy(p => p.Expediente)
@@ -450,8 +453,9 @@ namespace Negocio
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"ListarPaginadoConFiltros error: {ex.Message}");
-                return new List<RedeterminacionEF>();
+                // Antes devolvía una lista vacía: la grilla se mostraba sin registros y sin ningún aviso.
+                Trace.TraceError("[ListarPaginadoConFiltros] {0}", ex);
+                throw;
             }
         }
     }

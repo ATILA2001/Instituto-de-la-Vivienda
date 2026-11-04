@@ -13,6 +13,16 @@ namespace Dominio.DTO
         // Propiedades de CertificadoEF
         public int Id { get; set; }
         public int IdReliquidacion { get; set; }
+
+        /// <summary>
+        /// Clave estable de una reliquidación (fila virtual, Id = 0): código de redeterminación y mes, que es lo
+        /// que identifica su expediente en EXPEDIENTES_RELIQ. IdReliquidacion es un contador por carga del
+        /// snapshot y cambia de valor cuando se recarga, así que no sirve para resolver la fila editada.
+        /// </summary>
+        public string ClaveReliquidacion =>
+            IdReliquidacion > 0 && MesAprobacion.HasValue
+                ? CodigoAutorizante + "|" + MesAprobacion.Value.ToString("yyyyMM")
+                : null;
         public decimal MontoTotal { get; set; }
         public DateTime? MesAprobacion { get; set; }
         public string ExpedientePago { get; set; }

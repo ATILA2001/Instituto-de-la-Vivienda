@@ -162,7 +162,7 @@
 	<hr class="mb-3" />
 
 	<div class="gridview-scroll-container">
-		<asp:GridView ID="gridviewRegistros" DataKeyNames="Id" CssClass="table1 table-bordered table-hover mb-4"
+		<asp:GridView ID="gridviewRegistros" DataKeyNames="Id,ClaveReliquidacion" CssClass="table1 table-bordered table-hover mb-4"
 			OnSelectedIndexChanged="gridviewRegistros_SelectedIndexChanged"
 			OnRowDeleting="gridviewRegistros_RowDeleting"
 			OnRowDataBound="gridviewRegistros_RowDataBound"
@@ -183,7 +183,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("AreaNombre") %>
+						<%#: Eval("AreaNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -198,7 +198,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("ObraDescripcion") %>
+						<%#: Eval("ObraDescripcion") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -211,7 +211,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("BarrioNombre") %>
+						<%#: Eval("BarrioNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -224,7 +224,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("ProyectoNombre") %>
+						<%#: Eval("ProyectoNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -237,7 +237,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("EmpresaNombre") %>
+						<%#: Eval("EmpresaNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -250,7 +250,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("CodigoAutorizante") %>
+						<%#: Eval("CodigoAutorizante") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -263,7 +263,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("AutorizanteEstado") %>
+						<%#: Eval("AutorizanteEstado") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -285,7 +285,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("TipoPagoNombre") %>
+						<%#: Eval("TipoPagoNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -306,7 +306,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
+						<%#: Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 				<asp:TemplateField HeaderText="Estado Pago">
@@ -316,7 +316,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Estado") %>
+						<%#: Eval("Estado") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -329,7 +329,7 @@
 							OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("LineaGestionNombre") %>
+						<%#: Eval("LineaGestionNombre") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 

@@ -348,6 +348,12 @@
       <DependentUpon>LegitimosEF.aspx</DependentUpon>
     </Compile>
     <Compile Include="Startup.Auth.cs" />
+    <Compile Include="Infraestructura\DescargaArchivo.cs" />
+    <Compile Include="Infraestructura\FiltrosHeader.cs" />
+    <Compile Include="Infraestructura\GridPageBase.cs" />
+    <Compile Include="Infraestructura\HttpContextoWeb.cs" />
+    <Compile Include="Infraestructura\ProteccionCsrf.cs" />
+    <Compile Include="Infraestructura\TextoCombo.cs" />
     <Compile Include="Sso\AspNetCoreTicketDataFormat.cs" />
     <Compile Include="Sso\SharedChunkingCookieManager.cs" />
     <Content Include="Startup.aspx" />

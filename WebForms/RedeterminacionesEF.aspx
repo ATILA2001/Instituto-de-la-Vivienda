@@ -123,8 +123,8 @@
 											ControlToValidate="txtPorcentaje"
 											ValidationGroup="AgregarRedeterminacion"
 											runat="server"
-											ValidationExpression="^[0-9]+([,][0-9]{1,4})?$"
-											ErrorMessage="Solo números positivos con coma decimal (ej.: 12,5)"
+											ValidationExpression="^-?[0-9]+([,][0-9]+)?$"
+											ErrorMessage="Solo números con coma decimal (ej.: 12,5 o -4,2)"
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true" />
@@ -256,7 +256,7 @@
 							HeaderText="Obra" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Autorizante.Obra.Descripcion") %>
+						<%#: Eval("Autorizante.Obra.Descripcion") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -266,7 +266,7 @@
 							HeaderText="Autorizante" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("CodigoRedet") %>
+						<%#: Eval("CodigoRedet") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -299,7 +299,7 @@
 							HeaderText="Empresa" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Empresa") %>
+						<%#: Eval("Empresa") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -309,7 +309,7 @@
 							HeaderText="Contrata" DataTextField="Nombre" DataValueField="Nombre" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Contrata") %>
+						<%#: Eval("Contrata") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 
@@ -324,7 +324,7 @@
 							HeaderText="Area" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
-						<%# Eval("Area") %>
+						<%#: Eval("Area") %>
 					</ItemTemplate>
 				</asp:TemplateField>
 

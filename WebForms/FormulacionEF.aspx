@@ -267,7 +267,7 @@
             OnRowDeleting="dgvFormulacion_RowDeleting"
             OnDataBound="dgvFormulacion_DataBound"
             ShowHeaderWhenEmpty="true"
-            AutoGenerateColumns="false" AllowPaging="true" PageSize="12" OnPageIndexChanging="dgvFormulacion_PageIndexChanging" runat="server">
+            AutoGenerateColumns="false" AllowPaging="false" runat="server">
             <Columns>
                 <asp:BoundField HeaderText="ID" DataField="ObraId" Visible="false" />
 
@@ -280,7 +280,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("ObraEF.Area.Nombre") %>
+                        <%#: Eval("ObraEF.Area.Nombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -292,7 +292,7 @@
                             DataValueField="Id"
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
-                    <ItemTemplate><%# Eval("ObraEF.Empresa.Nombre") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("ObraEF.Empresa.Nombre") %></ItemTemplate>
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="Contrata">
                     <ItemTemplate>
@@ -308,7 +308,7 @@
                             DataValueField="Id"
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
-                    <ItemTemplate><%# Eval("ObraEF.Barrio.Nombre") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("ObraEF.Barrio.Nombre") %></ItemTemplate>
                 </asp:TemplateField>
 
                 <asp:TemplateField HeaderText="Linea de Gestión">
@@ -320,7 +320,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("ObraEF.Proyecto.LineaGestionEF.Nombre") %>
+                        <%#: Eval("ObraEF.Proyecto.LineaGestionEF.Nombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -333,7 +333,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("ObraEF.Proyecto.Nombre") %>
+                        <%#: Eval("ObraEF.Proyecto.Nombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
@@ -345,7 +345,7 @@
                             DataValueField="Id"
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
-                    <ItemTemplate><%# Eval("ObraEF.Descripcion") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("ObraEF.Descripcion") %></ItemTemplate>
                 </asp:TemplateField>
                 <asp:BoundField HeaderText="Breve Descripción" DataField="BreveDescripcion" />
                 <asp:BoundField HeaderText="Fecha Inicio" DataField="FechaInicio" DataFormatString="{0:dd-MM-yyyy}" />
@@ -357,17 +357,17 @@
 
                 <asp:TemplateField>
                     <HeaderTemplate>Monto <%# AnioCiclo1 %></HeaderTemplate>
-                    <ItemTemplate><%# Eval("MontoAnio1", "{0:C}") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("MontoAnio1", "{0:C}") %></ItemTemplate>
                 </asp:TemplateField>
 
                 <asp:TemplateField>
                     <HeaderTemplate>Monto <%# AnioCiclo2 %></HeaderTemplate>
-                    <ItemTemplate><%# Eval("MontoAnio2", "{0:C}") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("MontoAnio2", "{0:C}") %></ItemTemplate>
                 </asp:TemplateField>
 
                 <asp:TemplateField>
                     <HeaderTemplate>Monto <%# AnioCiclo3 %></HeaderTemplate>
-                    <ItemTemplate><%# Eval("MontoAnio3", "{0:C}") %></ItemTemplate>
+                    <ItemTemplate><%#: Eval("MontoAnio3", "{0:C}") %></ItemTemplate>
                 </asp:TemplateField>
                 <asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
                 <asp:BoundField HeaderText="Unidad de Medida" DataField="UnidadMedidaEF.Nombre" />
@@ -383,7 +383,7 @@
                             OnAcceptChanges="OnAcceptChanges" />
                     </HeaderTemplate>
                     <ItemTemplate>
-                        <%# Eval("PrioridadEF.Nombre") %>
+                        <%#: Eval("PrioridadEF.Nombre") %>
                     </ItemTemplate>
                 </asp:TemplateField>
 

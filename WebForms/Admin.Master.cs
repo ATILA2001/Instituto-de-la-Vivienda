@@ -22,11 +22,24 @@ namespace WebForms
 
         protected void Page_Init(object sender, EventArgs e)
         {
-            // Comprobación básica de usuario logueado. Siempre pasa por EnsureSessionUserFromClaims,
-            // que descarta el usuario cacheado en Session si no corresponde al principal actual.
-            if (UserHelper.EnsureSessionUserFromClaims() == null)
+            Infraestructura.ProteccionCsrf.Aplicar(Page);
+
+            // Siempre pasa por EnsureSessionUserFromClaims, que descarta el usuario cacheado en Session si no
+            // corresponde al principal actual.
+            var usuario = UserHelper.EnsureSessionUserFromClaims();
+            if (usuario == null)
             {
                 Response.Redirect("Startup.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                Response.End(); // corta el ciclo de vida: la página de contenido no debe ejecutar nada
+            }
+
+            // Las páginas de administración son sólo para administradores. Hasta acá las protegía únicamente
+            // perms_json (la lista de rutas que emite Auth.Web), que es configuración y no un rol.
+            if (!usuario.Tipo)
+            {
+                // Con returnUrl, como Global.RedirectToAccessDenied: en la URL se ve qué página se negó.
+                Response.Redirect("~/AccessDenied.aspx?returnUrl=" + Server.UrlEncode(Request.Path), false);
                 Context.ApplicationInstance.CompleteRequest();
                 Response.End();
             }

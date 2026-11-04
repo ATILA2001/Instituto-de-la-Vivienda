@@ -78,7 +78,7 @@ namespace WebForms
                         { "Observaciones", "Observaciones" },
                         { "Prioridad", "PrioridadEF.Nombre" }
                     };
-                    ExcelHelper.ExportarDatosGenericos(lista, mapeoColumnas, "FormulacionesEF");
+                    Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(lista, mapeoColumnas), "FormulacionesEF");
                     ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
                 }
                 else
@@ -232,13 +232,13 @@ namespace WebForms
                 });", true);
 
             btnAgregar.Text = "Agregar";
-            Session["EditingObraId"] = null;
+            ViewState["EditingObraId"] = null;
         }
 
         // btnAgregar_Click: guardado compartido del modal (Agregar y Editar).
         // - Lee los campos compartidos y los 3 montos del ciclo.
         // - Llama a GuardarPivot, que hace upsert/borrado de las (hasta) 3 filas de la obra.
-        // - Modo edición si Session["EditingObraId"] está presente; si no, es alta.
+        // - Modo edición si ViewState["EditingObraId"] está presente; si no, es alta.
         // - Muestra mensaje de éxito/error, limpia el formulario y refresca la grilla.
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
@@ -252,7 +252,7 @@ namespace WebForms
 
             try
             {
-                int? editingObraId = Session["EditingObraId"] as int?;
+                int? editingObraId = ViewState["EditingObraId"] as int?;
                 int obraId = editingObraId ?? int.Parse(ddlObraAgregar.SelectedValue);
 
                 var montos = new decimal?[]
@@ -296,7 +296,7 @@ namespace WebForms
 
                 LimpiarFormulario();
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModal", "$('#modalAgregar').modal('hide');", true);
-                Session["EditingObraId"] = null;
+                ViewState["EditingObraId"] = null;
                 Session["formulacionesCompletas"] = null;
 
                 // Refresca SOLO las obras (excluye la recién formulada). No rebindea unidad/prioridad
@@ -324,7 +324,7 @@ namespace WebForms
 
         // dgvFormulacion_SelectedIndexChanged: abre el modal en modo edición (por OBRA).
         // - Carga el pivot de la obra (sus filas del ciclo) y rellena los 3 montos + campos compartidos.
-        // - Define Session["EditingObraId"] para indicar modo edición.
+        // - Define ViewState["EditingObraId"] para indicar modo edición.
         // - Ajusta el texto del botón a "Actualizar" y muestra el modal.
         protected void dgvFormulacion_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -338,7 +338,7 @@ namespace WebForms
                     return;
                 }
 
-                Session["EditingObraId"] = obraId;
+                ViewState["EditingObraId"] = obraId;
 
                 lblObra.Attributes["for"] = ddlObraEditar.ClientID;
                 ddlObraAgregar.Visible = false;
@@ -477,9 +477,8 @@ namespace WebForms
 
                         if (!usuario.Tipo)
                         {
-                            var filtroAreaIds = usuario.IvcAreaIds;
-                            if (filtroAreaIds != null && filtroAreaIds.Count > 0)
-                                querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
+                            var filtroAreaIds = UserHelper.AreaIdsParaFiltro(usuario);
+                            querySubtotal = querySubtotal.Where(f => f.ObraEF.AreaId.HasValue && filtroAreaIds.Contains(f.ObraEF.AreaId.Value));
                         }
                         if (!string.IsNullOrWhiteSpace(filtroGeneral))
                         {
@@ -533,7 +532,7 @@ namespace WebForms
             try
             {
                 UsuarioEF usuario = UserHelper.GetFullCurrentUser();
-                int? obraEnEdicion = Session["EditingObraId"] as int?;
+                int? obraEnEdicion = ViewState["EditingObraId"] as int?;
 
                 BindObraDropDowns(obraEnEdicion, usuario);
 
@@ -559,12 +558,13 @@ namespace WebForms
         {
             var obraNegocio = new ObraNegocioEF();
 
+            // La descripción se acorta para que la lista desplegable no supere el ancho de la pantalla.
             // ddlObraAgregar: solo obras sin formulación en el ciclo (más la que se edite, por las dudas).
             var obrasAgregar = obraNegocio.ListarParaDDLNoEnFormulacion(obraEnEdicion, usuario)
                 .Select(o => new
                 {
                     o.Id,
-                    DescripcionCompleta = $"{o.Descripcion} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
+                    DescripcionCompleta = $"{Infraestructura.TextoCombo.Acortar(o.Descripcion)} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
                 })
                 .ToList();
 
@@ -573,7 +573,7 @@ namespace WebForms
                 .Select(o => new
                 {
                     o.Id,
-                    DescripcionCompleta = $"{o.Descripcion} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
+                    DescripcionCompleta = $"{Infraestructura.TextoCombo.Acortar(o.Descripcion)} - {o.Empresa?.Nombre ?? "Sin empresa"} - {o.Barrio?.Nombre ?? "Sin barrio"}"
                 })
                 .ToList();
 
@@ -636,19 +636,6 @@ namespace WebForms
             txtBuscar.Text = string.Empty;
             CustomControls.TreeViewSearch.ClearAllFiltersOnPage(this.Page);
             BindGrid(); // Recargar completamente
-        }
-
-        protected void dgvFormulacion_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            try
-            {
-                dgvFormulacion.PageIndex = e.NewPageIndex;
-                BindGrid();
-            }
-            catch (Exception)
-            {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
-            }
         }
 
         /// <summary>

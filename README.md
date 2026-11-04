@@ -7,7 +7,7 @@ Aplicación web interna para la gestión de obras, autorizantes, certificados, r
 | Proyecto | Tecnología | Contenido |
 |---|---|---|
 | `Dominio` | .NET Framework 4.8, Entity Framework 6 | Entidades (`*EF.cs`), `IVCdbContext`, DTOs, anillo de claves de DataProtection |
-| `Negocio` | .NET Framework 4.8 | Reglas de negocio y acceso a datos. Las clases `*NegocioEF` usan EF6; las clases `*Negocio` sin sufijo usan ADO.NET (`AccesoDatos`) y quedan sólo para Barrios, Empresas, Proyectos, Movimientos y Líneas de Gestión |
+| `Negocio` | .NET Framework 4.8 | Reglas de negocio y acceso a datos. `Redeterminaciones/` tiene las reglas de cálculo puras (`ReglasRedeterminaciones`), el mapeo de etapas y el servicio de datos externos (SADE, SIGAF, ACDIR); `Infraestructura/` define `IContextoWeb`, la única dependencia del request que usa esta capa. Las clases `*NegocioEF` usan EF6; las clases `*Negocio` sin sufijo usan ADO.NET (`AccesoDatos`) y quedan sólo para Barrios, Empresas, Proyectos, Movimientos y Líneas de Gestión |
 | `WebForms` | ASP.NET WebForms + OWIN | Páginas, master pages, controles (`CustomControls/`) y el pipeline de autenticación/autorización (`Global.cs`, `Startup.Auth.cs`, `Sso/`) |
 | `Tests/IVC.Tests` | MSTest, net48 | Pruebas unitarias de `Negocio` |
 | `Database/` | SQL | Vistas para Power BI que replican las reglas de redeterminaciones |
@@ -57,3 +57,5 @@ La solución debe compilar sin errores. Los warnings `CS0168` que quedan corresp
 - `Global.cs` autoriza cada request contra el claim `perms_json` (lista de páginas permitidas) y revalida `perms_version` contra Auth.Web cada 5 minutos, con tolerancia a fallos (fail-open) igual que SAI y SAF.
 - El usuario de negocio (`UsuarioEF`) se construye desde los claims y se cachea en Session; se descarta si cambia el `NameIdentifier` autenticado.
 - Las reglas de edición por rol y estado de planificación están centralizadas en `UserHelper.PuedeModificar*` y se verifican en cada handler que escribe datos, además de ocultar los controles en la interfaz.
+- CSRF: los tres masters fijan `ViewStateUserKey` a la sesión (`Infraestructura/ProteccionCsrf`), así el ViewState de un usuario no sirve en el navegador de otro. La cookie compartida viaja con `SameSite=None` porque lo exige el SSO entre hosts.
+- `Web.config` emite las mismas cabeceras que SAI y SAF (`nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`) y la cookie de sesión es `Secure`, `HttpOnly` y `SameSite=Lax`.

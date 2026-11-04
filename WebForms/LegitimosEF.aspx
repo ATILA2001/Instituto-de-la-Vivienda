@@ -226,7 +226,7 @@
                                                         />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("ObraEF.Area.Nombre") %>
+                            <%#: Eval("ObraEF.Area.Nombre") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -243,7 +243,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("ObraEF.Empresa.Nombre") %>
+                            <%#: Eval("ObraEF.Empresa.Nombre") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -256,7 +256,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("CodigoAutorizante") %>
+                            <%#: Eval("CodigoAutorizante") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -289,7 +289,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
+                            <%#: Eval("MesAprobacion", "{0:dd-MM-yyyy}") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -302,7 +302,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("Estado") %>
+                            <%#: Eval("Estado") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -319,7 +319,7 @@
                                 OnAcceptChanges="OnAcceptChanges" />
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%# Eval("ObraEF.Proyecto.LineaGestionEF.Nombre") %>
+                            <%#: Eval("ObraEF.Proyecto.LineaGestionEF.Nombre") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 

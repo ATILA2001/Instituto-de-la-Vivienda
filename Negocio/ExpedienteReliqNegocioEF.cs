@@ -51,9 +51,9 @@ namespace Negocio
                 }
                 catch (Exception ex)
                 {
-                    // Manejo de errores (opcionalmente, registrar el error).
-                    System.Diagnostics.Debug.WriteLine($"Error en GuardarOActualizar ExpedienteReliq: {ex.Message}");
-                    return false;
+                    // Antes devolvía false y el expediente de la reliquidación no quedaba guardado sin que nadie lo viera.
+                    System.Diagnostics.Trace.TraceError("[ExpedienteReliq.GuardarOActualizar] {0} {1:yyyy-MM}: {2}", codigoRedet, mesAprobacion, ex);
+                    throw;
                 }
             }
         }

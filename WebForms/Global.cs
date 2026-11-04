@@ -16,6 +16,9 @@ namespace WebForms
     {
         void Application_Start(object sender, EventArgs e)
         {
+            // Negocio accede a sesión, principal y descarga de archivos a través de esta abstracción (sin System.Web).
+            Negocio.Infraestructura.ContextoWeb.Registrar(Infraestructura.HttpContextoWeb.DelRequestActual);
+
             // Configurar el modo de validaci�n no intrusiva
             ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.WebForms;
 
@@ -44,7 +47,6 @@ namespace WebForms
                 "/Startup.aspx",
                 "/Inicio.aspx",
                 "/AccessDenied.aspx",
-                "/LogoutConfirmation.aspx",
                 "/Error.aspx",
                 "/",
                 "/ScriptResource.axd",
@@ -211,20 +213,19 @@ namespace WebForms
             if (string.IsNullOrWhiteSpace(cookieVersion))
                 return;
 
-            // Verificar caché de sesión (TTL 5 min)
-            var session = Context.Session;
-            if (session != null)
+            // Caché por usuario en HttpRuntime.Cache (TTL 5 min), como hace SAI con IMemoryCache.
+            // En Application_AuthorizeRequest la Session todavía no existe (se adquiere después), así que
+            // un caché en Session nunca aplicaba y cada request llamaba a Auth.Web.
+            // La caché guarda la última versión validada. Si la cookie coincide, no hay nada que consultar.
+            // Si no coincide, se consulta a Auth.Web en vez de redirigir: una cookie recién emitida tras un
+            // cambio de permisos trae una versión más nueva que la cacheada y, comparándola con la caché,
+            // el usuario quedaba en un bucle de login durante 5 minutos. SAI y SAF hacen lo mismo.
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var cacheKey = string.IsNullOrWhiteSpace(userId) ? null : "PermsVersion_" + userId;
+            if (cacheKey != null && HttpRuntime.Cache[cacheKey] is string cachedVersion
+                && string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
             {
-                var cachedVersion = session["PermsVersion_Cached"] as string;
-                var cachedAt = session["PermsVersion_CachedAt"] as DateTime?;
-
-                if (cachedVersion != null && cachedAt.HasValue
-                    && (DateTime.UtcNow - cachedAt.Value).TotalMinutes < 5)
-                {
-                    if (!string.Equals(cookieVersion, cachedVersion, StringComparison.Ordinal))
-                        RedirectToLogin();
-                    return;
-                }
+                return;
             }
 
             // Llamar a Auth.Web: GET /api/permissions/version
@@ -247,8 +248,9 @@ namespace WebForms
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 request.Timeout = 2000; // 2 segundos máximo
                 request.Method = "GET";
-                // Reenviar la cookie de sesión compartida para que el endpoint pueda autenticar
-                var cookieHeader = Context.Request.Headers["Cookie"];
+                // Reenviar sólo la cookie compartida (y sus chunks "<nombre>C1", "<nombre>C2", ...) para que el
+                // endpoint pueda autenticar. No se reenvía el header Cookie completo: incluiría ASP.NET_SessionId.
+                var cookieHeader = BuildSharedCookieHeader(Context.Request);
                 if (!string.IsNullOrWhiteSpace(cookieHeader))
                     request.Headers["Cookie"] = cookieHeader;
 
@@ -268,21 +270,43 @@ namespace WebForms
                 return;
             }
 
-            // Actualizar caché de sesión con la versión obtenida
-            if (session != null && serverVersion != null)
+            if (cacheKey != null && serverVersion != null)
             {
-                session["PermsVersion_Cached"] = serverVersion;
-                session["PermsVersion_CachedAt"] = DateTime.UtcNow;
+                HttpRuntime.Cache.Insert(cacheKey, serverVersion, null,
+                    DateTime.UtcNow.AddMinutes(5), System.Web.Caching.Cache.NoSlidingExpiration);
             }
 
             if (!string.Equals(cookieVersion, serverVersion, StringComparison.Ordinal))
                 RedirectToLogin();
         }
 
+        /// <summary>
+        /// Header Cookie con la cookie de autenticación compartida y sus chunks, nada más.
+        /// </summary>
+        private static string BuildSharedCookieHeader(HttpRequest request)
+        {
+            var sharedCookieName = Environment.GetEnvironmentVariable("SharedCookie__Name")
+                ?? WebConfigurationManager.AppSettings["SharedCookieName"];
+            if (string.IsNullOrWhiteSpace(sharedCookieName))
+                return null;
+
+            var partes = new List<string>();
+            foreach (string nombre in request.Cookies.AllKeys)
+            {
+                bool esCompartida = string.Equals(nombre, sharedCookieName, StringComparison.OrdinalIgnoreCase)
+                    || nombre.StartsWith(sharedCookieName + "C", StringComparison.OrdinalIgnoreCase);
+                if (esCompartida)
+                    partes.Add(nombre + "=" + request.Cookies[nombre]?.Value);
+            }
+
+            return partes.Count == 0 ? null : string.Join("; ", partes);
+        }
+
         protected void Application_Error(object sender, EventArgs e)
         {
             var ex = Server.GetLastError();
             Server.ClearError();
+            Trace.TraceError("[Application_Error] {0} {1}: {2}", Request?.HttpMethod, Request?.RawUrl, ex);
 
             string mensaje = "Ocurrió un error inesperado. Por favor, reintentá la operación o contactá al administrador.";
             if (ex is HttpException httpEx && httpEx.GetHttpCode() == 404)
