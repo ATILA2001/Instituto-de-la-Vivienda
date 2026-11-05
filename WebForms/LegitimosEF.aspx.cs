@@ -20,10 +20,10 @@ namespace WebForms
         private readonly LegitimoNegocioEF negocio = new LegitimoNegocioEF();
         private readonly CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
 
-        private bool? _puedeModificar;
-        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
-        private bool PuedeModificar =>
-            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarPlanificacion()).Value;
+        private bool? _puedeEditarInline;
+        /// <summary>Evaluado una sola vez por request. Los campos inline no dependen de la planificación.</summary>
+        private bool PuedeEditarInline =>
+            _puedeEditarInline ?? (_puedeEditarInline = UserHelper.PuedeEditarInline()).Value;
 
         // ------------------------------------------------------------------
         // GridPageBase
@@ -149,12 +149,12 @@ namespace WebForms
             var legitimo = (LegitimoEF)e.Row.DataItem;
             if (e.Row.FindControl("txtCertificadoInline") is TextBox txtCert)
             {
-                txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente) && PuedeModificar;
+                txtCert.Enabled = !string.IsNullOrWhiteSpace(legitimo.Expediente) && PuedeEditarInline;
             }
             // Misma regla que verifican los handlers inline: sin permiso, el control se ve deshabilitado.
             if (e.Row.FindControl("txtExpediente") is TextBox txtExp)
             {
-                txtExp.Enabled = PuedeModificar;
+                txtExp.Enabled = PuedeEditarInline;
             }
         }
 
@@ -458,7 +458,7 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarInline)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 CargarPaginaActual();
@@ -512,7 +512,7 @@ namespace WebForms
 
         protected void txtCertificadoInline_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarInline)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 CargarPaginaActual();

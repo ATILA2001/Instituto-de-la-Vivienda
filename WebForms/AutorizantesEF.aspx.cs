@@ -29,7 +29,7 @@ namespace WebForms
         private bool? _puedeEditarSeguimiento;
         /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
         private bool PuedeEditarSeguimiento =>
-            _puedeEditarSeguimiento ?? (_puedeEditarSeguimiento = UserHelper.PuedeEditarSeguimientoAutorizante()).Value;
+            _puedeEditarSeguimiento ?? (_puedeEditarSeguimiento = UserHelper.PuedeEditarInline()).Value;
 
         private List<EstadoAutorizanteEF> _estadosAutorizante;
         /// <summary>Catálogo de estados, leído una sola vez por request (se usa en cada fila de la grilla).</summary>
