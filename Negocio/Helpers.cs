@@ -459,15 +459,18 @@ namespace Negocio
         }
 
         /// <summary>
-        /// Puede actualizar inline el expediente y el estado de un autorizante en la grilla de Autorizantes.
-        /// Además de quienes pueden modificar planificación, el área Redeterminaciones hace el seguimiento
-        /// del trámite y edita esos dos campos aunque no pueda crear, modificar por modal ni eliminar.
+        /// Puede editar los campos inline de las grillas de planificación: expediente, monto y ejecución
+        /// física en Certificados; expediente y monto certificado en Legítimos; expediente y estado en
+        /// Autorizantes. Cualquier usuario autenticado con acceso a la página: estos campos nunca
+        /// dependieron del estado de la planificación ni del área (así funcionan desde marzo de 2026).
+        /// La auditoría de octubre de 2026 los había atado a PuedeModificarPlanificacion y el área lo
+        /// rechazó el 04/11/2026: con planificación cerrada se bloquean sólo alta, modal y baja.
         /// </summary>
-        public static bool PuedeEditarSeguimientoAutorizante()
+        public static bool PuedeEditarInline()
         {
             var user = GetFullCurrentUser();
-            if (user == null || !user.Estado) return false;
-            return PuedeModificarPlanificacion() || IsUserInArea(Dominio.IvcAreaIds.Redeterminaciones);
+            // Estado == false es el usuario "por defecto" que se devuelve sin sesión autenticada.
+            return user != null && user.Estado;
         }
 
         /// <summary>
