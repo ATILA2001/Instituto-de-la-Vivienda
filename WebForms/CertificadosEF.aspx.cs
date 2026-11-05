@@ -23,10 +23,10 @@ namespace WebForms
         private readonly CertificadoNegocioEF negocio = new CertificadoNegocioEF();
         private readonly CalculoRedeterminacionNegocioEF calculoRedeterminacionNegocio = new CalculoRedeterminacionNegocioEF();
 
-        private bool? _puedeModificar;
-        /// <summary>Evaluado una sola vez por request: la regla consulta Session y la base.</summary>
-        private bool PuedeModificar =>
-            _puedeModificar ?? (_puedeModificar = UserHelper.PuedeModificarPlanificacion()).Value;
+        private bool? _puedeEditarInline;
+        /// <summary>Evaluado una sola vez por request. Los campos inline no dependen de la planificación.</summary>
+        private bool PuedeEditarInline =>
+            _puedeEditarInline ?? (_puedeEditarInline = UserHelper.PuedeEditarInline()).Value;
 
         private static bool EsReliquidacion(CertificadoDTO c) => c.TipoPagoId == ReglasRedeterminaciones.TipoPagoReliquidacionId;
 
@@ -512,7 +512,7 @@ namespace WebForms
             }
 
             // Misma regla que verifican los handlers inline: sin permiso, los controles se ven deshabilitados.
-            if (!PuedeModificar)
+            if (!PuedeEditarInline)
             {
                 foreach (var id in new[] { "txtExpediente", "txtMontoInline", "txtPorcEjecFisicaInline" })
                 {
@@ -527,7 +527,7 @@ namespace WebForms
 
         protected void txtExpediente_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarInline)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 CargarPaginaActual();
@@ -623,7 +623,7 @@ namespace WebForms
 
         protected void txtMontoInline_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarInline)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 CargarPaginaActual();
@@ -688,7 +688,7 @@ namespace WebForms
 
         protected void txtPorcEjecFisicaInline_TextChanged(object sender, EventArgs e)
         {
-            if (!UserHelper.PuedeModificarPlanificacion())
+            if (!PuedeEditarInline)
             {
                 ToastService.Show(this.Page, "No tiene permisos para realizar esta acción.", ToastService.ToastType.Error);
                 CargarPaginaActual();
