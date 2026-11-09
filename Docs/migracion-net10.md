@@ -93,7 +93,7 @@ Total de code-behind vivo: ≈ 7.000 líneas de C# + ≈ 4.800 de markup. SAF co
 ### 3.3 Reglas transversales que hay que preservar
 
 - **Identidad IVC**: claims `area` (ids de Auth.Web) → `Areas.AuthAreaId` → `Areas.Id` (lista `IvcAreaIds`); `UsuariosVinculados` por `AuthUserId` (alta automática, nombre sincronizado, `IsPlanningOpenOverride`); admin = rol Admin/Administrador/Administradores. Tres áreas SECRETARIA (18, 19, 20) mapean al AuthAreaId 36.
-- **Permisos funcionales** (`UserHelper`): `PuedeModificarPlanificacion` (admin, o planificación abierta en `ABM_PLANI`, o override; nunca Redeterminaciones ni Secretaría), `PuedeEditarSeguimientoAutorizante` (planificación o área Redeterminaciones), `PuedeModificarFormulacion` (admin o formulación abierta, no Redet/Secretaría), `PuedeModificarRedeterminaciones` (todos salvo Secretaría). Se verifican en cada handler que escribe, además de ocultar controles.
+- **Permisos funcionales** (`UserHelper`): `PuedeModificarPlanificacion` (admin, o planificación abierta en `ABM_PLANI`, o override; nunca Redeterminaciones ni Secretaría), `PuedeEditarInline` (cualquier usuario autenticado con acceso a la página: expediente, monto y ejecución física en Certificados, expediente y certificado en Legítimos, expediente y estado en Autorizantes; no dependen de la planificación ni del área, dictamen del área del 04/11/2026, PR #17), `PuedeModificarFormulacion` (admin o formulación abierta, no Redet/Secretaría), `PuedeModificarRedeterminaciones` (todos salvo Secretaría). Se verifican en cada handler que escribe, además de ocultar controles.
 - **Filtro por área** en Obras/Autorizantes/Certificados/Legítimos/Formulación; `RedeterminacionesEF` es cross-area por diseño (sin guard, decisión del 01/11).
 - **Columnas financieras ocultas** al área Redeterminaciones en Obras.
 - `perms_version` revalidado contra Auth.Web cada 5 minutos con fail-open (idéntico en SAF: `PermissionVersionService`).
@@ -235,5 +235,8 @@ Las fases 4 a 7 se validan con usuarios en `IVC_TEST`, donde la app nueva y el l
 | CI | Sí, desde la fase 1: workflow de build + test en PRs a `dev` y `main`, sin despliegue |
 | Orden de módulos | Catálogos → Obras → Redeterminaciones → Formulación |
 | Base de desarrollo | `IVC_TEST` con `dotnet user-secrets`; `appsettings.json` con claves vacías |
+
+**Hotfixes del legado posteriores al cierre de fase 0** (replicar en la fase correspondiente de la app nueva):
+- PR #17 (05/11/2026, 3311e72): los campos inline de Certificados, Legítimos y Autorizantes no dependen del estado de la planificación; `PuedeEditarSeguimientoAutorizante` pasó a `PuedeEditarInline` (true para todo usuario autenticado). Con planificación cerrada se bloquean sólo alta, modal y baja. Tests en `UserHelperEdicionInlineTests`. Aplica a las fases 3 (reglas) y 6.
 
 Pendientes de fase 0 que siguen abiertos: PR fase 4 → `dev` → `main` y despliegue (en curso el 03/11), dictámenes del área (2.1.2), limpieza de datos (2.1.4), alta del cliente y páginas en Auth.Web de test, sitio IIS de test y usuario SQL con escritura.
