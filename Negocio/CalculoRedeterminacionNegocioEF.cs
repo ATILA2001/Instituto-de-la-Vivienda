@@ -683,37 +683,44 @@ namespace Negocio
         {
             try
             {
-                // Filtrar solo expedientes válidos
-                var expedientesValidos = expedientes
+                // Filtrar solo expedientes válidos (recortados y sin distinguir mayúsculas, como las claves del devengado)
+                var expedientesValidos = (expedientes ?? new List<string>())
                     .Where(e => !string.IsNullOrWhiteSpace(e))
-                    .Distinct()
+                    .Select(e => e.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
                 //if (!expedientesValidos.Any() && certificados.All(c => !c.ExpedientePago))
                 //    return certificados; // Nada que hacer si no hay expedientes para procesar
 
-                // OPTIMIZACIÓN: Usar datos precargados si están disponibles, sino cargar
-                var datosSigaf = datosSigafPrecargados ?? BuscarMuchosNumerosSigaf(expedientesValidos);
+                // OPTIMIZACIÓN: Usar datos precargados si están disponibles, sino cargar.
+                // Las claves se normalizan (recortadas, sin distinguir mayúsculas) para que coincidan con el expediente del pago.
+                var datosSigaf = DatosExternosNegocioEF.NormalizarDevengados(datosSigafPrecargados ?? BuscarMuchosNumerosSigaf(expedientesValidos));
                 var datosSade = datosSadePrecargados ?? BuscarMuchosDatosSade(expedientesValidos);
 
                 Debug.WriteLine($"Datos SIGAF/SADE: {(datosSigafPrecargados != null ? "REUTILIZADOS" : "CARGADOS")} - SIGAF: {datosSigaf.Count}, SADE: {datosSade.Count}");
 
+                // Pagos (certificados y reliquidaciones) agrupados por expediente una sola vez: antes se recorría toda
+                // la lista por cada expediente y otra vez por cada pago, cuadrático en la carga completa de la grilla.
+                var pagosPorExpediente = (todosLosCertificados ?? new List<CertificadoDTO>())
+                    .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago))
+                    .ToLookup(c => c.ExpedientePago.Trim(), StringComparer.OrdinalIgnoreCase);
+
                 // Para cada expediente, recalcular todos los certificados asociados
                 foreach (var expediente in expedientesValidos)
                 {
-                    // Obtener certificados con este expediente
-                    var certificadosDelExpediente = todosLosCertificados
-                        .Where(c => string.Equals(c.ExpedientePago, expediente, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-
-                    if (!certificadosDelExpediente.Any())
+                    var certificadosDelExpediente = pagosPorExpediente[expediente].ToList();
+                    if (certificadosDelExpediente.Count == 0)
                         continue;
+
+                    // Montos de todos los pagos del mismo expediente, base del reparto; R4: sin legítimos.
+                    var montosMismoExpediente = certificadosDelExpediente.Select(c => c.MontoTotal).ToList();
 
                     // Recalcular valores de SIGAF para todo el expediente
                     foreach (var cert in certificadosDelExpediente)
                     {
                         // Calcular SIGAF compartido
-                        cert.Sigaf = CalcularSIGAF(cert.ExpedientePago, cert.MontoTotal, todosLosCertificados, datosSigaf);
+                        cert.Sigaf = CalcularSIGAF(expediente, cert.MontoTotal, montosMismoExpediente, datosSigaf);
 
                         // Calcular propiedades adicionales
                         //var autorizante = autorizantes.FirstOrDefault(a => a.CodigoAutorizante == cert.CodigoAutorizante);
@@ -872,33 +879,16 @@ namespace Negocio
 
 
         /// <summary>
-        /// Calcula SIGAF directamente usando los datos en memoria sin causar bucles infinitos
-        /// Replica la lógica de SIGAFHelper.CalcularSIGAFCompartido pero sin dependencias circulares
+        /// SIGAF de un pago: la parte del devengado del expediente que le corresponde según su monto
+        /// (ReglasRedeterminaciones.ProrratearSigaf). Null si el expediente no tiene devengado.
+        /// datosSigaf viene normalizado (ver DatosExternosNegocioEF.NormalizarDevengados): clave recortada, sin distinguir mayúsculas.
         /// </summary>
-        private decimal? CalcularSIGAF(string expedientePago, decimal montoTotal, List<CertificadoDTO> todosLosCertificados, Dictionary<string, decimal> datosSigaf)
+        private static decimal? CalcularSIGAF(string expediente, decimal montoTotal, IReadOnlyCollection<decimal> montosMismoExpediente, Dictionary<string, decimal> datosSigaf)
         {
-            try
-            {
-                // Validaciones robustas
-                if (string.IsNullOrWhiteSpace(expedientePago) || datosSigaf == null || !datosSigaf.ContainsKey(expedientePago))
-                    return null;
+            if (string.IsNullOrWhiteSpace(expediente) || datosSigaf == null || !datosSigaf.TryGetValue(expediente.Trim(), out decimal totalDevengado))
+                return null;
 
-                decimal totalDevengado = datosSigaf[expedientePago];
-
-                // Montos de todos los pagos (certificados y reliquidaciones) del mismo expediente; R4: sin legítimos.
-                var montosMismoExpediente = (todosLosCertificados ?? new List<CertificadoDTO>())
-                    .Where(c => !string.IsNullOrWhiteSpace(c.ExpedientePago) &&
-                          c.ExpedientePago.Equals(expedientePago, StringComparison.OrdinalIgnoreCase))
-                    .Select(c => c.MontoTotal)
-                    .ToList();
-
-                return ReglasRedeterminaciones.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError("[CalcularSIGAF] expediente {0}: {1}", expedientePago, ex);
-                throw;
-            }
+            return ReglasRedeterminaciones.ProrratearSigaf(totalDevengado, montoTotal, montosMismoExpediente);
         }
 
         /// <summary>
@@ -937,7 +927,8 @@ namespace Negocio
             string estado = ReglasRedeterminaciones.DeterminarEstado(expedientePago, sigaf);
 
             // Dictionary no admite clave null: un pago sin expediente antes caía en el catch y quedaba con Estado "ERROR".
-            var pase = datosSade != null && datosSade.TryGetValue(expedientePago ?? "", out var encontrado)
+            // Clave recortada: el diccionario SADE viene indexado por expediente recortado (DatosExternosNegocioEF).
+            var pase = datosSade != null && datosSade.TryGetValue((expedientePago ?? "").Trim(), out var encontrado)
                 ? encontrado
                 : UltimoPaseSade.SinDatos;
 

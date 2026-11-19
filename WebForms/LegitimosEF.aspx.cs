@@ -191,7 +191,7 @@ namespace WebForms
             var expedientes = (expedientesAfectados ?? Enumerable.Empty<string>())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(s => s.Trim())
-                .Distinct()
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             if (expedientes.Count == 0)
@@ -205,25 +205,27 @@ namespace WebForms
                 var datosSade = calculoRedeterminacionNegocio.ObtenerDatosSadeBulk(expedientes);
                 var datosSigaf = calculoRedeterminacionNegocio.ObtenerSigafBulk(expedientes);
 
-                foreach (var l in ListaCompleta)
-                {
-                    if (string.IsNullOrWhiteSpace(l.Expediente)) continue;
-                    var exp = l.Expediente.Trim();
-                    if (!expedientes.Contains(exp)) continue;
+                // Todos los legítimos del snapshot que comparten los expedientes afectados (sin distinguir
+                // mayúsculas, como la agrupación del reparto): el devengado se reparte entre ellos en
+                // proporción a su monto, igual que en Certificados.
+                var clavesAfectadas = new HashSet<string>(expedientes, StringComparer.OrdinalIgnoreCase);
+                var afectados = ListaCompleta
+                    .Where(l => !string.IsNullOrWhiteSpace(l.Expediente) && clavesAfectadas.Contains(l.Expediente.Trim()))
+                    .ToList();
 
-                    if (datosSade != null && datosSade.TryGetValue(exp, out var sadeInfo))
+                foreach (var l in afectados)
+                {
+                    if (datosSade != null && datosSade.TryGetValue(l.Expediente.Trim(), out var sadeInfo))
                     {
                         l.BuzonSade = sadeInfo.Buzon;
                         l.FechaSade = sadeInfo.Fecha;
                     }
-
-                    if (datosSigaf != null && datosSigaf.TryGetValue(exp, out var sigafVal))
-                    {
-                        l.Sigaf = sigafVal;
-                    }
-
-                    AplicarEstado(l);
                 }
+
+                LegitimoNegocioEF.AsignarSigafProrrateado(afectados, datosSigaf);
+
+                foreach (var l in afectados)
+                    AplicarEstado(l);
             }
             catch (Exception ex)
             {

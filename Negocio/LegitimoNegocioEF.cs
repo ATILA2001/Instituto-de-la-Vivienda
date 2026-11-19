@@ -230,17 +230,23 @@ namespace Negocio
                     var datosSade = calculoRedeterminacionNegocioEF.ObtenerDatosSadeBulk(expedientesPagina);
                     var datosSigaf = calculoRedeterminacionNegocioEF.ObtenerSigafBulk(expedientesPagina);
 
+                    // El reparto del devengado se hace entre todos los legítimos del usuario que comparten el
+                    // expediente, no sólo los de la página ni los que pasan los filtros opcionales: se traen
+                    // (sólo las columnas necesarias) los hermanos que quedaron fuera de la página.
+                    var idsPagina = new HashSet<int>(page.Select(p => p.Id));
+                    var hermanos = BuildBaseQuery(context, usuario)
+                        .Where(l => expedientesPagina.Contains(l.Expediente))
+                        .Select(l => new { l.Id, l.Expediente, l.Certificado })
+                        .ToList()
+                        .Where(h => !idsPagina.Contains(h.Id))
+                        .Select(h => new LegitimoEF { Id = h.Id, Expediente = h.Expediente, Certificado = h.Certificado });
+                    AsignarSigafProrrateado(page.Concat(hermanos), datosSigaf);
+
                     foreach (var l in page)
                     {
-                        // Obtener sigaf si existe
-                        decimal? sigafVal = null;
-                        if (!string.IsNullOrWhiteSpace(l.Expediente) && datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sVal))
-                            sigafVal = sVal;
-
                         // Calcular propiedades adicionales exactamente como en CertificadosEF
-                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, UltimoPaseSade>());
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, l.Sigaf, datosSade ?? new Dictionary<string, UltimoPaseSade>());
 
-                        l.Sigaf = sigafVal;
                         l.BuzonSade = buzon;
                         l.FechaSade = fecha;
                         l.Estado = estado;
@@ -288,15 +294,12 @@ namespace Negocio
                     var datosSade = calculoRedeterminacionNegocioEF.ObtenerDatosSadeBulk(expedientes);
                     var datosSigaf = calculoRedeterminacionNegocioEF.ObtenerSigafBulk(expedientes);
 
+                    AsignarSigafProrrateado(list, datosSigaf);
+
                     foreach (var l in list)
                     {
-                        decimal? sigafVal = null;
-                        if (!string.IsNullOrWhiteSpace(l.Expediente) && datosSigaf != null && datosSigaf.TryGetValue(l.Expediente, out var sVal))
-                            sigafVal = sVal;
+                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, l.Sigaf, datosSade ?? new Dictionary<string, UltimoPaseSade>());
 
-                        var (estado, buzon, fecha) = calculoRedeterminacionNegocioEF.CalcularPropiedadesAdicionales(l.Expediente, l.Certificado, sigafVal, datosSade ?? new Dictionary<string, UltimoPaseSade>());
-
-                        l.Sigaf = sigafVal;
                         l.BuzonSade = buzon;
                         l.FechaSade = fecha;
                         l.Estado = estado;
@@ -304,6 +307,36 @@ namespace Negocio
                 }
 
                 return list;
+            }
+        }
+
+        /// <summary>
+        /// Reparte el devengado SIGAF de cada expediente entre los legítimos que lo comparten, en proporción
+        /// a su monto (misma regla que los certificados: ReglasRedeterminaciones.ProrratearSigaf). Un único
+        /// legítimo se lleva todo. Los legítimos sin expediente o sin dato SIGAF quedan con Sigaf null.
+        /// La lista debe incluir a todos los legítimos del expediente que participan del reparto.
+        /// </summary>
+        public static void AsignarSigafProrrateado(IEnumerable<LegitimoEF> legitimos, IReadOnlyDictionary<string, decimal> datosSigaf)
+        {
+            if (legitimos == null) return;
+
+            var devengados = DatosExternosNegocioEF.NormalizarDevengados(datosSigaf);
+
+            var grupos = legitimos
+                .Where(l => l != null && !string.IsNullOrWhiteSpace(l.Expediente))
+                .GroupBy(l => l.Expediente.Trim(), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var grupo in grupos)
+            {
+                decimal? totalDevengado = devengados.TryGetValue(grupo.Key, out var total) ? total : (decimal?)null;
+                var montos = grupo.Select(l => l.Certificado ?? 0m).ToList();
+
+                foreach (var l in grupo)
+                {
+                    l.Sigaf = totalDevengado.HasValue
+                        ? ReglasRedeterminaciones.ProrratearSigaf(totalDevengado.Value, l.Certificado ?? 0m, montos)
+                        : null;
+                }
             }
         }
 
