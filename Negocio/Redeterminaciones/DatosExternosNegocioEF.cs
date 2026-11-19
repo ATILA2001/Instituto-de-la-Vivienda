@@ -52,16 +52,25 @@ namespace Negocio.Redeterminaciones
         /// </summary>
         public Dictionary<string, UltimoPaseSade> ObtenerUltimosPasesSade(List<string> expedientes)
         {
-            if (expedientes == null || !expedientes.Any())
-                return new Dictionary<string, UltimoPaseSade>();
+            // Claves recortadas y sin distinguir mayúsculas: la grafía de PASES_SADE puede diferir de la del pago.
+            var pedidos = (expedientes ?? new List<string>())
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Select(e => e.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (pedidos.Count == 0)
+                return NuevoDiccionarioSade();
 
             var cache = ObtenerCacheSade();
-            if (cache != null && expedientes.All(cache.ContainsKey))
+            if (cache != null && pedidos.All(cache.ContainsKey))
             {
-                return expedientes
-                    .Distinct()
-                    .Where(e => cache[e].TieneDatos)
-                    .ToDictionary(e => e, e => cache[e]);
+                var desdeCache = NuevoDiccionarioSade();
+                foreach (var expediente in pedidos)
+                {
+                    if (cache[expediente].TieneDatos)
+                        desdeCache[expediente] = cache[expediente];
+                }
+                return desdeCache;
             }
 
             try
@@ -72,21 +81,21 @@ namespace Negocio.Redeterminaciones
                     // "TOP 1 ... ORDER BY fecha DESC" por expediente.
                     var ultimosPases = context.PasesSade
                         .AsNoTracking()
-                        .Where(p => expedientes.Contains(p.Expediente))
+                        .Where(p => pedidos.Contains(p.Expediente))
                         .GroupBy(p => p.Expediente)
                         .Select(g => g.OrderByDescending(p => p.FechaUltimoPase).FirstOrDefault())
                         .ToList();
 
-                    resultado = ultimosPases
+                    resultado = NormalizarPasesSade(ultimosPases
                         .Where(p => p != null)
-                        .ToDictionary(p => p.Expediente, p => new UltimoPaseSade(p.BuzonDestino, p.FechaUltimoPase));
+                        .Select(p => new KeyValuePair<string, UltimoPaseSade>(p.Expediente, new UltimoPaseSade(p.BuzonDestino, p.FechaUltimoPase))));
                 }
 
                 // Actualizar la caché con los que tienen datos y marcar los que no como consultados.
-                var cacheActual = cache ?? new Dictionary<string, UltimoPaseSade>();
+                var cacheActual = cache ?? NuevoDiccionarioSade();
                 foreach (var kvp in resultado)
                     cacheActual[kvp.Key] = kvp.Value;
-                foreach (var expediente in expedientes)
+                foreach (var expediente in pedidos)
                 {
                     if (!resultado.ContainsKey(expediente))
                         cacheActual[expediente] = UltimoPaseSade.SinDatos;
@@ -101,6 +110,28 @@ namespace Negocio.Redeterminaciones
                 throw;
             }
         }
+
+        /// <summary>
+        /// Reindexa los pases por expediente recortado y sin distinguir mayúsculas (la grafía de PASES_SADE puede
+        /// diferir de la del pago). Si varias claves coinciden al normalizar, queda el pase de fecha más reciente.
+        /// </summary>
+        public static Dictionary<string, UltimoPaseSade> NormalizarPasesSade(IEnumerable<KeyValuePair<string, UltimoPaseSade>> pases)
+        {
+            var resultado = NuevoDiccionarioSade();
+            if (pases == null) return resultado;
+
+            foreach (var par in pases)
+            {
+                if (string.IsNullOrWhiteSpace(par.Key) || par.Value == null) continue;
+                var clave = par.Key.Trim();
+                if (!resultado.TryGetValue(clave, out var existente) || Nullable.Compare(par.Value.Fecha, existente.Fecha) > 0)
+                    resultado[clave] = par.Value;
+            }
+            return resultado;
+        }
+
+        private static Dictionary<string, UltimoPaseSade> NuevoDiccionarioSade() =>
+            new Dictionary<string, UltimoPaseSade>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>Descarta la caché SADE de la sesión para forzar la recarga desde la base.</summary>
         public static void LimpiarCacheSade()
@@ -125,12 +156,14 @@ namespace Negocio.Redeterminaciones
             {
                 using (var context = new IVCdbContext())
                 {
-                    return context.Devengados
+                    var porExpediente = context.Devengados
                         .AsNoTracking()
                         .Where(d => expedientes.Contains(d.EeFinanciera))
                         .GroupBy(d => d.EeFinanciera)
                         .Select(g => new { Expediente = g.Key, Total = g.Sum(d => (decimal?)d.ImportePp) ?? 0 })
                         .ToDictionary(r => r.Expediente, r => r.Total);
+
+                    return NormalizarDevengados(porExpediente);
                 }
             }
             catch (Exception ex)
@@ -138,6 +171,25 @@ namespace Negocio.Redeterminaciones
                 Trace.TraceError("[SIGAF] Error en carga masiva: {0}", ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Las claves del devengado vienen agrupadas por SQL con la grafía de la tabla DEVENGADOS, que puede
+        /// diferir del expediente cargado en el pago en mayúsculas o espacios. Se reindexan recortadas y sin
+        /// distinguir mayúsculas; si dos claves coinciden al normalizar, el devengado del expediente es la suma.
+        /// </summary>
+        public static Dictionary<string, decimal> NormalizarDevengados(IReadOnlyDictionary<string, decimal> devengados)
+        {
+            var resultado = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+            if (devengados == null) return resultado;
+
+            foreach (var par in devengados)
+            {
+                if (string.IsNullOrWhiteSpace(par.Key)) continue;
+                var clave = par.Key.Trim();
+                resultado[clave] = resultado.TryGetValue(clave, out var acumulado) ? acumulado + par.Value : par.Value;
+            }
+            return resultado;
         }
 
         // ---------- ACDIR (GEDO) ----------
