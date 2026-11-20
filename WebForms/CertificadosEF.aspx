@@ -85,7 +85,7 @@
 								</div>
 								<div class="col-6">
 									<div class="mb-3">
-										<label for="txtFecha" class="form-label">Mes Aprobacion</label>
+										<label for="txtFecha" class="form-label">Mes Aprobación</label>
 										<asp:TextBox ID="txtFecha" CssClass="form-control" runat="server" TextMode="Date" />
 										<asp:RequiredFieldValidator ID="rfvFecha"
 											ControlToValidate="txtFecha"
@@ -177,7 +177,7 @@
 				<asp:TemplateField>
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
-							HeaderText="Area"
+							HeaderText="Área"
 							DataTextField="Nombre"
 							DataValueField="Id"
 							OnAcceptChanges="OnAcceptChanges" />
@@ -244,7 +244,7 @@
 				<asp:TemplateField>
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderCodigoAutorizante" runat="server"
-							HeaderText="Codigo Autorizante"
+							HeaderText="Código Autorizante"
 							DataTextField="CodigoAutorizante"
 							DataValueField="Id"
 							OnAcceptChanges="OnAcceptChanges" />
@@ -323,7 +323,7 @@
 				<asp:TemplateField>
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderLinea" runat="server"
-							HeaderText="Linea"
+							HeaderText="Línea"
 							DataTextField="Nombre"
 							DataValueField="Id"
 							OnAcceptChanges="OnAcceptChanges" />

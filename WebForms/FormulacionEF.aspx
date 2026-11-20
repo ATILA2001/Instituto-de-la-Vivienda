@@ -311,7 +311,7 @@
                     <ItemTemplate><%#: Eval("ObraEF.Barrio.Nombre") %></ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="Linea de Gestión">
+                <asp:TemplateField HeaderText="Línea de Gestión">
                     <HeaderTemplate>
                         <CustomControls:TreeViewSearch ID="cblsHeaderLineaGestion" runat="server"
                             HeaderText="Línea de Gestión"

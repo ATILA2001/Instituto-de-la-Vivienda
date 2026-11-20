@@ -62,7 +62,7 @@
 
     <!-- Centro: Subtotal -->
     <div class="text-center">
-        <asp:Label ID="lblSubtotalPaginacion" runat="server" Text="Total: $0.00 (0 registros)" CssClass="badge text-dark fs-6" />
+        <asp:Label ID="lblSubtotalPaginacion" runat="server" Text="Total: $ 0,00 (0 registros)" CssClass="badge text-dark fs-6" />
     </div>
 
     <!-- Dropdown de registros por página a la derecha -->

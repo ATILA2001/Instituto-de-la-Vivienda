@@ -321,7 +321,7 @@
 				<asp:TemplateField HeaderText="Área">
 					<HeaderTemplate>
 						<CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
-							HeaderText="Area" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
+							HeaderText="Área" DataTextField="Nombre" DataValueField="Id" OnAcceptChanges="OnAcceptChanges" />
 					</HeaderTemplate>
 					<ItemTemplate>
 						<%#: Eval("Area") %>

@@ -158,7 +158,7 @@
 
                     <asp:BoundField HeaderText="Proyecto" DataField="Proyecto" />
                     <asp:BoundField HeaderText="SubProyecto" DataField="SubProyecto" />
-                    <asp:BoundField HeaderText="Linea de Gestion" DataField="Linea" />
+                    <asp:BoundField HeaderText="Línea de Gestión" DataField="Linea" />
 
 
                     <asp:BoundField HeaderText="Movimiento" DataField="Monto" DataFormatString="{0:C}" />

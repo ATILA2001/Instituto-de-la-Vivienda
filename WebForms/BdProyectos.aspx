@@ -34,7 +34,7 @@
 									</div>
 
 									<div class="mb-3">
-										<label for="ddlLineaGestion" class="form-label">Linea de Gestión</label>
+										<label for="ddlLineaGestion" class="form-label">Línea de Gestión</label>
 										<asp:DropDownList ID="ddlLineaGestion" CssClass="form-select" runat="server" />
 									</div>
 

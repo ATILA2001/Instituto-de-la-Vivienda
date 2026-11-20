@@ -110,8 +110,8 @@ namespace WebForms
                 "MontoActual",
                 "MontoFaltante",
                 "Disponible Actual",
-                "Planificacion 2025",
-                "Ejecucion Presupuesto 2025",
+                "Planificación 2025",
+                "Ejecución Presupuesto 2025",
                 "Monto de Obra inicial",
                 "Monto de Obra actual",
                 "Faltante de Obra");
@@ -250,12 +250,8 @@ namespace WebForms
                 return;
             }
 
-            if (!Page.IsValid)
-            {
-                var errorList = Page.Validators.Cast<IValidator>().Where(v => !v.IsValid).Select(v => v.ErrorMessage).ToList();
-                ToastService.Show(this.Page, "Errores de validación: " + string.Join("; ", errorList), ToastService.ToastType.Error);
-                return;
-            }
+            // Los validadores ya muestran su mensaje debajo de cada campo del modal.
+            if (!Page.IsValid) return;
 
             int? editingId = ViewState["EditingObraId"] as int?;
 

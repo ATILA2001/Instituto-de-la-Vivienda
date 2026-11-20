@@ -13,19 +13,19 @@ namespace WebForms
 
         private static readonly HomePageLink[] Pages =
         {
-            new HomePageLink("ObrasEF.aspx", "Obras", "Consulta y gestion de obras."),
-            new HomePageLink("AutorizantesEF.aspx", "Autorizantes", "Administracion de autorizantes."),
+            new HomePageLink("ObrasEF.aspx", "Obras", "Consulta y gestión de obras."),
+            new HomePageLink("AutorizantesEF.aspx", "Autorizantes", "Administración de autorizantes."),
             new HomePageLink("CertificadosEF.aspx", "Certificados", "Carga y seguimiento de certificados."),
-            new HomePageLink("LegitimosEF.aspx", "Legitimos Abonos", "Gestion de legitimos abonos."),
-            new HomePageLink("FormulacionEF.aspx", "Formulacion", "Formulacion presupuestaria."),
+            new HomePageLink("LegitimosEF.aspx", "Legítimos Abonos", "Gestión de legítimos abonos."),
+            new HomePageLink("FormulacionEF.aspx", "Formulación", "Formulación presupuestaria."),
             new HomePageLink("BdProyectos.aspx", "Proyectos", "Base de proyectos."),
-            new HomePageLink("MovimientosGestion.aspx", "Movimientos", "Movimientos de gestion."),
-            new HomePageLink("LineasGestion.aspx", "Lineas de Gestion", "Lineas de gestion sin fuente financiera."),
-            new HomePageLink("LineasGestionFF.aspx", "Lineas con FF", "Lineas de gestion con fuente financiera."),
-            new HomePageLink("PanelConfiguracion.aspx", "Panel de Configuracion", "Configuracion administrativa."),
+            new HomePageLink("MovimientosGestion.aspx", "Movimientos", "Movimientos de gestión."),
+            new HomePageLink("LineasGestion.aspx", "Líneas de Gestión", "Líneas de gestión sin fuente financiera."),
+            new HomePageLink("LineasGestionFF.aspx", "Líneas con FF", "Líneas de gestión con fuente financiera."),
+            new HomePageLink("PanelConfiguracion.aspx", "Panel de Configuración", "Configuración administrativa."),
             new HomePageLink("RedeterminacionesEF.aspx", "Redeterminaciones", "Seguimiento de redeterminaciones."),
-            new HomePageLink("AbmlBarrio.aspx", "Barrios", "Administracion de barrios."),
-            new HomePageLink("AbmlEmpresa.aspx", "Empresas", "Administracion de empresas.")
+            new HomePageLink("AbmlBarrio.aspx", "Barrios", "Administración de barrios."),
+            new HomePageLink("AbmlEmpresa.aspx", "Empresas", "Administración de empresas.")
         };
 
         protected void Page_Load(object sender, EventArgs e)

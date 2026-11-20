@@ -359,7 +359,7 @@
                 <asp:TemplateField>
                     <HeaderTemplate>
                         <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server"
-                            HeaderText="Area"
+                            HeaderText="Área"
                             DataTextField="Nombre"
                             DataValueField="Id"
                             OnAcceptChanges="OnAcceptChanges" />
@@ -412,11 +412,11 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <%--				<asp:BoundField HeaderText="Codigo Autorizante" DataField="CodigoAutorizante" />--%>
+                <%--				<asp:BoundField HeaderText="Código Autorizante" DataField="CodigoAutorizante" />--%>
                 <asp:TemplateField>
                     <HeaderTemplate>
                         <CustomControls:TreeViewSearch ID="cblsHeaderCodigoAutorizante" runat="server"
-                            HeaderText="Codigo Autorizante"
+                            HeaderText="Código Autorizante"
                             DataTextField="CodigoAutorizante"
                             DataValueField="CodigoAutorizante"
                             OnAcceptChanges="OnAcceptChanges" />
@@ -466,7 +466,7 @@
                 </asp:TemplateField>
 
                 <asp:BoundField HeaderText="Monto Autorizado" DataField="MontoAutorizado" DataFormatString="{0:C}" />
-                <asp:BoundField HeaderText="Mes Aprobacion" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
+                <asp:BoundField HeaderText="Mes Aprobación" DataField="MesAprobacion" DataFormatString="{0:dd-MM-yyyy}" />
                 <asp:BoundField HeaderText="Mes Base" DataField="MesBase" DataFormatString="{0:dd-MM-yyyy}" />
 
                 <asp:BoundField HeaderText="Buzon sade" DataField="BuzonSade" HeaderStyle-ForeColor="White" />

@@ -70,7 +70,7 @@
                                 </div>
                                 <div id="areaContainer" class="col-6">
                                     <div class="mb-3">
-                                        <label for="ddlArea" class="form-label">Area</label>
+                                        <label for="ddlArea" class="form-label">Área</label>
                                         <asp:DropDownList ID="ddlArea" CssClass="form-select" runat="server" AppendDataBoundItems="true">
                                             <asp:ListItem Value="" Text="Seleccione un área" Selected="True"></asp:ListItem>
                                         </asp:DropDownList>
@@ -289,7 +289,7 @@
                     </asp:TemplateField>
 
                     <asp:BoundField HeaderText="Nombre de Obra" DataField="Descripcion" />
-                    <asp:BoundField HeaderText="Linea de Gestion" DataField="LineaGestionNombre" />
+                    <asp:BoundField HeaderText="Línea de Gestión" DataField="LineaGestionNombre" />
                     <asp:BoundField HeaderText="Proyecto" DataField="ProyectoNombre" />
 
                     <asp:TemplateField HeaderText="Disponible Actual">
@@ -303,9 +303,9 @@
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:TemplateField HeaderText="Planificacion 2025">
+                    <asp:TemplateField HeaderText="Planificación 2025">
                         <HeaderTemplate>
-                            <asp:PlaceHolder runat="server">Planificacion 2025</asp:PlaceHolder>
+                            <asp:PlaceHolder runat="server">Planificación 2025</asp:PlaceHolder>
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">
@@ -314,9 +314,9 @@
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:TemplateField HeaderText="Ejecucion Presupuesto 2025">
+                    <asp:TemplateField HeaderText="Ejecución Presupuesto 2025">
                         <HeaderTemplate>
-                            <asp:PlaceHolder runat="server">Ejecucion Presupuesto 2025</asp:PlaceHolder>
+                            <asp:PlaceHolder runat="server">Ejecución Presupuesto 2025</asp:PlaceHolder>
                         </HeaderTemplate>
                         <ItemTemplate>
                             <asp:PlaceHolder runat="server">

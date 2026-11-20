@@ -211,7 +211,7 @@
                     <asp:TemplateField>
                         <HeaderTemplate>
                                                         <CustomControls:TreeViewSearch ID="cblsHeaderArea" runat="server" 
-                                                        HeaderText="Area"
+                                                        HeaderText="Área"
                                                         DataTextField="Nombre"
                                                         DataValueField="Id"
                                                         OnAcceptChanges="OnAcceptChanges"
@@ -305,7 +305,7 @@
                     <asp:TemplateField>
                         <HeaderTemplate>
                             <CustomControls:TreeViewSearch ID="cblsHeaderLineaGestion" runat="server"
-                                HeaderText="Linea de Gestión"
+                                HeaderText="Línea de Gestión"
                                 DataTextField="Nombre"
                                 DataValueField="Id"
                                 OnAcceptChanges="OnAcceptChanges" />
