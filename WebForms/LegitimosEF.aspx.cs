@@ -307,7 +307,7 @@ namespace WebForms
                 {
                     ObraId = string.IsNullOrEmpty(ddlObra.SelectedValue) ? 0 : int.Parse(ddlObra.SelectedValue),
                     CodigoAutorizante = txtAutorizante.Text,
-                    Expediente = txtExpediente.Text,
+                    Expediente = string.IsNullOrWhiteSpace(txtExpediente.Text) ? string.Empty : txtExpediente.Text.Trim(),
                     InicioEjecucion = string.IsNullOrWhiteSpace(txtInicioEjecucion.Text) ? (DateTime?)null : DateTime.Parse(txtInicioEjecucion.Text),
                     FinEjecucion = string.IsNullOrWhiteSpace(txtFinEjecucion.Text) ? (DateTime?)null : DateTime.Parse(txtFinEjecucion.Text),
                     Certificado = string.IsNullOrWhiteSpace(txtCertificado.Text) ? (decimal?)null : decimal.Parse(txtCertificado.Text.Replace('.', ',')),
