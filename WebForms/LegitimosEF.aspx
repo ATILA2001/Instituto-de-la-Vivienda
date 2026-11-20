@@ -358,5 +358,26 @@
                 document.getElementById('<%= txtAutorizante.ClientID %>').value = '';
             } catch (e) {}
         }
+
+        // Fin Ejecución no puede ser anterior a Inicio Ejecución: el selector de fecha de Fin
+        // toma como mínimo la fecha de Inicio y, al cambiar cualquiera de las dos, se evalúa el
+        // CompareValidator cvFinEjecucion para mostrar el aviso debajo del campo sin esperar al envío.
+        (function () {
+            var inicio = document.getElementById('<%= txtInicioEjecucion.ClientID %>');
+            var fin = document.getElementById('<%= txtFinEjecucion.ClientID %>');
+            var validador = document.getElementById('<%= cvFinEjecucion.ClientID %>');
+            if (!inicio || !fin) return;
+
+            function sincronizarMinimoFin() {
+                fin.min = inicio.value || '';
+                if (validador && typeof ValidatorValidate === 'function') {
+                    ValidatorValidate(validador);
+                }
+            }
+
+            inicio.addEventListener('change', sincronizarMinimoFin);
+            fin.addEventListener('change', sincronizarMinimoFin);
+            sincronizarMinimoFin();
+        })();
     </script>
 </asp:Content>
