@@ -41,7 +41,7 @@ namespace WebForms
                     empresa.Id = int.Parse(Request.QueryString["codM"].ToString());
                     empresa.Nombre = txtNombre.Text.Trim();
                     negocio.modificar(empresa);
-                    ToastService.Show(this.Page, "Se modificó la empresa exitosamente.", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Empresa modificada correctamente.", ToastService.ToastType.Success);
 
                     ScriptManager.RegisterClientScriptBlock(this, typeof(Page), "redirectJS",
                     "setTimeout(function() { window.location.replace('AbmlEmpresa.aspx') }, 3000);", true);
@@ -57,7 +57,7 @@ namespace WebForms
             }
             else
             {
-                ToastService.Show(this.Page, "Tiene que llenar todos los campos.", ToastService.ToastType.Warning);
+                ToastService.Show(this.Page, "Complete todos los campos.", ToastService.ToastType.Warning);
             }
         }
         protected void btnVolver_Click(object sender, EventArgs e)

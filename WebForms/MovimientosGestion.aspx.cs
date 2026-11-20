@@ -297,7 +297,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -327,7 +327,7 @@ namespace WebForms
 
                     if (negocio.modificar(movimiento))
                     {
-                        ToastService.Show(this.Page, "Movimiento modificado exitosamente!", ToastService.ToastType.Success);
+                        ToastService.Show(this.Page, "Movimiento modificado correctamente.", ToastService.ToastType.Success);
 
                         // Clear the editing state
                         ViewState["EditingMovimientoId"] = null;
@@ -335,7 +335,7 @@ namespace WebForms
                     }
                     else
                     {
-                        ToastService.Show(this.Page, "Hubo un problema al modificar el movimiento.", ToastService.ToastType.Warning);
+                        ToastService.Show(this.Page, "No se pudo modificar el movimiento. Intente nuevamente.", ToastService.ToastType.Warning);
                     }
                 }
                 else
@@ -345,11 +345,11 @@ namespace WebForms
 
                     if (negocio.agregar(movimiento))
                     {
-                        ToastService.Show(this.Page, "Movimiento agregado exitosamente!", ToastService.ToastType.Success);
+                        ToastService.Show(this.Page, "Movimiento agregado correctamente.", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        ToastService.Show(this.Page, "Hubo un problema al agregar el movimiento.", ToastService.ToastType.Warning);
+                        ToastService.Show(this.Page, "No se pudo agregar el movimiento. Intente nuevamente.", ToastService.ToastType.Warning);
                     }
                 }
 

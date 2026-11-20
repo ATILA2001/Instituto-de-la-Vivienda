@@ -99,7 +99,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar los proyectos. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los proyectos. Intente nuevamente.", ToastService.ToastType.Error);
                 dgvBdProyecto.DataSource = null;
                 dgvBdProyecto.DataBind();
             }
@@ -199,7 +199,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar los datos del proyecto. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del proyecto. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -316,7 +316,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -347,7 +347,7 @@ namespace WebForms
 
                     if (bdProyectoNegocio.modificar(proyecto))
                     {
-                        ToastService.Show(this.Page, "Proyecto modificado exitosamente!", ToastService.ToastType.Success);
+                        ToastService.Show(this.Page, "Proyecto modificado correctamente.", ToastService.ToastType.Success);
 
                         // Clear the editing state
                         ViewState["EditingProyectoId"] = null;
@@ -355,7 +355,7 @@ namespace WebForms
                     }
                     else
                     {
-                        ToastService.Show(this.Page, "No se pudo modificar el proyecto.", ToastService.ToastType.Error);
+                        ToastService.Show(this.Page, "No se pudo modificar el proyecto. Intente nuevamente.", ToastService.ToastType.Error);
                     }
                 }
                 else
@@ -366,11 +366,11 @@ namespace WebForms
 
                     if (bdProyectoNegocio.agregar(proyecto))
                     {
-                        ToastService.Show(this.Page, "Proyecto agregado exitosamente!", ToastService.ToastType.Success);
+                        ToastService.Show(this.Page, "Proyecto agregado correctamente.", ToastService.ToastType.Success);
                     }
                     else
                     {
-                        ToastService.Show(this.Page, "No se pudo agregar el proyecto.", ToastService.ToastType.Error);
+                        ToastService.Show(this.Page, "No se pudo agregar el proyecto. Intente nuevamente.", ToastService.ToastType.Error);
                     }
                 }
 
@@ -397,7 +397,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalOnError", "$('#modalAgregar').modal('show');", true);
             }
         }

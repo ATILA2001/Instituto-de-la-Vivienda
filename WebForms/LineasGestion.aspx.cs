@@ -51,7 +51,7 @@ namespace WebForms
                 negocio.agregar(linea);
 
                 // Mostrar mensaje de éxito
-                ToastService.Show(this.Page, "¡Línea de Gestión agregada exitosamente!", ToastService.ToastType.Success);
+                ToastService.Show(this.Page, "Línea de gestión agregada correctamente.", ToastService.ToastType.Success);
 
 
                 List<LineaGestion> listaLineaGestion = negocio.listar();
@@ -103,7 +103,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

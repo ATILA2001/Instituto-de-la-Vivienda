@@ -32,7 +32,7 @@ namespace WebForms
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "ObrasCompleto";
         protected override int IdDe(ObraDTO item) => item.Id;
-        protected override string MensajeErrorCarga => "Error al cargar las obras. Intente nuevamente.";
+        protected override string MensajeErrorCarga => "No se pudieron cargar las obras. Intente nuevamente.";
 
         protected override List<ObraDTO> CargarListaCompleta()
         {
@@ -199,7 +199,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[ObrasEF] Error al cargar las listas del formulario: " + ex);
-                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -285,23 +285,23 @@ namespace WebForms
             {
                 if (_negocio.Modificar(obra))
                 {
-                    ToastService.Show(this.Page, "Obra modificada exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Obra modificada correctamente.", ToastService.ToastType.Success);
                     ViewState["EditingObraId"] = null;
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "Hubo un problema al modificar la obra.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo modificar la obra. Intente nuevamente.", ToastService.ToastType.Error);
                 }
             }
             else
             {
                 if (_negocio.Agregar(obra))
                 {
-                    ToastService.Show(this.Page, "Obra agregada exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Obra agregada correctamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "Hubo un problema al agregar la obra.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo agregar la obra. Intente nuevamente.", ToastService.ToastType.Error);
                 }
             }
 
@@ -331,7 +331,7 @@ namespace WebForms
                 ObraDTO obraSeleccionada = ItemDeFila(dgvObra.SelectedIndex);
                 if (obraSeleccionada == null)
                 {
-                    ToastService.Show(this.Page, "Error: Registro no encontrado.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el registro seleccionado.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -344,7 +344,7 @@ namespace WebForms
 
                 if (!existe)
                 {
-                    ToastService.Show(this.Page, "Error: No se pudo cargar la obra para edición.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo cargar la obra para edición.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -380,7 +380,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[ObrasEF] Error al cargar la obra para edición: " + ex);
-                ToastService.Show(this.Page, "Error al cargar los datos de la obra. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos de la obra. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -402,11 +402,11 @@ namespace WebForms
                 var id = Convert.ToInt32(dgvObra.DataKeys[e.RowIndex].Value);
                 if (_negocio.Eliminar(id))
                 {
-                    ToastService.Show(this.Page, "Obra eliminada exitosamente", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Obra eliminada correctamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "No fue posible eliminar la obra", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo eliminar la obra. Intente nuevamente.", ToastService.ToastType.Error);
                 }
 
                 RecargarTrasCambio();

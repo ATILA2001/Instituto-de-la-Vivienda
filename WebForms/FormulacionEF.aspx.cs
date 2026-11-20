@@ -79,16 +79,16 @@ namespace WebForms
                         { "Prioridad", "PrioridadEF.Nombre" }
                     };
                     Infraestructura.DescargaArchivo.Excel(Response, Negocio.ExcelHelper.GenerarXlsx(lista, mapeoColumnas), "FormulacionesEF");
-                    ToastService.Show(this.Page, "Datos exportados exitosamente", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Exportación completada.", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "No hay datos para exportar", ToastService.ToastType.Warning);
+                    ToastService.Show(this.Page, "No hay datos para exportar.", ToastService.ToastType.Warning);
                 }
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron exportar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -287,11 +287,11 @@ namespace WebForms
 
                 if (_negocio.GuardarPivot(obraId, compartido, montos))
                 {
-                    ToastService.Show(this.Page, editingObraId != null ? "Formulación modificada exitosamente!" : "Formulación agregada exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, editingObraId != null ? "Formulación modificada correctamente." : "Formulación agregada correctamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "No se pudo guardar la formulación.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo guardar la formulación. Intente nuevamente.", ToastService.ToastType.Error);
                 }
 
                 LimpiarFormulario();
@@ -311,7 +311,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -372,7 +372,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -411,7 +411,7 @@ namespace WebForms
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "No se pudo eliminar la formulación.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo eliminar la formulación. Intente nuevamente.", ToastService.ToastType.Error);
                 }
             }
             catch (InvalidOperationException ex)
@@ -509,7 +509,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -548,7 +548,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar las listas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -627,7 +627,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron aplicar los filtros. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

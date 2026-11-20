@@ -68,7 +68,7 @@ namespace WebForms
                 LineaGestionFFNegocio negocio = new LineaGestionFFNegocio();
                 negocio.agregar(nuevaFF);
                 // Mostrar mensaje de éxito
-                ToastService.Show(this.Page, "¡Línea de Gestión FF agregada exitosamente!", ToastService.ToastType.Success);
+                ToastService.Show(this.Page, "Línea de gestión FF agregada correctamente.", ToastService.ToastType.Success);
 
                 Session["listaLineasFF"] = negocio.listar();
                 dgvLineaGestionFF.DataSource = Session["listaLineasFF"];
@@ -118,7 +118,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 

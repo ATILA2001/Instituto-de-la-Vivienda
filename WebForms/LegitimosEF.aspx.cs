@@ -34,7 +34,7 @@ namespace WebForms
         protected override PaginationControl Paginador => paginationControl;
         protected override string ClaveSesion => "legitimosCompletos";
         protected override int IdDe(LegitimoEF item) => item.Id;
-        protected override string MensajeErrorCarga => "Error al cargar los legítimos. Intente nuevamente.";
+        protected override string MensajeErrorCarga => "No se pudieron cargar los legítimos. Intente nuevamente.";
 
         protected override List<LegitimoEF> CargarListaCompleta() =>
             // Sin filtros: el negocio devuelve la lista completa del usuario con Empresa, Línea, SIGAF, SADE y Estado.
@@ -261,7 +261,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al cargar las obras del formulario: " + ex);
-                ToastService.Show(this.Page, "Error al cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar las obras. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -323,7 +323,7 @@ namespace WebForms
                     var entidad = negocio.ObtenerPorId((int)ViewState["EditingLegitimoEFId"]);
                     if (entidad == null)
                     {
-                        ToastService.Show(this.Page, "Error: No se encontró el legítimo a modificar.", ToastService.ToastType.Error);
+                        ToastService.Show(this.Page, "No se encontró el legítimo a modificar.", ToastService.ToastType.Error);
                         return;
                     }
 
@@ -339,12 +339,12 @@ namespace WebForms
                     entidad.ObraEF = null;
 
                     negocio.Modificar(entidad);
-                    ToastService.Show(this.Page, "Legítimo modificado exitosamente.", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Legítimo modificado correctamente.", ToastService.ToastType.Success);
                 }
                 else
                 {
                     negocio.Agregar(legitimo);
-                    ToastService.Show(this.Page, "Legítimo agregado exitosamente.", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Legítimo agregado correctamente.", ToastService.ToastType.Success);
                 }
 
                 LimpiarFormulario();
@@ -361,7 +361,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al guardar el legítimo: " + ex);
-                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModalWithError", "$('#modalAgregar').modal('show');", true);
             }
         }
@@ -374,7 +374,7 @@ namespace WebForms
                 var legitimo = negocio.ObtenerPorId(legitimoId);
                 if (legitimo == null)
                 {
-                    ToastService.Show(this.Page, "Error: No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo cargar el legítimo para edición.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -399,7 +399,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al cargar el legítimo para edición: " + ex);
-                ToastService.Show(this.Page, "Error al cargar los datos del legítimo. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del legítimo. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -419,7 +419,7 @@ namespace WebForms
             var key = gridviewRegistros.DataKeys[e.RowIndex].Value;
             if (key == null || !int.TryParse(key.ToString(), out int id))
             {
-                ToastService.Show(this.Page, "Id inválido.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se encontró el registro a eliminar.", ToastService.ToastType.Error);
                 return;
             }
 
@@ -430,7 +430,7 @@ namespace WebForms
 
                 if (negocio.Eliminar(id))
                 {
-                    ToastService.Show(this.Page, "Legítimo eliminado exitosamente.", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Legítimo eliminado correctamente.", ToastService.ToastType.Success);
                     lista.RemoveAll(l => l.Id == id);
                     RecalcularYRecargar(new[] { expedienteAfectado });
                 }
@@ -474,7 +474,7 @@ namespace WebForms
                 var legitimo = ItemDelControlInline(sender);
                 if (legitimo == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -508,7 +508,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al actualizar el expediente: " + ex);
-                ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -528,7 +528,7 @@ namespace WebForms
 
                 if (!MontoHelper.TryParseEsAr(nuevoValorStr, out decimal nuevoCertificado))
                 {
-                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
                     // Volver a bindear para que el textbox muestre el valor guardado y no el texto rechazado
                     CargarPaginaActual();
                     return;
@@ -537,20 +537,20 @@ namespace WebForms
                 var legitimo = ItemDelControlInline(sender);
                 if (legitimo == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
                 if (legitimo.Id <= 0)
                 {
-                    ToastService.Show(this.Page, "Error: No se puede modificar este registro.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se puede modificar este registro.", ToastService.ToastType.Error);
                     return;
                 }
 
                 var entidad = negocio.ObtenerPorId(legitimo.Id);
                 if (entidad == null)
                 {
-                    ToastService.Show(this.Page, "Error: No se encontró el legítimo.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el legítimo.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -569,7 +569,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[LegitimosEF] Error al actualizar el certificado: " + ex);
-                ToastService.Show(this.Page, "Error al actualizar el certificado. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

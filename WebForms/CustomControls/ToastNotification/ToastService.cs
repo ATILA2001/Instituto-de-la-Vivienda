@@ -19,7 +19,8 @@ namespace WebForms.CustomControls
  }
 
  /// <summary>
- /// Shows a Bootstrap toast on the given page. Duration is fixed to5 seconds.
+ /// Shows a Bootstrap toast on the given page. Info, Success y Warning se ocultan a los 5 segundos;
+ /// Error queda visible hasta que el usuario lo cierra y muestra el texto completo, para que pueda capturarlo.
  /// </summary>
  public static void Show(Page page, string message, ToastType type = ToastType.Info)
  {
@@ -31,6 +32,10 @@ namespace WebForms.CustomControls
 
  string bgClass = GetBackgroundClass(type);
  string icon = GetIcon(type);
+ bool esError = type == ToastType.Error;
+ string autohide = esError ? "false" : "true";
+ string whiteSpace = esError ? "normal" : "nowrap";
+ string truncateClass = esError ? "" : " text-truncate";
  // JavaScriptStringEncode escapa también < > & / y U+2028/2029, que el escape manual anterior no cubría.
  // Sumado a que el mensaje se inserta como nodo de texto (no innerHTML), el contenido nunca se interpreta como HTML.
  string safeMessage = HttpUtility.JavaScriptStringEncode(message ?? string.Empty);
@@ -56,7 +61,7 @@ namespace WebForms.CustomControls
  toastEl.setAttribute('aria-atomic', 'true');
 toastEl.style.width = 'fit-content';
     toastEl.style.maxWidth = '100%';
-    toastEl.style.whiteSpace = 'nowrap';
+    toastEl.style.whiteSpace = '{whiteSpace}';
     toastEl.style.overflow = 'hidden';
     toastEl.style.textOverflow = 'ellipsis';
 
@@ -64,8 +69,8 @@ toastEl.style.width = 'fit-content';
  inner.className = 'd-flex';
 
  var body = document.createElement('div');
- body.className = 'toast-body fs-5 py-3 text-truncate' ;
-body.style.whiteSpace = 'nowrap';
+ body.className = 'toast-body fs-5 py-3{truncateClass}';
+body.style.whiteSpace = '{whiteSpace}';
     body.style.overflow = 'hidden';
     body.style.textOverflow = 'ellipsis';
  var iconEl = document.createElement('i');
@@ -84,7 +89,7 @@ body.style.whiteSpace = 'nowrap';
  toastEl.appendChild(inner);
  container.appendChild(toastEl);
 
- var toast = new bootstrap.Toast(toastEl, {{ autohide: true, delay:5000 }});
+ var toast = new bootstrap.Toast(toastEl, {{ autohide: {autohide}, delay: 5000 }});
  toast.show();
 
  toastEl.addEventListener('hidden.bs.toast', function() {{

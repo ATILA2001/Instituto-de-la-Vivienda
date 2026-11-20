@@ -27,7 +27,7 @@
                                             ControlToValidate="txtDescripcion"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
-                                            ErrorMessage="Ingrese el nombre de la obra"
+                                            ErrorMessage="El nombre de la obra es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
@@ -111,7 +111,7 @@
                                             ControlToValidate="txtNumero"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
-                                            ErrorMessage="Ingrese un número"
+                                            ErrorMessage="El número es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
@@ -125,7 +125,7 @@
                                             ControlToValidate="txtAnio"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
-                                            ErrorMessage="Ingrese un año"
+                                            ErrorMessage="El año es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
@@ -139,7 +139,7 @@
                                             ControlToValidate="txtEtapa"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
-                                            ErrorMessage="Ingrese una etapa"
+                                            ErrorMessage="La etapa es requerida"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />
@@ -153,7 +153,7 @@
                                             ControlToValidate="txtObraNumero"
                                             ValidationGroup="AgregarObra"
                                             runat="server"
-                                            ErrorMessage="Ingrese el número de obra"
+                                            ErrorMessage="El número de obra es requerido"
                                             Display="Dynamic"
                                             CssClass="text-danger"
                                             EnableClientScript="true" />

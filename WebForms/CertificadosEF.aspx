@@ -77,7 +77,7 @@
 											ValidationGroup="AgregarCertificado"
 											runat="server"
 											ValidationExpression="^[0-9]+(\,[0-9]{1,2})?$"
-											ErrorMessage="Solo números positivos con hasta2 decimales"
+											ErrorMessage="Solo números positivos con hasta 2 decimales"
 											Display="Dynamic"
 											CssClass="text-danger"
 											EnableClientScript="true" />

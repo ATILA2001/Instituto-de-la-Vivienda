@@ -41,7 +41,7 @@ namespace WebForms
                     barrio.Id = int.Parse(Request.QueryString["codM"].ToString());
                     barrio.Nombre = txtNombre.Text.Trim();
                     negocio.modificar(barrio);
-                    ToastService.Show(this.Page, "Se modificó el barrio exitosamente.", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Barrio modificado correctamente.", ToastService.ToastType.Success);
 
                     ScriptManager.RegisterClientScriptBlock(this, typeof(Page), "redirectJS",
                     "setTimeout(function() { window.location.replace('Abmlbarrio.aspx') }, 3000);", true);
@@ -57,7 +57,7 @@ namespace WebForms
             }
             else
             {
-                ToastService.Show(this.Page, "Tiene que llenar todos los campos.", ToastService.ToastType.Warning);
+                ToastService.Show(this.Page, "Complete todos los campos.", ToastService.ToastType.Warning);
             }
         }
         protected void btnVolver_Click(object sender, EventArgs e)

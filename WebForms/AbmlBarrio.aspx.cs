@@ -36,7 +36,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar los barrios. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los barrios. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -50,13 +50,13 @@ namespace WebForms
                     barrio.Nombre = txtNombre.Text.Trim();
                     negocio.agregar(barrio);
 
-                    ToastService.Show(this.Page, "Barrio agregado exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Barrio agregado correctamente.", ToastService.ToastType.Success);
                     txtNombre.Text = string.Empty;
                     CargarListaBarrios();
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "Debe llenar todos los campos.", ToastService.ToastType.Warning);
+                    ToastService.Show(this.Page, "Complete todos los campos.", ToastService.ToastType.Warning);
                 }
             }
             catch (InvalidOperationException ex)
@@ -107,7 +107,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo cambiar de página. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
     }

@@ -41,7 +41,7 @@ namespace WebForms
         protected override int IdDe(CertificadoDTO item) => item.Id;
         protected override string NombreClaveVirtual => "ClaveReliquidacion";
         protected override string ClaveVirtualDe(CertificadoDTO item) => item.ClaveReliquidacion;
-        protected override string MensajeErrorCarga => "Error al cargar los certificados. Intente nuevamente.";
+        protected override string MensajeErrorCarga => "No se pudieron cargar los certificados. Intente nuevamente.";
 
         protected override List<CertificadoDTO> CargarListaCompleta() =>
             calculoRedeterminacionNegocio.ListarCertificadosYReliquidaciones(UserHelper.GetFullCurrentUser());
@@ -260,7 +260,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[CertificadosEF] Error al cargar las listas del formulario: " + ex);
-                ToastService.Show(this.Page, "Error al cargar los datos del formulario.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del formulario. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -318,7 +318,7 @@ namespace WebForms
                     CertificadoEF certificadoExistente = negocio.ObtenerPorId(editingId.Value);
                     if (certificadoExistente == null)
                     {
-                        ToastService.Show(this.Page, "Error: No se encontró el certificado a modificar.", ToastService.ToastType.Error);
+                        ToastService.Show(this.Page, "No se encontró el certificado a modificar.", ToastService.ToastType.Error);
                         return;
                     }
 
@@ -331,7 +331,7 @@ namespace WebForms
 
                     resultado = negocio.Modificar(certificadoExistente);
                     ToastService.Show(this.Page,
-                        resultado ? "Certificado modificado exitosamente!" : "Hubo un problema al modificar el certificado.",
+                        resultado ? "Certificado modificado correctamente." : "No se pudo modificar el certificado. Intente nuevamente.",
                         resultado ? ToastService.ToastType.Success : ToastService.ToastType.Error);
                 }
                 else
@@ -347,7 +347,7 @@ namespace WebForms
 
                     resultado = negocio.Agregar(nuevoCertificado);
                     ToastService.Show(this.Page,
-                        resultado ? "Certificado agregado exitosamente!" : "Hubo un problema al agregar el certificado.",
+                        resultado ? "Certificado agregado correctamente." : "No se pudo agregar el certificado. Intente nuevamente.",
                         resultado ? ToastService.ToastType.Success : ToastService.ToastType.Error);
                 }
 
@@ -394,7 +394,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[CertificadosEF] Error al guardar el certificado: " + ex);
-                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -409,7 +409,7 @@ namespace WebForms
                 CertificadoDTO seleccionado = ItemDeFila(gridviewRegistros.SelectedIndex);
                 if (seleccionado == null)
                 {
-                    ToastService.Show(this.Page, "Error: Registro no encontrado.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el registro seleccionado.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -434,7 +434,7 @@ namespace WebForms
                 CertificadoEF certificadoEF = negocio.ObtenerPorId(seleccionado.Id);
                 if (certificadoEF == null)
                 {
-                    ToastService.Show(this.Page, "Error: No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo cargar el certificado para edición.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -456,7 +456,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[CertificadosEF] Error al cargar el certificado para edición: " + ex);
-                ToastService.Show(this.Page, "Error al cargar los datos del certificado. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar los datos del certificado. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -541,7 +541,7 @@ namespace WebForms
                 CertificadoDTO certificado = ItemDelControlInline(sender);
                 if (certificado == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -583,7 +583,7 @@ namespace WebForms
                     {
                         if (!certificado.MesAprobacion.HasValue)
                         {
-                            ToastService.Show(this.Page, "Error: La reliquidación no tiene fecha de aprobación.", ToastService.ToastType.Error);
+                            ToastService.Show(this.Page, "La reliquidación no tiene fecha de aprobación.", ToastService.ToastType.Error);
                             return;
                         }
                         resultado = new ExpedienteReliqNegocioEF().GuardarOActualizar(certificado.CodigoAutorizante, certificado.MesAprobacion.Value, nuevoExpediente);
@@ -601,7 +601,7 @@ namespace WebForms
 
                 if (!resultado)
                 {
-                    ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -617,7 +617,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[CertificadosEF] Error al actualizar el expediente: " + ex);
-                ToastService.Show(this.Page, "Error al actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -637,7 +637,7 @@ namespace WebForms
 
                 if (!MontoHelper.TryParseEsAr(nuevoValorStr, out decimal nuevoMonto))
                 {
-                    ToastService.Show(this.Page, "Error: El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "El monto ingresado no es válido. Use coma para los decimales (ej.: 1.234,56).", ToastService.ToastType.Error);
                     // Volver a bindear para que el textbox muestre el valor guardado y no el texto rechazado
                     CargarPaginaActual();
                     return;
@@ -646,27 +646,27 @@ namespace WebForms
                 CertificadoDTO certificado = ItemDelControlInline(sender);
                 if (certificado == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
                 if (EsReliquidacion(certificado) || certificado.Id <= 0)
                 {
-                    ToastService.Show(this.Page, "Error: No se puede modificar el monto de este registro.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se puede modificar el monto de este registro.", ToastService.ToastType.Error);
                     return;
                 }
 
                 CertificadoEF entidad = negocio.ObtenerPorId(certificado.Id);
                 if (entidad == null)
                 {
-                    ToastService.Show(this.Page, "Error: No se encontró el certificado.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el certificado.", ToastService.ToastType.Error);
                     return;
                 }
 
                 entidad.MontoTotal = nuevoMonto;
                 if (!negocio.Modificar(entidad))
                 {
-                    ToastService.Show(this.Page, "Error al actualizar el monto.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo actualizar el monto. Intente nuevamente.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -682,7 +682,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[CertificadosEF] Error al actualizar el monto: " + ex);
-                ToastService.Show(this.Page, "Error al actualizar el monto. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo actualizar el monto. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -702,7 +702,7 @@ namespace WebForms
                 CertificadoDTO dto = ItemDelControlInline(sender);
                 if (dto == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -719,7 +719,7 @@ namespace WebForms
                     if (!decimal.TryParse(nuevoValorStr, System.Globalization.NumberStyles.Any,
                         System.Globalization.CultureInfo.InvariantCulture, out decimal parsed))
                     {
-                        ToastService.Show(this.Page, "Error: El porcentaje ingresado no es válido.", ToastService.ToastType.Error);
+                        ToastService.Show(this.Page, "El porcentaje ingresado no es válido.", ToastService.ToastType.Error);
                         CargarPaginaActual();
                         return;
                     }

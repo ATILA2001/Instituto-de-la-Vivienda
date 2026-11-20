@@ -41,7 +41,7 @@ namespace WebForms
             }
             catch (Exception)
             {
-                ToastService.Show(this.Page, "Error al cargar las empresas. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron cargar las empresas. Intente nuevamente.", ToastService.ToastType.Error);
             }
         }
 
@@ -55,14 +55,14 @@ namespace WebForms
                     empresa.Nombre = txtNombre.Text.Trim();
                     negocio.agregar(empresa);
 
-                    ToastService.Show(this.Page, "¡Empresa agregada exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Empresa agregada correctamente.", ToastService.ToastType.Success);
                     txtNombre.Text = string.Empty;
 
                     CargarListaEmpresas();
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "Debe llenar todos los campos.", ToastService.ToastType.Warning);
+                    ToastService.Show(this.Page, "Complete todos los campos.", ToastService.ToastType.Warning);
                 }
             }
             catch (InvalidOperationException ex)

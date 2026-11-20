@@ -395,11 +395,11 @@ namespace WebForms
 
             if (_autorizanteNegocioEF.Agregar(autorizante))
             {
-                ToastService.Show(this.Page, "Autorizante agregado exitosamente!", ToastService.ToastType.Success);
+                ToastService.Show(this.Page, "Autorizante agregado correctamente.", ToastService.ToastType.Success);
             }
             else
             {
-                ToastService.Show(this.Page, "Hubo un problema al agregar el autorizante.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudo agregar el autorizante. Intente nuevamente.", ToastService.ToastType.Error);
             }
 
             LimpiarFormularioAgregar();
@@ -423,7 +423,7 @@ namespace WebForms
             var autorizanteExistente = autorizanteId.HasValue ? _autorizanteNegocioEF.ObtenerPorId(autorizanteId.Value) : null;
             if (autorizanteExistente == null)
             {
-                ToastService.Show(this.Page, "Error: No se encontró el autorizante a modificar.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se encontró el autorizante a modificar.", ToastService.ToastType.Error);
                 return;
             }
 
@@ -439,13 +439,13 @@ namespace WebForms
             {
                 if (_autorizanteNegocioEF.Modificar(autorizanteExistente))
                 {
-                    ToastService.Show(this.Page, "Autorizante modificado exitosamente!", ToastService.ToastType.Success);
+                    ToastService.Show(this.Page, "Autorizante modificado correctamente.", ToastService.ToastType.Success);
                     CalculoRedeterminacionNegocioEF.LimpiarCacheSade();
                     ViewState["EditingAutorizanteId"] = null;
                 }
                 else
                 {
-                    ToastService.Show(this.Page, "No se pudo guardar el cambio. Intente nuevamente.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
                 }
             }
             catch (InvalidOperationException ex)
@@ -456,7 +456,7 @@ namespace WebForms
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.TraceError("[AutorizantesEF] Error al modificar el autorizante: " + ex);
-                ToastService.Show(this.Page, "Ocurrió un error al guardar. Intente nuevamente.", ToastService.ToastType.Error);
+                ToastService.Show(this.Page, "No se pudieron guardar los cambios. Intente nuevamente.", ToastService.ToastType.Error);
                 return;
             }
 
@@ -521,7 +521,7 @@ namespace WebForms
             {
                 if (gridviewRegistros.DataKeys == null || gridviewRegistros.DataKeys.Count <= e.RowIndex)
                 {
-                    ToastService.Show(this.Page, "No se pudo identificar el registro.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el registro seleccionado.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -531,7 +531,7 @@ namespace WebForms
 
                 if (id <= 0)
                 {
-                    ToastService.Show(this.Page, "No se puede eliminar: Id inválido.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el registro a eliminar.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -574,13 +574,13 @@ namespace WebForms
                 var autorizante = ItemDelControlInline(sender);
                 if (autorizante == null)
                 {
-                    ToastService.Show(this.Page, "Error: Índice fuera del rango de datos.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo identificar el registro seleccionado. Recargue la página.", ToastService.ToastType.Error);
                     return;
                 }
 
                 if (!_autorizanteNegocioEF.ActualizarExpediente(autorizante.CodigoAutorizante, nuevoExpediente))
                 {
-                    ToastService.Show(this.Page, "Error al actualizar el expediente.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo actualizar el expediente. Intente nuevamente.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -626,7 +626,7 @@ namespace WebForms
                 var autorizante = ItemDelControlInline(sender);
                 if (autorizante == null)
                 {
-                    ToastService.Show(this.Page, "Error: no se pudo localizar el autorizante a actualizar.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se encontró el autorizante a modificar.", ToastService.ToastType.Error);
                     return;
                 }
 
@@ -654,7 +654,7 @@ namespace WebForms
 
                 if (!actualizado)
                 {
-                    ToastService.Show(this.Page, "Error al actualizar el estado.", ToastService.ToastType.Error);
+                    ToastService.Show(this.Page, "No se pudo actualizar el estado. Intente nuevamente.", ToastService.ToastType.Error);
                     return;
                 }
 
